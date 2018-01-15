@@ -3,7 +3,7 @@ from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 class Scatter3DCanvas(BaseMatplotlibCanvas):
     def __init__(self, data, *args, **kwargs):
         self.data = data
-        super(Scatter3DCanvas, self).__init__(*args, **kwargs)
+        super(Scatter3DCanvas, self).__init__(*args, in3D=True, **kwargs)
 
     def compute_initial_figure(self):
         self.axes.scatter(self.data[:, 0], self.data[:, 1], self.data[:, 2])

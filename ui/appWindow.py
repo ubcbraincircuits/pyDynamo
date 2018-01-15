@@ -4,6 +4,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
 from .scatter3DCanvas import Scatter3DCanvas
+from .dendriteVolumeCanvas import DendriteVolumeCanvas
 
 # MEGA HACK
 def rotation_matrix(axis, theta):
@@ -34,7 +35,7 @@ POINTS = np.random.rand(n, 3)
 ROTPOINTS = hackRotate(POINTS)
 
 class AppWindow(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, hackVolume):
         QtWidgets.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
@@ -52,11 +53,11 @@ class AppWindow(QtWidgets.QMainWindow):
 
         self.main_widget = QtWidgets.QWidget(self)
 
-        l = QtWidgets.QVBoxLayout(self.main_widget)
+        l = QtWidgets.QHBoxLayout(self.main_widget)
         self.scatter3d = Scatter3DCanvas(POINTS, self.main_widget, width=5, height=4, dpi=100)
-        self.scatter3dRot = Scatter3DCanvas(ROTPOINTS, self.main_widget, width=5, height=4, dpi=100)
         l.addWidget(self.scatter3d)
-        l.addWidget(self.scatter3dRot)
+        self.dendrites = DendriteVolumeCanvas(hackVolume, self.main_widget)
+        l.addWidget(self.dendrites)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -77,4 +78,3 @@ class AppWindow(QtWidgets.QMainWindow):
             newP = np.random.rand(n, 3)
             newPRot = absorient.hackRotate(newP)
             self.scatter3d.updateData(newP)
-            self.scatter3dRot.updateData(newPRot)
