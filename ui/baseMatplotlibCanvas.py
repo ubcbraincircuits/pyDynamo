@@ -13,7 +13,7 @@ class BaseMatplotlibCanvas(FigureCanvas):
             self.axes = fig.add_subplot(111)
         self.compute_initial_figure()
         super(BaseMatplotlibCanvas, self).__init__(fig)
-        if (in3D):
+        if in3D:
             self.axes.mouse_init()
         self.setParent(parent)
         FigureCanvas.setSizePolicy(self,

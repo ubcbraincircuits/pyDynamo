@@ -74,7 +74,19 @@ class AppWindow(QtWidgets.QMainWindow):
         QtWidgets.QMessageBox.about(self, "About", "Fill in stuff here?")
 
     def keyPressEvent(self, event):
-        if (event.key() == 32):
+        key = event.key()
+        print (key)
+        if (key == 32):
             newP = np.random.rand(n, 3)
             newPRot = absorient.hackRotate(newP)
             self.scatter3d.updateData(newP)
+        elif (key == 52): # '4'
+            self.dendrites.brightnessAction(-1, 0)
+        elif (key == 53): # '5'
+            self.dendrites.brightnessAction(1, 0)
+        elif (key == 54): # '6'
+            self.dendrites.brightnessAction(0, 0, reset=True)
+        elif (key == 55): # '7'
+            self.dendrites.brightnessAction(0, -1)
+        elif (key == 56): # '8'
+            self.dendrites.brightnessAction(0, 1)
