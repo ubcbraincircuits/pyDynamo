@@ -2,17 +2,11 @@
 
 """
 
-import os.path
-try:
-    from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
-    from PyQt5.QtGui import QImage, QPixmap, QPainterPath
-    from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog
-except ImportError:
-    try:
-        from PyQt4.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
-        from PyQt4.QtGui import QGraphicsView, QGraphicsScene, QImage, QPixmap, QPainterPath, QFileDialog
-    except ImportError:
-        raise ImportError("ImageViewerQt: Requires PyQt5 or PyQt4.")
+import math
+
+from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
+from PyQt5.QtGui import QImage, QPixmap, QPainterPath
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog, QApplication
 
 
 __author__ = "Marcel Goldschen-Ohm <marcel.goldschen@gmail.com>"
@@ -44,8 +38,9 @@ class QtImageViewer(QGraphicsView):
     leftMouseButtonDoubleClicked = pyqtSignal(float, float)
     rightMouseButtonDoubleClicked = pyqtSignal(float, float)
 
-    def __init__(self):
+    def __init__(self, parentView):
         QGraphicsView.__init__(self)
+        self.parentView = parentView
 
         # Image is displayed as a QPixmap in a QGraphicsScene attached to this QGraphicsView.
         self.scene = QGraphicsScene()
@@ -65,8 +60,8 @@ class QtImageViewer(QGraphicsView):
         #   Qt.ScrollBarAlwaysOff: Never shows a scroll bar.
         #   Qt.ScrollBarAlwaysOn: Always shows a scroll bar.
         #   Qt.ScrollBarAsNeeded: Shows a scroll bar only when zoomed.
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
         # Stack of QRectF zoom boxes in scene coordinates.
         self.zoomStack = []
@@ -120,20 +115,6 @@ class QtImageViewer(QGraphicsView):
             self._pixmapHandle = self.scene.addPixmap(pixmap)
         self.setSceneRect(QRectF(pixmap.rect()))  # Set scene size to image size.
         self.updateViewer()
-
-    def loadImageFromFile(self, fileName=""):
-        """ Load an image from file.
-        Without any arguments, loadImageFromFile() will popup a file dialog to choose the image file.
-        With a fileName argument, loadImageFromFile(fileName) will attempt to load the specified image file directly.
-        """
-        if len(fileName) == 0:
-            if QT_VERSION_STR[0] == '4':
-                fileName = QFileDialog.getOpenFileName(self, "Open image file.")
-            elif QT_VERSION_STR[0] == '5':
-                fileName, dummy = QFileDialog.getOpenFileName(self, "Open image file.")
-        if len(fileName) and os.path.isfile(fileName):
-            image = QImage(fileName)
-            self.setImage(image)
 
     def updateViewer(self):
         """ Show current zoom (if showing entire image, apply current aspect ratio mode).
@@ -197,33 +178,29 @@ class QtImageViewer(QGraphicsView):
             self.rightMouseButtonDoubleClicked.emit(scenePos.x(), scenePos.y())
         QGraphicsView.mouseDoubleClickEvent(self, event)
 
+    def wheelEvent(self, event):
+        # HACK
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers & Qt.ShiftModifier:
+            self.handleZoomScroll(event.pixelDelta().y())
+        else:
+            self.parentView.wheelEvent(event)
 
-if __name__ == '__main__':
-    import sys
-    try:
-        from PyQt5.QtWidgets import QApplication
-    except ImportError:
-        try:
-            from PyQt4.QtGui import QApplication
-        except ImportError:
-            raise ImportError("ImageViewerQt: Requires PyQt5 or PyQt4.")
-    print('Using Qt ' + QT_VERSION_STR)
+    def handleZoomScroll(self, yDelta):
+        # TODO: Fix bug where scroll-zoom -> pan -> scroll-zoom is broken.
+        border = self.getViewportRect()
+        mid = border.center()
+        border.translate(-mid)
+        scale = math.exp(-yDelta / 100.0)
+        border = QRectF(border.topLeft() * scale, border.bottomRight() * scale)
+        border.translate(mid)
+        border = border.intersected(self.sceneRect())
+        if len(self.zoomStack) > 0:
+            self.zoomStack[-1] = border
+        else:
+            self.zoomStack = [border]
+        self.updateViewer()
 
-    def handleLeftClick(x, y):
-        row = int(y)
-        column = int(x)
-        print("Clicked on image pixel (row="+str(row)+", column="+str(column)+")")
-
-    # Create the application.
-    app = QApplication(sys.argv)
-
-    # Create image viewer and load an image file to display.
-    viewer = QtImageViewer()
-    viewer.loadImageFromFile()  # Pops up file dialog.
-
-    # Handle left mouse clicks with custom slot.
-    viewer.leftMouseButtonPressed.connect(handleLeftClick)
-
-    # Show viewer and run application.
-    viewer.show()
-    sys.exit(app.exec_())
+    # HACK
+    def getViewportRect(self):
+        return self.mapToScene(self.viewport().geometry()).boundingRect()

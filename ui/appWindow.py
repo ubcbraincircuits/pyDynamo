@@ -5,6 +5,9 @@ from PyQt5 import QtCore, QtWidgets
 
 from .scatter3DCanvas import Scatter3DCanvas
 from .dendriteVolumeCanvas import DendriteVolumeCanvas
+from .np2qt import np2qt
+from .QtImageViewer import QtImageViewer
+
 
 # MEGA HACK
 def rotation_matrix(axis, theta):
@@ -79,7 +82,6 @@ class AppWindow(QtWidgets.QMainWindow):
         if (key == 32):
             newP = np.random.rand(n, 3)
             newPRot = absorient.hackRotate(newP)
-            self.scatter3d.updateData(newP)
         elif (key == 52): # '4'
             self.dendrites.brightnessAction(-1, 0)
         elif (key == 53): # '5'

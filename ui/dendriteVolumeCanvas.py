@@ -1,30 +1,38 @@
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 
+from PyQt5.QtWidgets import QWidget, QHBoxLayout
+
 import numpy as np
 
-class DendriteVolumeCanvas(BaseMatplotlibCanvas):
+from .np2qt import np2qt
+from .QtImageViewer import QtImageViewer
+
+# class DendriteVolumeCanvas(BaseMatplotlibCanvas):
+class DendriteVolumeCanvas(QWidget):
     INVERT_SCROLL = False
     SCROLL_SENSITIVITY = 30.0
     COLOR_SENSITIVITY = 10.0 / 256.0
 
     def __init__(self, volume, *args, **kwargs):
+        super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
         self.volume = volume
         self.zAxisAt = 0
-        super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
-
-    def compute_initial_figure(self):
         self.colorLimits = (0, 1)
-        # self.drawImage()
-        self.axes.imshow(self.volume[0], cmap='gray')
+
+        l = QHBoxLayout(self)
+        self.imgView = QtImageViewer(self)
+        self.imgView.setImage(np2qt(volume[0], normalize=True))
+        l.addWidget(self.imgView)
+        # super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
 
     def changeZAxis(self, delta):
         self.zAxisAt = self.snapToRange(self.zAxisAt + delta, 0, len(self.volume) - 1)
         self.redraw()
 
     def redraw(self):
-        self.axes.cla()
+        # self.axes.cla()
         self.drawImage()
-        self.draw()
+        # self.draw()
 
     def drawImage(self):
         c1, c2 = self.colorLimits
@@ -33,7 +41,8 @@ class DendriteVolumeCanvas(BaseMatplotlibCanvas):
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
         imageData = self.snapToRange(imageData, 0.0, 1.0)
-        self.axes.imshow(imageData, cmap='gray')
+        self.imgView.setImage(np2qt(imageData, normalize=True))
+        # self.axes.imshow(imageData, cmap='gray')
 
     def changeBrightness(self, lowerDelta, upperDelta):
         self.colorLimits = (
@@ -51,6 +60,7 @@ class DendriteVolumeCanvas(BaseMatplotlibCanvas):
         if self.INVERT_SCROLL:
             scrollDelta *= -1
         self.changeZAxis(scrollDelta)
+        return True
 
     # HACK - move to common
     def snapToRange(self, x, lo, hi):
