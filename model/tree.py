@@ -6,18 +6,16 @@ class Branch():
 
     points = attr.ib(default=[]) # matlab {1}
     children = attr.ib(default=[]) # matlab {2}
-    ids = attr.ib(default=[]) # matlab {3}
+    annotation = attr.ib(default=[]) # matlab {3}
     hilighted = attr.ib(default=[]) # matlab {4}
 
     isEnded = attr.ib(default=False)
     colorData = attr.ib(default=None)
 
     def addPoint(self, point):
-        print ("Added: ")
-        print (point)
         self.points.append(point)
         self.children.append([])
-        self.ids.append('')
+        self.annotation.append('')
         self.hilighted.append(0)
         self.isEnded = False
         self.colorData = None # hmm...

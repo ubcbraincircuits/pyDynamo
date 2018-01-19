@@ -5,6 +5,7 @@ import numpy as np
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
+from .dendritePainter import DendritePainter
 
 # class DendriteVolumeCanvas(BaseMatplotlibCanvas):
 class DendriteVolumeCanvas(QWidget):
@@ -25,7 +26,6 @@ class DendriteVolumeCanvas(QWidget):
         self.imgView = QtImageViewer(self)
         self.imgView.setImage(np2qt(volume[0], normalize=True))
         l.addWidget(self.imgView)
-        # super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
 
     def changeZAxis(self, delta):
         self.zAxisAt = self.snapToRange(self.zAxisAt + delta, 0, len(self.volume) - 1)
@@ -42,7 +42,6 @@ class DendriteVolumeCanvas(QWidget):
         imageData = (imageData - c1) / (c2 - c1)
         imageData = self.snapToRange(imageData, 0.0, 1.0)
         self.imgView.setImage(np2qt(imageData, normalize=True), maintainZoom=True)
-        # self.axes.imshow(imageData, cmap='gray')
 
     def changeBrightness(self, lowerDelta, upperDelta):
         self.colorLimits = (
@@ -55,6 +54,7 @@ class DendriteVolumeCanvas(QWidget):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
         self.model.addPoint((pos.x(), pos.y(), self.zAxisAt))
         self.HACKSCATTER.needToUpdate()
+        self.drawImage()
 
     def wheelEvent(self,event):
         scrollDelta = -(int)(np.ceil(event.pixelDelta().y() / self.SCROLL_SENSITIVITY))

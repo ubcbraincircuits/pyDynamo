@@ -9,6 +9,7 @@ from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
 from PyQt5.QtGui import QImage, QPixmap, QPainterPath
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog, QApplication
 
+from .dendritePainter import DendritePainter
 
 __author__ = "Marcel Goldschen-Ohm <marcel.goldschen@gmail.com>"
 __version__ = '0.9.0'
@@ -43,6 +44,7 @@ class QtImageViewer(QGraphicsView):
     def __init__(self, parentView):
         QGraphicsView.__init__(self)
         self.parentView = parentView
+        self.dendritePainter = DendritePainter()
 
         # Image is displayed as a QPixmap in a QGraphicsScene attached to this QGraphicsView.
         self.scene = QGraphicsScene()
@@ -130,6 +132,12 @@ class QtImageViewer(QGraphicsView):
         """ Maintain current zoom on resize.
         """
         self.forceRepaint()
+
+    def drawForeground(self, painter, rect):
+        super().drawForeground(painter, rect)
+        self.dendritePainter.begin(painter, self.parentView.zAxisAt)
+        self.dendritePainter.drawTree(self.parentView.model)
+        self.dendritePainter.end()
 
     def mousePressEvent(self, event):
         """ Start mouse pan or zoom mode.
