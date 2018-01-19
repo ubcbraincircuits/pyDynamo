@@ -4,6 +4,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
 from .scatter3DCanvas import Scatter3DCanvas
+from .dendriteCanvasActions import DendriteCanvasActions
 from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
@@ -61,6 +62,7 @@ class AppWindow(QtWidgets.QMainWindow):
         l.addWidget(self.scatter3d)
         self.dendrites = DendriteVolumeCanvas(hackVolume, self.main_widget)
         l.addWidget(self.dendrites)
+        self.actionHandler = DendriteCanvasActions(self.dendrites)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -82,6 +84,10 @@ class AppWindow(QtWidgets.QMainWindow):
         if (key == 32):
             newP = np.random.rand(n, 3)
             newPRot = absorient.hackRotate(newP)
+        elif (key == 49): # '1' = next z axis plane
+            self.dendrites.changeZAxis(1)
+        elif (key == 50): # '2' = previous z axis plane
+            self.dendrites.changeZAxis(-1)
         elif (key == 52): # '4'
             self.dendrites.brightnessAction(-1, 0)
         elif (key == 53): # '5'
@@ -92,3 +98,16 @@ class AppWindow(QtWidgets.QMainWindow):
             self.dendrites.brightnessAction(0, -1)
         elif (key == 56): # '8'
             self.dendrites.brightnessAction(0, 1)
+        elif (key == 88): # x = zoom in
+            self.actionHandler.zoom(-0.2) # ~= ln(0.8) as used in matlab
+        elif (key == 90): # z = zoom out
+            self.actionHandler.zoom(0.2)
+        elif (key == 87): # w = pan up
+            self.actionHandler.pan(0, -1)
+        elif (key == 65): # a = pan left
+            self.actionHandler.pan(-1, 0)
+        elif (key == 83): # s = pan down
+            # TODO - ctrl-s = save
+            self.actionHandler.pan(0, 1)
+        elif (key == 68): # d = pan right
+            self.actionHandler.pan(1, 0)

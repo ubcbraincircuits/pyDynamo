@@ -28,7 +28,8 @@ from mpl_toolkits.mplot3d import Axes3D
 progname = os.path.basename(sys.argv[0])
 progversion = "0.1"
 
-import absorient
+from calc import absorient
+import files
 
 n = 5
 POINTS = np.random.rand(n, 3)
@@ -61,7 +62,55 @@ class MyStaticMplCanvas(MyMplCanvas):
         super(MyStaticMplCanvas, self).__init__(*args, **kwargs)
 
     def compute_initial_figure(self):
-        self.axes.scatter(self.data[:, 0], self.data[:, 1], self.data[:, 2])
+        s = self.data.shape
+        """
+        idx = np.indices(np.array(self.data.shape) + 1).astype(float)
+        x, y, z = idx[0], idx[1], idx[2]
+
+        fill = np.ones(s)
+
+        # fCol = np.ones((s[0], s[1], s[2], 1))
+        fCol = np.ndarray(shape=s, dtype=str)
+        for i in range(s[0]):
+            for j in range(s[1]):
+                for k in range(s[2]):
+                    # asCol = np.array([0, 0, 255, self.data[i,j,k]])
+                    red, green, blue, alpha = 127, 127, 127, 127 # int(self.data[i,j,k] * 255)
+                    asCol = '#{a:02x}{r:02x}{g:02x}{b:02x}'.format(r=red,g=green,b=blue,a=alpha)
+                    fCol[i,j,k] = asCol
+        self.axes.voxels(x, y, z, fill, facecolors=fCol)
+        """
+        # n_voxels = np.zeros((4, 3, 4), dtype=bool)
+        # n_voxels[0, 0, :] = True
+        # n_voxels[-1, 0, :] = True
+        # n_voxels[1, 0, 2] = True
+        # n_voxels[2, 0, 1] = True
+
+        fCol = np.ndarray(shape=s, dtype='<U9')
+        for i in range(s[0]):
+            for j in range(s[1]):
+                for k in range(s[2]):
+                    # asCol = np.array([0, 0, 255, self.data[i,j,k]])
+                    red, green, blue, alpha = 0, 0, 0, int(self.data[i,j,k] * 255)
+                    asCol = '#{r:02x}{g:02x}{b:02x}{a:02x}'.format(r=red,g=green,b=blue,a=alpha)
+                    fCol[i,j,k] = asCol
+
+        # facecolors = np.where(n_voxels, '#FFD65DC0', '#7A88CCC0')
+        # edgecolors = np.where(n_voxels, '#BFAB6E', '#7D84A6')
+        filled = np.ones(s)
+        filled_2 = self.explode(filled)
+        fcolors_2 = self.explode(fCol)
+        ecolors_2 = fcolors_2 # self.explode(edgecolors)
+
+        x, y, z = np.indices(np.array(filled_2.shape) + 1).astype(float) // 2
+        x[0::2, :, :] += 0.05
+        y[:, 0::2, :] += 0.05
+        z[:, :, 0::2] += 0.05
+        x[1::2, :, :] += 0.95
+        y[:, 1::2, :] += 0.95
+        z[:, :, 1::2] += 0.95
+
+        self.axes.voxels(x, y, z, filled_2, facecolors=fcolors_2, edgecolors=ecolors_2)
 
     def updateData(self, data):
         self.data = data
@@ -73,25 +122,12 @@ class MyStaticMplCanvas(MyMplCanvas):
         print ("Clicked: (%d %d)" % (event.globalX(), event.globalY()))
         super(MyStaticMplCanvas, self).mousePressEvent(event)
 
+    def explode(self, data):
+        size = np.array(data.shape)*2
+        data_e = np.zeros(size - 1, dtype=data.dtype)
+        data_e[::2, ::2, ::2] = data
+        return data_e
 
-"""
-class MyDynamicMplCanvas(MyMplCanvas):
-    def __init__(self, *args, **kwargs):
-        MyMplCanvas.__init__(self, *args, **kwargs)
-        timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.update_figure)
-        timer.start(1000)
-
-    def compute_initial_figure(self):
-        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
-
-    def update_figure(self):
-        # Build a list of 4 random integers between 0 and 10 (both inclusive)
-        l = [random.randint(0, 10) for i in range(4)]
-        self.axes.cla()
-        self.axes.plot([0, 1, 2, 3], l, 'r')
-        self.draw()
-"""
 
 
 class ApplicationWindow(QtWidgets.QMainWindow):
@@ -114,11 +150,20 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.main_widget = QtWidgets.QWidget(self)
 
         l = QtWidgets.QVBoxLayout(self.main_widget)
-        self.scatter3d = MyStaticMplCanvas(POINTS, self.main_widget, width=5, height=4, dpi=100)
-        self.scatter3dRot = MyStaticMplCanvas(ROTPOINTS, self.main_widget, width=5, height=4, dpi=100)
+
+        hackVolume = files.tiffRead('data/Live4-1-2015_09-16-03.tif')
+        hackVolume = np.array(hackVolume[:int(len(hackVolume) / 2)])
+        hackVolume = hackVolume[::2, ::16, ::16]
+        hackVolume = (hackVolume - hackVolume.min()) / (hackVolume.max() - hackVolume.min())
+        print("VOL")
+        print(hackVolume.shape)
+
+
+        self.scatter3d = MyStaticMplCanvas(hackVolume, self.main_widget, width=5, height=4, dpi=100)
+        # self.scatter3dRot = MyStaticMplCanvas(ROTPOINTS, self.main_widget, width=5, height=4, dpi=100)
         # dc = MyDynamicMplCanvas(self.main_widget, width=5, height=4, dpi=100)
         l.addWidget(self.scatter3d)
-        l.addWidget(self.scatter3dRot)
+        # l.addWidget(self.scatter3dRot)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -139,7 +184,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             newP = np.random.rand(n, 3)
             newPRot = absorient.hackRotate(newP)
             self.scatter3d.updateData(newP)
-            self.scatter3dRot.updateData(newPRot)
+            # self.scatter3dRot.updateData(newPRot)
 
 qApp = QtWidgets.QApplication(sys.argv)
 

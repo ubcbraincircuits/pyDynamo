@@ -27,12 +27,10 @@ class DendriteVolumeCanvas(QWidget):
 
     def changeZAxis(self, delta):
         self.zAxisAt = self.snapToRange(self.zAxisAt + delta, 0, len(self.volume) - 1)
-        self.redraw()
+        self.drawImage()
 
     def redraw(self):
-        # self.axes.cla()
         self.drawImage()
-        # self.draw()
 
     def drawImage(self):
         c1, c2 = self.colorLimits
@@ -41,7 +39,7 @@ class DendriteVolumeCanvas(QWidget):
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
         imageData = self.snapToRange(imageData, 0.0, 1.0)
-        self.imgView.setImage(np2qt(imageData, normalize=True))
+        self.imgView.setImage(np2qt(imageData, normalize=True), maintainZoom=True)
         # self.axes.imshow(imageData, cmap='gray')
 
     def changeBrightness(self, lowerDelta, upperDelta):
@@ -49,7 +47,7 @@ class DendriteVolumeCanvas(QWidget):
             self.snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
             self.snapToRange(self.colorLimits[1] + upperDelta, self.colorLimits[0] + 0.001, 1),
         )
-        self.redraw()
+        self.drawImage()
 
     def mousePressEvent(self, event):
         print ("Clicked: (%d %d)" % (event.globalX(), event.globalY()))
@@ -69,6 +67,6 @@ class DendriteVolumeCanvas(QWidget):
     def brightnessAction(self, lower, upper, reset=False):
         if reset:
             self.colorLimits = (0, 1)
-            self.redraw()
+            self.drawImage()
         else:
             self.changeBrightness(lower * self.COLOR_SENSITIVITY, upper * self.COLOR_SENSITIVITY)

@@ -63,9 +63,6 @@ class QtImageViewer(QGraphicsView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
-        # Stack of QRectF zoom boxes in scene coordinates.
-        self.zoomStack = []
-
         # Flags for enabling/disabling mouse interaction.
         self.canZoom = True
         self.canPan = True
@@ -98,7 +95,7 @@ class QtImageViewer(QGraphicsView):
             return self._pixmapHandle.pixmap().toImage()
         return None
 
-    def setImage(self, image):
+    def setImage(self, image, maintainZoom=False):
         """ Set the scene's current image pixmap to the input QImage or QPixmap.
         Raises a RuntimeError if the input image has type other than QImage or QPixmap.
         :type image: QImage | QPixmap
@@ -114,23 +111,19 @@ class QtImageViewer(QGraphicsView):
         else:
             self._pixmapHandle = self.scene.addPixmap(pixmap)
         self.setSceneRect(QRectF(pixmap.rect()))  # Set scene size to image size.
-        self.updateViewer()
+        self.forceRepaint()
 
-    def updateViewer(self):
+    def forceRepaint(self):
         """ Show current zoom (if showing entire image, apply current aspect ratio mode).
         """
         if not self.hasImage():
             return
-        if len(self.zoomStack) and self.sceneRect().contains(self.zoomStack[-1]):
-            self.fitInView(self.zoomStack[-1], Qt.IgnoreAspectRatio)  # Show zoomed rect (ignore aspect ratio).
-        else:
-            self.zoomStack = []  # Clear the zoom stack (in case we got here because of an invalid zoom).
-            self.fitInView(self.sceneRect(), self.aspectRatioMode)  # Show entire image (use current aspect ratio mode).
+        self.viewport().update()
 
     def resizeEvent(self, event):
         """ Maintain current zoom on resize.
         """
-        self.updateViewer()
+        self.forceRepaint()
 
     def mousePressEvent(self, event):
         """ Start mouse pan or zoom mode.
@@ -156,12 +149,11 @@ class QtImageViewer(QGraphicsView):
             self.leftMouseButtonReleased.emit(scenePos.x(), scenePos.y())
         elif event.button() == Qt.RightButton:
             if self.canZoom:
-                viewBBox = self.zoomStack[-1] if len(self.zoomStack) else self.sceneRect()
-                selectionBBox = self.scene.selectionArea().boundingRect().intersected(viewBBox)
+                selectionBBox = self.scene.selectionArea().boundingRect()
                 self.scene.setSelectionArea(QPainterPath())  # Clear current selection area.
-                if selectionBBox.isValid() and (selectionBBox != viewBBox):
-                    self.zoomStack.append(selectionBBox)
-                    self.updateViewer()
+                if selectionBBox.isValid():
+                    self.moveViewRect(selectionBBox)
+                    self.forceRepaint()
             self.setDragMode(QGraphicsView.NoDrag)
             self.rightMouseButtonReleased.emit(scenePos.x(), scenePos.y())
 
@@ -173,8 +165,7 @@ class QtImageViewer(QGraphicsView):
             self.leftMouseButtonDoubleClicked.emit(scenePos.x(), scenePos.y())
         elif event.button() == Qt.RightButton:
             if self.canZoom:
-                self.zoomStack = []  # Clear zoom stack.
-                self.updateViewer()
+                self.moveViewRect(self.sceneRect())
             self.rightMouseButtonDoubleClicked.emit(scenePos.x(), scenePos.y())
         QGraphicsView.mouseDoubleClickEvent(self, event)
 
@@ -187,19 +178,23 @@ class QtImageViewer(QGraphicsView):
             self.parentView.wheelEvent(event)
 
     def handleZoomScroll(self, yDelta):
+        self.zoom(-yDelta / 100.0)
+
+    def zoom(self, logAmount):
+        scale = math.exp(logAmount)
         # TODO: Fix bug where scroll-zoom -> pan -> scroll-zoom is broken.
         border = self.getViewportRect()
         mid = border.center()
         border.translate(-mid)
-        scale = math.exp(-yDelta / 100.0)
         border = QRectF(border.topLeft() * scale, border.bottomRight() * scale)
         border.translate(mid)
-        border = border.intersected(self.sceneRect())
-        if len(self.zoomStack) > 0:
-            self.zoomStack[-1] = border
-        else:
-            self.zoomStack = [border]
-        self.updateViewer()
+        self.moveViewRect(border.intersected(self.sceneRect()))
+
+    # HACK
+    def moveViewRect(self, newViewRect):
+        self.fitInView(newViewRect)
+        self.forceRepaint()
+
 
     # HACK
     def getViewportRect(self):
