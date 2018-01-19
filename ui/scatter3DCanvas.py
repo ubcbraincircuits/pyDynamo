@@ -1,17 +1,20 @@
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 
 class Scatter3DCanvas(BaseMatplotlibCanvas):
-    def __init__(self, data, *args, **kwargs):
-        self.data = data
+    def __init__(self, hackModel, *args, **kwargs):
+        self.hackModel = hackModel
         super(Scatter3DCanvas, self).__init__(*args, in3D=True, **kwargs)
 
     def compute_initial_figure(self):
-        self.axes.scatter(self.data[:, 0], self.data[:, 1], self.data[:, 2])
+        for branch in self.hackModel.branches:
+            x = [p[0] for p in branch.points]
+            y = [p[1] for p in branch.points]
+            z = [p[2] for p in branch.points]
+        self.axes.scatter(x, y, z)
 
-    def updateData(self, data):
-        self.data = data
+    def needToUpdate(self):
         self.axes.cla()
-        self.axes.scatter(data[:, 0], data[:, 1], data[:, 2])
+        self.compute_initial_figure()
         self.draw()
 
     def mousePressEvent(self, event):

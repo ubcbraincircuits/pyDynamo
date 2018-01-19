@@ -39,7 +39,7 @@ POINTS = np.random.rand(n, 3)
 ROTPOINTS = hackRotate(POINTS)
 
 class AppWindow(QtWidgets.QMainWindow):
-    def __init__(self, hackVolume):
+    def __init__(self, hackVolume, hackModel):
         QtWidgets.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
@@ -58,9 +58,9 @@ class AppWindow(QtWidgets.QMainWindow):
         self.main_widget = QtWidgets.QWidget(self)
 
         l = QtWidgets.QHBoxLayout(self.main_widget)
-        self.scatter3d = Scatter3DCanvas(POINTS, self.main_widget, width=5, height=4, dpi=100)
+        self.scatter3d = Scatter3DCanvas(hackModel, self.main_widget, width=5, height=4, dpi=100)
         l.addWidget(self.scatter3d)
-        self.dendrites = DendriteVolumeCanvas(hackVolume, self.main_widget)
+        self.dendrites = DendriteVolumeCanvas(hackVolume, hackModel, self.scatter3d, self.main_widget)
         l.addWidget(self.dendrites)
         self.actionHandler = DendriteCanvasActions(self.dendrites)
 

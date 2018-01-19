@@ -1,9 +1,8 @@
-from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 
 from PyQt5.QtWidgets import QWidget, QHBoxLayout
-
 import numpy as np
 
+from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
@@ -13,11 +12,14 @@ class DendriteVolumeCanvas(QWidget):
     SCROLL_SENSITIVITY = 30.0
     COLOR_SENSITIVITY = 10.0 / 256.0
 
-    def __init__(self, volume, *args, **kwargs):
+    def __init__(self, volume, model, HACKSCATTER, *args, **kwargs):
         super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
         self.volume = volume
         self.zAxisAt = 0
         self.colorLimits = (0, 1)
+        self.model = model
+
+        self.HACKSCATTER = HACKSCATTER
 
         l = QHBoxLayout(self)
         self.imgView = QtImageViewer(self)
@@ -49,9 +51,10 @@ class DendriteVolumeCanvas(QWidget):
         )
         self.drawImage()
 
-    def mousePressEvent(self, event):
-        print ("Clicked: (%d %d)" % (event.globalX(), event.globalY()))
+    def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
+        self.model.addPoint((pos.x(), pos.y(), self.zAxisAt))
+        self.HACKSCATTER.needToUpdate()
 
     def wheelEvent(self,event):
         scrollDelta = -(int)(np.ceil(event.pixelDelta().y() / self.SCROLL_SENSITIVITY))

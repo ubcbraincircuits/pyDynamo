@@ -3,6 +3,7 @@
 """
 
 import math
+import time
 
 from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
 from PyQt5.QtGui import QImage, QPixmap, QPainterPath
@@ -12,6 +13,7 @@ from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog, QApplica
 __author__ = "Marcel Goldschen-Ohm <marcel.goldschen@gmail.com>"
 __version__ = '0.9.0'
 
+SINGLE_CLICK_SEC = 0.2
 
 class QtImageViewer(QGraphicsView):
     """ PyQt image viewer widget for a QPixmap in a QGraphicsView scene with mouse zooming and panning.
@@ -66,6 +68,10 @@ class QtImageViewer(QGraphicsView):
         # Flags for enabling/disabling mouse interaction.
         self.canZoom = True
         self.canPan = True
+
+        # HACK - mouse click vs drag disambiguation
+        self.lastMousePressSec = -1
+        self.lastMousePressPos = None
 
     def hasImage(self):
         """ Returns whether or not the scene contains an image pixmap.
@@ -128,6 +134,9 @@ class QtImageViewer(QGraphicsView):
     def mousePressEvent(self, event):
         """ Start mouse pan or zoom mode.
         """
+        self.lastMousePressSec = time.time()
+        self.lastMousePressPos = event.pos()
+
         scenePos = self.mapToScene(event.pos())
         if event.button() == Qt.LeftButton:
             if self.canPan:
@@ -142,6 +151,12 @@ class QtImageViewer(QGraphicsView):
     def mouseReleaseEvent(self, event):
         """ Stop mouse pan or zoom mode (apply zoom if valid).
         """
+        timeDiff = time.time() - self.lastMousePressSec
+        if timeDiff < SINGLE_CLICK_SEC: # TODO - check distance
+            scenePos = self.mapToScene(event.pos())
+            self.parentView.mouseClickEvent(event, scenePos)
+            return
+
         QGraphicsView.mouseReleaseEvent(self, event)
         scenePos = self.mapToScene(event.pos())
         if event.button() == Qt.LeftButton:
@@ -182,9 +197,9 @@ class QtImageViewer(QGraphicsView):
 
     def zoom(self, logAmount):
         scale = math.exp(logAmount)
-        # TODO: Fix bug where scroll-zoom -> pan -> scroll-zoom is broken.
         border = self.getViewportRect()
         mid = border.center()
+
         border.translate(-mid)
         border = QRectF(border.topLeft() * scale, border.bottomRight() * scale)
         border.translate(mid)
