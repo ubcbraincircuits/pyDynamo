@@ -1,16 +1,16 @@
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 
 class Scatter3DCanvas(BaseMatplotlibCanvas):
-    def __init__(self, hackModel, *args, **kwargs):
-        self.hackModel = hackModel
+    def __init__(self, treeModel, *args, **kwargs):
+        self.treeModel = treeModel
         super(Scatter3DCanvas, self).__init__(*args, in3D=True, **kwargs)
 
     def compute_initial_figure(self):
         x, y, z = [], [], []
-        for branch in self.hackModel.branches:
-            x = [p.location[0] for p in branch.points]
-            z = [p.location[2] for p in branch.points]
-            y = [p.location[1] for p in branch.points]
+        points = self.treeModel.flattenPoints()
+        x = [p.location[0] for p in points]
+        z = [p.location[2] for p in points]
+        y = [p.location[1] for p in points]
         self.axes.scatter(x, y, z)
 
     def needToUpdate(self):

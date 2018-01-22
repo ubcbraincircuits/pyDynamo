@@ -1,5 +1,6 @@
-
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QHBoxLayout
+
 import numpy as np
 
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
@@ -47,7 +48,7 @@ class DendriteVolumeCanvas(QWidget):
     def paintOverImage(self, painter, rect):
         p = DendritePainter(painter, self.zAxisAt, self.uiState)
         p.drawTree(self.model)
-        
+
     def changeBrightness(self, lowerDelta, upperDelta):
         self.colorLimits = (
             self.snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
@@ -57,7 +58,10 @@ class DendriteVolumeCanvas(QWidget):
 
     def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
-        self.uiState.addPointToCurrentBranchAndSelect((pos.x(), pos.y(), self.zAxisAt))
+        if event.button() == Qt.RightButton:
+            self.uiState.addPointToNewBranchAndSelect((pos.x(), pos.y(), self.zAxisAt))
+        else:
+            self.uiState.addPointToCurrentBranchAndSelect((pos.x(), pos.y(), self.zAxisAt))
         self.HACKSCATTER.needToUpdate()
         self.drawImage()
 

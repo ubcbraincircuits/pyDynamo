@@ -1,5 +1,8 @@
-from PyQt5.QtGui import QPen, QPainter, QBrush, QFont
+from PyQt5.QtGui import QPen, QPainter, QBrush, QFont, QColor
 from PyQt5.QtCore import Qt, QPointF, QRectF
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 """
 White dot = point on this plane
@@ -15,6 +18,7 @@ class DendritePainter():
     NODE_CIRCLE_RADIUS = 5
     NODE_CIRCLE_PEN = QPen(QBrush(Qt.black), 1, Qt.SolidLine)
     NODE_CIRCLE_BRUSH = QBrush(Qt.white)
+    NODE_CIRCLE_SELECTED_BRUSH = QBrush(Qt.cyan)
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
     ANNOTATION_FONT = QFont("Arial", 12, QFont.Bold)
@@ -22,38 +26,50 @@ class DendritePainter():
     ANNOTATION_HEIGHT = 40
     ANNOTATION_MAX_WIDTH = 512
 
+    LINE_COLOR_COUNT = 7
+    LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
+
     def __init__(self, painter, currentZ, uiState):
         self.p = painter
         self.zAt = currentZ
         self.uiState = uiState
+        self.colorAt = 1 # Start at yellow, not red.
 
     def drawTree(self, tree):
+        selectedPoint = self.uiState.currentPoint()
         for branch in tree.branches:
             self.drawBranchLines(branch)
+            self.colorAt = (self.colorAt + 1) % self.LINE_COLOR_COUNT
+        if tree.rootPoint is not None:
+            self.drawPoint(tree.rootPoint, selectedPoint)
         for branch in tree.branches:
-            self.drawBranchPoints(branch)
+            self.drawBranchPoints(branch, selectedPoint)
 
     def drawBranchLines(self, branch):
-        for i in range(1, len(branch.points)):
-            lastX, lastY, lastZ = branch.points[i-1].location
+        for i in range(len(branch.points)):
+            previousPoint = branch.parentPoint if i == 0 else branch.points[i-1]
+            lastX, lastY, lastZ = previousPoint.location
             thisX, thisY, thisZ = branch.points[ i ].location
             linePen = self.getLinePen(lastZ, thisZ)
             if linePen is not None:
                 self.p.setPen(linePen)
                 self.p.drawLine(lastX, lastY, thisX, thisY)
 
-    def drawBranchPoints(self, branch):
+    def drawBranchPoints(self, branch, selectedPoint):
         for i in range(len(branch.points)):
-            x, y, z = branch.points[i].location
-            annotation = branch.points[i].annotation
-            if z == self.zAt:
-                self.drawCircleThisZ(x, y)
-                if annotation != "":
-                    self.drawAnnotation(x, y, annotation)
+            self.drawPoint(branch.points[i], selectedPoint)
 
-    def drawCircleThisZ(self, x, y):
+    def drawPoint(self, point, selectedPoint):
+        x, y, z = point.location
+        annotation = point.annotation
+        if z == self.zAt:
+            self.drawCircleThisZ(x, y, point == selectedPoint)
+            if annotation != "":
+                self.drawAnnotation(x, y, annotation)
+
+    def drawCircleThisZ(self, x, y, isSelected):
         self.p.setPen(self.NODE_CIRCLE_PEN)
-        self.p.setBrush(self.NODE_CIRCLE_BRUSH)
+        self.p.setBrush(self.NODE_CIRCLE_SELECTED_BRUSH if isSelected else self.NODE_CIRCLE_BRUSH)
         self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_RADIUS, self.NODE_CIRCLE_RADIUS)
 
     def drawAnnotation(self, x, y, text):
@@ -71,9 +87,15 @@ class DendritePainter():
         inZ1, inZ2 = z1 == self.zAt, z2 == self.zAt
         near1, near2 = self.isNearZ(z1), self.isNearZ(z2)
         if inZ1 or inZ2:
-            return self.ON_Z_LINE_PEN
+            l = self.ON_Z_LINE_PEN
+            c = self.LINE_COLORS[self.colorAt]
+            l.setColor(QColor.fromRgbF(c[0], c[1], c[2]))
+            return l
         elif near1 or near2 or self.uiState.drawAllBranches:
-            return self.NEAR_Z_LINE_PEN
+            l = self.NEAR_Z_LINE_PEN
+            c = self.LINE_COLORS[self.colorAt]
+            l.setColor(QColor.fromRgbF(c[0], c[1], c[2]))
+            return l
         else:
             return None
 
