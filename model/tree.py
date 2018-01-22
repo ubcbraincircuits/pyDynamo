@@ -1,39 +1,40 @@
 import attr
 
 @attr.s
+class Point():
+    # Node position as an (x, y, z) tuple.
+    location = attr.ib(default=None) # (x, y, z) tuple
+
+    # Text annotation for node.
+    annotation = attr.ib(default="")
+
+    # Branches coming off the node
+    children = attr.ib(default=[]) # Not used yet
+
+    # Not sure...?
+    hilighed = attr.ib(default=None) # Not used yet
+
+
+@attr.s
 class Branch():
-    branchID = attr.ib()
+    # Points along this dendrite branch, in order.
+    points = attr.ib(default=[])
 
-    points = attr.ib(default=[]) # matlab {1}
-    children = attr.ib(default=[]) # matlab {2}
-    annotations = attr.ib(default=[]) # matlab {3}
-    hilighted = attr.ib(default=[]) # matlab {4}
+    # Not sure...?
+    isEnded = attr.ib(default=False) # Not used yet
 
-    isEnded = attr.ib(default=False)
-    colorData = attr.ib(default=None)
+    # Not sure...?
+    colorData = attr.ib(default=None) # Not used yet
 
     def addPoint(self, point):
         self.points.append(point)
-        self.children.append([])
-        self.annotations.append('')
-        self.hilighted.append(0)
-        self.isEnded = False
-        self.colorData = None # hmm...
+        return len(self.points) - 1
 
 @attr.s
 class Tree():
-    branches = attr.ib(default=[Branch(branchID=0)])
-    currentBranch = attr.ib(default=0)
+    # All branches making up this dendrite tree.
+    branches = attr.ib(default=[])
 
-    def getCurrentBranch(self):
-        return self.branches[self.currentBranch]
-
-    def addPoint(self, point):
-        self.getCurrentBranch().addPoint(point)
-
-# HACK - move to new file, this isn't a tree.
-@attr.s
-class UIOptions():
-    currentPoint = attr.ib(default=0)
-    showAnnotations = attr.ib(default=True)
-    drawAllBranches = attr.ib(default=False)
+    def addBranch(self, branch):
+        self.branches.append(branch)
+        return len(self.branches) - 1

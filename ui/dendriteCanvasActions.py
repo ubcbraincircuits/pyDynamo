@@ -2,10 +2,10 @@ from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
 
 class DendriteCanvasActions():
-    def __init__(self, dendriteCanvas, model, uiOptions):
+    def __init__(self, dendriteCanvas, model, uiState):
         self.canvas = dendriteCanvas
         self.model = model
-        self.uiOptions = uiOptions
+        self.uiState = uiState
 
     def zoom(self, logAmount):
         self.canvas.imgView.zoom(logAmount)
@@ -32,14 +32,8 @@ class DendriteCanvasActions():
         self.canvas.imgView.moveViewRect(viewBox)
 
     def getAnnotation(self, window):
-        currentBranch, currentPoint = self.model.currentBranch, self.uiOptions.currentPoint
-        if currentPoint is None or currentBranch is None:
-            # TODO - error alert?
-            print ("No current point selected")
-            return
-        currentAnnotation = self.model.branches[currentBranch].annotations[currentPoint] or ''
-
-        text, okPressed = QInputDialog.getText(window, "Annotate point", "Enter annotation:", QLineEdit.Normal, currentAnnotation)
+        currentPoint = self.uiState.currentPoint()
+        text, okPressed = QInputDialog.getText(window,
+            "Annotate point", "Enter annotation:", QLineEdit.Normal, currentPoint.annotation)
         if okPressed:
-            print ("New annotation: " + text)
-            self.model.branches[currentBranch].annotations[currentPoint] = text
+            currentPoint.annotation = text

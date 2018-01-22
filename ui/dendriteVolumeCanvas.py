@@ -13,13 +13,13 @@ class DendriteVolumeCanvas(QWidget):
     SCROLL_SENSITIVITY = 30.0
     COLOR_SENSITIVITY = 10.0 / 256.0
 
-    def __init__(self, volume, model, uiOptions, HACKSCATTER, *args, **kwargs):
+    def __init__(self, volume, model, uiState, HACKSCATTER, *args, **kwargs):
         super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
         self.volume = volume
         self.zAxisAt = 0
         self.colorLimits = (0, 1)
         self.model = model
-        self.uiOptions = uiOptions
+        self.uiState = uiState
 
         self.HACKSCATTER = HACKSCATTER
 
@@ -44,6 +44,10 @@ class DendriteVolumeCanvas(QWidget):
         imageData = self.snapToRange(imageData, 0.0, 1.0)
         self.imgView.setImage(np2qt(imageData, normalize=True), maintainZoom=True)
 
+    def paintOverImage(self, painter, rect):
+        p = DendritePainter(painter, self.zAxisAt, self.uiState)
+        p.drawTree(self.model)
+        
     def changeBrightness(self, lowerDelta, upperDelta):
         self.colorLimits = (
             self.snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
@@ -53,7 +57,7 @@ class DendriteVolumeCanvas(QWidget):
 
     def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
-        self.model.addPoint((pos.x(), pos.y(), self.zAxisAt))
+        self.uiState.addPointToCurrentBranchAndSelect((pos.x(), pos.y(), self.zAxisAt))
         self.HACKSCATTER.needToUpdate()
         self.drawImage()
 

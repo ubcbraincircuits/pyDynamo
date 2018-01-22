@@ -39,34 +39,34 @@ POINTS = np.random.rand(n, 3)
 ROTPOINTS = hackRotate(POINTS)
 
 class AppWindow(QtWidgets.QMainWindow):
-    def __init__(self, hackVolume, hackModel, hackOptions):
+    def __init__(self, imageVolume, treeModel, uiState):
         QtWidgets.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
+        self.statusBar().showMessage("Dynamo", 2000)
 
+        """
+        TODO - keep menu?
+        """
         self.file_menu = QtWidgets.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.fileQuit,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
+        self.file_menu.addAction('&Quit', self.fileQuit, QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
-
         self.help_menu = QtWidgets.QMenu('&Help', self)
         self.menuBar().addSeparator()
         self.menuBar().addMenu(self.help_menu)
-
         self.help_menu.addAction('&About', self.about)
 
-        self.main_widget = QtWidgets.QWidget(self)
-        l = QtWidgets.QHBoxLayout(self.main_widget)
-        self.scatter3d = Scatter3DCanvas(hackModel, self.main_widget, width=5, height=4, dpi=100)
+        self.root = QtWidgets.QWidget(self)
+        self.scatter3d = Scatter3DCanvas(treeModel, self.root, width=5, height=4, dpi=100)
+        self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, self.scatter3d, self.root)
+        self.actionHandler = DendriteCanvasActions(self.dendrites, treeModel, uiState)
+
+        # Assemble the view hierarchy.
+        l = QtWidgets.QHBoxLayout(self.root)
         l.addWidget(self.scatter3d)
-        self.dendrites = DendriteVolumeCanvas(hackVolume, hackModel, hackOptions, self.scatter3d, self.main_widget)
         l.addWidget(self.dendrites)
-        self.actionHandler = DendriteCanvasActions(self.dendrites, hackModel, hackOptions)
-
-        self.main_widget.setFocus()
-        self.setCentralWidget(self.main_widget)
-
-        self.statusBar().showMessage("All hail matplotlib!", 2000)
+        self.root.setFocus()
+        self.setCentralWidget(self.root)
 
     def fileQuit(self):
         self.close()
@@ -80,41 +80,41 @@ class AppWindow(QtWidgets.QMainWindow):
     def keyPressEvent(self, event):
         key = event.key()
         print (key)
-        if (key == 32):
+        if   (key == ord(' ')):
             newP = np.random.rand(n, 3)
             newPRot = absorient.hackRotate(newP)
-        elif (key == 49): # '1' = next z axis plane
+        elif (key == ord('1')):
             self.dendrites.changeZAxis(1)
-        elif (key == 50): # '2' = previous z axis plane
+        elif (key == ord('2')):
             self.dendrites.changeZAxis(-1)
-        elif (key == 52): # '4'
+        elif (key == ord('4')):
             self.dendrites.brightnessAction(-1, 0)
-        elif (key == 53): # '5'
+        elif (key == ord('5')):
             self.dendrites.brightnessAction(1, 0)
-        elif (key == 54): # '6'
+        elif (key == ord('6')):
             self.dendrites.brightnessAction(0, 0, reset=True)
-        elif (key == 55): # '7'
+        elif (key == ord('7')):
             self.dendrites.brightnessAction(0, -1)
-        elif (key == 56): # '8'
+        elif (key == ord('8')):
             self.dendrites.brightnessAction(0, 1)
-        elif (key == 88): # x = zoom in
+        elif (key == ord('X')):
             self.actionHandler.zoom(-0.2) # ~= ln(0.8) as used in matlab
-        elif (key == 90): # z = zoom out
+        elif (key == ord('Z')):
             self.actionHandler.zoom(0.2)
-        elif (key == 87): # w = pan up
+        elif (key == ord('W')):
             self.actionHandler.pan(0, -1)
-        elif (key == 65): # a = pan left
+        elif (key == ord('A')):
             self.actionHandler.pan(-1, 0)
-        elif (key == 83): # s = pan down
+        elif (key == ord('S')):
             # TODO - ctrl-s = save
             self.actionHandler.pan(0, 1)
-        elif (key == 68): # d = pan right
+        elif (key == ord('D')):
             self.actionHandler.pan(1, 0)
-        elif (key == 70): # f = toggle annotations
-            self.dendrites.uiOptions.showAnnotations = not self.dendrites.uiOptions.showAnnotations
+        elif (key == ord('F')):
+            self.dendrites.uiState.showAnnotations = not self.dendrites.uiState.showAnnotations
             self.dendrites.redraw()
-        elif (key == 86): # v = toggle show-all tree
-            self.dendrites.uiOptions.drawAllBranches = not self.dendrites.uiOptions.drawAllBranches
+        elif (key == ord('V')):
+            self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
             self.dendrites.redraw()
-        elif (key == 81): # q = set/edit annotations
+        elif (key == ord('Q')):
             self.actionHandler.getAnnotation(self)

@@ -6,10 +6,11 @@ class Scatter3DCanvas(BaseMatplotlibCanvas):
         super(Scatter3DCanvas, self).__init__(*args, in3D=True, **kwargs)
 
     def compute_initial_figure(self):
+        x, y, z = [], [], []
         for branch in self.hackModel.branches:
-            x = [p[0] for p in branch.points]
-            y = [p[1] for p in branch.points]
-            z = [p[2] for p in branch.points]
+            x = [p.location[0] for p in branch.points]
+            z = [p.location[2] for p in branch.points]
+            y = [p.location[1] for p in branch.points]
         self.axes.scatter(x, y, z)
 
     def needToUpdate(self):

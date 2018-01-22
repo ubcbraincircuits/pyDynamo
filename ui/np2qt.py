@@ -23,7 +23,6 @@ def qimageview(image):
     del image.__array_interface__
     return result
 
-
 def _normalize255(array, normalize, clip = (0, 255)):
     if normalize:
         if normalize is True:
@@ -77,18 +76,5 @@ def np2qt(gray, normalize = False):
     if not np.ma.is_masked(gray):
         for i in range(256):
             result.setColor(i, qRgb(i,i,i))
-
         qimageview(result)[:] = _normalize255(gray, normalize)
-    # else:
-    #     # map gray value 1 to gray value 0, in order to make room for
-    #     # transparent colormap entry:
-    #     result.setColor(0, qRgb(0,0,0))
-    #     for i in range(2, 256):
-    #         result.setColor(i-1, qRgb(i,i,i))
-    #
-    #     qimageview(result)[:] = _normalize255(gray, normalize, clip = (1, 255)) - 1
-    #
-    #     result.setColor(255, 0)
-    #     qimageview(result)[gray.mask] = 255
-
     return result
