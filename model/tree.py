@@ -6,7 +6,7 @@ class Branch():
 
     points = attr.ib(default=[]) # matlab {1}
     children = attr.ib(default=[]) # matlab {2}
-    annotation = attr.ib(default=[]) # matlab {3}
+    annotations = attr.ib(default=[]) # matlab {3}
     hilighted = attr.ib(default=[]) # matlab {4}
 
     isEnded = attr.ib(default=False)
@@ -15,7 +15,7 @@ class Branch():
     def addPoint(self, point):
         self.points.append(point)
         self.children.append([])
-        self.annotation.append('')
+        self.annotations.append('')
         self.hilighted.append(0)
         self.isEnded = False
         self.colorData = None # hmm...
@@ -30,3 +30,10 @@ class Tree():
 
     def addPoint(self, point):
         self.getCurrentBranch().addPoint(point)
+
+# HACK - move to new file, this isn't a tree.
+@attr.s
+class UIOptions():
+    currentPoint = attr.ib(default=0)
+    showAnnotations = attr.ib(default=True)
+    drawAllBranches = attr.ib(default=False)

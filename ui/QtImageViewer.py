@@ -135,7 +135,7 @@ class QtImageViewer(QGraphicsView):
 
     def drawForeground(self, painter, rect):
         super().drawForeground(painter, rect)
-        self.dendritePainter.begin(painter, self.parentView.zAxisAt)
+        self.dendritePainter.begin(painter, self.parentView.zAxisAt, self.parentView.uiOptions)
         self.dendritePainter.drawTree(self.parentView.model)
         self.dendritePainter.end()
 

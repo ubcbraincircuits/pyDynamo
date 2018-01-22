@@ -39,7 +39,7 @@ POINTS = np.random.rand(n, 3)
 ROTPOINTS = hackRotate(POINTS)
 
 class AppWindow(QtWidgets.QMainWindow):
-    def __init__(self, hackVolume, hackModel):
+    def __init__(self, hackVolume, hackModel, hackOptions):
         QtWidgets.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
@@ -56,13 +56,12 @@ class AppWindow(QtWidgets.QMainWindow):
         self.help_menu.addAction('&About', self.about)
 
         self.main_widget = QtWidgets.QWidget(self)
-
         l = QtWidgets.QHBoxLayout(self.main_widget)
         self.scatter3d = Scatter3DCanvas(hackModel, self.main_widget, width=5, height=4, dpi=100)
         l.addWidget(self.scatter3d)
-        self.dendrites = DendriteVolumeCanvas(hackVolume, hackModel, self.scatter3d, self.main_widget)
+        self.dendrites = DendriteVolumeCanvas(hackVolume, hackModel, hackOptions, self.scatter3d, self.main_widget)
         l.addWidget(self.dendrites)
-        self.actionHandler = DendriteCanvasActions(self.dendrites)
+        self.actionHandler = DendriteCanvasActions(self.dendrites, hackModel, hackOptions)
 
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -111,3 +110,11 @@ class AppWindow(QtWidgets.QMainWindow):
             self.actionHandler.pan(0, 1)
         elif (key == 68): # d = pan right
             self.actionHandler.pan(1, 0)
+        elif (key == 70): # f = toggle annotations
+            self.dendrites.uiOptions.showAnnotations = not self.dendrites.uiOptions.showAnnotations
+            self.dendrites.redraw()
+        elif (key == 86): # v = toggle show-all tree
+            self.dendrites.uiOptions.drawAllBranches = not self.dendrites.uiOptions.drawAllBranches
+            self.dendrites.redraw()
+        elif (key == 81): # q = set/edit annotations
+            self.actionHandler.getAnnotation(self)
