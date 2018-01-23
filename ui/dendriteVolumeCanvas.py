@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QApplication
 
 import numpy as np
 
@@ -58,10 +58,27 @@ class DendriteVolumeCanvas(QWidget):
 
     def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
+        location = (pos.x(), pos.y(), self.zAxisAt)
+
+        modifiers = QApplication.keyboardModifiers()
+        shiftPressed = modifiers & Qt.ShiftModifier
+
+        pointClicked, closestDist = self.uiState.closestPointInZPlane(location)
+        if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
+            pointClicked = None
+
         if event.button() == Qt.RightButton:
-            self.uiState.addPointToNewBranchAndSelect((pos.x(), pos.y(), self.zAxisAt))
+            if pointClicked:
+                self.uiState.deletePoint(pointClicked)
+            else:
+                self.uiState.addPointToNewBranchAndSelect(location)
         else:
-            self.uiState.addPointToCurrentBranchAndSelect((pos.x(), pos.y(), self.zAxisAt))
+            if shiftPressed:
+                self.uiState.addPointMidBranchAndSelect(location)
+            elif pointClicked:
+                self.uiState.selectPoint(pointClicked)
+            else:
+                self.uiState.addPointToCurrentBranchAndSelect(location)
         self.HACKSCATTER.needToUpdate()
         self.drawImage()
 

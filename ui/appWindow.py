@@ -118,3 +118,5 @@ class AppWindow(QtWidgets.QMainWindow):
             self.dendrites.redraw()
         elif (key == ord('Q')):
             self.actionHandler.getAnnotation(self)
+        elif (key == QtCore.Qt.Key_Delete):
+            self.actionHandler.deleteCurrentPoint();

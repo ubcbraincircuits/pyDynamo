@@ -12,10 +12,10 @@ Dashed line = line without end on this plane
 Only draw ones with Z < 3 difference, UNLESS all are drawn
 """
 class DendritePainter():
-    ON_Z_LINE_PEN = QPen(QBrush(Qt.yellow), 3, Qt.SolidLine)
-    NEAR_Z_LINE_PEN = QPen(QBrush(Qt.yellow), 3, Qt.DashLine)
+    LINE_WIDTH = 3
 
-    NODE_CIRCLE_RADIUS = 5
+    # TODO - scale with zoom.
+    NODE_CIRCLE_DIAMETER = 5
     NODE_CIRCLE_PEN = QPen(QBrush(Qt.black), 1, Qt.SolidLine)
     NODE_CIRCLE_BRUSH = QBrush(Qt.white)
     NODE_CIRCLE_SELECTED_BRUSH = QBrush(Qt.cyan)
@@ -70,7 +70,7 @@ class DendritePainter():
     def drawCircleThisZ(self, x, y, isSelected):
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(self.NODE_CIRCLE_SELECTED_BRUSH if isSelected else self.NODE_CIRCLE_BRUSH)
-        self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_RADIUS, self.NODE_CIRCLE_RADIUS)
+        self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_DIAMETER, self.NODE_CIRCLE_DIAMETER)
 
     def drawAnnotation(self, x, y, text):
         if not self.uiState.showAnnotations:
@@ -87,18 +87,15 @@ class DendritePainter():
         inZ1, inZ2 = z1 == self.zAt, z2 == self.zAt
         near1, near2 = self.isNearZ(z1), self.isNearZ(z2)
         if inZ1 or inZ2:
-            l = self.ON_Z_LINE_PEN
-            c = self.LINE_COLORS[self.colorAt]
-            l.setColor(QColor.fromRgbF(c[0], c[1], c[2]))
-            return l
+            color = self.LINE_COLORS[self.colorAt]
+            color = QColor.fromRgbF(color[0], color[1], color[2])
+            return QPen(QBrush(color), self.LINE_WIDTH, Qt.SolidLine)
         elif near1 or near2 or self.uiState.drawAllBranches:
-            l = self.NEAR_Z_LINE_PEN
-            c = self.LINE_COLORS[self.colorAt]
-            l.setColor(QColor.fromRgbF(c[0], c[1], c[2]))
-            return l
+            color = self.LINE_COLORS[self.colorAt]
+            color = QColor.fromRgbF(color[0], color[1], color[2])
+            return QPen(QBrush(color), self.LINE_WIDTH, Qt.DashLine)
         else:
             return None
-
 
 
     # HACK - utilities

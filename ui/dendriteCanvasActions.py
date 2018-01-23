@@ -37,3 +37,7 @@ class DendriteCanvasActions():
             "Annotate point", "Enter annotation:", QLineEdit.Normal, currentPoint.annotation)
         if okPressed:
             currentPoint.annotation = text
+
+    def deleteCurrentPoint(self):
+        self.uiState.deletePoint(self.uiState.currentPoint())
+        self.canvas.redraw()

@@ -5,6 +5,9 @@ class Point():
     # Node position as an (x, y, z) tuple.
     location = attr.ib(default=None) # (x, y, z) tuple
 
+    # Branch this point belongs to
+    parentBranch = attr.ib(default=None)
+
     # Text annotation for node.
     annotation = attr.ib(default="")
 
@@ -12,11 +15,13 @@ class Point():
     children = attr.ib(default=attr.Factory(list)) # Not used yet
 
     # Not sure...?
-    hilighed = attr.ib(default=None) # Not used yet
+    hilighted = attr.ib(default=None) # Not used yet
 
 
 @attr.s
 class Branch():
+    # TODO: Tree this branch belongs to
+
     # Node this branched off, or None for root branch
     parentPoint = attr.ib(default=None)
 
@@ -31,7 +36,21 @@ class Branch():
 
     def addPoint(self, point):
         self.points.append(point)
+        point.parentBranch = self
         return len(self.points) - 1
+
+    def insertPointBefore(self, point, index):
+        self.points.insert(index, point)
+        point.parentBranch = self
+        return index
+
+    def removePointLocally(self, point):
+        if point not in self.points:
+            print ("Deleting point not in the branch? Whoops")
+            return
+        index = self.points.index(point)
+        self.points.remove(point)
+        return self.parentPoint if index == 0 else self.points[index - 1]
 
 @attr.s
 class Tree():
@@ -44,6 +63,15 @@ class Tree():
     def addBranch(self, branch):
         self.branches.append(branch)
         return len(self.branches) - 1
+
+    def removeBranch(self, branch):
+        if branch not in self.branches:
+            print ("Deleting branch not in the tree? Whoops")
+            return
+        if len(branch.points) > 0:
+            print ("Removing a branch that still has stuff on it? use uiState.removeBranch.")
+            return
+        self.branches.remove(branch)
 
     def flattenPoints(self):
         if self.rootPoint is None:
