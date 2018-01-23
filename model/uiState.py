@@ -20,6 +20,9 @@ class UIState():
     # UI Option for whether or not to show all branches, or just the nearby ones.
     drawAllBranches = attr.ib(default=False)
 
+    # UI Option for dendrite line width
+    lineWidth = attr.ib(default=3)
+
     def currentBranch(self):
         if self.currentBranchIndex == -1:
             return None
@@ -115,6 +118,11 @@ class UIState():
                 closestDist = dist
         return closestPoint, closestDist
 
+    def toggleLineWidth(self):
+        if self.lineWidth == 4:
+            self.lineWidth = 1
+        else:
+            self.lineWidth += 1
 
     # HACK - move to common location
     def normDelta(self, p1, p2):

@@ -110,6 +110,9 @@ class AppWindow(QtWidgets.QMainWindow):
             self.actionHandler.pan(0, 1)
         elif (key == ord('D')):
             self.actionHandler.pan(1, 0)
+        elif (key == ord('H')):
+            self.dendrites.uiState.toggleLineWidth()
+            self.dendrites.redraw()
         elif (key == ord('F')):
             self.dendrites.uiState.showAnnotations = not self.dendrites.uiState.showAnnotations
             self.dendrites.redraw()

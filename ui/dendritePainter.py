@@ -12,8 +12,6 @@ Dashed line = line without end on this plane
 Only draw ones with Z < 3 difference, UNLESS all are drawn
 """
 class DendritePainter():
-    LINE_WIDTH = 3
-
     # TODO - scale with zoom.
     NODE_CIRCLE_DIAMETER = 5
     NODE_CIRCLE_PEN = QPen(QBrush(Qt.black), 1, Qt.SolidLine)
@@ -89,11 +87,11 @@ class DendritePainter():
         if inZ1 or inZ2:
             color = self.LINE_COLORS[self.colorAt]
             color = QColor.fromRgbF(color[0], color[1], color[2])
-            return QPen(QBrush(color), self.LINE_WIDTH, Qt.SolidLine)
+            return QPen(QBrush(color), self.uiState.lineWidth, Qt.SolidLine)
         elif near1 or near2 or self.uiState.drawAllBranches:
             color = self.LINE_COLORS[self.colorAt]
             color = QColor.fromRgbF(color[0], color[1], color[2])
-            return QPen(QBrush(color), self.LINE_WIDTH, Qt.DashLine)
+            return QPen(QBrush(color), self.uiState.lineWidth, Qt.DashLine)
         else:
             return None
 
