@@ -39,7 +39,7 @@ class QtImageViewer(QGraphicsView):
     leftMouseButtonDoubleClicked = pyqtSignal(float, float)
     rightMouseButtonDoubleClicked = pyqtSignal(float, float)
 
-    def __init__(self, parentView):
+    def __init__(self, parentView, imageData=None):
         QGraphicsView.__init__(self)
         self.parentView = parentView
 
@@ -71,6 +71,9 @@ class QtImageViewer(QGraphicsView):
         # HACK - mouse click vs drag disambiguation
         self.lastMousePressSec = -1
         self.lastMousePressPos = None
+
+        if imageData is not None:
+            self.setImage(imageData)
 
     def hasImage(self):
         """ Returns whether or not the scene contains an image pixmap.
@@ -129,10 +132,6 @@ class QtImageViewer(QGraphicsView):
         """ Maintain current zoom on resize.
         """
         self.forceRepaint()
-
-    def drawForeground(self, painter, rect):
-        super().drawForeground(painter, rect)
-        self.parentView.paintOverImage(painter, rect)
 
     def mousePressEvent(self, event):
         """ Start mouse pan or zoom mode.

@@ -27,10 +27,11 @@ class DendritePainter():
     LINE_COLOR_COUNT = 7
     LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
 
-    def __init__(self, painter, currentZ, uiState):
+    def __init__(self, painter, currentZ, uiState, zoomMapFunc):
         self.p = painter
         self.zAt = currentZ
         self.uiState = uiState
+        self.zoomMapFunc = zoomMapFunc
         self.colorAt = 1 # Start at yellow, not red.
 
     def drawTree(self, tree):
@@ -46,8 +47,8 @@ class DendritePainter():
     def drawBranchLines(self, branch):
         for i in range(len(branch.points)):
             previousPoint = branch.parentPoint if i == 0 else branch.points[i-1]
-            lastX, lastY, lastZ = previousPoint.location
-            thisX, thisY, thisZ = branch.points[ i ].location
+            lastX, lastY, lastZ = self.zoomedLocation(previousPoint.location)
+            thisX, thisY, thisZ = self.zoomedLocation(branch.points[i].location)
             linePen = self.getLinePen(lastZ, thisZ)
             if linePen is not None:
                 self.p.setPen(linePen)
@@ -58,7 +59,7 @@ class DendritePainter():
             self.drawPoint(branch.points[i], selectedPoint)
 
     def drawPoint(self, point, selectedPoint):
-        x, y, z = point.location
+        x, y, z = self.zoomedLocation(point.location)
         annotation = point.annotation
         if z == self.zAt:
             self.drawCircleThisZ(x, y, point == selectedPoint)
@@ -94,6 +95,11 @@ class DendritePainter():
             return QPen(QBrush(color), self.uiState.lineWidth, Qt.DashLine)
         else:
             return None
+
+    def zoomedLocation(self, xyz):
+        x, y, z = xyz
+        zoomedXY = self.zoomMapFunc(x, y)
+        return (zoomedXY.x(), zoomedXY.y(), z)
 
 
     # HACK - utilities
