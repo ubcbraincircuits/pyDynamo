@@ -10,6 +10,8 @@ from .QtImageViewer import QtImageViewer
 from .dendritePainter import DendritePainter
 from .dendriteOverlay import DendriteOverlay
 
+from util import snapToRange
+
 class DendriteVolumeCanvas(QWidget):
     INVERT_SCROLL = False
     SCROLL_SENSITIVITY = 30.0
@@ -32,7 +34,7 @@ class DendriteVolumeCanvas(QWidget):
         l.addWidget(self.imgOverlay, 0, 0)
 
     def changeZAxis(self, delta):
-        self.zAxisAt = self.snapToRange(self.zAxisAt + delta, 0, len(self.volume) - 1)
+        self.zAxisAt = snapToRange(self.zAxisAt + delta, 0, len(self.volume) - 1)
         self.drawImage()
 
     def redraw(self):
@@ -44,13 +46,14 @@ class DendriteVolumeCanvas(QWidget):
         imageData = np.array(self.volume[self.zAxisAt])
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
-        imageData = self.snapToRange(imageData, 0.0, 1.0)
+        imageData = snapToRange(imageData, 0.0, 1.0)
         self.imgView.setImage(np2qt(imageData, normalize=True), maintainZoom=True)
 
+    # TODO: move to actions
     def changeBrightness(self, lowerDelta, upperDelta):
         self.colorLimits = (
-            self.snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
-            self.snapToRange(self.colorLimits[1] + upperDelta, self.colorLimits[0] + 0.001, 1),
+            snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
+            snapToRange(self.colorLimits[1] + upperDelta, self.colorLimits[0] + 0.001, 1),
         )
         self.drawImage()
 
@@ -87,10 +90,7 @@ class DendriteVolumeCanvas(QWidget):
         self.changeZAxis(scrollDelta)
         return True
 
-    # HACK - move to common
-    def snapToRange(self, x, lo, hi):
-        return np.maximum(lo, np.minimum(hi, x))
-
+    # TODO - move colorLimits to uiState, action to dendriteCanvasActions
     def brightnessAction(self, lower, upper, reset=False):
         if reset:
             self.colorLimits = (0, 1)

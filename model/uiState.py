@@ -3,6 +3,8 @@ import math
 
 from .tree import *
 
+from util import normDelta, dotDelta, deltaSz
+
 @attr.s
 class UIState():
     # Tree being shown in the UI.
@@ -67,10 +69,10 @@ class UIState():
             afterPoint = branch.points[self.currentPointIndex + 1]
             if beforePoint is None:
                 return # Whoops, ignore.
-            beforeDelta = self.normDelta(beforePoint.location, currentPointAt)
-            afterDelta = self.normDelta(afterPoint.location, currentPointAt)
-            currDelta = self.normDelta(location, currentPointAt)
-            if (self.dotDelta(beforeDelta, currDelta) > self.dotDelta(afterDelta, currDelta)):
+            beforeDelta = normDelta(beforePoint.location, currentPointAt)
+            afterDelta = normDelta(afterPoint.location, currentPointAt)
+            currDelta = normDelta(location, currentPointAt)
+            if (dotDelta(beforeDelta, currDelta) > dotDelta(afterDelta, currDelta)):
                 newPointIndex = self.currentPointIndex
             else:
                 newPointIndex = self.currentPointIndex + 1
@@ -112,7 +114,7 @@ class UIState():
         for point in self._tree.flattenPoints():
             if point.location[2] != location[2]:
                 continue
-            dist = self.deltaSz(location, point.location)
+            dist = deltaSz(location, point.location)
             if closestDist is None or dist < closestDist:
                 closestPoint = point
                 closestDist = dist
@@ -123,16 +125,3 @@ class UIState():
             self.lineWidth = 1
         else:
             self.lineWidth += 1
-
-    # HACK - move to common location
-    def normDelta(self, p1, p2):
-        x, y, z = p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2]
-        sz = math.sqrt(x*x + y*y + z*z)
-        return (x/sz, y/sz, z/sz)
-
-    def dotDelta(self, p1, p2):
-        return p1[0] * p2[0] + p1[1] * p2[1] + p1[2] * p2[2]
-
-    def deltaSz(self, p1, p2):
-        x, y, z = p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2]
-        return math.sqrt(x*x + y*y + z*z)
