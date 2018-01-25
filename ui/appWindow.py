@@ -9,7 +9,6 @@ from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
-
 # MEGA HACK
 def rotation_matrix(axis, theta):
     """
@@ -45,17 +44,6 @@ class AppWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Dynamo")
         self.statusBar().showMessage("Dynamo", 2000)
 
-        """
-        TODO - keep menu?
-        """
-        self.file_menu = QtWidgets.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.fileQuit, QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
-        self.menuBar().addMenu(self.file_menu)
-        self.help_menu = QtWidgets.QMenu('&Help', self)
-        self.menuBar().addSeparator()
-        self.menuBar().addMenu(self.help_menu)
-        self.help_menu.addAction('&About', self.about)
-
         self.root = QtWidgets.QWidget(self)
         self.scatter3d = Scatter3DCanvas(treeModel, self.root, width=5, height=4, dpi=100)
         self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, self.scatter3d, self.root)
@@ -68,16 +56,26 @@ class AppWindow(QtWidgets.QMainWindow):
         self.root.setFocus()
         self.setCentralWidget(self.root)
 
+        # Top level menu:
+        self.file_menu = QtWidgets.QMenu('&File', self)
+        self.file_menu.addAction('&Quit', self.fileQuit, QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
+        self.menuBar().addMenu(self.file_menu)
+        self.help_menu = QtWidgets.QMenu('&Help', self)
+        self.menuBar().addSeparator()
+        self.menuBar().addMenu(self.help_menu)
+        self.help_menu.addAction('&Shortcuts', self.actionHandler.showHotkeys, QtCore.Qt.Key_F1)
+
     def fileQuit(self):
         self.close()
 
     def closeEvent(self, ce):
         self.fileQuit()
 
-    def about(self):
-        QtWidgets.QMessageBox.about(self, "About", "Fill in stuff here?")
+    def showHotkeys(self):
+        self.actionHandler.showHotkeys()
 
     def keyPressEvent(self, event):
+        # TODO: add menu items for some of these too.
         key = event.key()
         print (key)
         if   (key == ord(' ')):

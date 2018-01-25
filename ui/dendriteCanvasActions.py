@@ -1,6 +1,8 @@
 from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
 
+from .helpDialog import showHelpDialog
+
 class DendriteCanvasActions():
     def __init__(self, dendriteCanvas, model, uiState):
         self.canvas = dendriteCanvas
@@ -41,3 +43,6 @@ class DendriteCanvasActions():
     def deleteCurrentPoint(self):
         self.uiState.deletePoint(self.uiState.currentPoint())
         self.canvas.redraw()
+
+    def showHotkeys(self):
+        showHelpDialog()
