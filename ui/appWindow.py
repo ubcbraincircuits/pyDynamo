@@ -9,34 +9,6 @@ from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
-# MEGA HACK
-def rotation_matrix(axis, theta):
-    """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
-    """
-    axis = np.asarray(axis)
-    axis = axis/math.sqrt(np.dot(axis, axis))
-    a = math.cos(theta/2.0)
-    b, c, d = -axis*math.sin(theta/2.0)
-    aa, bb, cc, dd = a*a, b*b, c*c, d*d
-    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
-    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
-                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
-                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
-
-MAT = rotation_matrix([0, 0, 1], math.pi / 2.0)
-
-def hackRotate(points):
-    print (MAT.shape)
-    print (points.shape)
-    return np.dot(MAT, points.T).T
-
-# HACK
-n = 5
-POINTS = np.random.rand(n, 3)
-ROTPOINTS = hackRotate(POINTS)
-
 class AppWindow(QtWidgets.QMainWindow):
     def __init__(self, imageVolume, treeModel, uiState):
         QtWidgets.QMainWindow.__init__(self)
@@ -86,15 +58,15 @@ class AppWindow(QtWidgets.QMainWindow):
         elif (key == ord('2')):
             self.dendrites.changeZAxis(-1)
         elif (key == ord('4')):
-            self.dendrites.brightnessAction(-1, 0)
+            self.actionHandler.changeBrightness(-1, 0)
         elif (key == ord('5')):
-            self.dendrites.brightnessAction(1, 0)
+            self.actionHandler.changeBrightness(1, 0)
         elif (key == ord('6')):
-            self.dendrites.brightnessAction(0, 0, reset=True)
+            self.actionHandler.changeBrightness(0, 0, reset=True)
         elif (key == ord('7')):
-            self.dendrites.brightnessAction(0, -1)
+            self.actionHandler.changeBrightness(0, -1)
         elif (key == ord('8')):
-            self.dendrites.brightnessAction(0, 1)
+            self.actionHandler.changeBrightness(0, 1)
         elif (key == ord('X')):
             self.actionHandler.zoom(-0.2) # ~= ln(0.8) as used in matlab
         elif (key == ord('Z')):

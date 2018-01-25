@@ -3,7 +3,7 @@ import math
 
 from .tree import *
 
-from util import normDelta, dotDelta, deltaSz
+from util import snapToRange, normDelta, dotDelta, deltaSz
 
 @attr.s
 class UIState():
@@ -25,6 +25,9 @@ class UIState():
     # UI Option for dendrite line width
     lineWidth = attr.ib(default=3)
 
+    # (lower-, upper-) bounds for intensities to show
+    colorLimits = attr.ib(default=(0, 1))
+
     def currentBranch(self):
         if self.currentBranchIndex == -1:
             return None
@@ -35,7 +38,7 @@ class UIState():
             return self._tree.rootPoint
         return self.currentBranch().points[self.currentPointIndex]
 
-    # HACK - move these to dendrite canvas actions
+    # TODO - move these to dendrite canvas actions
     def addPointToCurrentBranchAndSelect(self, location):
         if self._tree.rootPoint is None:
             self._tree.rootPoint = Point(location)
@@ -106,6 +109,12 @@ class UIState():
         newPoint = oldBranch.removePointLocally(point)
         point.parentBranch = None
         self.selectPoint(newPoint)
+
+    def changeBrightness(self, lowerDelta, upperDelta):
+        self.colorLimits = (
+            snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
+            snapToRange(self.colorLimits[1] + upperDelta, self.colorLimits[0] + 0.001, 1),
+        )
 
     # TODO - move elsewhere?
     def closestPointInZPlane(self, location):
