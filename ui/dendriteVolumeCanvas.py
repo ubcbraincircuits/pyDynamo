@@ -70,7 +70,8 @@ class DendriteVolumeCanvas(QWidget):
                 self.uiState.selectPoint(pointClicked)
             else:
                 self.uiState.addPointToCurrentBranchAndSelect(location)
-        self.HACKSCATTER.needToUpdate()
+        if self.HACKSCATTER is not None:
+            self.HACKSCATTER.needToUpdate()
         self.drawImage()
 
     def wheelEvent(self,event):

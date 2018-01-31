@@ -23,13 +23,13 @@ class AppWindow(QtWidgets.QMainWindow):
         imageVolume = files.tiffRead(imagePath)
 
         self.root = QtWidgets.QWidget(self)
-        self.scatter3d = Scatter3DCanvas(treeModel, self.root, width=5, height=4, dpi=100)
-        self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, self.scatter3d, self.root)
+        # self.scatter3d = Scatter3DCanvas(treeModel, self.root, width=5, height=4, dpi=100)
+        self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, None, self.root)
         self.actionHandler = DendriteCanvasActions(self.dendrites, treeModel, uiState)
 
         # Assemble the view hierarchy.
         l = QtWidgets.QHBoxLayout(self.root)
-        l.addWidget(self.scatter3d)
+        # l.addWidget(self.scatter3d)
         l.addWidget(self.dendrites)
         self.root.setFocus()
         self.setCentralWidget(self.root)

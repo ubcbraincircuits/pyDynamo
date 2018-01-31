@@ -6,6 +6,7 @@ from PyQt5 import QtCore, QtWidgets
 from model import FullState, Tree, UIState
 
 from .appWindow import AppWindow
+from .tilefigs import tileFigs
 
 class InitialMenu(QtWidgets.QMainWindow):
     def __init__(self):
@@ -70,6 +71,8 @@ class InitialMenu(QtWidgets.QMainWindow):
             self.childWindows.append(childWindow)
             childWindow.show()
         if len(filePaths) > 0:
+            # TODO - on shortcut
+            tileFigs(self.childWindows)
             self.hide()
 
     def openFromFile(self):
