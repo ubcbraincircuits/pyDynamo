@@ -3,14 +3,16 @@ import numpy as np
 
 from PyQt5 import QtCore, QtWidgets
 
-from .appWindow import AppWindow
+from model import FullState, Tree, UIState
 
-import files
-from model import Tree, UIState
+from .appWindow import AppWindow
 
 class InitialMenu(QtWidgets.QMainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
+        self.childWindows = []
+        self.fullState = FullState()
+
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
         self.statusBar().showMessage("Dynamo", 2000)
@@ -54,16 +56,24 @@ class InitialMenu(QtWidgets.QMainWindow):
         self.fileQuit()
 
     def newFromStacks(self):
-        imageVolume = files.tiffRead('data/Live4-1-2015_09-16-03.tif')
-        treeModel = Tree()
-        uiState = UIState(tree=treeModel)
-        uiApp = AppWindow(imageVolume, treeModel, uiState, parent=self)
-        uiApp.show()
-        self.hide()
+        filePaths, _ = QtWidgets.QFileDialog.getOpenFileNames(self,
+            "Open image stacks", "", "Image files (*.tif)"
+        )
+        self.fullState.addFiles(filePaths)
+        for i in range(len(filePaths)):
+            childWindow = AppWindow(
+                self.fullState.filePaths[i],
+                self.fullState.trees[i],
+                self.fullState.uiStates[i],
+                parent=self
+            )
+            self.childWindows.append(childWindow)
+            childWindow.show()
+        if len(filePaths) > 0:
+            self.hide()
 
     def openFromFile(self):
-        QtWidgets.QMessageBox.warning(
-            self,
+        QtWidgets.QMessageBox.warning(self,
             "Coming soon...",
             "To be added after file save/load working"
         )

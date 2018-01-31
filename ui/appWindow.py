@@ -3,6 +3,8 @@ import numpy as np
 
 from PyQt5 import QtCore, QtWidgets
 
+import files
+
 from .scatter3DCanvas import Scatter3DCanvas
 from .dendriteCanvasActions import DendriteCanvasActions
 from .dendriteVolumeCanvas import DendriteVolumeCanvas
@@ -10,11 +12,15 @@ from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
 class AppWindow(QtWidgets.QMainWindow):
-    def __init__(self, imageVolume, treeModel, uiState, parent=None):
+    def __init__(self, imagePath, treeModel, uiState, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
         self.statusBar().showMessage("Dynamo", 2000)
+
+        # TODO - option for when imagePath=None, have a button to load an image?
+        assert imagePath is not None
+        imageVolume = files.tiffRead(imagePath)
 
         self.root = QtWidgets.QWidget(self)
         self.scatter3d = Scatter3DCanvas(treeModel, self.root, width=5, height=4, dpi=100)
