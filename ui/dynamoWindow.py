@@ -18,25 +18,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.initialMenu.show()
 
     def newFromStacks(self):
-        filePaths, _ = QtWidgets.QFileDialog.getOpenFileNames(self,
-            "Open image stacks", "", "Image files (*.tif)"
-        )
-        self.fullState.addFiles(filePaths)
-        for i in range(len(filePaths)):
-            childWindow = StackWindow(
-                self.fullState.filePaths[i],
-                self.fullState.trees[i],
-                self.fullState.uiStates[i],
-                self
-            )
-            self.stackWindows.append(childWindow)
-            childWindow.show()
-            childWindow.redraw()
-        if len(filePaths) > 0:
-            # TODO - on shortcut
-            tileFigs(self.stackWindows)
-            self.initialMenu.hide()
-            self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
+        self.openFilesAndAppendStacks()
+        self.initialMenu.hide()
+        self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
 
     def openFromFile(self):
         QtWidgets.QMessageBox.warning(self,
@@ -57,3 +41,27 @@ class DynamoWindow(QtWidgets.QMainWindow):
         elif (key == ord('T')):
             tileFigs(self.stackWindows)
             return True
+        elif (key == ord('O')):
+            self.openFilesAndAppendStacks()
+            return True
+
+    # TODO - document
+    def openFilesAndAppendStacks(self):
+        filePaths, _ = QtWidgets.QFileDialog.getOpenFileNames(self,
+            "Open image stacks", "", "Image files (*.tif)"
+        )
+        if len(filePaths) == 0:
+            return
+
+        offset = len(self.fullState.filePaths)
+        self.fullState.addFiles(filePaths)
+        for i in range(len(filePaths)):
+            childWindow = StackWindow(
+                self.fullState.filePaths[i + offset],
+                self.fullState.trees[i + offset],
+                self.fullState.uiStates[i + offset],
+                self
+            )
+            self.stackWindows.append(childWindow)
+            childWindow.show()
+        tileFigs(self.stackWindows)
