@@ -10,8 +10,8 @@ from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
 class AppWindow(QtWidgets.QMainWindow):
-    def __init__(self, imageVolume, treeModel, uiState):
-        QtWidgets.QMainWindow.__init__(self)
+    def __init__(self, imageVolume, treeModel, uiState, parent=None):
+        QtWidgets.QMainWindow.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
         self.statusBar().showMessage("Dynamo", 2000)
