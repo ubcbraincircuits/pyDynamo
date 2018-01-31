@@ -11,25 +11,22 @@ from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
-class AppWindow(QtWidgets.QMainWindow):
-    def __init__(self, imagePath, treeModel, uiState, parent=None):
+class StackWindow(QtWidgets.QMainWindow):
+    def __init__(self, imagePath, treeModel, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle("Dynamo")
-        self.statusBar().showMessage("Dynamo", 2000)
+        self.setWindowTitle(imagePath)
 
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
         imageVolume = files.tiffRead(imagePath)
 
         self.root = QtWidgets.QWidget(self)
-        # self.scatter3d = Scatter3DCanvas(treeModel, self.root, width=5, height=4, dpi=100)
         self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, None, self.root)
         self.actionHandler = DendriteCanvasActions(self.dendrites, treeModel, uiState)
 
         # Assemble the view hierarchy.
         l = QtWidgets.QHBoxLayout(self.root)
-        # l.addWidget(self.scatter3d)
         l.addWidget(self.dendrites)
         self.root.setFocus()
         self.setCentralWidget(self.root)
@@ -43,6 +40,9 @@ class AppWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.help_menu)
         self.help_menu.addAction('&Shortcuts', self.actionHandler.showHotkeys, QtCore.Qt.Key_F1)
 
+    def redraw(self):
+        self.dendrites.redraw()
+
     def fileQuit(self):
         self.close()
 
@@ -53,13 +53,12 @@ class AppWindow(QtWidgets.QMainWindow):
         self.actionHandler.showHotkeys()
 
     def keyPressEvent(self, event):
+        if self.parent().childKeyPress(event):
+            return
+
         # TODO: add menu items for some of these too.
         key = event.key()
-        print (key)
-        if   (key == ord(' ')):
-            newP = np.random.rand(n, 3)
-            newPRot = absorient.hackRotate(newP)
-        elif (key == ord('1')):
+        if   (key == ord('1')):
             self.dendrites.changeZAxis(1)
         elif (key == ord('2')):
             self.dendrites.changeZAxis(-1)
@@ -86,15 +85,12 @@ class AppWindow(QtWidgets.QMainWindow):
             self.actionHandler.pan(0, 1)
         elif (key == ord('D')):
             self.actionHandler.pan(1, 0)
-        elif (key == ord('H')):
-            self.dendrites.uiState.toggleLineWidth()
-            self.dendrites.redraw()
         elif (key == ord('F')):
             self.dendrites.uiState.showAnnotations = not self.dendrites.uiState.showAnnotations
-            self.dendrites.redraw()
+            self.redraw()
         elif (key == ord('V')):
             self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
-            self.dendrites.redraw()
+            self.redraw()
         elif (key == ord('Q')):
             self.actionHandler.getAnnotation(self)
         elif (key == QtCore.Qt.Key_Delete):

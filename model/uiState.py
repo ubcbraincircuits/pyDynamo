@@ -7,6 +7,9 @@ from util import snapToRange, normDelta, dotDelta, deltaSz
 
 @attr.s
 class UIState():
+    # Full state this belongs within
+    _parent = attr.ib(default=None)
+
     # Tree being shown in the UI.
     _tree = attr.ib(default=None)
 
@@ -22,11 +25,11 @@ class UIState():
     # UI Option for whether or not to show all branches, or just the nearby ones.
     drawAllBranches = attr.ib(default=False)
 
-    # UI Option for dendrite line width
-    lineWidth = attr.ib(default=3)
-
     # (lower-, upper-) bounds for intensities to show
     colorLimits = attr.ib(default=(0, 1))
+
+    def parent(self):
+        return self._parent
 
     def currentBranch(self):
         if self.currentBranchIndex == -1:
@@ -128,9 +131,3 @@ class UIState():
                 closestPoint = point
                 closestDist = dist
         return closestPoint, closestDist
-
-    def toggleLineWidth(self):
-        if self.lineWidth == 4:
-            self.lineWidth = 1
-        else:
-            self.lineWidth += 1
