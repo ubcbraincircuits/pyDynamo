@@ -1,7 +1,9 @@
-from libtiff import TIFF
+import libtiff
+
+libtiff.libtiff_ctypes.suppress_warnings()
 
 def tiffRead(path):
-    tif = TIFF.open(path, mode='r')
+    tif = libtiff.TIFF.open(path, mode='r')
     stack = [img for img in tif.iter_images()]
     tif.close()
     return stack
