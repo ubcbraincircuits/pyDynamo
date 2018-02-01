@@ -15,7 +15,7 @@ class DendriteOverlay(QWidget):
         p = QPainter()
         p.begin(self)
         DendritePainter(p,
-            self.dendriteCanvas.zAxisAt,
+            self.dendriteCanvas.uiState.parent().zAxisAt,
             self.dendriteCanvas.uiState,
             self.dendriteCanvas.imgView.mapFromScene
         ).drawTree(self.dendriteCanvas.model)

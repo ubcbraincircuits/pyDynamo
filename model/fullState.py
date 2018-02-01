@@ -14,6 +14,12 @@ class FullState:
     # Image-specific options, one for each of the files above
     uiStates = attr.ib(default=attr.Factory(list))
 
+    # Size of 3D volume, needs to be the same between stacks
+    volumeSize = attr.ib(default=None)
+
+    # Shared UI position in the Z plane
+    zAxisAt = attr.ib(default=0)
+
     # Shared UI Option for dendrite line width
     lineWidth = attr.ib(default=3)
 
@@ -32,3 +38,12 @@ class FullState:
             self.lineWidth = 1
         else:
             self.lineWidth += 1
+
+    def changeZAxis(self, delta):
+        self.zAxisAt = snapToRange(self.zAxisAt + delta, 0, self.volumeSize[0] - 1)
+
+    def updateVolumneSize(self, volumeSize):
+        print(volumeSize)
+        # TODO: Something better when volume sizes don't match? ...
+        if self.volumeSize is None:
+            self.volumeSize = volumeSize

@@ -45,6 +45,29 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.openFilesAndAppendStacks()
             return True
 
+        elif (key == ord('1')):
+            self.changeZAxis(1)
+            return True
+        elif (key == ord('2')):
+            self.changeZAxis(-1)
+            return True
+
+    # TODO: listen to state changes and redraw everything automatically?
+    def changeZAxis(self, delta):
+        self.fullState.changeZAxis(delta)
+        self.redrawAllStacks()
+
+    # TODO - document
+    def redrawAllStacks(self):
+        for window in self.stackWindows:
+            window.dendrites.drawImage()
+
+    # TODO - document
+    def handleDendriteMoveViewRect(self, viewRect):
+        for window in self.stackWindows:
+            # HACK - very dots, much wow.
+            window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
+
     # TODO - document
     def openFilesAndAppendStacks(self):
         filePaths, _ = QtWidgets.QFileDialog.getOpenFileNames(self,

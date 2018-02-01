@@ -72,8 +72,15 @@ class QtImageViewer(QGraphicsView):
         self.lastMousePressSec = -1
         self.lastMousePressPos = None
 
+        # HACK - ignore moving view twice when local change gets sent global
+        self.ignoreScrollChange = False
+        self.ignoreGlobalMoveViewRect = False
+
         if imageData is not None:
             self.setImage(imageData)
+
+        self.horizontalScrollBar().valueChanged.connect(self.viewportChangedByScroll)
+        self.verticalScrollBar().valueChanged.connect(self.viewportChangedByScroll)
 
     def hasImage(self):
         """ Returns whether or not the scene contains an image pixmap.
@@ -207,9 +214,25 @@ class QtImageViewer(QGraphicsView):
         border.translate(mid)
         self.moveViewRect(border.intersected(self.sceneRect()))
 
-    def moveViewRect(self, newViewRect):
+    def moveViewRect(self, newViewRect, alreadySetFromScroll=False):
+        self.ignoreGlobalMoveViewRect = True
+        if not alreadySetFromScroll:
+            self.fitInView(newViewRect) # Only set locally if not done already...
+        self.parentView.dynamoWindow.handleDendriteMoveViewRect(newViewRect)
+        self.ignoreGlobalMoveViewRect = False
+
+    def handleGlobalMoveViewRect(self, newViewRect):
+        if self.ignoreGlobalMoveViewRect:
+            return
+        self.ignoreScrollChange = True
         self.fitInView(newViewRect)
         self.forceRepaint()
+        self.ignoreScrollChange = False
+
+    def viewportChangedByScroll(self, event):
+        if self.ignoreScrollChange:
+            return
+        self.moveViewRect(self.getViewportRect(), alreadySetFromScroll=True)
 
     def getViewportRect(self):
         return self.mapToScene(self.viewport().geometry()).boundingRect()

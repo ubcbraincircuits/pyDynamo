@@ -34,5 +34,5 @@ def tileFigs(figs):
             if idx < nfigs:
                 figlft = (col + 1) * hspc + col * figwid;
                	figtop = row * medspc + topspc + row * fighgt;
-                figs[idx].resize(figwid, fighgt)
+                # figs[idx].resize(figwid, fighgt)
                 figs[idx].move(figlft, figtop)

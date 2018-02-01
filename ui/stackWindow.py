@@ -20,9 +20,10 @@ class StackWindow(QtWidgets.QMainWindow):
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
         imageVolume = files.tiffRead(imagePath)
+        uiState.parent().updateVolumneSize(np.shape(imageVolume))
 
         self.root = QtWidgets.QWidget(self)
-        self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, None, self.root)
+        self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, parent, self.root)
         self.actionHandler = DendriteCanvasActions(self.dendrites, treeModel, uiState)
 
         # Assemble the view hierarchy.
@@ -58,11 +59,7 @@ class StackWindow(QtWidgets.QMainWindow):
 
         # TODO: add menu items for some of these too.
         key = event.key()
-        if   (key == ord('1')):
-            self.dendrites.changeZAxis(1)
-        elif (key == ord('2')):
-            self.dendrites.changeZAxis(-1)
-        elif (key == ord('4')):
+        if (key == ord('4')):
             self.actionHandler.changeBrightness(-1, 0)
         elif (key == ord('5')):
             self.actionHandler.changeBrightness(1, 0)
