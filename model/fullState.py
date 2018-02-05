@@ -23,6 +23,13 @@ class FullState:
     # Shared UI Option for dendrite line width
     lineWidth = attr.ib(default=3)
 
+    # Get the index of a state, or -1 if it's not contained.
+    def indexForState(self, uiState):
+        try:
+            return self.uiStates.index(uiState)
+        except:
+            return -1
+
     # TODO: active window
     # TODO: add new window off active
 
@@ -42,8 +49,7 @@ class FullState:
     def changeZAxis(self, delta):
         self.zAxisAt = snapToRange(self.zAxisAt + delta, 0, self.volumeSize[0] - 1)
 
-    def updateVolumneSize(self, volumeSize):
-        print(volumeSize)
+    def updateVolumeSize(self, volumeSize):
         # TODO: Something better when volume sizes don't match? ...
         if self.volumeSize is None:
             self.volumeSize = volumeSize

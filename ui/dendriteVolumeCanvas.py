@@ -16,10 +16,11 @@ class DendriteVolumeCanvas(QWidget):
     INVERT_SCROLL = False
     SCROLL_SENSITIVITY = 60.0
 
-    def __init__(self, volume, model, uiState, dynamoWindow, *args, **kwargs):
+    def __init__(self, volume, model, fullActions, uiState, dynamoWindow, *args, **kwargs):
         super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
         self.volume = volume
         self.model = model
+        self.fullActions = fullActions
         self.uiState = uiState
         self.dynamoWindow = dynamoWindow
 
@@ -55,15 +56,16 @@ class DendriteVolumeCanvas(QWidget):
             if pointClicked:
                 self.uiState.deletePoint(pointClicked)
             else:
-                self.uiState.addPointToNewBranchAndSelect(location)
+                self.fullActions.addPointToNewBranchAndSelect(self.uiState, location)
         else:
             if shiftPressed:
                 self.uiState.addPointMidBranchAndSelect(location)
             elif pointClicked:
                 self.uiState.selectPoint(pointClicked)
             else:
-                self.uiState.addPointToCurrentBranchAndSelect(location)
-        self.drawImage()
+                self.fullActions.addPointToCurrentBranchAndSelect(self.uiState, location)
+        self.dynamoWindow.redrawAllStacks() # HACK - redraw only those that have changed.
+
 
     def wheelEvent(self,event):
         scrollDelta = -(int)(np.ceil(event.pixelDelta().y() / self.SCROLL_SENSITIVITY))

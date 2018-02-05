@@ -12,7 +12,7 @@ from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
 class StackWindow(QtWidgets.QMainWindow):
-    def __init__(self, imagePath, treeModel, uiState, parent):
+    def __init__(self, imagePath, treeModel, fullActions, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle(imagePath)
@@ -20,10 +20,12 @@ class StackWindow(QtWidgets.QMainWindow):
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
         imageVolume = files.tiffRead(imagePath)
-        uiState.parent().updateVolumneSize(np.shape(imageVolume))
+        uiState.parent().updateVolumeSize(np.shape(imageVolume))
 
         self.root = QtWidgets.QWidget(self)
-        self.dendrites = DendriteVolumeCanvas(imageVolume, treeModel, uiState, parent, self.root)
+        self.dendrites = DendriteVolumeCanvas(
+            imageVolume, treeModel, fullActions, uiState, parent, self.root
+        )
         self.actionHandler = DendriteCanvasActions(self.dendrites, treeModel, uiState)
 
         # Assemble the view hierarchy.

@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
-from model import FullState, Tree, UIState
+from model import FullState, FullStateActions, Tree, UIState
 
 from .initialMenu import InitialMenu
 from .stackWindow import StackWindow
@@ -13,6 +13,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
         self.stackWindows = []
         self.fullState = FullState()
+        self.fullActions = FullStateActions(self.fullState)
 
         self.initialMenu = InitialMenu(self)
         self.initialMenu.show()
@@ -82,6 +83,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             childWindow = StackWindow(
                 self.fullState.filePaths[i + offset],
                 self.fullState.trees[i + offset],
+                self.fullActions,
                 self.fullState.uiStates[i + offset],
                 self
             )

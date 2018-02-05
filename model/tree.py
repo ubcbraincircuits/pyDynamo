@@ -1,4 +1,5 @@
 import attr
+import util
 
 @attr.s
 class Point():
@@ -6,16 +7,16 @@ class Point():
     location = attr.ib(default=None) # (x, y, z) tuple
 
     # Branch this point belongs to
-    parentBranch = attr.ib(default=None)
+    parentBranch = attr.ib(default=None, repr=False, cmp=False)
 
     # Text annotation for node.
-    annotation = attr.ib(default="")
+    annotation = attr.ib(default="", cmp=False)
 
     # Branches coming off the node
     children = attr.ib(default=attr.Factory(list)) # Not used yet
 
     # Not sure...?
-    hilighted = attr.ib(default=None) # Not used yet
+    hilighted = attr.ib(default=None, cmp=False) # Not used yet
 
 
 @attr.s
@@ -23,16 +24,16 @@ class Branch():
     # TODO: Tree this branch belongs to
 
     # Node this branched off, or None for root branch
-    parentPoint = attr.ib(default=None)
+    parentPoint = attr.ib(default=None, repr=False, cmp=False)
 
     # Points along this dendrite branch, in order.
     points = attr.ib(default=attr.Factory(list))
 
     # Not sure...?
-    isEnded = attr.ib(default=False) # Not used yet
+    isEnded = attr.ib(default=False, cmp=False) # Not used yet
 
     # Not sure...?
-    colorData = attr.ib(default=None) # Not used yet
+    colorData = attr.ib(default=None, cmp=False) # Not used yet
 
     def addPoint(self, point):
         self.points.append(point)
@@ -55,7 +56,7 @@ class Branch():
 @attr.s
 class Tree():
     # Soma, initial start of the main branch.
-    rootPoint = None
+    rootPoint = attr.ib(default=None)
 
     # All branches making up this dendrite tree.
     branches = attr.ib(default=attr.Factory(list))
@@ -81,6 +82,13 @@ class Tree():
             result.extend(branch.points)
         return result
 
+    def closestPointTo(self, targetLocation):
+        closestDist, closestPoint = None, None
+        for point in self.flattenPoints():
+            dist = util.deltaSz(targetLocation, point.location)
+            if closestDist is None or dist < closestDist:
+                closestDist, closestPoint = dist, point
+        return closestPoint
 
 #
 # Debug formatting for converting trees to string representation

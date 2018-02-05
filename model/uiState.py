@@ -41,20 +41,6 @@ class UIState():
             return self._tree.rootPoint
         return self.currentBranch().points[self.currentPointIndex]
 
-    # TODO - move these to dendrite canvas actions
-    def addPointToCurrentBranchAndSelect(self, location):
-        if self._tree.rootPoint is None:
-            self._tree.rootPoint = Point(location)
-            return
-        if self.currentBranchIndex == -1:
-            self.currentBranchIndex = self._tree.addBranch(Branch(parentPoint=self._tree.rootPoint))
-        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
-
-    def addPointToNewBranchAndSelect(self, location):
-        newBranch = Branch(parentPoint=self.currentPoint())
-        self.currentBranchIndex = self._tree.addBranch(newBranch)
-        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
-
     def addPointMidBranchAndSelect(self, location):
         branch = self.currentBranch()
         if branch is None:
@@ -131,3 +117,20 @@ class UIState():
                 closestPoint = point
                 closestDist = dist
         return closestPoint, closestDist
+
+    ##
+    ## IN THE PROCESS OF BEING MOVED TO FULL_STATE_ACTIONS:
+    ##
+    # TODO - move these to dendrite canvas actions
+    def addPointToCurrentBranchAndSelect(self, location):
+        if self._tree.rootPoint is None:
+            self._tree.rootPoint = Point(location)
+            return
+        if self.currentBranchIndex == -1:
+            self.currentBranchIndex = self._tree.addBranch(Branch(parentPoint=self._tree.rootPoint))
+        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
+
+    def addPointToNewBranchAndSelect(self, location):
+        newBranch = Branch(parentPoint=self.currentPoint())
+        self.currentBranchIndex = self._tree.addBranch(newBranch)
+        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
