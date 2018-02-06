@@ -41,6 +41,60 @@ class UIState():
             return self._tree.rootPoint
         return self.currentBranch().points[self.currentPointIndex]
 
+    def deleteBranch(self, branch):
+        # Need to remove backwards, as we're removing while we're iterating
+        reverseIndex = list(reversed(range(len(branch.points))))
+        for i in reverseIndex:
+            self.deletePoint(branch.points[i])
+        self._tree.removeBranch(branch)
+
+    def changeBrightness(self, lowerDelta, upperDelta):
+        self.colorLimits = (
+            snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
+            snapToRange(self.colorLimits[1] + upperDelta, self.colorLimits[0] + 0.001, 1),
+        )
+
+    # TODO - move elsewhere?
+    def closestPointInZPlane(self, location):
+        closestPoint = None
+        closestDist = None
+        for point in self._tree.flattenPoints():
+            if point.location[2] != location[2]:
+                continue
+            dist = deltaSz(location, point.location)
+            if closestDist is None or dist < closestDist:
+                closestPoint = point
+                closestDist = dist
+        return closestPoint, closestDist
+
+    ##
+    ## IN THE PROCESS OF BEING MOVED TO FULL_STATE_ACTIONS:
+    ##
+    def selectPoint(self, newPoint):
+        if newPoint is None or newPoint == self._tree.rootPoint:
+            self.currentBranchIndex = -1
+            self.currentPointIndex = -1
+        else:
+            branch = newPoint.parentBranch
+            if branch in self._tree.branches and newPoint in branch.points:
+                self.currentBranchIndex = self._tree.branches.index(branch)
+                self.currentPointIndex = branch.points.index(newPoint)
+            else:
+                print ("Can't find point... %s" % newPoint)
+
+    def addPointToCurrentBranchAndSelect(self, location):
+        if self._tree.rootPoint is None:
+            self._tree.rootPoint = Point(location)
+            return
+        if self.currentBranchIndex == -1:
+            self.currentBranchIndex = self._tree.addBranch(Branch(parentPoint=self._tree.rootPoint))
+        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
+
+    def addPointToNewBranchAndSelect(self, location):
+        newBranch = Branch(parentPoint=self.currentPoint())
+        self.currentBranchIndex = self._tree.addBranch(newBranch)
+        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
+
     def addPointMidBranchAndSelect(self, location):
         branch = self.currentBranch()
         if branch is None:
@@ -70,25 +124,8 @@ class UIState():
                 newPointIndex = self.currentPointIndex + 1
 
         self.currentPointIndex = branch.insertPointBefore(newPoint, newPointIndex)
-
-    def selectPoint(self, newPoint):
-        if newPoint is None or newPoint == self._tree.rootPoint:
-            self.currentBranchIndex = -1
-            self.currentPointIndex = -1
-        else:
-            branch = newPoint.parentBranch
-            if branch in self._tree.branches and newPoint in branch.points:
-                self.currentBranchIndex = self._tree.branches.index(branch)
-                self.currentPointIndex = branch.points.index(newPoint)
-            else:
-                print ("Can't find point... %s" % newPoint)
-
-    def deleteBranch(self, branch):
-        # Need to remove backwards, as we're removing while we're iterating
-        reverseIndex = list(reversed(range(len(branch.points))))
-        for i in reverseIndex:
-            self.deletePoint(branch.points[i])
-        self._tree.removeBranch(branch)
+        # Returns old branch, and next point after
+        return branch, None if newPointIndex == len(branch.points) else branch.points[newPointIndex]
 
     def deletePoint(self, point):
         for branch in self._tree.branches:
@@ -98,39 +135,3 @@ class UIState():
         newPoint = oldBranch.removePointLocally(point)
         point.parentBranch = None
         self.selectPoint(newPoint)
-
-    def changeBrightness(self, lowerDelta, upperDelta):
-        self.colorLimits = (
-            snapToRange(self.colorLimits[0] + lowerDelta, 0, self.colorLimits[1] - 0.001),
-            snapToRange(self.colorLimits[1] + upperDelta, self.colorLimits[0] + 0.001, 1),
-        )
-
-    # TODO - move elsewhere?
-    def closestPointInZPlane(self, location):
-        closestPoint = None
-        closestDist = None
-        for point in self._tree.flattenPoints():
-            if point.location[2] != location[2]:
-                continue
-            dist = deltaSz(location, point.location)
-            if closestDist is None or dist < closestDist:
-                closestPoint = point
-                closestDist = dist
-        return closestPoint, closestDist
-
-    ##
-    ## IN THE PROCESS OF BEING MOVED TO FULL_STATE_ACTIONS:
-    ##
-    # TODO - move these to dendrite canvas actions
-    def addPointToCurrentBranchAndSelect(self, location):
-        if self._tree.rootPoint is None:
-            self._tree.rootPoint = Point(location)
-            return
-        if self.currentBranchIndex == -1:
-            self.currentBranchIndex = self._tree.addBranch(Branch(parentPoint=self._tree.rootPoint))
-        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
-
-    def addPointToNewBranchAndSelect(self, location):
-        newBranch = Branch(parentPoint=self.currentPoint())
-        self.currentBranchIndex = self._tree.addBranch(newBranch)
-        self.currentPointIndex = self.currentBranch().addPoint(Point(location))

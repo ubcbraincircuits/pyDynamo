@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
 
+import util
 from .helpDialog import showHelpDialog
 
 class DendriteCanvasActions():
@@ -17,20 +18,16 @@ class DendriteCanvasActions():
     def pan(self, xDelta, yDelta):
         outsideRect = self.canvas.imgView.sceneRect()
         viewBox = self.canvas.imgView.getViewportRect()
-
-        xDeltaPx = (int)(xDelta * viewBox.width() * 0.1)
-        yDeltaPx = (int)(yDelta * viewBox.height() * 0.1)
-
-        if xDeltaPx < outsideRect.left() - viewBox.left():
-            xDeltaPx = outsideRect.left() - viewBox.left()
-        elif xDeltaPx > outsideRect.right() - viewBox.right():
-            xDeltaPx = outsideRect.right() - viewBox.right()
-
-        if yDeltaPx < outsideRect.top() - viewBox.top():
-            yDeltaPx = outsideRect.top() - viewBox.top()
-        elif yDeltaPx > outsideRect.bottom() - viewBox.bottom():
-            yDeltaPx = outsideRect.bottom() - viewBox.bottom()
-
+        xDeltaPx = util.snapToRange(
+            (int)(xDelta * viewBox.width() * 0.1),
+            outsideRect.left() - viewBox.left(),
+            outsideRect.right() - viewBox.right()
+        )
+        yDeltaPx = util.snapToRange(
+            (int)(yDelta * viewBox.height() * 0.1),
+            outsideRect.top() - viewBox.top(),
+            outsideRect.bottom() - viewBox.bottom()
+        )
         viewBox.translate(xDeltaPx, yDeltaPx)
         viewBox = viewBox.intersected(self.canvas.imgView.sceneRect())
         self.canvas.imgView.moveViewRect(viewBox)
@@ -48,10 +45,6 @@ class DendriteCanvasActions():
             "Annotate point", "Enter annotation:", QLineEdit.Normal, currentPoint.annotation)
         if okPressed:
             currentPoint.annotation = text
-
-    def deleteCurrentPoint(self):
-        self.uiState.deletePoint(self.uiState.currentPoint())
-        self.canvas.redraw()
 
     def showHotkeys(self):
         showHelpDialog()

@@ -81,6 +81,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.fullState.addFiles(filePaths)
         for i in range(len(filePaths)):
             childWindow = StackWindow(
+                i + offset,
                 self.fullState.filePaths[i + offset],
                 self.fullState.trees[i + offset],
                 self.fullActions,

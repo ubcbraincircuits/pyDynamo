@@ -12,21 +12,25 @@ from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
 class StackWindow(QtWidgets.QMainWindow):
-    def __init__(self, imagePath, treeModel, fullActions, uiState, parent):
+    def __init__(self, windowIndex, imagePath, treeModel, fullActions, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
+        self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle(imagePath)
 
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
+        self.imagePath = imagePath;
         imageVolume = files.tiffRead(imagePath)
         uiState.parent().updateVolumeSize(np.shape(imageVolume))
 
         self.root = QtWidgets.QWidget(self)
         self.dendrites = DendriteVolumeCanvas(
-            imageVolume, treeModel, fullActions, uiState, parent, self.root
+            windowIndex, imageVolume, treeModel, fullActions, uiState, parent, self.root
         )
         self.actionHandler = DendriteCanvasActions(self.dendrites, treeModel, uiState)
+        self.fullActions = fullActions
+        self.uiState = uiState
 
         # Assemble the view hierarchy.
         l = QtWidgets.QHBoxLayout(self.root)
@@ -93,4 +97,5 @@ class StackWindow(QtWidgets.QMainWindow):
         elif (key == ord('Q')):
             self.actionHandler.getAnnotation(self)
         elif (key == QtCore.Qt.Key_Delete):
-            self.actionHandler.deleteCurrentPoint();
+            self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint())
+            self.parent().redrawAllStacks() # HACK - auto redraw on change

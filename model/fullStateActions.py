@@ -1,33 +1,67 @@
+from .tree import *
+
 class FullStateActions():
     def __init__(self, fullState):
         self.state = fullState
 
-    # TODO - move these to dendrite canvas actions
-    def addPointToCurrentBranchAndSelect(self, localState, location):
-        idx = self.state.indexForState(localState)
+    def selectPoint(self, localIdx, point):
+        localState = self.state.uiStates[localIdx]
         currentBranch = localState.currentBranchIndex
-        if idx != -1:
-            for i in reversed(range(idx, len(self.state.uiStates))):
-                state = self.state.uiStates[i]
-                addPointDownstream = True # always true in matlab...
-                if addPointDownstream:
-                    currentPoint = self.analogousNewPoint(location, currentBranch, idx, i)
-                    state.currentBranchIndex = currentBranch
-                    state.addPointToCurrentBranchAndSelect(location)
+        for i in reversed(range(len(self.state.uiStates))):
+            state = self.state.uiStates[i]
+            selectedPoint = self.analogousOldPoint(point, currentBranch, localIdx, i)
+            state.selectPoint(selectedPoint)
 
-    def addPointToNewBranchAndSelect(self, localState, location):
-        idx = self.state.indexForState(localState)
+    def addPointToCurrentBranchAndSelect(self, localIdx, location):
+        localState = self.state.uiStates[localIdx]
+        currentBranch = localState.currentBranchIndex
+        for i in reversed(range(localIdx, len(self.state.uiStates))):
+            state = self.state.uiStates[i]
+            currentPoint = self.analogousNewPoint(location, currentBranch, localIdx, i)
+            state.currentBranchIndex = currentBranch
+            state.addPointToCurrentBranchAndSelect(location)
+
+    def addPointToNewBranchAndSelect(self, localIdx, location):
+        localState = self.state.uiStates[localIdx]
         currentBranch = localState.currentBranchIndex
         currentSource = localState.currentPoint()
-        if idx != -1:
-            for i in reversed(range(len(self.state.uiStates))):
-                state = self.state.uiStates[i]
-                addPointDownstream = True # always true in matlab...
-                if addPointDownstream:
-                    newSource = self.analogousOldPoint(currentSource, currentBranch, idx, i)
-                    newPoint = self.analogousNewPoint(location, currentBranch, idx, i)
-                    state.selectPoint(newSource)
-                    state.addPointToNewBranchAndSelect(newPoint)
+        for i in reversed(range(len(self.state.uiStates))):
+            state = self.state.uiStates[i]
+            addPointDownstream = True # always true in matlab...
+            if addPointDownstream:
+                newSource = self.analogousOldPoint(currentSource, currentBranch, localIdx, i)
+                newPoint = self.analogousNewPoint(location, currentBranch, localIdx, i)
+                state.selectPoint(newSource)
+                state.addPointToNewBranchAndSelect(newPoint)
+
+    def addPointMidBranchAndSelect(self, localIdx, location):
+        localState = self.state.uiStates[localIdx]
+        currentBranch = localState.currentBranchIndex
+        branch, pointAfter = localState.addPointMidBranchAndSelect(location)
+        for i in reversed(range(localIdx + 1, len(self.state.uiStates))):
+            state = self.state.uiStates[i]
+            newBranch = self.analogousBranch(branch, localIdx, i)
+            if pointAfter is None:
+                newPointIndex = len(newBranch.points)
+            else:
+                newAfter = self.analogousOldPoint(pointAfter, currentBranch, localIdx, i)
+                newPointIndex = newBranch.points.index(newAfter)
+            newBranch.insertPointBefore(Point(location), newPointIndex)
+
+    def deletePoint(self, localIdx, point):
+        localState = self.state.uiStates[localIdx]
+        # TODO: Delete point vs delete entire branch of point
+        currentBranch = localState.currentBranchIndex
+        currentSource = localState.currentPoint()
+        if localIdx != -1:
+            for i in reversed(range(localIdx, len(self.state.uiStates))):
+                newSource = self.analogousOldPoint(currentSource, currentBranch, localIdx, i)
+                self.state.uiStates[i].deletePoint(newSource)
+
+    ##
+    ## ANALOGOUS methods
+    ## TODO: fix up ID system, do properly.
+    ##
 
     def analogousNewPoint(self, sourcePosition, sourceBranch, sourceID, targetID):
         # given a point, pass it through the transformation from source to
@@ -45,3 +79,9 @@ class FullStateActions():
         if sourceID == targetID:
             return sourcePoint
         return self.state.uiStates[targetID]._tree.closestPointTo(sourcePoint.location)
+
+    def analogousBranch(self, branch, sourceID, targetID):
+        if sourceID == targetID:
+            return branch;
+        idx = self.state.uiStates[sourceID]._tree.branches.index(branch)
+        return self.state.uiStates[targetID]._tree.branches[idx]
