@@ -60,21 +60,6 @@ class FullState:
         if self.volumeSize is None:
             self.volumeSize = volumeSize
 
-    def nextPointID(self):
-        newID = '%08x' % self._currentPointID
-        self._currentPointID += 1
-        return newID
-
-    def nextBranchID(self):
-        newID = '%04x' % self._currentBranchID
-        self._currentBranchID += 1
-        return newID
-
-    ##
-    ## ANALOGOUS methods
-    ## TODO: fix up ID system, do properly.
-    ##
-
     def convertLocation(self, sourceLocation, sourceID, targetID):
         # given a point, pass it through the transformation from source to
         # target, with the branch base as the translation reference source
@@ -86,7 +71,6 @@ class FullState:
         return sourceLocation # HACK - support rotations
 
     def analogousPoint(self, sourcePoint, sourceID, targetID):
-        # TODO - rotation logic, see matlab.
         if sourceID == targetID:
             return sourcePoint
         return self.uiStates[targetID]._tree.getPointByID(sourcePoint.id)
@@ -95,3 +79,13 @@ class FullState:
         if sourceBranch == None or sourceID == targetID:
             return sourceBranch
         return self.uiStates[targetID]._tree.getBranchByID(sourceBranch.id)
+
+    def nextPointID(self):
+        newID = '%08x' % self._currentPointID
+        self._currentPointID += 1
+        return newID
+
+    def nextBranchID(self):
+        newID = '%04x' % self._currentBranchID
+        self._currentBranchID += 1
+        return newID

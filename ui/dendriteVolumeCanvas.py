@@ -52,7 +52,8 @@ class DendriteVolumeCanvas(QWidget):
         modifiers = QApplication.keyboardModifiers()
         shiftPressed = modifiers & Qt.ShiftModifier
 
-        pointClicked, closestDist = self.uiState.closestPointInZPlane(location)
+        pointClicked = self._tree.closestPointTo(location, zFilter=True)
+        closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
         if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
             pointClicked = None
 

@@ -52,22 +52,7 @@ class UIState():
             snapToRange(self.colorLimits[1] + upperDelta, self.colorLimits[0] + 0.001, 1),
         )
 
-    # TODO - move elsewhere?
-    def closestPointInZPlane(self, location):
-        closestPoint = None
-        closestDist = None
-        for point in self._tree.flattenPoints():
-            if point.location[2] != location[2]:
-                continue
-            dist = deltaSz(location, point.location)
-            if closestDist is None or dist < closestDist:
-                closestPoint = point
-                closestDist = dist
-        return closestPoint, closestDist
-
-    ##
-    ## IN THE PROCESS OF BEING MOVED TO FULL_STATE_ACTIONS:
-    ##
+    ## Local actions to apply only to this stack.
 
     def selectPointByID(self, selectedID):
         selectedPoint = self._tree.getPointByID(selectedID)

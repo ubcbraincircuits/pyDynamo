@@ -78,7 +78,6 @@ class Tree():
 
     # HACK - make faster, index points by ID
     def getPointByID(self, pointID):
-        # TODO - rename to getPointByID
         for point in self.flattenPoints():
             if point.id == pointID:
                 return point
@@ -118,9 +117,11 @@ class Tree():
             result.extend(branch.points)
         return result
 
-    def closestPointTo(self, targetLocation):
+    def closestPointTo(self, targetLocation, zFilter=False):
         closestDist, closestPoint = None, None
         for point in self.flattenPoints():
+            if zFilter and point.location[2] != targetLocation[2]:
+                continue
             dist = util.deltaSz(targetLocation, point.location)
             if closestDist is None or dist < closestDist:
                 closestDist, closestPoint = dist, point
