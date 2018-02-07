@@ -13,11 +13,11 @@ class UIState():
     # Tree being shown in the UI.
     _tree = attr.ib(default=None)
 
-    # Currently active branch, indexed by position in list of branches.
-    currentBranchIndex = attr.ib(default=-1)
+    # ID of currently active branch
+    currentBranchID = attr.ib(default=None)
 
-    # Currently active point, indexed by position in list of nodes.
-    currentPointIndex = attr.ib(default=-1)
+    # ID of currently active point
+    currentPointID = attr.ib(default=None)
 
     # UI Option for whether or not to show annotations.
     showAnnotations = attr.ib(default=True)
@@ -32,20 +32,18 @@ class UIState():
         return self._parent
 
     def currentBranch(self):
-        if self.currentBranchIndex == -1:
-            return None
-        return self._tree.branches[self.currentBranchIndex]
+        return self._tree.getBranchByID(self.currentBranchID)
 
     def currentPoint(self):
-        if self.currentPointIndex == -1:
+        if self.currentPointID is None:
             return self._tree.rootPoint
-        return self.currentBranch().points[self.currentPointIndex]
+        return self._tree.getPointByID(self.currentPointID)
 
     def deleteBranch(self, branch):
         # Need to remove backwards, as we're removing while we're iterating
         reverseIndex = list(reversed(range(len(branch.points))))
         for i in reverseIndex:
-            self.deletePoint(branch.points[i])
+            self.deletePointByID(branch.points[i].id)
         self._tree.removeBranch(branch)
 
     def changeBrightness(self, lowerDelta, upperDelta):
@@ -70,68 +68,106 @@ class UIState():
     ##
     ## IN THE PROCESS OF BEING MOVED TO FULL_STATE_ACTIONS:
     ##
-    def selectPoint(self, newPoint):
-        if newPoint is None or newPoint == self._tree.rootPoint:
-            self.currentBranchIndex = -1
-            self.currentPointIndex = -1
-        else:
-            branch = newPoint.parentBranch
-            if branch in self._tree.branches and newPoint in branch.points:
-                self.currentBranchIndex = self._tree.branches.index(branch)
-                self.currentPointIndex = branch.points.index(newPoint)
+
+    def selectPointByID(self, selectedID):
+        selectedPoint = self._tree.getPointByID(selectedID)
+        if selectedPoint is not None:
+            self.currentPointID = selectedID
+            if selectedPoint.isRoot():
+                if len(self._tree.branches) > 0:
+                    self.currentBranchID = self._tree.branches[0].id
+                else:
+                    self.currentBranchID = None
             else:
-                print ("Can't find point... %s" % newPoint)
+                self.currentBranchID = selectedPoint.parentBranch.id
+        else:
+            self.currentPointID = None
+            self.currentBranchID = None
 
-    def addPointToCurrentBranchAndSelect(self, location):
+    def addPointToCurrentBranchAndSelect(self, location, newPointID=None, newBranchID=None):
+        newPoint = Point(self.maybeCreateNewID(newPointID), location)
         if self._tree.rootPoint is None:
-            self._tree.rootPoint = Point(location)
-            return
-        if self.currentBranchIndex == -1:
-            self.currentBranchIndex = self._tree.addBranch(Branch(parentPoint=self._tree.rootPoint))
-        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
+            self._tree.rootPoint = newPoint
+        else:
+            if self.currentBranchID is None:
+                newBranchID = self.maybeCreateBranchID(newBranchID)
+                newBranch = Branch(newBranchID, self._tree, parentPoint=self._tree.rootPoint)
+                self._tree.addBranch(newBranch)
+                self.currentBranchID = newBranch.id
+            self.currentBranch().addPoint(newPoint)
+            self.currentPointID = newPoint.id
+        return newPoint
 
-    def addPointToNewBranchAndSelect(self, location):
-        newBranch = Branch(parentPoint=self.currentPoint())
-        self.currentBranchIndex = self._tree.addBranch(newBranch)
-        self.currentPointIndex = self.currentBranch().addPoint(Point(location))
+    def addPointToNewBranchAndSelect(self, location, newPointID=None, newBranchID=None):
+        newPoint = Point(self.maybeCreateNewID(newPointID), location)
+        newBranchID = self.maybeCreateBranchID(newBranchID)
+        newBranch = Branch(newBranchID, self._tree, parentPoint=self.currentPoint())
+        newBranch.addPoint(newPoint)
+        self._tree.addBranch(newBranch)
+        self.currentBranchID = newBranch.id
+        self.currentPointID = newPoint.id
+        return newPoint
 
     def addPointMidBranchAndSelect(self, location):
         branch = self.currentBranch()
         if branch is None:
-            return
+            return None, False
 
-        currentPointAt = self.currentPoint().location
-        newPoint = Point(location)
+        currentPoint = self.currentPoint()
+        currentPointIndex = branch.indexForPoint(self.currentPoint())
+        newPoint = Point(self.maybeCreateNewID(None), location)
         newPointIndex = None
+        isAfter = False
 
-        if len(branch.points) < 2:
+        if currentPointIndex == -1:
+            # Selected the root point in the first branch, so add before the first point
+            newPointIndex = 0
+            isAfter = True
+        elif len(branch.points) < 2:
             # Branch is either empty or has only one point, so add new point at start:
             newPointIndex = 0
-        elif self.currentPointIndex == len(branch.points) - 1:
+            isAfter = (len(branch.points) == 0)
+        elif currentPointIndex == len(branch.points) - 1:
             # Current = last point in branch, so add new point before it:
-            newPointIndex = self.currentPointIndex
+            newPointIndex = currentPointIndex
+            isAfter = False
         else:
-            beforePoint = branch.parentPoint if self.currentPointIndex == 0 else branch.points[self.currentPointIndex - 1]
-            afterPoint = branch.points[self.currentPointIndex + 1]
+            beforePoint = branch.parentPoint if currentPointIndex == 0 else branch.points[currentPointIndex - 1]
+            afterPoint = branch.points[currentPointIndex + 1]
             if beforePoint is None:
-                return # Whoops, ignore.
-            beforeDelta = normDelta(beforePoint.location, currentPointAt)
-            afterDelta = normDelta(afterPoint.location, currentPointAt)
-            currDelta = normDelta(location, currentPointAt)
-            if (dotDelta(beforeDelta, currDelta) > dotDelta(afterDelta, currDelta)):
-                newPointIndex = self.currentPointIndex
-            else:
-                newPointIndex = self.currentPointIndex + 1
+                return None, False # Something's gone wrong, ignore
 
-        self.currentPointIndex = branch.insertPointBefore(newPoint, newPointIndex)
-        # Returns old branch, and next point after
-        return branch, None if newPointIndex == len(branch.points) else branch.points[newPointIndex]
+            beforeDelta = normDelta(beforePoint.location, currentPoint.location)
+            afterDelta = normDelta(afterPoint.location, currentPoint.location)
+            currDelta = normDelta(location, currentPoint.location)
+            isAfter = (dotDelta(beforeDelta, currDelta) < dotDelta(afterDelta, currDelta))
+            newPointIndex = currentPointIndex + (1 if isAfter else 0)
 
-    def deletePoint(self, point):
+        branch.insertPointBefore(newPoint, newPointIndex)
+        self.currentPointID = newPoint.id
+        # Returns added point, and whether it was before or after the source
+        return newPoint, isAfter
+
+    def addKnownPointMidBranchAndSelect(self, location, branch, source, isAfter, newPointID):
+        newPoint = Point(newPointID, location)
+        newIndex = branch.indexForPoint(source)
+        if newIndex == -1:
+            assert source.isRoot()
+            newIndex = 0
+        elif isAfter:
+            newIndex += 1
+        branch.insertPointBefore(newPoint, newIndex)
+        self.currentBranchID = branch.id
+        self.currentPointID = newPoint.id
+
+    def deletePointByID(self, pointID):
         for branch in self._tree.branches:
-            if branch.parentPoint == point:
+            if branch.parentPoint.id == pointID:
                 self.deleteBranch(branch)
-        oldBranch = point.parentBranch
-        newPoint = oldBranch.removePointLocally(point)
-        point.parentBranch = None
-        self.selectPoint(newPoint)
+        self.selectPointByID(self._tree.removePointByID(pointID))
+
+    def maybeCreateNewID(self, newPointID):
+        return newPointID if newPointID is not None else self._parent.nextPointID()
+
+    def maybeCreateBranchID(self, newBranchID):
+        return newBranchID if newBranchID is not None else self._parent.nextBranchID()

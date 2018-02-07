@@ -35,14 +35,14 @@ class DendritePainter():
         self.colorAt = 1 # Start at yellow, not red.
 
     def drawTree(self, tree):
-        selectedPoint = self.uiState.currentPoint()
+        selectedPointID = self.uiState.currentPointID
         for branch in tree.branches:
             self.drawBranchLines(branch)
             self.colorAt = (self.colorAt + 1) % self.LINE_COLOR_COUNT
         if tree.rootPoint is not None:
-            self.drawPoint(tree.rootPoint, selectedPoint)
+            self.drawPoint(tree.rootPoint, selectedPointID)
         for branch in tree.branches:
-            self.drawBranchPoints(branch, selectedPoint)
+            self.drawBranchPoints(branch, selectedPointID)
 
     def drawBranchLines(self, branch):
         for i in range(len(branch.points)):
@@ -54,15 +54,15 @@ class DendritePainter():
                 self.p.setPen(linePen)
                 self.p.drawLine(lastX, lastY, thisX, thisY)
 
-    def drawBranchPoints(self, branch, selectedPoint):
+    def drawBranchPoints(self, branch, selectedPointID):
         for i in range(len(branch.points)):
-            self.drawPoint(branch.points[i], selectedPoint)
+            self.drawPoint(branch.points[i], selectedPointID)
 
-    def drawPoint(self, point, selectedPoint):
+    def drawPoint(self, point, selectedPointID):
         x, y, z = self.zoomedLocation(point.location)
         annotation = point.annotation
         if z == self.zAt:
-            self.drawCircleThisZ(x, y, point == selectedPoint)
+            self.drawCircleThisZ(x, y, point.id == selectedPointID)
             if annotation != "":
                 self.drawAnnotation(x, y, annotation)
 

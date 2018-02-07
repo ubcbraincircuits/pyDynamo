@@ -3,8 +3,11 @@ import util
 
 @attr.s
 class Point():
+    # Identifier of point, can be shared across stacks.
+    id = attr.ib()
+
     # Node position as an (x, y, z) tuple.
-    location = attr.ib(default=None) # (x, y, z) tuple
+    location = attr.ib() # (x, y, z) tuple
 
     # Branch this point belongs to
     parentBranch = attr.ib(default=None, repr=False, cmp=False)
@@ -18,10 +21,16 @@ class Point():
     # Not sure...?
     hilighted = attr.ib(default=None, cmp=False) # Not used yet
 
+    def isRoot(self):
+        return self.parentBranch is None
 
 @attr.s
 class Branch():
-    # TODO: Tree this branch belongs to
+    # Identifier of a branch, can be shared across stacks.
+    id = attr.ib()
+
+    # Tree the branch belongs to
+    _parentTree = attr.ib(repr=False, cmp=False)
 
     # Node this branched off, or None for root branch
     parentPoint = attr.ib(default=None, repr=False, cmp=False)
@@ -34,6 +43,12 @@ class Branch():
 
     # Not sure...?
     colorData = attr.ib(default=None, cmp=False) # Not used yet
+
+    def indexForPoint(self, pointTarget):
+        for idx, point in enumerate(self.points):
+            if point.id == pointTarget.id:
+                return idx
+        return -1
 
     def addPoint(self, point):
         self.points.append(point)
@@ -61,6 +76,20 @@ class Tree():
     # All branches making up this dendrite tree.
     branches = attr.ib(default=attr.Factory(list))
 
+    # HACK - make faster, index points by ID
+    def getPointByID(self, pointID):
+        # TODO - rename to getPointByID
+        for point in self.flattenPoints():
+            if point.id == pointID:
+                return point
+        return None
+
+    def getBranchByID(self, branchID):
+        for branch in self.branches:
+            if branch.id == branchID:
+                return branch
+        return None
+
     def addBranch(self, branch):
         self.branches.append(branch)
         return len(self.branches) - 1
@@ -73,6 +102,13 @@ class Tree():
             print ("Removing a branch that still has stuff on it? use uiState.removeBranch.")
             return
         self.branches.remove(branch)
+
+    def removePointByID(self, pointID):
+        pointToRemove = self.getPointByID(pointID)
+        if pointToRemove is not None:
+            return pointToRemove.parentBranch.removePointLocally(pointToRemove)
+        else:
+            return None
 
     def flattenPoints(self):
         if self.rootPoint is None:

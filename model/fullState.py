@@ -23,6 +23,12 @@ class FullState:
     # Shared UI Option for dendrite line width
     lineWidth = attr.ib(default=3)
 
+    # Keep track of the highest point ID created, used for making more unique identifiers.
+    _currentPointID = 0
+
+    # Keep track of the highest branch ID created, used for making more unique identifiers.
+    _currentBranchID = 0
+
     # Get the index of a state, or -1 if it's not contained.
     def indexForState(self, uiState):
         try:
@@ -53,3 +59,39 @@ class FullState:
         # TODO: Something better when volume sizes don't match? ...
         if self.volumeSize is None:
             self.volumeSize = volumeSize
+
+    def nextPointID(self):
+        newID = '%08x' % self._currentPointID
+        self._currentPointID += 1
+        return newID
+
+    def nextBranchID(self):
+        newID = '%04x' % self._currentBranchID
+        self._currentBranchID += 1
+        return newID
+
+    ##
+    ## ANALOGOUS methods
+    ## TODO: fix up ID system, do properly.
+    ##
+
+    def convertLocation(self, sourceLocation, sourceID, targetID):
+        # given a point, pass it through the transformation from source to
+        # target, with the branch base as the translation reference source
+        # and landmarks as the rotation reference. return the position.
+        noRotation = True # all(all(state{targetID}.info.R == eye(3))) || isempty(state{targetID}.info.R)
+        if sourceID == targetID or noRotation:
+            return sourceLocation
+        # TODO - rotation logic, see matlab.
+        return sourceLocation # HACK - support rotations
+
+    def analogousPoint(self, sourcePoint, sourceID, targetID):
+        # TODO - rotation logic, see matlab.
+        if sourceID == targetID:
+            return sourcePoint
+        return self.uiStates[targetID]._tree.getPointByID(sourcePoint.id)
+
+    def analogousBranch(self, sourceBranch, sourceID, targetID):
+        if sourceBranch == None or sourceID == targetID:
+            return sourceBranch
+        return self.uiStates[targetID]._tree.getBranchByID(sourceBranch.id)
