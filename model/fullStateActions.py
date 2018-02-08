@@ -21,13 +21,13 @@ class FullStateActions():
     def addPointToNewBranchAndSelect(self, localIdx, location):
         localState = self.state.uiStates[localIdx]
         currentSource = localState.currentPoint()
-        newPoint = localState.addPointToNewBranchAndSelect(location)
+        newPoint, newBranch = localState.addPointToNewBranchAndSelect(location)
 
         for i in range(localIdx + 1, len(self.state.uiStates)):
             state = self.state.uiStates[i]
             newLocation = self.state.convertLocation(location, localIdx, i)
             state.selectPointByID(currentSource.id)
-            state.addPointToNewBranchAndSelect(newLocation, newPoint.id)
+            state.addPointToNewBranchAndSelect(newLocation, newPoint.id, newBranch.id)
 
     def addPointMidBranchAndSelect(self, localIdx, location):
         localState = self.state.uiStates[localIdx]

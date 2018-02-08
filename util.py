@@ -1,6 +1,9 @@
 import math
 import numpy as np
 
+SAVE_KEY = 'persist'
+SAVE_META = {SAVE_KEY: True}
+
 def snapToRange(x, lo, hi):
     return np.maximum(lo, np.minimum(hi, x))
 

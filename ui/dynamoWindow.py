@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
 from model import FullState, FullStateActions, Tree, UIState
+from files import loadState, saveState
 
 from .initialMenu import InitialMenu
 from .stackWindow import StackWindow
@@ -24,14 +25,36 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
 
     def openFromFile(self):
-        QtWidgets.QMessageBox.warning(self,
-            "Coming soon...",
-            "To be added after file save/load working"
+        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+            "Open dynamo save file", "", "Dynamo files (*.dyn)"
         )
+        if filePath != "":
+            self.fullState = loadState(filePath)
+            self.fullActions = FullStateActions(self.fullState)
+            self.makeNewWindows()
+
+    def saveToFile(self):
+        if self.fullState._rootPath is not None:
+            saveState(self.fullState, self.fullState._rootPath)
+        else:
+            self.saveToNewFile()
+
+    def saveToNewFile(self):
+        filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+            "New dynamo save file", "", "Dynamo files (*.dyn)"
+        )
+        if filePath != "":
+            if not filePath.endswith(".dyn"):
+                filePath = filePath + ".dyn"
+            self.fullState._rootPath = filePath
+            saveState(self.fullState, filePath)
+            QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + filePath)
 
     # Global key handler for actions shared between all stack windows
     def childKeyPress(self, event):
         key = event.key()
+        ctrlPressed = (event.modifiers() & Qt.ControlModifier)
+
         print ("DYNAMO key %d" % (key))
 
         if (key == ord('H')):
@@ -45,12 +68,14 @@ class DynamoWindow(QtWidgets.QMainWindow):
         elif (key == ord('O')):
             self.openFilesAndAppendStacks()
             return True
-
         elif (key == ord('1')):
             self.changeZAxis(1)
             return True
         elif (key == ord('2')):
             self.changeZAxis(-1)
+            return True
+        elif (key == ord('S') and ctrlPressed):
+            self.saveToFile()
             return True
 
     # TODO: listen to state changes and redraw everything automatically?
@@ -76,16 +101,17 @@ class DynamoWindow(QtWidgets.QMainWindow):
         )
         if len(filePaths) == 0:
             return
-
         offset = len(self.fullState.filePaths)
         self.fullState.addFiles(filePaths)
-        for i in range(len(filePaths)):
+        self.makeNewWindows(offset)
+
+    def makeNewWindows(self, startFrom=0):
+        for i in range(startFrom, len(self.fullState.filePaths)):
             childWindow = StackWindow(
-                i + offset,
-                self.fullState.filePaths[i + offset],
-                self.fullState.trees[i + offset],
+                i,
+                self.fullState.filePaths[i],
                 self.fullActions,
-                self.fullState.uiStates[i + offset],
+                self.fullState.uiStates[i],
                 self
             )
             self.stackWindows.append(childWindow)

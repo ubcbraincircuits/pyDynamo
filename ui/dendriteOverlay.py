@@ -18,5 +18,5 @@ class DendriteOverlay(QWidget):
             self.dendriteCanvas.uiState.parent().zAxisAt,
             self.dendriteCanvas.uiState,
             self.dendriteCanvas.imgView.mapFromScene
-        ).drawTree(self.dendriteCanvas.model)
+        ).drawTree(self.dendriteCanvas.uiState._tree)
         p.end()

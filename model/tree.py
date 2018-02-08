@@ -1,22 +1,24 @@
 import attr
 import util
 
+from util import SAVE_META
+
 @attr.s
 class Point():
     # Identifier of point, can be shared across stacks.
-    id = attr.ib()
+    id = attr.ib(metadata=SAVE_META)
 
     # Node position as an (x, y, z) tuple.
-    location = attr.ib() # (x, y, z) tuple
+    location = attr.ib(metadata=SAVE_META) # (x, y, z) tuple
 
     # Branch this point belongs to
     parentBranch = attr.ib(default=None, repr=False, cmp=False)
 
     # Text annotation for node.
-    annotation = attr.ib(default="", cmp=False)
+    annotation = attr.ib(default="", cmp=False, metadata=SAVE_META)
 
-    # Branches coming off the node
-    children = attr.ib(default=attr.Factory(list)) # Not used yet
+    # Branches coming off the node - unused?
+    children = attr.ib(default=attr.Factory(list))
 
     # Not sure...?
     hilighted = attr.ib(default=None, cmp=False) # Not used yet
@@ -27,16 +29,16 @@ class Point():
 @attr.s
 class Branch():
     # Identifier of a branch, can be shared across stacks.
-    id = attr.ib()
+    id = attr.ib(metadata=SAVE_META)
 
     # Tree the branch belongs to
-    _parentTree = attr.ib(repr=False, cmp=False)
+    _parentTree = attr.ib(default=None, repr=False, cmp=False)
 
     # Node this branched off, or None for root branch
-    parentPoint = attr.ib(default=None, repr=False, cmp=False)
+    parentPoint = attr.ib(default=None, repr=False, cmp=False, metadata=SAVE_META)
 
     # Points along this dendrite branch, in order.
-    points = attr.ib(default=attr.Factory(list))
+    points = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Not sure...?
     isEnded = attr.ib(default=False, cmp=False) # Not used yet
@@ -71,10 +73,10 @@ class Branch():
 @attr.s
 class Tree():
     # Soma, initial start of the main branch.
-    rootPoint = attr.ib(default=None)
+    rootPoint = attr.ib(default=None, metadata=SAVE_META)
 
     # All branches making up this dendrite tree.
-    branches = attr.ib(default=attr.Factory(list))
+    branches = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # HACK - make faster, index points by ID
     def getPointByID(self, pointID):
@@ -141,10 +143,9 @@ def printBranch(tree, branch, pad=""):
     if branch.points[0] == branch.parentPoint:
         print ("BRANCH IS OWN PARENT? :(")
         return
-    isFirst = True
+    print (pad + "-> Branch " + branch.id + " = ")
     for point in branch.points:
-        printPoint(tree, point, pad, isFirst)
-        isFirst = False
+        printPoint(tree, point, pad)
 
 def printTree(tree):
     printPoint(tree, tree.rootPoint)

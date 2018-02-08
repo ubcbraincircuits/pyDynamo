@@ -7,9 +7,8 @@ from .helpDialog import showHelpDialog
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
 
-    def __init__(self, dendriteCanvas, model, uiState):
+    def __init__(self, dendriteCanvas, uiState):
         self.canvas = dendriteCanvas
-        self.model = model
         self.uiState = uiState
 
     def zoom(self, logAmount):

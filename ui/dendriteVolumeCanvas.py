@@ -10,20 +10,19 @@ from .QtImageViewer import QtImageViewer
 from .dendritePainter import DendritePainter
 from .dendriteOverlay import DendriteOverlay
 
-from util import snapToRange
+from util import deltaSz, snapToRange
 
 class DendriteVolumeCanvas(QWidget):
     INVERT_SCROLL = False
     SCROLL_SENSITIVITY = 60.0
 
     def __init__(self,
-        windowIndex, volume, model, fullActions, uiState, dynamoWindow,
+        windowIndex, volume, fullActions, uiState, dynamoWindow,
         *args, **kwargs
     ):
         super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
         self.windowIndex = windowIndex
         self.volume = volume
-        self.model = model
         self.fullActions = fullActions
         self.uiState = uiState
         self.dynamoWindow = dynamoWindow
@@ -33,6 +32,7 @@ class DendriteVolumeCanvas(QWidget):
         self.imgOverlay = DendriteOverlay(self)
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
+        self.drawImage()
 
     def redraw(self):
         self.drawImage()
@@ -52,7 +52,7 @@ class DendriteVolumeCanvas(QWidget):
         modifiers = QApplication.keyboardModifiers()
         shiftPressed = modifiers & Qt.ShiftModifier
 
-        pointClicked = self._tree.closestPointTo(location, zFilter=True)
+        pointClicked = self.uiState._tree.closestPointTo(location, zFilter=True)
         closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
         if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
             pointClicked = None

@@ -3,7 +3,7 @@ import math
 
 from .tree import *
 
-from util import snapToRange, normDelta, dotDelta, deltaSz
+from util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 
 @attr.s
 class UIState():
@@ -20,13 +20,13 @@ class UIState():
     currentPointID = attr.ib(default=None)
 
     # UI Option for whether or not to show annotations.
-    showAnnotations = attr.ib(default=True)
+    showAnnotations = attr.ib(default=True, metadata=SAVE_META)
 
     # UI Option for whether or not to show all branches, or just the nearby ones.
-    drawAllBranches = attr.ib(default=False)
+    drawAllBranches = attr.ib(default=False, metadata=SAVE_META)
 
     # (lower-, upper-) bounds for intensities to show
-    colorLimits = attr.ib(default=(0, 1))
+    colorLimits = attr.ib(default=(0, 1), metadata=SAVE_META)
 
     def parent(self):
         return self._parent
@@ -91,7 +91,7 @@ class UIState():
         self._tree.addBranch(newBranch)
         self.currentBranchID = newBranch.id
         self.currentPointID = newPoint.id
-        return newPoint
+        return newPoint, newBranch
 
     def addPointMidBranchAndSelect(self, location):
         branch = self.currentBranch()

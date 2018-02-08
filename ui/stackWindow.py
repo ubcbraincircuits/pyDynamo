@@ -12,7 +12,7 @@ from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
 class StackWindow(QtWidgets.QMainWindow):
-    def __init__(self, windowIndex, imagePath, treeModel, fullActions, uiState, parent):
+    def __init__(self, windowIndex, imagePath, fullActions, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -26,9 +26,9 @@ class StackWindow(QtWidgets.QMainWindow):
 
         self.root = QtWidgets.QWidget(self)
         self.dendrites = DendriteVolumeCanvas(
-            windowIndex, imageVolume, treeModel, fullActions, uiState, parent, self.root
+            windowIndex, imageVolume, fullActions, uiState, parent, self.root
         )
-        self.actionHandler = DendriteCanvasActions(self.dendrites, treeModel, uiState)
+        self.actionHandler = DendriteCanvasActions(self.dendrites, uiState)
         self.fullActions = fullActions
         self.uiState = uiState
 
