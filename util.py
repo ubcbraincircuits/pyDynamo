@@ -1,8 +1,12 @@
 import math
 import numpy as np
+import time
 
 SAVE_KEY = 'persist'
 SAVE_META = {SAVE_KEY: True}
+
+def currentTimeMillis():
+    return int(round(time.time() * 1000))
 
 def snapToRange(x, lo, hi):
     return np.maximum(lo, np.minimum(hi, x))

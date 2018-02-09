@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
 from model import FullState, FullStateActions, Tree, UIState
-from files import loadState, saveState
+from files import AutoSaver, loadState, saveState
 
 from .initialMenu import InitialMenu
 from .stackWindow import StackWindow
@@ -15,6 +15,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.stackWindows = []
         self.fullState = FullState()
         self.fullActions = FullStateActions(self.fullState)
+        self.autoSaver = AutoSaver(self.fullState)
 
         self.initialMenu = InitialMenu(self)
         self.initialMenu.show()
@@ -31,6 +32,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         if filePath != "":
             self.fullState = loadState(filePath)
             self.fullActions = FullStateActions(self.fullState)
+            self.autoSaver = AutoSaver(self.fullState)
             self.makeNewWindows()
 
     def saveToFile(self):
@@ -87,12 +89,14 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def redrawAllStacks(self):
         for window in self.stackWindows:
             window.dendrites.drawImage()
+        self.maybeAutoSave()
 
     # TODO - document
     def handleDendriteMoveViewRect(self, viewRect):
         for window in self.stackWindows:
             # HACK - very dots, much wow.
             window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
+        self.maybeAutoSave()
 
     # TODO - document
     def openFilesAndAppendStacks(self):
@@ -117,3 +121,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.stackWindows.append(childWindow)
             childWindow.show()
         tileFigs(self.stackWindows)
+
+    # TODO - listen to full state changes.
+    def maybeAutoSave(self):
+        if self.autoSaver is not None:
+            self.autoSaver.handleStateChange()
