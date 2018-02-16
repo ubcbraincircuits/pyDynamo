@@ -28,6 +28,7 @@ class DendriteVolumeCanvas(QWidget):
         self.dynamoWindow = dynamoWindow
 
         l = QGridLayout(self)
+        l.setContentsMargins(0, 0, 0, 0)
         self.imgView = QtImageViewer(self, np2qt(volume[0], normalize=True))
         self.imgOverlay = DendriteOverlay(self)
         l.addWidget(self.imgView, 0, 0)

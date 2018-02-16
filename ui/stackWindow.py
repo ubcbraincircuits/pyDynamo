@@ -33,8 +33,9 @@ class StackWindow(QtWidgets.QMainWindow):
         self.uiState = uiState
 
         # Assemble the view hierarchy.
-        l = QtWidgets.QHBoxLayout(self.root)
-        l.addWidget(self.dendrites)
+        l = QtWidgets.QGridLayout(self.root)
+        l.setContentsMargins(0, 0, 0, 0)
+        l.addWidget(self.dendrites, 0, 0, QtCore.Qt.AlignCenter)
         self.root.setFocus()
         self.setCentralWidget(self.root)
 

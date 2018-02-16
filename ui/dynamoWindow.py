@@ -21,9 +21,11 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.initialMenu.show()
 
     def newFromStacks(self):
-        self.openFilesAndAppendStacks()
         self.initialMenu.hide()
+        self.openFilesAndAppendStacks()
         self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
+        QtWidgets.QApplication.processEvents()
+        tileFigs(self.stackWindows)
 
     def openFromFile(self):
         print ("Opening open file dialog...")
@@ -73,6 +75,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 window.redraw()
             return True
         elif (key == ord('T')):
+            self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
             tileFigs(self.stackWindows)
             return True
         elif (key == ord('O')):
@@ -128,6 +131,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             )
             self.stackWindows.append(childWindow)
             childWindow.show()
+        QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
 
     # TODO - listen to full state changes.
