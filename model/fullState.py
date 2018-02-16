@@ -94,3 +94,9 @@ class FullState:
         newID = '%04x' % self._nextBranchID
         self._nextBranchID += 1
         return newID
+
+    def removeStack(self, index):
+        self.filePaths.pop(index)
+        self.trees.pop(index)
+        self.uiStates.pop(index)
+        # TODO - remove undo state for that stack too

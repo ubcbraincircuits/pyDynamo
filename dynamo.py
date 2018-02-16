@@ -10,4 +10,7 @@ from ui import DynamoWindow
 # RUN DYNAMO
 qtApp = QtWidgets.QApplication(sys.argv)
 dynamoWindow = DynamoWindow()
-sys.exit(qtApp.exec_())
+print ("Exec!")
+res = qtApp.exec_()
+print ("EXIT!")
+sys.exit(res)

@@ -41,7 +41,7 @@ class StackWindow(QtWidgets.QMainWindow):
 
         # Top level menu:
         self.file_menu = QtWidgets.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.fileQuit, QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
+        self.file_menu.addAction('Quit &Window', self.fileQuit, QtCore.Qt.CTRL + QtCore.Qt.Key_W)
         self.menuBar().addMenu(self.file_menu)
         self.help_menu = QtWidgets.QMenu('&Help', self)
         self.menuBar().addSeparator()
@@ -54,8 +54,8 @@ class StackWindow(QtWidgets.QMainWindow):
     def fileQuit(self):
         self.close()
 
-    def closeEvent(self, ce):
-        self.fileQuit()
+    def closeEvent(self, event):
+        self.parent().removeStackWindow(self.windowIndex)
 
     def showHotkeys(self):
         self.actionHandler.showHotkeys()

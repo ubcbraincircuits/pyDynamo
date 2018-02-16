@@ -18,6 +18,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.autoSaver = AutoSaver(self.fullState)
 
         self.initialMenu = InitialMenu(self)
+        self.show()
         self.initialMenu.show()
 
     def newFromStacks(self):
@@ -28,22 +29,19 @@ class DynamoWindow(QtWidgets.QMainWindow):
         tileFigs(self.stackWindows)
 
     def openFromFile(self):
-        print ("Opening open file dialog...")
         filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
             "Open dynamo save file", "", "Dynamo files (*.dyn)"
         )
-        print ("Closed, path = '%s'" % filePath)
         if filePath != "":
             self.fullState = loadState(filePath)
             self.fullActions = FullStateActions(self.fullState)
             self.autoSaver = AutoSaver(self.fullState)
             self.makeNewWindows()
-        print ("For some reason, closing everything...")
 
     def closeEvent(self, event):
-        print ("CLOSE D")
+        print ("CLOSE ignored")
         print (event)
-        evnt.ignore()
+        # event.ignore()
 
     def saveToFile(self):
         if self.fullState._rootPath is not None:
@@ -133,6 +131,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
             childWindow.show()
         QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
+
+    def removeStackWindow(self, windowIndex):
+        self.fullState.removeStack(windowIndex)
+        self.stackWindows.pop(windowIndex)
+        for i in range(len(self.stackWindows)):
+            self.stackWindows[i].windowIndex = i
 
     # TODO - listen to full state changes.
     def maybeAutoSave(self):
