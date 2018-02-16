@@ -19,6 +19,9 @@ class UIState():
     # ID of currently active point
     currentPointID = attr.ib(default=None)
 
+    # Whether the current point is being moved (True) or just selected (False)
+    isMoving = attr.ib(default=False)
+
     # UI Option for whether or not to show annotations.
     showAnnotations = attr.ib(default=True, metadata=SAVE_META)
 
@@ -54,7 +57,7 @@ class UIState():
 
     ## Local actions to apply only to this stack.
 
-    def selectPointByID(self, selectedID):
+    def selectPointByID(self, selectedID, isMove=False):
         selectedPoint = self._tree.getPointByID(selectedID)
         if selectedPoint is not None:
             self.currentPointID = selectedID
@@ -65,9 +68,12 @@ class UIState():
                     self.currentBranchID = None
             else:
                 self.currentBranchID = selectedPoint.parentBranch.id
+            self.isMoving = isMove
         else:
             self.currentPointID = None
             self.currentBranchID = None
+            self.isMoving = False
+            assert not isMove
 
     def addPointToCurrentBranchAndSelect(self, location, newPointID=None, newBranchID=None):
         newPoint = Point(self.maybeCreateNewID(newPointID), location)
@@ -150,6 +156,11 @@ class UIState():
             if branch.parentPoint.id == pointID:
                 self.deleteBranch(branch)
         self.selectPointByID(self._tree.removePointByID(pointID))
+
+    def endMove(self, newLocation, moveDownstream):
+        assert self.isMoving and self.currentPointID is not None, "Can only end a move if actually moving a point"
+        self._tree.movePoint(self.currentPointID, newLocation, moveDownstream)
+
 
     def maybeCreateNewID(self, newPointID):
         return newPointID if newPointID is not None else self._parent.nextPointID()

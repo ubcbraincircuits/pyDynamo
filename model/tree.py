@@ -111,6 +111,29 @@ class Tree():
         else:
             return None
 
+    def movePoint(self, pointID, newLocation, moveDownstream):
+        pointToMove = self.getPointByID(pointID)
+        assert pointToMove is not None, "Trying to move an unknown point ID"
+        delta = util.locationMinus(newLocation, pointToMove.location)
+        if moveDownstream:
+            self._recursiveMovePointDelta(pointToMove, delta)
+        else:
+            # Non-recursive, so just move this one point:
+            pointToMove.location = newLocation
+
+    def _recursiveMovePointDelta(self, point, delta):
+        point.location = util.locationPlus(point.location, delta)
+        # First, move any branches coming off this point, by moving their first point
+        for branch in self.branches:
+            if branch.parentPoint.id == point.id and len(branch.points) > 0:
+                self._recursiveMovePointDelta(branch.points[0], delta)
+        # Next, move the next point on this branch (which will recursively do likewise...)
+        if point.parentBranch is not None:
+            nextIdx = point.parentBranch.indexForPoint(point) + 1
+            assert nextIdx > 0, "Moving a point on a branch that doesn't know the point is there?"
+            if nextIdx < len(point.parentBranch.points):
+                self._recursiveMovePointDelta(point.parentBranch.points[nextIdx], delta)
+
     def flattenPoints(self):
         if self.rootPoint is None:
             return []

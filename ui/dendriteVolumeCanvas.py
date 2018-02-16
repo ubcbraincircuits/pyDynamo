@@ -51,21 +51,38 @@ class DendriteVolumeCanvas(QWidget):
         location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt)
         modifiers = QApplication.keyboardModifiers()
         shiftPressed = modifiers & Qt.ShiftModifier
+        rightClick = event.button() == Qt.RightButton
 
         pointClicked = self.uiState._tree.closestPointTo(location, zFilter=True)
         closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
         if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
             pointClicked = None
 
-        if event.button() == Qt.RightButton:
+
+        # Handle Right-click first; either delete the point, or start a new branch.
+        if rightClick:
             if pointClicked:
                 self.fullActions.deletePoint(self.windowIndex, pointClicked)
             else:
                 self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
-        else:
-            if shiftPressed:
+        # Next, moving; either switch moving point, cancel move, or move selected point to new spot.
+        elif self.uiState.isMoving:
+            if pointClicked:
+                if shiftPressed:
+                    self.fullActions.beginMove(self.windowIndex, pointClicked)
+                else:
+                    self.fullActions.selectPoint(self.windowIndex, pointClicked)
+            else:
+                self.fullActions.endMove(self.windowIndex, location, moveDownstream=shiftPressed)
+        # Next. shift; either start move, or add mid-branch point
+        elif shiftPressed:
+            if pointClicked:
+                self.fullActions.beginMove(self.windowIndex, pointClicked)
+            else:
                 self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location)
-            elif pointClicked:
+        # Otherwise - handle no modifier; either select point, or add to end of current branch.
+        else:
+            if pointClicked:
                 self.fullActions.selectPoint(self.windowIndex, pointClicked)
             else:
                 self.fullActions.addPointToCurrentBranchAndSelect(self.windowIndex, location)

@@ -48,4 +48,14 @@ class FullStateActions():
     def deletePoint(self, localIdx, point):
         # TODO: Delete point vs delete entire branch of point
         for i in range(localIdx, len(self.state.uiStates)):
-            state = self.state.uiStates[i].deletePointByID(point.id)
+            self.state.uiStates[i].deletePointByID(point.id)
+
+    def beginMove(self, localIdx, point):
+        for i in range(len(self.state.uiStates)):
+            self.state.uiStates[i].selectPointByID(point.id, isMove=(i >= localIdx))
+
+    def endMove(self, localIdx, location, moveDownstream):
+        for i in range(localIdx, len(self.state.uiStates)):
+            state = self.state.uiStates[i]
+            newLocation = self.state.convertLocation(location, localIdx, i)
+            state.endMove(newLocation, moveDownstream)

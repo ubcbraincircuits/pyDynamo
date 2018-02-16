@@ -11,8 +11,16 @@ def currentTimeMillis():
 def snapToRange(x, lo, hi):
     return np.maximum(lo, np.minimum(hi, x))
 
+# Given two tuples A = (Ax, Ay, Az), B = (Bx, By, Bz), return A + B
+def locationPlus(A, B):
+    return (A[0] + B[0], A[1] + B[1], A[2] + B[2])
+
+# Given two tuples A = (Ax, Ay, Az), B = (Bx, By, Bz), return A - B
+def locationMinus(A, B):
+    return (A[0] - B[0], A[1] - B[1], A[2] - B[2])
+
 def normDelta(p1, p2):
-    x, y, z = p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2]
+    x, y, z = locationMinus(p1, p2)
     sz = math.sqrt(x*x + y*y + z*z)
     return (x/sz, y/sz, z/sz)
 
@@ -20,7 +28,7 @@ def dotDelta(p1, p2):
     return p1[0] * p2[0] + p1[1] * p2[1] + p1[2] * p2[2]
 
 def deltaSz(p1, p2):
-    x, y, z = p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2]
+    x, y, z = locationMinus(p1, p2)
     return math.sqrt(x*x + y*y + z*z)
 
 # TODO - remove
