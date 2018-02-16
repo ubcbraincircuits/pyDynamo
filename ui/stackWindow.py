@@ -55,7 +55,15 @@ class StackWindow(QtWidgets.QMainWindow):
         self.close()
 
     def closeEvent(self, event):
-        self.parent().removeStackWindow(self.windowIndex)
+        msg = "Close this stack?"
+        reply = QtWidgets.QMessageBox.question(
+            self, 'Close?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
+        )
+        if reply == QtWidgets.QMessageBox.Yes:
+            self.parent().removeStackWindow(self.windowIndex)
+            event.accept()
+        else:
+            event.ignore()
 
     def showHotkeys(self):
         self.actionHandler.showHotkeys()
