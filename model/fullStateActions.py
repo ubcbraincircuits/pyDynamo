@@ -50,6 +50,9 @@ class FullStateActions():
         for i in range(localIdx, len(self.state.uiStates)):
             self.state.uiStates[i].deletePointByID(point.id)
 
+    def nextChannel(self):
+        self.state.changeChannel(1)
+
     def beginMove(self, localIdx, point):
         for i in range(len(self.state.uiStates)):
             self.state.uiStates[i].selectPointByID(point.id, isMove=(i >= localIdx))

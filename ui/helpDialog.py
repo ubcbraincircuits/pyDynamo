@@ -25,6 +25,7 @@ Reassign the parent of a branch by shift-clicking a point and clicking the new p
 *Ctrl-M* to save drawing session
 *3*: open a 3d wire model of the current stack
 *M*: Show motility plot
+*C*: Change color channel
 
 To quickly end a session, you can type ''close all'' into
 the matlab prompt and hit the enter key to close windows

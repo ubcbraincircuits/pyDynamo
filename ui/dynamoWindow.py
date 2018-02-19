@@ -69,8 +69,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
         if (key == ord('H')):
             self.fullState.toggleLineWidth()
-            for window in self.stackWindows:
-                window.redraw()
+            self.redrawAllStacks()
             return True
         elif (key == ord('T')):
             self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
@@ -84,6 +83,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
             return True
         elif (key == ord('2')):
             self.changeZAxis(-1)
+            return True
+        elif (key == ord('C')):
+            self.fullActions.nextChannel()
+            self.redrawAllStacks()
             return True
         elif (key == ord('S') and ctrlPressed):
             self.saveToFile()

@@ -29,7 +29,7 @@ class DendriteVolumeCanvas(QWidget):
 
         l = QGridLayout(self)
         l.setContentsMargins(0, 0, 0, 0)
-        self.imgView = QtImageViewer(self, np2qt(volume[0], normalize=True))
+        self.imgView = QtImageViewer(self, np2qt(self.currentImage(), normalize=True))
         self.imgOverlay = DendriteOverlay(self)
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
@@ -38,10 +38,15 @@ class DendriteVolumeCanvas(QWidget):
     def redraw(self):
         self.drawImage()
 
+    def currentImage(self):
+        fullState = self.uiState.parent()
+        return self.volume[fullState.channel][fullState.zAxisAt]
+
     def drawImage(self):
         c1, c2 = self.uiState.colorLimits
         # TODO: use inbuilt clim if possible instead.
-        imageData = np.array(self.volume[self.uiState.parent().zAxisAt])
+        # imageData = np.array(self.volume[self.uiState.parent().zAxisAt])
+        imageData = self.currentImage()
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
         imageData = snapToRange(imageData, 0.0, 1.0)
