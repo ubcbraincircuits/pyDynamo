@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
-from model import FullState, FullStateActions, Tree, UIState
+from model import FullState, FullStateActions, Tree, UIState, History
 from files import AutoSaver, loadState, saveState
 
 from .initialMenu import InitialMenu
@@ -14,7 +14,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
         self.stackWindows = []
         self.fullState = FullState()
-        self.fullActions = FullStateActions(self.fullState)
+        self.history = History(self.fullState)
+        self.fullActions = FullStateActions(self.fullState, self.history)
         self.autoSaver = AutoSaver(self.fullState)
 
         self.initialMenu = InitialMenu(self)
@@ -24,7 +25,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def newFromStacks(self):
         self.initialMenu.hide()
         self.openFilesAndAppendStacks()
-        self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
+        if len(self.stackWindows) > 0:
+            self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
         QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
 
@@ -34,7 +36,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
         )
         if filePath != "":
             self.fullState = loadState(filePath)
-            self.fullActions = FullStateActions(self.fullState)
+            self.history = History(self.fullState)
+            self.fullActions = FullStateActions(self.fullState, self.history)
             self.autoSaver = AutoSaver(self.fullState)
             self.makeNewWindows()
 
@@ -64,6 +67,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def childKeyPress(self, event):
         key = event.key()
         ctrlPressed = (event.modifiers() & Qt.ControlModifier)
+        shftPressed = (event.modifiers() & Qt.ShiftModifier)
 
         print ("DYNAMO key %d" % (key))
 
@@ -79,10 +83,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.openFilesAndAppendStacks()
             return True
         elif (key == ord('1')):
-            self.changeZAxis(1)
+            self.fullActions.changeZAxis(1)
+            self.redrawAllStacks()
             return True
         elif (key == ord('2')):
-            self.changeZAxis(-1)
+            self.fullActions.changeZAxis(-1)
+            self.redrawAllStacks()
             return True
         elif (key == ord('C')):
             self.fullActions.nextChannel()
@@ -91,11 +97,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
         elif (key == ord('S') and ctrlPressed):
             self.saveToFile()
             return True
-
-    # TODO: listen to state changes and redraw everything automatically?
-    def changeZAxis(self, delta):
-        self.fullState.changeZAxis(delta)
-        self.redrawAllStacks()
+        elif (key == ord('Z') and ctrlPressed):
+            self.updateUndoStack(isRedo=shftPressed)
+            return True
 
     # TODO - document
     def redrawAllStacks(self):
@@ -145,3 +149,31 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def maybeAutoSave(self):
         if self.autoSaver is not None:
             self.autoSaver.handleStateChange()
+
+    def updateUndoStack(self, isRedo):
+        if isRedo:
+            if not self.history.redo():
+                return
+        else:
+            if not self.history.undo():
+                return
+
+        while len(self.stackWindows) > len(self.fullState.uiStates):
+            lastWindow = self.stackWindows.pop()
+            lastWindow.ignoreUndoCloseEvent = True
+            lastWindow.close()
+
+        for i in range(len(self.fullState.uiStates)):
+            if i < len(self.stackWindows):
+                self.stackWindows[i].updateState(
+                    self.fullState.filePaths[i], self.fullState.uiStates[i])
+            else:
+                childWindow = StackWindow(
+                    i,
+                    self.fullState.filePaths[i],
+                    self.fullActions,
+                    self.fullState.uiStates[i],
+                    self
+                )
+                self.stackWindows.append(childWindow)
+                childWindow.show()

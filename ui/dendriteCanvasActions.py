@@ -11,6 +11,9 @@ class DendriteCanvasActions():
         self.canvas = dendriteCanvas
         self.uiState = uiState
 
+    def updateUIState(self, newUiState):
+        self.uiState = newUiState
+
     def zoom(self, logAmount):
         self.canvas.imgView.zoom(logAmount)
 

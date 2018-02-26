@@ -31,6 +31,7 @@ class StackWindow(QtWidgets.QMainWindow):
         self.actionHandler = DendriteCanvasActions(self.dendrites, uiState)
         self.fullActions = fullActions
         self.uiState = uiState
+        self.ignoreUndoCloseEvent = False
 
         # Assemble the view hierarchy.
         l = QtWidgets.QGridLayout(self.root)
@@ -48,6 +49,15 @@ class StackWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.help_menu)
         self.help_menu.addAction('&Shortcuts', self.actionHandler.showHotkeys, QtCore.Qt.Key_F1)
 
+    def updateState(self, newFilePath, newUiState):
+        self.setWindowTitle(newFilePath)
+        self.imagePath = newFilePath
+        self.uiState = newUiState
+        newVolume = files.tiffRead(newFilePath)
+        self.uiState.parent().updateVolumeSize(np.shape(newVolume))
+        self.dendrites.updateState(newVolume, newUiState)
+        self.actionHandler.updateUIState(newUiState)
+
     def redraw(self):
         self.dendrites.redraw()
 
@@ -55,6 +65,9 @@ class StackWindow(QtWidgets.QMainWindow):
         self.close()
 
     def closeEvent(self, event):
+        if self.ignoreUndoCloseEvent:
+            event.accept()
+            return
         msg = "Close this stack?"
         reply = QtWidgets.QMessageBox.question(
             self, 'Close?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No

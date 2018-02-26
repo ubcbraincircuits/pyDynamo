@@ -35,6 +35,11 @@ class DendriteVolumeCanvas(QWidget):
         l.addWidget(self.imgOverlay, 0, 0)
         self.drawImage()
 
+    def updateState(self, newVolume, newUiState):
+        self.volume = newVolume
+        self.uiState = newUiState
+        self.redraw()
+
     def redraw(self):
         self.drawImage()
 
@@ -63,7 +68,6 @@ class DendriteVolumeCanvas(QWidget):
         closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
         if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
             pointClicked = None
-
 
         # Handle Right-click first; either delete the point, or start a new branch.
         if rightClick:
@@ -99,5 +103,5 @@ class DendriteVolumeCanvas(QWidget):
         scrollDelta = -(int)(np.ceil(event.pixelDelta().y() / self.SCROLL_SENSITIVITY))
         if self.INVERT_SCROLL:
             scrollDelta *= -1
-        self.dynamoWindow.changeZAxis(scrollDelta)
+        self.fullActions.changeZAxis(scrollDelta)
         return True
