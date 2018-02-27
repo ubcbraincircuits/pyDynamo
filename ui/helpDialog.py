@@ -39,3 +39,17 @@ def showHelpDialog():
         QMessageBox.Ok
     )
     popup.exec_()
+
+"""
+TODO: Dynomito keys?
+'*C*: Change the channel of the image being shown; GREEN/RED';
+'Hold *SPACE* while clicking to place the start of a MITO';
+'  Continue to hold *SPACE* while adding points to the MITO';
+'  To extend an existing MITO, hold space and click on it, ...';
+'  then click to add new points. Release space when done.';
+'*Y*: SHOW/HIDE mitos';
+'*U*: SHOW/HIDE dendritic tree';
+'';
+'To quickly end a session, you can type ''close all'' into';
+'the matlab prompt and hit the enter key to close windows';
+"""

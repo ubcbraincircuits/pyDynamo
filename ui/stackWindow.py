@@ -44,6 +44,10 @@ class StackWindow(QtWidgets.QMainWindow):
         self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('Quit &Window', self.fileQuit, QtCore.Qt.CTRL + QtCore.Qt.Key_W)
         self.menuBar().addMenu(self.file_menu)
+        self.edit_menu = QtWidgets.QMenu('&Edit', self)
+        self.edit_menu.addAction('Undo', self.undo, QtCore.Qt.CTRL + QtCore.Qt.Key_Z)
+        self.edit_menu.addAction('Redo', self.redo, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_Z)
+        self.menuBar().addMenu(self.edit_menu)
         self.help_menu = QtWidgets.QMenu('&Help', self)
         self.menuBar().addSeparator()
         self.menuBar().addMenu(self.help_menu)
@@ -80,6 +84,12 @@ class StackWindow(QtWidgets.QMainWindow):
 
     def showHotkeys(self):
         self.actionHandler.showHotkeys()
+
+    def undo(self):
+        self.parent().updateUndoStack(isRedo=False)
+
+    def redo(self):
+        self.parent().updateUndoStack(isRedo=True)
 
     def keyPressEvent(self, event):
         if self.parent().childKeyPress(event):
