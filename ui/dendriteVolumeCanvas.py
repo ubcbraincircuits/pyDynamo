@@ -29,7 +29,9 @@ class DendriteVolumeCanvas(QWidget):
 
         l = QGridLayout(self)
         l.setContentsMargins(0, 0, 0, 0)
-        self.imgView = QtImageViewer(self, np2qt(self.currentImage(), normalize=True))
+        self.imgView = QtImageViewer(self,
+            np2qt(self.currentImage(), normalize=True, channel=self.uiState.parent().colorChannel())
+        )
         self.imgOverlay = DendriteOverlay(self)
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
@@ -55,7 +57,9 @@ class DendriteVolumeCanvas(QWidget):
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
         imageData = snapToRange(imageData, 0.0, 1.0)
-        self.imgView.setImage(np2qt(imageData, normalize=True), maintainZoom=True)
+        self.imgView.setImage(
+            np2qt(imageData, normalize=True, channel=self.uiState.parent().colorChannel()),
+            maintainZoom=True)
 
     def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)

@@ -91,7 +91,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.redrawAllStacks()
             return True
         elif (key == ord('C')):
-            self.fullActions.nextChannel()
+            if shftPressed:
+                self.fullState.useColor = not self.fullState.useColor
+            else:
+                self.fullActions.nextChannel()
             self.redrawAllStacks()
             return True
         elif (key == ord('S') and ctrlPressed):

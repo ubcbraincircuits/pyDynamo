@@ -48,7 +48,7 @@ def _normalize255(array, normalize, clip = (0, 255)):
 
     return array
 
-def np2qt(gray, normalize = False):
+def np2qt(gray, normalize=False, channel=None):
     """Convert the 2D numpy array `gray` into a 8-bit, indexed QImage_
     with a gray colormap.  The first dimension represents the vertical
     image axis.
@@ -75,6 +75,13 @@ def np2qt(gray, normalize = False):
 
     if not np.ma.is_masked(gray):
         for i in range(256):
-            result.setColor(i, qRgb(i,i,i))
+            if channel == 'r':
+                result.setColor(i, qRgb(i,0,0))
+            elif channel == 'g':
+                result.setColor(i, qRgb(0,i,0))
+            elif channel == 'b':
+                result.setColor(i, qRgb(0,0,i))
+            else:
+                result.setColor(i, qRgb(i,i,i))
         qimageview(result)[:] = _normalize255(gray, normalize)
     return result

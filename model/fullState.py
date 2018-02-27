@@ -28,6 +28,9 @@ class FullState:
     # Shared color channel information
     channel = attr.ib(default=0)
 
+    # Whether to draw channels in color (True for r/g/b) or white (False)
+    useColor = attr.ib(default=False)
+
     # Shared UI Option for dendrite line width
     lineWidth = attr.ib(default=3)
 
@@ -106,3 +109,8 @@ class FullState:
         self.trees.pop(index)
         self.uiStates.pop(index)
         # TODO - remove undo state for that stack too
+
+    def colorChannel(self):
+        if not self.useColor:
+            return None
+        return ['r', 'g', 'b'][self.channel % 3]
