@@ -50,10 +50,12 @@ class FullState:
     # TODO: active window
     # TODO: add new window off active
 
-    def addFiles(self, filePaths):
-        for path in filePaths:
+    def addFiles(self, filePaths, treeData=None):
+        for i, path in enumerate(filePaths):
             self.filePaths.append(path)
             nextTree = Tree() # TODO: add nextTree as child of prevTree
+            if treeData is not None and i < len(treeData):
+                nextTree = treeData[i]
             self.trees.append(nextTree)
             self.uiStates.append(UIState(parent=self, tree=nextTree))
 

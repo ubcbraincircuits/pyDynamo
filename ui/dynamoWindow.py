@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
 from model import FullState, FullStateActions, Tree, UIState, History
-from files import AutoSaver, loadState, saveState
+from files import AutoSaver, loadState, saveState, importFromMatlab
 
 from .initialMenu import InitialMenu
 from .stackWindow import StackWindow
@@ -36,6 +36,17 @@ class DynamoWindow(QtWidgets.QMainWindow):
         )
         if filePath != "":
             self.fullState = loadState(filePath)
+            self.history = History(self.fullState)
+            self.fullActions = FullStateActions(self.fullState, self.history)
+            self.autoSaver = AutoSaver(self.fullState)
+            self.makeNewWindows()
+
+    def importFromMatlab(self):
+        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+            "Import matlab save file", "", "Matlab file (*.mat)"
+        )
+        if filePath != "":
+            self.fullState = importFromMatlab(filePath)
             self.history = History(self.fullState)
             self.fullActions = FullStateActions(self.fullState, self.history)
             self.autoSaver = AutoSaver(self.fullState)

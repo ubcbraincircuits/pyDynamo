@@ -23,18 +23,25 @@ class InitialMenu(QtWidgets.QMainWindow):
         buttonL.setToolTip("Open a previous session")
         buttonL.clicked.connect(parent.openFromFile)
 
+        # Option #2 - Import from matlab
+        buttonI = QtWidgets.QPushButton("&Import from Matlab .mat", self)
+        buttonI.setToolTip("Import from Matlab save file")
+        buttonI.clicked.connect(parent.importFromMatlab)
+
         # Assemble the view hierarchy.
         self.root = QtWidgets.QWidget(self)
         l = QtWidgets.QVBoxLayout(self.root)
         l.addWidget(buttonN, 0, QtCore.Qt.AlignHCenter)
-        l.addWidget(buttonL, 0, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
+        l.addWidget(buttonL, 0, QtCore.Qt.AlignHCenter)
+        l.addWidget(buttonI, 0, QtCore.Qt.AlignHCenter)
         self.root.setFocus()
         self.setCentralWidget(self.root)
 
         # Top level menu:
         self.fileMenu = QtWidgets.QMenu('&File', self)
         self.fileMenu.addAction('&New', parent.newFromStacks, QtCore.Qt.CTRL + QtCore.Qt.Key_N)
-        self.fileMenu.addAction('&Load', parent.openFromFile, QtCore.Qt.CTRL + QtCore.Qt.Key_O)
+        self.fileMenu.addAction('&Open', parent.openFromFile, QtCore.Qt.CTRL + QtCore.Qt.Key_O)
+        self.fileMenu.addAction('&Import', parent.importFromMatlab, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
         self.menuBar().addMenu(self.fileMenu)
 
     def centerWindow(self):

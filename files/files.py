@@ -3,7 +3,7 @@ import json
 
 from util import SAVE_KEY
 
-from model import Point, Branch, Tree, UIState, FullState
+from model import *
 
 def attrFilter(attrData, value):
     return (SAVE_KEY in attrData.metadata) and attrData.metadata[SAVE_KEY]

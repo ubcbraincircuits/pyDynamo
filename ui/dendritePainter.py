@@ -96,7 +96,7 @@ class DendritePainter():
         elif near1 or near2 or self.uiState.drawAllBranches:
             color = self.LINE_COLORS[self.colorAt]
             color = QColor.fromRgbF(color[0], color[1], color[2])
-            return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.DashLine)
+            return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.DotLine)
         else:
             return None
 
