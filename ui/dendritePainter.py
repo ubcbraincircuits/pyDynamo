@@ -4,6 +4,12 @@ from PyQt5.QtCore import Qt, QPointF, QRectF
 import matplotlib.pyplot as plt
 import numpy as np
 
+LINE_COLOR_COUNT = 7
+LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
+
+def colorForBranch(branchNumber):
+    return LINE_COLORS[(branchNumber + 1) % LINE_COLOR_COUNT] # +1 to start at yellow, not red.
+
 """
 White dot = point on this plane
 Green dot = current point
@@ -25,21 +31,18 @@ class DendritePainter():
     ANNOTATION_HEIGHT = 40
     ANNOTATION_MAX_WIDTH = 512
 
-    LINE_COLOR_COUNT = 7
-    LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
-
     def __init__(self, painter, currentZ, uiState, zoomMapFunc):
         self.p = painter
         self.zAt = currentZ
         self.uiState = uiState
         self.zoomMapFunc = zoomMapFunc
-        self.colorAt = 1 # Start at yellow, not red.
+        self.branchAt = 0
 
     def drawTree(self, tree):
         selectedPointID = self.uiState.currentPointID
         for branch in tree.branches:
             self.drawBranchLines(branch)
-            self.colorAt = (self.colorAt + 1) % self.LINE_COLOR_COUNT
+            self.branchAt = self.branchAt + 1
         if tree.rootPoint is not None:
             self.drawPoint(tree.rootPoint, selectedPointID)
         for branch in tree.branches:
@@ -90,11 +93,11 @@ class DendritePainter():
         inZ1, inZ2 = z1 == self.zAt, z2 == self.zAt
         near1, near2 = self.isNearZ(z1), self.isNearZ(z2)
         if inZ1 or inZ2:
-            color = self.LINE_COLORS[self.colorAt]
+            color = colorForBranch(self.branchAt)
             color = QColor.fromRgbF(color[0], color[1], color[2])
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.SolidLine)
         elif near1 or near2 or self.uiState.drawAllBranches:
-            color = self.LINE_COLORS[self.colorAt]
+            color = colorForBranch(self.branchAt)
             color = QColor.fromRgbF(color[0], color[1], color[2])
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.DotLine)
         else:

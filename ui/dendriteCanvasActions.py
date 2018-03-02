@@ -2,13 +2,16 @@ from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
 
 import util
+from .dendrite3DViewWindow import Dendrite3DViewWindow
 from .helpDialog import showHelpDialog
 
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
 
-    def __init__(self, dendriteCanvas, uiState):
+    def __init__(self, dendriteCanvas, imagePath, treeModel, uiState):
         self.canvas = dendriteCanvas
+        self.imagePath = imagePath
+        self.treeModel = treeModel
         self.uiState = uiState
 
     def updateUIState(self, newUiState):
@@ -50,3 +53,7 @@ class DendriteCanvasActions():
 
     def showHotkeys(self):
         showHelpDialog()
+
+    def launch3DView(self):
+        viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.treeModel)
+        viewWindow.show()

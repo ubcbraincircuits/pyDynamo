@@ -5,14 +5,13 @@ from PyQt5 import QtCore, QtWidgets
 
 import files
 
-from .scatter3DCanvas import Scatter3DCanvas
 from .dendriteCanvasActions import DendriteCanvasActions
 from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
 class StackWindow(QtWidgets.QMainWindow):
-    def __init__(self, windowIndex, imagePath, fullActions, uiState, parent):
+    def __init__(self, windowIndex, imagePath, fullActions, treeModel, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -28,7 +27,7 @@ class StackWindow(QtWidgets.QMainWindow):
         self.dendrites = DendriteVolumeCanvas(
             windowIndex, imageVolume, fullActions, uiState, parent, self.root
         )
-        self.actionHandler = DendriteCanvasActions(self.dendrites, uiState)
+        self.actionHandler = DendriteCanvasActions(self.dendrites, imagePath, treeModel, uiState)
         self.fullActions = fullActions
         self.uiState = uiState
         self.ignoreUndoCloseEvent = False
@@ -97,7 +96,9 @@ class StackWindow(QtWidgets.QMainWindow):
 
         # TODO: add menu items for some of these too.
         key = event.key()
-        if (key == ord('4')):
+        if (key == ord('3')):
+            self.actionHandler.launch3DView()
+        elif (key == ord('4')):
             self.actionHandler.changeBrightness(-1, 0)
         elif (key == ord('5')):
             self.actionHandler.changeBrightness(1, 0)

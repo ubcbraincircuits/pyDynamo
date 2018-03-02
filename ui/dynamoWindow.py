@@ -145,6 +145,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 i,
                 self.fullState.filePaths[i],
                 self.fullActions,
+                self.fullState.trees[i],
                 self.fullState.uiStates[i],
                 self
             )
@@ -186,6 +187,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     i,
                     self.fullState.filePaths[i],
                     self.fullActions,
+                    self.fullState.trees[i],
                     self.fullState.uiStates[i],
                     self
                 )
