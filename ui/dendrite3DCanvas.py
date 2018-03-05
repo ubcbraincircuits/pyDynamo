@@ -1,9 +1,6 @@
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 from .dendritePainter import colorForBranch
 
-
-SCALE = [0.15, 0.15, 1.5] # HACK: Store in state instead
-
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Dendrite3DCanvas(BaseMatplotlibCanvas):
     def __init__(self, treeModel, *args, **kwargs):
@@ -25,19 +22,12 @@ class Dendrite3DCanvas(BaseMatplotlibCanvas):
             if branch.parentPoint is None:
                 continue
             points = [branch.parentPoint] + branch.points
-            x = [p.location[0] * SCALE[0] for p in points]
-            y = [p.location[1] * SCALE[1] for p in points]
-            z = [p.location[2] * SCALE[2] for p in points]
+            x, y, z = self.treeModel.worldCoordPoints(points)
             self.axes.plot(x, y, z, c=colorForBranch(i))
 
         # And finally draw the soma as a big sphere:
-        self.axes.scatter(
-            [self.treeModel.rootPoint.location[0] * SCALE[0]],
-            [self.treeModel.rootPoint.location[1] * SCALE[1]],
-            [self.treeModel.rootPoint.location[2] * SCALE[2]],
-            c=colorForBranch(0),
-            s=100
-        )
+        x, y, z = self.treeModel.worldCoordPoints([self.treeModel.rootPoint])
+        self.axes.scatter(x, y, z, c=colorForBranch(0), s=100)
 
     def needToUpdate(self):
         self.axes.cla()

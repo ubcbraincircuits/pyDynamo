@@ -17,7 +17,7 @@ class Point():
     # Text annotation for node.
     annotation = attr.ib(default="", cmp=False, metadata=SAVE_META)
 
-    # Branches coming off the node - unused?
+    # Branches coming off the node.
     children = attr.ib(default=attr.Factory(list))
 
     # Not sure...?
@@ -70,6 +70,10 @@ class Branch():
         self.points.remove(point)
         return self.parentPoint if index == 0 else self.points[index - 1]
 
+    def setParentPoint(self, parentPoint):
+        self.parentPoint = parentPoint
+        self.parentPoint.children.append(self)
+
 @attr.s
 class Tree():
     # Soma, initial start of the main branch.
@@ -93,6 +97,7 @@ class Tree():
 
     def addBranch(self, branch):
         self.branches.append(branch)
+        branch._parentTree = self
         return len(self.branches) - 1
 
     def removeBranch(self, branch):
@@ -143,6 +148,7 @@ class Tree():
         return result
 
     def closestPointTo(self, targetLocation, zFilter=False):
+        # TODO - need to fix for world coordinates?
         closestDist, closestPoint = None, None
         for point in self.flattenPoints():
             if zFilter and point.location[2] != targetLocation[2]:
@@ -151,6 +157,14 @@ class Tree():
             if closestDist is None or dist < closestDist:
                 closestDist, closestPoint = dist, point
         return closestPoint
+
+    def worldCoordPoints(self, points):
+        SCALE = [0.3070, 0.3070, 1.5] # HACK: Store in state instead
+        x = [p.location[0] * SCALE[0] for p in points]
+        y = [p.location[1] * SCALE[1] for p in points]
+        z = [p.location[2] * SCALE[2] for p in points]
+        return x, y, z
+
 
 #
 # Debug formatting for converting trees to string representation

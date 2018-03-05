@@ -33,7 +33,7 @@ def parseMatlabTree(fullState, saveState):
             rootPoint = branch.points[0]
             branch.removePointLocally(rootPoint)
             if i == 0: # First branch is special, as first node is tree root
-                branch.parentPoint = rootPoint
+                branch.setParentPoint(rootPoint)
                 tree.rootPoint = rootPoint
         else:
             # No branch data? Not sure what caused this in matlab...
@@ -46,7 +46,7 @@ def parseMatlabTree(fullState, saveState):
             childListForPoints = branchList[0, i][0][1][0] # Child index list
             for j, childListForPoint in enumerate(childListForPoints):
                 for childIdx in np.nditer(childListForPoint, ['refs_ok', 'zerosize_ok']):
-                    tree.branches[childIdx - 1].parentPoint = tree.branches[i].points[j - 1]
+                    tree.branches[childIdx - 1].setParentPoint(tree.branches[i].points[j - 1])
     return tree
 
 # Load an existing dynamo matlab file, and convert it into the python dynamo format.

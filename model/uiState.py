@@ -82,7 +82,8 @@ class UIState():
         else:
             if self.currentBranchID is None:
                 newBranchID = self.maybeCreateBranchID(newBranchID)
-                newBranch = Branch(newBranchID, self._tree, parentPoint=self._tree.rootPoint)
+                newBranch = Branch(newBranchID, self._tree)
+                newBranch.setParentPoint(self._tree.rootPoint)
                 self._tree.addBranch(newBranch)
                 self.currentBranchID = newBranch.id
             self.currentBranch().addPoint(newPoint)
@@ -92,7 +93,8 @@ class UIState():
     def addPointToNewBranchAndSelect(self, location, newPointID=None, newBranchID=None):
         newPoint = Point(self.maybeCreateNewID(newPointID), location)
         newBranchID = self.maybeCreateBranchID(newBranchID)
-        newBranch = Branch(newBranchID, self._tree, parentPoint=self.currentPoint())
+        newBranch = Branch(newBranchID, self._tree)
+        newBranch.setParentPoint(self.currentPoint())
         newBranch.addPoint(newPoint)
         self._tree.addBranch(newBranch)
         self.currentBranchID = newBranch.id
