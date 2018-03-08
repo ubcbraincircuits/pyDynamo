@@ -32,9 +32,7 @@ def motility(trees,
     lengthSubtracted = filoLengths[:-1, :]
 
     rawMotility = lengthAdded - lengthSubtracted
-    # TODO - get this part working...
-    print(masterChangedOut)
-    # rawMotility[masterChangedOut] = np.nan
+    rawMotility[masterChangedOut] = np.nan
 
     # including motility due to additions/subtractions
     if includeAS:

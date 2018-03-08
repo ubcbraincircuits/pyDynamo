@@ -19,8 +19,8 @@ def addedSubtractedTransitioned(
     addedResult = np.full(resultShape, False)
     subtracted = np.full(resultShape, False)
     transitioned = np.full(resultShape, False)
-    masterNodes = np.full(resultShape, np.nan)
     masterChanged = np.full(resultShape, False)
+    masterNodes = np.full(resultShape, np.nan)
 
     for treeAt, tree in enumerate(trees):
         _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeAt, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
@@ -36,7 +36,7 @@ def addedSubtractedTransitioned(
     subtracted[masterChanged] = False
 
 
-    return filoTypes, added, subtracted, transitioned, masterNodes, masterChanged
+    return filoTypes, added, subtracted, transitioned, masterChanged, masterNodes
 
 # HACK : TODO: Migrate to ID-based results rather than index-based
 def _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeIdx, branchIdx, excludeAxon, excludeBasal, terminalDist, filoDist):
@@ -85,7 +85,7 @@ def _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeIdx, b
                 if len(childBranch.points) == 1 and point == branch.points[-1]:
                     filoTypes[treeIdx][childBranchIdx] = FiloType.BRANCH_ONLY
                     masterNodes[treeIdx][childBranchIdx] = branchIdx # we use convention that long branches are their own masternode
-                    masterChanged[treeIdx][branchIdx] = _didMasterChange(masterNodes, treeIdx, branchIdx)
+                    masterChanged[treeIdx][childBranchIdx] = _didMasterChange(masterNodes, treeIdx, branchIdx)
 
             else: # Not filo
                 # all terminal filopodia identified so far are actually interstitial

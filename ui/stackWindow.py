@@ -54,7 +54,7 @@ class StackWindow(QtWidgets.QMainWindow):
         self.help_menu.addAction('&Shortcuts', self.actionHandler.showHotkeys, QtCore.Qt.Key_F1)
 
     def updateState(self, newFilePath, newUiState):
-        self.setWindowTitle(newFilePath)
+        self.setWindowTitle(_createTitle(self.windowIndex, newFilePath))
         self.imagePath = newFilePath
         self.uiState = newUiState
         newVolume = files.tiffRead(newFilePath)
