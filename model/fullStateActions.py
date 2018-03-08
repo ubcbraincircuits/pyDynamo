@@ -58,7 +58,8 @@ class FullStateActions():
             self.state.uiStates[i].deletePointByID(point.id)
 
     def changeZAxis(self, zDelta):
-        self.history.pushState()
+        # self.history.pushState()
+        # TODO - how to store history on scroll
         self.state.changeZAxis(zDelta)
 
     def nextChannel(self):

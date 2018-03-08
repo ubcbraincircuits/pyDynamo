@@ -43,40 +43,21 @@ def _tdblBranch(branch, excludeAxon, excludeBasal, includeFilo, filoDist):
     if somaIdx >= 0:
         pointsWithRoot = pointsWithRoot[somaIdx+1:]
 
-    # ... and find the last branchpoint
-    lastChild = _lastPointWithChildren(pointsWithRoot)
+    # ... measure distance for entire branch, and up to last branchpoint:
+    totalLength, totalLengthToLastBranch = branch.worldLengths()
 
-    # ... then measure distances up to and past branch point.
-    x, y, z = branch._parentTree.worldCoordPoints(pointsWithRoot)
-    totalDist = 0
-    toLastBranchDist = 0
-    for i in range(len(pointsWithRoot) - 1):
-        locA = (x[i  ], y[i  ], z[i  ])
-        locB = (x[i+1], y[i+1], z[i+1])
-        pointDist = util.deltaSz(locA, locB)
-        totalDist += pointDist
-        if i < lastChild:
-            toLastBranchDist += pointDist
-
-    # Use full distance only if including filo, or it's large enough:
-    if includeFilo or (totalDist - toLastBranchDist) > filoDist:
-        totalLength += totalDist
+    # Use full distance only if including filo, or if the end isn't a filo.
+    if includeFilo or (totalLength - totalLengthToLastBranch) > filoDist:
+        totalLength += totalLength
     else:
-        totalLength += toLastBranchDist
+        totalLength += totalLengthToLastBranch
     return totalLength
 
 # Return the index of the last point whose label contains given text, or -1 if not found.
+# TODO - move somewhere common.
 def _lastPointWithLabel(points, label):
     lastPointIdx = -1
     for i, point in enumerate(points):
         if point.annotation.find(label) != -1:
-            lastPointIdx = i
-    return lastPointIdx
-
-# Return the index of the last point with child branches, or -1 if not found.
-def _lastPointWithChildren(points):
-    lastPointIdx = -1
-    for i, point in enumerate(points):
-        if len(point.children) > 0:
             lastPointIdx = i
     return lastPointIdx

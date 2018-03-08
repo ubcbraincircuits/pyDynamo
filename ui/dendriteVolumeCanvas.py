@@ -108,4 +108,5 @@ class DendriteVolumeCanvas(QWidget):
         if self.INVERT_SCROLL:
             scrollDelta *= -1
         self.fullActions.changeZAxis(scrollDelta)
+        self.dynamoWindow.redrawAllStacks()
         return True

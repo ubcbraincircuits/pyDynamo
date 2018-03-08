@@ -46,6 +46,9 @@ class Branch():
     # Not sure...?
     colorData = attr.ib(default=None, cmp=False) # Not used yet
 
+    def indexInParent(self):
+        return self._parentTree.branches.index(self)
+
     def indexForPoint(self, pointTarget):
         for idx, point in enumerate(self.points):
             if point.id == pointTarget.id:
@@ -73,6 +76,28 @@ class Branch():
     def setParentPoint(self, parentPoint):
         self.parentPoint = parentPoint
         self.parentPoint.children.append(self)
+
+    def worldLengths(self):
+        pointsWithRoot = [self.parentPoint] + self.points
+        x, y, z = self._parentTree.worldCoordPoints(pointsWithRoot)
+        lastBranchPoint = _lastPointWithChildren(pointsWithRoot)
+        totalLength, totalLengthToLastBranch = 0, 0
+        for i in range(len(x) - 1):
+            edgeDistance = util.deltaSz((x[i], y[i], z[i]), (x[i+1], y[i+1], z[i+1]))
+            totalLength += edgeDistance
+            if i < lastBranchPoint:
+                totalLengthToLastBranch += edgeDistance
+        return totalLength, totalLengthToLastBranch
+
+    def isFilo(self, maxLength):
+        # If it has children, it's not a filo
+        if _lastPointWithChildren(self.points) > -1:
+            return False, 0
+        # If it has a lamella, it's not a filo
+        if _lastPointWithLabel(self.points, 'lam') > -1:
+            return False, 0
+        totalLength, _ = self.worldLengths()
+        return totalLength < maxLength, totalLength
 
 @attr.s
 class Tree():
@@ -165,6 +190,24 @@ class Tree():
         z = [p.location[2] * SCALE[2] for p in points]
         return x, y, z
 
+### Branch utilities
+
+# Return the index of the last point with child branches, or -1 if not found.
+def _lastPointWithChildren(points):
+    lastPointIdx = -1
+    for i, point in enumerate(points):
+        if len(point.children) > 0:
+            lastPointIdx = i
+    return lastPointIdx
+
+# Return the index of the last point whose label contains given text, or -1 if not found.
+# TODO - move somewhere common.
+def _lastPointWithLabel(points, label):
+    lastPointIdx = -1
+    for i, point in enumerate(points):
+        if point.annotation.find(label) != -1:
+            lastPointIdx = i
+    return lastPointIdx
 
 #
 # Debug formatting for converting trees to string representation
