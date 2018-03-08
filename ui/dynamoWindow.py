@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
-from calc import TDBL
+from calc import TDBL, motility # TODO - remove
 from model import FullState, FullStateActions, Tree, UIState, History
 from files import AutoSaver, loadState, saveState, importFromMatlab
 
@@ -113,6 +113,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
             else:
                 self.fullActions.nextChannel()
             self.redrawAllStacks()
+            return True
+        elif (key == ord('M')):
+            motility(self.fullState.trees) # HACK
             return True
         elif (key == ord('S') and ctrlPressed):
             self.saveToFile()

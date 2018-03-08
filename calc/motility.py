@@ -1,33 +1,66 @@
-def motility(tree,
+import numpy as np
+
+from .addedSubtractedTransitioned import addedSubtractedTransitioned
+from .TDBL import TDBL
+
+from model import FiloType
+
+def motility(trees,
     excludeAxon=True,
     excludeBasal=True,
     includeAS=False,
     terminalDist=10,
     filoDist=10
 ):
-    # filoTypes, added, subtracted, _, masterChangedOut, _ = addedSubtractedTransitioned()
+    filoTypes, added, subtracted, _, masterChangedOut, _ = \
+        addedSubtractedTransitioned(trees, excludeAxon, excludeBasal, terminalDist, filoDist)
 
-    tdbl = TDBL(tree, excludeAxon, excludeBasal, includeFilo=True, filoDist)
+    # All outputs will be [# trees][# branches]
+    nTrees = len(trees)
+    nBranches = len(trees[-1].branches)
+    resultShape = (nTrees, nBranches)
+    filoLengths = np.full(resultShape, np.nan)
 
-    filoLengths = np.zeros(len(tree.branches))
-    filoLengths[:] = np.nan
+    allTDBL = np.zeros(nTrees)
 
-    for branch in tree.rootPoint.children:
-        _calcFiloLengths(filoLengths, branch, filoDist)
-    nFilo = 1.0
+    for treeIdx, tree in enumerate(trees):
+        allTDBL[treeIdx] = TDBL(tree, excludeAxon, excludeBasal, includeFilo=True, filoDist=filoDist)
+        for branch in tree.rootPoint.children:
+            _calcFiloLengths(filoLengths[treeIdx, :], branch, excludeAxon, excludeBasal, filoDist)
 
-    motities = {
+    lengthAdded = filoLengths[1:, :]
+    lengthSubtracted = filoLengths[:-1, :]
+
+    rawMotility = lengthAdded - lengthSubtracted
+    # TODO - get this part working...
+    print(masterChangedOut)
+    # rawMotility[masterChangedOut] = np.nan
+
+    # including motility due to additions/subtractions
+    if includeAS:
+        rawMotility[added] = lengthAdded[added]
+        rawMotility[subtracted] = -lengthSubtracted[subtracted]
+
+    filoLengthWithNan = filoLengths[:rawMotility.shape[0], :]
+    filoLengthWithNan[np.isnan(rawMotility)] = np.nan
+
+    nFilo = np.sum((filoTypes > FiloType.ABSENT) & (filoTypes < FiloType.BRANCH_ONLY), axis=1)
+
+    # Normalize by pre stats, not post:
+    allTDBL, nFilo = allTDBL[:-1], nFilo[:-1]
+
+    motilities = {
         'raw': rawMotility,
-        'rawTDBL': np.nansum(rawMotility) / tdbl,
-        'rawFilo': np.nansum(rawMotility) / filoLength,
-        'rawNFilo': np.nansum(rawMotility) / nFilo,
+        'rawTDBL': np.nansum(rawMotility, axis=1) / allTDBL,
+        'rawFilo': np.nansum(rawMotility, axis=1) / np.nansum(filoLengthWithNan, axis=1),
+        'rawNFilo': np.nansum(rawMotility, axis=1) / nFilo
     }
     return motilities, filoLengths
 
 
-def _calcFiloLengths(filoLengths, branch, filoDist):
+def _calcFiloLengths(filoLengths, branch, excludeAxon, excludeBasal, filoDist):
     branchIdx = branch.indexInParent()
-    if !np.isnan(filoLengths[branchIdx]):
+    if ~np.isnan(filoLengths[branchIdx]):
         return filoLengths[branchIdx] # Already calculated, so no need to do it again.
 
     pointsWithRoot = [branch.parentPoint] + branch.points
@@ -54,7 +87,7 @@ def _calcFiloLengths(filoLengths, branch, filoDist):
     totalLength, totalLengthToLastBranch = branch.worldLengths()
     for point in branch.points:
         for childBranch in point.children:
-            _calcFiloLenths(filoLengths, childBranch, filoDist)
+            _calcFiloLengths(filoLengths, childBranch, excludeAxon, excludeBasal, filoDist)
 
     # 6) Add the final filo for this branch if it's short enough.
     lengthPastLastBranch, filoLength = filoDist + 1, 0

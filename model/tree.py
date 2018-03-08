@@ -26,6 +26,9 @@ class Point():
     def isRoot(self):
         return self.parentBranch is None
 
+    def indexInParent(self):
+        return self.parentBranch.points.index(self)
+
 @attr.s
 class Branch():
     # Identifier of a branch, can be shared across stacks.
@@ -89,9 +92,22 @@ class Branch():
                 totalLengthToLastBranch += edgeDistance
         return totalLength, totalLengthToLastBranch
 
+    def cumulativeWorldLengths(self):
+        pointsWithRoot = [self.parentPoint] + self.points
+        x, y, z = self._parentTree.worldCoordPoints(pointsWithRoot)
+        cumulativeLength, lengths = 0, []
+        for i in range(len(x) - 1):
+            edgeDistance = util.deltaSz((x[i], y[i], z[i]), (x[i+1], y[i+1], z[i+1]))
+            cumulativeLength += edgeDistance
+            lengths.append(cumulativeLength)
+        return lengths
+
+    def hasChildren(self):
+        return _lastPointWithChildren(self.points) > -1
+
     def isFilo(self, maxLength):
         # If it has children, it's not a filo
-        if _lastPointWithChildren(self.points) > -1:
+        if self.hasChildren():
             return False, 0
         # If it has a lamella, it's not a filo
         if _lastPointWithLabel(self.points, 'lam') > -1:
