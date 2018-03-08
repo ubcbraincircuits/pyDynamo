@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import os.path
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -15,7 +16,7 @@ class StackWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle(imagePath)
+        self.setWindowTitle(_createTitle(windowIndex, imagePath))
 
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
@@ -132,3 +133,7 @@ class StackWindow(QtWidgets.QMainWindow):
         elif (key == QtCore.Qt.Key_Delete):
             self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint())
             self.parent().redrawAllStacks() # HACK - auto redraw on change
+
+# Utility for nicer formatting of the window, using index and just image file name.
+def _createTitle(index, path):
+    return "[%d] - %s" % (index + 1, os.path.basename(path))
