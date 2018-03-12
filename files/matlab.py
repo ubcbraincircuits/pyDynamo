@@ -2,6 +2,7 @@ import numpy as np
 import scipy.io as sio
 
 from model import *
+from util import deltaSz
 
 # Read a single branch from the matlab arrays containing per-point data
 def parseMatlabBranch(fullState, pointsXYZ, annotations):
@@ -32,8 +33,8 @@ def parseMatlabTree(fullState, saveState):
             # ... and remove first point as it is duplicated data from parent:
             rootPoint = branch.points[0]
             branch.removePointLocally(rootPoint)
+            branch.setParentPoint(rootPoint)
             if i == 0: # First branch is special, as first node is tree root
-                branch.setParentPoint(rootPoint)
                 tree.rootPoint = rootPoint
         else:
             # No branch data? Not sure what caused this in matlab...
@@ -46,6 +47,19 @@ def parseMatlabTree(fullState, saveState):
             childListForPoints = branchList[0, i][0][1][0] # Child index list
             for j, childListForPoint in enumerate(childListForPoints):
                 for childIdx in np.nditer(childListForPoint, ['refs_ok', 'zerosize_ok']):
+                    if tree.branches[i].parentPoint is not None:
+                        oldParent = tree.branches[childIdx - 1].parentPoint
+                        newParent = tree.branches[i].points[j - 1]
+                        moved = deltaSz(oldParent.location, newParent.location)
+                        if moved > 0.01:
+                            print("WARNING: Branch %d parent location has moved %f" % (childIdx - 1, moved))
+                            print("%s to %s" % (
+                                str(tree.branches[childIdx - 1].parentPoint.location),
+                                str(tree.branches[i].points[j - 1].location)
+                            ))
+                            # HACK - add branch to children of parent, but keep old parent on branch
+                            tree.branches[i].points[j - 1].children.append(tree.branches[childIdx - 1])
+                            continue
                     tree.branches[childIdx - 1].setParentPoint(tree.branches[i].points[j - 1])
     return tree
 

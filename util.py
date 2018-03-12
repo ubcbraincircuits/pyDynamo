@@ -46,3 +46,16 @@ def rotation_matrix(axis, theta):
     return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
                      [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
+
+def emptyArrayArray(c):
+    d = []
+    for i in range(c):
+        d.append([])
+    return d
+
+def emptyArrayMatrix(r, c):
+    d = []
+    for i in range(r):
+        d.append(emptyArrayArray(c))
+    return d
