@@ -1,3 +1,6 @@
+"""
+.. module:: tree
+"""
 import attr
 import util
 
@@ -5,23 +8,25 @@ from util import SAVE_META
 
 @attr.s
 class Point():
-    # Identifier of point, can be shared across stacks.
+    """Node in the tree, a point in 3D space."""
+
     id = attr.ib(metadata=SAVE_META)
+    """Identifier of point, can be shared across stacks."""
 
-    # Node position as an (x, y, z) tuple.
-    location = attr.ib(metadata=SAVE_META) # (x, y, z) tuple
+    location = attr.ib(metadata=SAVE_META)
+    """Node position as an (x, y, z) tuple."""
 
-    # Branch this point belongs to
     parentBranch = attr.ib(default=None, repr=False, cmp=False)
+    """Branch this point belongs to"""
 
-    # Text annotation for node.
     annotation = attr.ib(default="", cmp=False, metadata=SAVE_META)
+    """Text annotation for node."""
 
-    # Branches coming off the node.
     children = attr.ib(default=attr.Factory(list))
+    """Branches coming off the node."""
 
-    # Not sure...?
-    hilighted = attr.ib(default=None, cmp=False) # Not used yet
+    hilighted = attr.ib(default=None, cmp=False)
+    """Not sure...? Isn't used... """
 
     def isRoot(self):
         return self.parentBranch is None
@@ -31,23 +36,25 @@ class Point():
 
 @attr.s
 class Branch():
-    # Identifier of a branch, can be shared across stacks.
+    """Single connected branch on a Tree"""
+
     id = attr.ib(metadata=SAVE_META)
+    """Identifier of a branch, can be shared across stacks."""
 
-    # Tree the branch belongs to
     _parentTree = attr.ib(default=None, repr=False, cmp=False)
+    """Tree the branch belongs to"""
 
-    # Node this branched off, or None for root branch
     parentPoint = attr.ib(default=None, repr=False, cmp=False, metadata=SAVE_META)
+    """Node this branched off, or None for root branch"""
 
-    # Points along this dendrite branch, in order.
     points = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    """Points along this dendrite branch, in order."""
 
-    # Not sure...?
-    isEnded = attr.ib(default=False, cmp=False) # Not used yet
+    isEnded = attr.ib(default=False, cmp=False)
+    """Not sure...? Isn't used... """
 
-    # Not sure...?
     colorData = attr.ib(default=None, cmp=False) # Not used yet
+    """Not sure...? Isn't used... """
 
     def indexInParent(self):
         return self._parentTree.branches.index(self)
@@ -117,11 +124,13 @@ class Branch():
 
 @attr.s
 class Tree():
-    # Soma, initial start of the main branch.
-    rootPoint = attr.ib(default=None, metadata=SAVE_META)
+    """3D Tree structure."""
 
-    # All branches making up this dendrite tree.
+    rootPoint = attr.ib(default=None, metadata=SAVE_META)
+    """Soma, initial start of the main branch."""
+
     branches = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    """All branches making up this dendrite tree."""
 
     # HACK - make faster, index points by ID
     def getPointByID(self, pointID):
