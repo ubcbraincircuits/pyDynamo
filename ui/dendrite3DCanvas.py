@@ -8,14 +8,15 @@ class Dendrite3DCanvas(BaseMatplotlibCanvas):
         super(Dendrite3DCanvas, self).__init__(*args, in3D=True, **kwargs)
 
     def compute_initial_figure(self):
+        ax = self.axes[0]
         # Update colors to be white on black:
-        self.axes.set_facecolor("black")
-        self.axes.w_xaxis.set_pane_color((0.0,0.0,0.0,1.0))
-        self.axes.w_yaxis.set_pane_color((0.0,0.0,0.0,1.0))
-        self.axes.w_zaxis.set_pane_color((0.0,0.0,0.0,1.0))
-        self.axes.w_xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
-        self.axes.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
-        self.axes.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+        ax.set_facecolor("black")
+        ax.w_xaxis.set_pane_color((0.0,0.0,0.0,1.0))
+        ax.w_yaxis.set_pane_color((0.0,0.0,0.0,1.0))
+        ax.w_zaxis.set_pane_color((0.0,0.0,0.0,1.0))
+        ax.w_xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+        ax.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+        ax.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
 
         # Draw each branch in the same color as in the flat version:
         for i, branch in enumerate(self.treeModel.branches):
@@ -23,14 +24,14 @@ class Dendrite3DCanvas(BaseMatplotlibCanvas):
                 continue
             points = [branch.parentPoint] + branch.points
             x, y, z = self.treeModel.worldCoordPoints(points)
-            self.axes.plot(x, y, z, c=colorForBranch(i))
+            ax.plot(x, y, z, c=colorForBranch(i))
 
         # And finally draw the soma as a big sphere:
         x, y, z = self.treeModel.worldCoordPoints([self.treeModel.rootPoint])
-        self.axes.scatter(x, y, z, c=colorForBranch(0), s=100)
+        ax.scatter(x, y, z, c=colorForBranch(0), s=100)
 
     def needToUpdate(self):
-        self.axes.cla()
+        self.axes[0].cla()
         self.compute_initial_figure()
         self.draw()
 

@@ -6,6 +6,7 @@ from model import FullState, FullStateActions, Tree, UIState, History
 from files import AutoSaver, loadState, saveState, importFromMatlab
 
 from .initialMenu import InitialMenu
+from .motility3DViewWindow import Motility3DViewWindow
 from .stackWindow import StackWindow
 from .tilefigs import tileFigs
 
@@ -115,7 +116,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.redrawAllStacks()
             return True
         elif (key == ord('M')):
-            motility(self.fullState.trees) # HACK
+            viewWindow = Motility3DViewWindow(self, self.fullState.trees)
+            viewWindow.show()
             return True
         elif (key == ord('S') and ctrlPressed):
             self.saveToFile()

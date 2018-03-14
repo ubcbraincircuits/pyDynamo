@@ -5,23 +5,24 @@ from matplotlib.figure import Figure
 
 class BaseMatplotlibCanvas(FigureCanvas):
     # Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.).
-    def __init__(self, parent=None, width=5, height=4, dpi=100, in3D=False):
+    def __init__(self, parent=None, width=5, height=4, dpi=100, in3D=False, subplots=1):
         fig = Figure(figsize=(width, height), dpi=dpi)
-        fig.subplots_adjust(top=1.0, bottom=0.0, right=1.0, left=0.0)
+        fig.subplots_adjust(top=1.0, bottom=0.0, right=1.0, left=0.0, wspace=0.0, hspace=0.0)
         if in3D:
-            self.axes = fig.add_subplot(111, projection='3d')
+            self.axes = [fig.add_subplot(1, subplots, i + 1, projection='3d') for i in range(subplots)]
         else:
-            self.axes = fig.add_subplot(111)
+            self.axes = [fig.add_subplot(1, subplots, i + 1, projection='2d') for i in range(subplots)]
         self.compute_initial_figure()
         super(BaseMatplotlibCanvas, self).__init__(fig)
         if in3D:
-            self.axes.mouse_init()
+            [ax.mouse_init() for ax in self.axes]
         self.setParent(parent)
         self.setStyleSheet("background-color:black;")
         FigureCanvas.setSizePolicy(self,
                                    QtWidgets.QSizePolicy.Expanding,
                                    QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+        self.fig = fig
 
     def compute_initial_figure(self):
         pass
