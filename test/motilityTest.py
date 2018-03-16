@@ -64,7 +64,7 @@ def nanCompare(a, b):
     with np.errstate(invalid='ignore'):
         return ((np.abs(a - b) < 1e-9) | (np.isnan(a) & np.isnan(b)))
 
-def main():
+def run():
     results = calculateResults()
     answers = loadAnswers()
 
@@ -84,8 +84,5 @@ def main():
             print ("Match: ")
             print (nanCompare(answers[prop][VIDS], results[prop][VIDS]))
 
-
-
-
 if __name__ == '__main__':
-    main()
+    run()

@@ -55,6 +55,7 @@ def testTree():
     canRedo = h.redo()
     assert canRedo
     assert data == s1
+    print ("History test passed! 🙌")
 
 
 if __name__ == '__main__':
