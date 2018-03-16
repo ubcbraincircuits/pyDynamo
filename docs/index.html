@@ -60,10 +60,44 @@
 <dt>
 <em class="property">class </em><code class="descclassname">model.tree.</code><code class="descname">Branch</code><span class="sig-paren">(</span><em>id</em>, <em>parentTree=None</em>, <em>parentPoint=None</em>, <em>points=NOTHING</em>, <em>isEnded=False</em>, <em>colorData=None</em><span class="sig-paren">)</span></dt>
 <dd><p>Single connected branch on a Tree</p>
+<dl class="method">
+<dt>
+<code class="descname">addPoint</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span></dt>
+<dd><p>Appends a point at the end of the branch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the index of the new point.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt>
 <code class="descname">colorData</code><em class="property"> = None</em></dt>
 <dd><p>Not sure...? Isn&#8217;t used...</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">cumulativeWorldLengths</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Calculate the length to all points along the branch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of cumulative lengths, how far along the branch to get to each point.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">hasChildren</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>True if any point on the branch has child branches coming off it.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -72,10 +106,50 @@
 <dd><p>Identifier of a branch, can be shared across stacks.</p>
 </dd></dl>
 
+<dl class="method">
+<dt>
+<code class="descname">indexForPoint</code><span class="sig-paren">(</span><em>pointTarget</em><span class="sig-paren">)</span></dt>
+<dd><p>Given a point, return how far along the branch it sits.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">indexInParent</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Ordinal number of branch within the tree it is owned by.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">insertPointBefore</code><span class="sig-paren">(</span><em>point</em>, <em>index</em><span class="sig-paren">)</span></dt>
+<dd><p>Appends a point within a branch.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the index of the new point.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt>
 <code class="descname">isEnded</code><em class="property"> = None</em></dt>
 <dd><p>Not sure...? Isn&#8217;t used...</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">isFilo</code><span class="sig-paren">(</span><em>maxLength</em><span class="sig-paren">)</span></dt>
+<dd><p>A branch is considered a Filo if it has no children, not a lamella, and not too long.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Tuple pair (whether it is a Filo, total length of the branch)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -88,6 +162,40 @@
 <dt>
 <code class="descname">points</code><em class="property"> = None</em></dt>
 <dd><p>Points along this dendrite branch, in order.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">removePointLocally</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span></dt>
+<dd><p>Remove a single point from the branch, leaving points before and after.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The point before this one</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">setParentPoint</code><span class="sig-paren">(</span><em>parentPoint</em><span class="sig-paren">)</span></dt>
+<dd><p>Sets the parent point for this branch, and adds the branch to its parent&#8217;s children.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">worldLengths</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Returns world length of the branch, plus the length to the last branch point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(totalLength, totalLength to last branch)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -120,6 +228,12 @@
 <dd><p>Identifier of point, can be shared across stacks.</p>
 </dd></dl>
 
+<dl class="method">
+<dt>
+<code class="descname">isRoot</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Whether this point represents the root of the whole tree.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt>
 <code class="descname">location</code><em class="property"> = None</em></dt>
@@ -138,16 +252,106 @@
 <dt>
 <em class="property">class </em><code class="descclassname">model.tree.</code><code class="descname">Tree</code><span class="sig-paren">(</span><em>rootPoint=None</em>, <em>branches=NOTHING</em><span class="sig-paren">)</span></dt>
 <dd><p>3D Tree structure.</p>
+<dl class="method">
+<dt>
+<code class="descname">addBranch</code><span class="sig-paren">(</span><em>branch</em><span class="sig-paren">)</span></dt>
+<dd><p>Adds a branch to the tree.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Index of branch within the tree.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt>
 <code class="descname">branches</code><em class="property"> = None</em></dt>
 <dd><p>All branches making up this dendrite tree.</p>
 </dd></dl>
 
+<dl class="method">
+<dt>
+<code class="descname">closestPointTo</code><span class="sig-paren">(</span><em>targetLocation</em>, <em>zFilter=False</em><span class="sig-paren">)</span></dt>
+<dd><p>Given a position, find the point closest to it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>targetLocation</strong> &#8211; (x, y, z) location tuple.</li>
+<li><strong>zFilter</strong> &#8211; If true, only items on the same zStack are considered.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Point object of point closest to the target location.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">flattenPoints</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Returns all points in the tree, as a single list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">getBranchByID</code><span class="sig-paren">(</span><em>branchID</em><span class="sig-paren">)</span></dt>
+<dd><p>Given the ID of a branch, find the branch object that matches.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">getPointByID</code><span class="sig-paren">(</span><em>pointID</em><span class="sig-paren">)</span></dt>
+<dd><p>Given the ID of a point, find the point object that matches.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">movePoint</code><span class="sig-paren">(</span><em>pointID</em>, <em>newLocation</em>, <em>moveDownstream=False</em><span class="sig-paren">)</span></dt>
+<dd><p>Moves a point to a new loction, optionally also moving all downstream points by the same.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pointID</strong> &#8211; ID of point to move.</li>
+<li><strong>newLocation</strong> &#8211; (x, y, z) tuple to move it to.</li>
+<li><strong>moveDownstream</strong> &#8211; Boolean flag of whether to move all child points and points later in the branch.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">removeBranch</code><span class="sig-paren">(</span><em>branch</em><span class="sig-paren">)</span></dt>
+<dd><p>Removes a branch from the tree - assumes all points already removed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">removePointByID</code><span class="sig-paren">(</span><em>pointID</em><span class="sig-paren">)</span></dt>
+<dd><p>Removes a single point from the tree, identified by ID.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt>
 <code class="descname">rootPoint</code><em class="property"> = None</em></dt>
 <dd><p>Soma, initial start of the main branch.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">worldCoordPoints</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span></dt>
+<dd><p>Convert image pixel (x, y, z) to a real-world (x, y, z) position by scaling.</p>
 </dd></dl>
 
 </dd></dl>
