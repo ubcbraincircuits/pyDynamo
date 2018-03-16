@@ -25,3 +25,15 @@ Model tree:
 .. automodule:: model.tree
    :members:
    :noindex:
+
+Model filotype:
+
+.. automodule:: model.filoType
+   :members:
+   :noindex:
+
+ Model history:
+
+ .. automodule:: model.history
+    :members:
+    :noindex:
