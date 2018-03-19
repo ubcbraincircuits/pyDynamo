@@ -16,6 +16,9 @@ class FullState:
     # Image-specific tree data, one for each of the files above
     trees = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
+    # Landmark points for each tree.
+    landmarks = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+
     # Image-specific options, one for each of the files above
     uiStates = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
@@ -27,6 +30,9 @@ class FullState:
 
     # Shared color channel information
     channel = attr.ib(default=0)
+
+    # Which landmark point we're editing, -1 when not in landmark mode.
+    landmarkPointAt = attr.ib(default=-1)
 
     # Whether to draw channels in color (True for r/g/b) or white (False)
     useColor = attr.ib(default=False)
@@ -50,14 +56,21 @@ class FullState:
     # TODO: active window
     # TODO: add new window off active
 
-    def addFiles(self, filePaths, treeData=None):
+    def addFiles(self, filePaths, treeData=None, landmarkData=None):
         for i, path in enumerate(filePaths):
             self.filePaths.append(path)
+
             nextTree = Tree() # TODO: add nextTree as child of prevTree
             if treeData is not None and i < len(treeData):
                 nextTree = treeData[i]
             self.trees.append(nextTree)
-            self.uiStates.append(UIState(parent=self, tree=nextTree))
+
+            nextLandmarks = []
+            if landmarkData is not None and i < len(landmarkData):
+                nextLandmarks = landmarkData[i]
+            self.landmarks.append(nextLandmarks)
+
+            self.uiStates.append(UIState(parent=self, tree=nextTree, landmarks=nextLandmarks))
 
     def toggleLineWidth(self):
         if self.lineWidth == 4:
@@ -70,6 +83,16 @@ class FullState:
 
     def changeChannel(self, delta):
         self.channel = (self.channel + delta) % self.volumeSize[0]
+
+    def inLandmarkMode(self):
+        return self.landmarkPointAt >= 0
+
+    def toggleLandmarkMode(self):
+        self.landmarkPointAt = -1 if self.inLandmarkMode() else 0
+
+    def nextLandmarkPoint(self, backwards=False):
+        self.landmarkPointAt += -1 if backwards else 1
+        self.landmarkPointAt = max(0, self.landmarkPointAt)
 
     def updateVolumeSize(self, volumeSize):
         # TODO: Something better when volume sizes don't match? ...
@@ -109,6 +132,7 @@ class FullState:
     def removeStack(self, index):
         self.filePaths.pop(index)
         self.trees.pop(index)
+        self.landmarks.pop(index)
         self.uiStates.pop(index)
         # TODO - remove undo state for that stack too
 

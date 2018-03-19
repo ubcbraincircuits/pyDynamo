@@ -1,4 +1,4 @@
-from calc import addedSubtractedTransitioned, motility
+from analysis import addedSubtractedTransitioned, motility
 
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 from .dendritePainter import colorForBranch

@@ -3,6 +3,7 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget, QGridLayout, QApplication
 
 from .dendritePainter import DendritePainter
+from .landmarkPainter import LandmarkPainter
 
 class DendriteOverlay(QWidget):
     def __init__(self, dendriteCanvas, *args, **kwargs):
@@ -12,11 +13,21 @@ class DendriteOverlay(QWidget):
 
     def paintEvent(self, event):
         super().paintEvent(event)
+        fullState = self.dendriteCanvas.uiState.parent()
+
         p = QPainter()
         p.begin(self)
-        DendritePainter(p,
-            self.dendriteCanvas.uiState.parent().zAxisAt,
-            self.dendriteCanvas.uiState,
-            self.dendriteCanvas.imgView.mapFromScene
-        ).drawTree(self.dendriteCanvas.uiState._tree)
+
+        if fullState.inLandmarkMode():
+            LandmarkPainter(p,
+                fullState.zAxisAt,
+                self.dendriteCanvas.uiState,
+                self.dendriteCanvas.imgView.mapFromScene
+            ).drawLandmarks(self.dendriteCanvas.uiState._landmarks, fullState.landmarkPointAt)
+        else:
+            DendritePainter(p,
+                fullState.zAxisAt,
+                self.dendriteCanvas.uiState,
+                self.dendriteCanvas.imgView.mapFromScene
+            ).drawTree(self.dendriteCanvas.uiState._tree)
         p.end()

@@ -1,7 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
-from calc import TDBL, motility # TODO - remove
 from model import FullState, FullStateActions, Tree, UIState, History
 from files import AutoSaver, loadState, saveState, importFromMatlab
 
@@ -50,9 +49,6 @@ class DynamoWindow(QtWidgets.QMainWindow):
         )
         if filePath != "":
             self.fullState = importFromMatlab(filePath)
-            # Debug for now - TODO: remove.
-            for i, tree in enumerate(self.fullState.trees):
-                print ("%d -> %f" % (i, TDBL(tree, excludeAxon=True, excludeBasal=False, includeFilo=False, filoDist=5)))
             self.history = History(self.fullState)
             self.fullActions = FullStateActions(self.fullState, self.history)
             self.autoSaver = AutoSaver(self.fullState)
@@ -108,6 +104,15 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.fullActions.changeZAxis(-1)
             self.redrawAllStacks()
             return True
+        elif (key == ord('L')):
+            self.fullState.toggleLandmarkMode()
+            self.redrawAllStacks()
+            return True
+        elif (key == Qt.Key_Return):
+            if self.fullState.inLandmarkMode():
+                self.fullState.nextLandmarkPoint(shftPressed)
+                self.redrawAllStacks()
+                return True
         elif (key == ord('C')):
             if shftPressed:
                 self.fullState.useColor = not self.fullState.useColor
