@@ -1,5 +1,6 @@
 import attr
 import json
+import gzip
 
 from util import SAVE_KEY
 
@@ -10,9 +11,8 @@ def attrFilter(attrData, value):
 
 def saveState(fullState, path):
     asDict = attr.asdict(fullState, filter=attrFilter)
-    with open(path, 'w') as outfile:
-        json.dump(asDict, outfile, indent=2, sort_keys=True)
-
+    with gzip.GzipFile(path, 'w') as outfile:
+        outfile.write(json.dumps(asDict, indent=2, sort_keys=True).encode('utf-8'))
 
 ### HACK - use cattrs?
 def convert(asDict, key, conversion, isArray=False):
@@ -83,6 +83,6 @@ def indexFullState(fullState, path):
 
 def loadState(path):
     asDict = None
-    with open(path, 'r') as infile:
-        asDict = json.load(infile)
+    with gzip.GzipFile(path, 'r') as infile:
+        asDict = json.loads(infile.read().decode('utf-8'))
     return indexFullState(convertToFullState(asDict), path)

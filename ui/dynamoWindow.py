@@ -33,7 +33,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     def openFromFile(self):
         filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
-            "Open dynamo save file", "", "Dynamo files (*.dyn)"
+            "Open dynamo save file", "", "Dynamo files (*.dyn.gz)"
         )
         if filePath != "":
             self.fullState = loadState(filePath)
@@ -71,8 +71,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
             "New dynamo save file", "", "Dynamo files (*.dyn)"
         )
         if filePath != "":
-            if not filePath.endswith(".dyn"):
-                filePath = filePath + ".dyn"
+            if not filePath.endswith(".dyn.gz"):
+                filePath = filePath + ".dyn.gz"
             self.fullState._rootPath = filePath
             saveState(self.fullState, filePath)
             QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + filePath)
