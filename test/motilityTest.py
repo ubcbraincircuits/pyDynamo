@@ -3,7 +3,7 @@ import scipy.io
 
 from util import emptyArrayMatrix
 
-from calc import addedSubtractedTransitioned, motility, TDBL
+from analysis import addedSubtractedTransitioned, motility, TDBL
 from files import importFromMatlab
 
 PROPERTIES = ['added', 'filolengths', 'tdbl', 'masterChanged', 'transitioned', 'masterNodes', 'subtracted', 'filotypes']

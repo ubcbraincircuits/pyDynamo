@@ -69,6 +69,17 @@ class Branch():
                 return idx
         return -1
 
+    def isEmpty(self):
+        """Whether the branch has no points other than the branch point."""
+        return len(self.points) == 0
+
+    def isAxon(self, axonLabel='axon'):
+        """Whether the branch is labelled as the axon."""
+        return util.lastPointWithLabelIdx([self.parentPoint] + self.points, axonLabel) >= 0
+
+    def isBasal(self, basalLabel='basal'):
+        return util.lastPointWithLabelIdx([self.parentPoint] + self.points, basalLabel) >= 0
+
     def hasChildren(self):
         """True if any point on the branch has child branches coming off it."""
         return _lastPointWithChildren(self.points) > -1
@@ -118,12 +129,13 @@ class Branch():
         self.parentPoint = parentPoint
         self.parentPoint.children.append(self)
 
-    def worldLengths(self):
+    def worldLengths(self, fromIdx=0):
         """Returns world length of the branch, plus the length to the last branch point.
 
         :returns: (totalLength, totalLength to last branch)
         """
         pointsWithRoot = [self.parentPoint] + self.points
+        pointsWithRoot = pointsWithRoot[fromIdx:]
         x, y, z = self._parentTree.worldCoordPoints(pointsWithRoot)
         lastBranchPoint = _lastPointWithChildren(pointsWithRoot)
         totalLength, totalLengthToLastBranch = 0, 0

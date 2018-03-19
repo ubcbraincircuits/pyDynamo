@@ -59,3 +59,10 @@ def emptyArrayMatrix(r, c):
     for i in range(r):
         d.append(emptyArrayArray(c))
     return d
+
+def lastPointWithLabelIdx(points, label):
+    lastPointIdx = -1
+    for i, point in enumerate(points):
+        if point.annotation.find(label) != -1:
+            lastPointIdx = i
+    return lastPointIdx

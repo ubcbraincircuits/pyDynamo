@@ -79,12 +79,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                 if childBranch is None or len(childBranch.points) == 0:
                                     retracted += self.filoLengths[treeIdx - 1][childBranch]
                             if retracted > 0:
-                                print ("%d/%d removed! %f" % (treeIdx, branchIdx, retracted))
                                 x, y, z = treeModel.worldCoordPoints([childPoint])
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
                             drawAt = self.treeModels[treeIdx - 1].branches[branchIdx].points[-1] # End or parent?
-                            print ("%d/%d removed! %s" % (treeIdx, branchIdx, str(drawAt)))
                             if drawAt is not None:
                                 sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
                                 x, y, z = treeModel.worldCoordPoints([drawAt])
