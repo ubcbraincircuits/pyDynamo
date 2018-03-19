@@ -60,17 +60,17 @@ def _calcFiloLengths(filoLengths, branch, excludeAxon, excludeBasal, filoDist):
     # 1) If the branch has not been created yet, or is empty, abort
     if branch.isEmpty():
         filoLengths[branchIdx] = 0
-        return 0
+        return
     # 2) If the branch contains an 'axon' label, abort. 3) Same with basal dendrite.
     if (excludeAxon and branch.isAxon()) or (excludeBasal and branch.isBasal()):
         filoLengths[branchIdx] = np.nan
-        return np.nan
+        return
     # 4) If we're a filo, set and stop:
     isFilo, branchLength = branch.isFilo(filoDist)
     if isFilo:
         filoLengths[branchIdx] = branchLength
         return
-
+        
     # 5) Recurse to fill filolengths cache for all child branches:
     for point in branch.points:
         for childBranch in point.children:
