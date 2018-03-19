@@ -18,7 +18,6 @@ Dashed line = line without end on this plane
 Only draw ones with Z < 3 difference, UNLESS all are drawn
 """
 class DendritePainter():
-    # TODO - scale with zoom.
     NODE_CIRCLE_DIAMETER = 5
     NODE_CIRCLE_PEN = QPen(QBrush(Qt.black), 1, Qt.SolidLine)
     NODE_CIRCLE_BRUSH = QBrush(Qt.white)

@@ -108,11 +108,6 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.fullState.toggleLandmarkMode()
             self.redrawAllStacks()
             return True
-        elif (key == Qt.Key_Return):
-            if self.fullState.inLandmarkMode():
-                self.fullState.nextLandmarkPoint(shftPressed)
-                self.redrawAllStacks()
-                return True
         elif (key == ord('C')):
             if shftPressed:
                 self.fullState.useColor = not self.fullState.useColor
@@ -130,6 +125,26 @@ class DynamoWindow(QtWidgets.QMainWindow):
         elif (key == ord('Z') and ctrlPressed):
             self.updateUndoStack(isRedo=shftPressed)
             return True
+
+        # Handle these only while doing landmarks:
+        if self.fullState.inLandmarkMode():
+            if (key == Qt.Key_Return):
+                self.fullState.nextLandmarkPoint(shftPressed)
+                self.redrawAllStacks()
+                return True
+            elif (key == Qt.Key_Delete):
+                msg = "Delete this landmark?"
+                reply = QtWidgets.QMessageBox.question(
+                    self, 'Delete?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
+                )
+                if reply == QtWidgets.QMessageBox.Yes:
+                    self.history.pushState()
+                    self.fullActions.deleteCurrentLandmark()
+                    self.redrawAllStacks()
+                    return True
+        return False
+
+
 
     # TODO - document
     def redrawAllStacks(self):

@@ -4,21 +4,17 @@ from PyQt5.QtCore import Qt, QPointF, QRectF
 import matplotlib.pyplot as plt
 import numpy as np
 
-# LINE_COLOR_COUNT = 7
-# LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
-
-# def colorForBranch(branchNumber):
-    # return LINE_COLORS[(branchNumber + 1) % LINE_COLOR_COUNT] # +1 to start at yellow, not red.
-
 """
 """
 class LandmarkPainter():
-    # TODO - scale with zoom.
     NODE_CIRCLE_DIAMETER = 5
-    NODE_CIRCLE_PEN = QPen(QBrush(Qt.black), 1, Qt.SolidLine)
-    NODE_CIRCLE_BRUSH = QBrush(Qt.white)
-    NODE_CIRCLE_SELECTED_BRUSH = QBrush(Qt.cyan)
-    NODE_CIRCLE_MOVING_BRUSH = QBrush(Qt.red)
+
+    NODE_CIRCLE_PEN = QPen(QBrush(Qt.darkRed), 2, Qt.SolidLine)
+    NODE_CIRCLE_CURRENT_PEN = QPen(QBrush(Qt.darkCyan), 2, Qt.SolidLine)
+
+    NODE_CIRCLE_BRUSH = QBrush(Qt.red)
+    NODE_CIRCLE_CURRENT_BRUSH = QBrush(Qt.cyan)
+    NODE_CIRCLE_WRONGZ_BRUSH = Qt.NoBrush
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
     ANNOTATION_FONT = QFont("Arial", 12, QFont.Bold)
@@ -38,23 +34,28 @@ class LandmarkPainter():
             self.drawLandmark(landmark, i == landmarkPointIdx)
 
     def drawLandmark(self, landmark, isCurrent):
-        x, y, z = self.zoomedLocation(point.location)
-        annotation = point.annotation
-        self.drawCircle(x, y, isCurrent)
+        if landmark is None:
+            return
+        x, y, z = self.zoomedLocation(landmark)
+        self.drawCircle(x, y, z == self.zAt, isCurrent)
 
-    def drawCircleThisZ(self, x, y, isCurent):
-        brushColor = self.NODE_CIRCLE_BRUSH
-        if isSelected:
-            brushColor = self.NODE_CIRCLE_MOVING_BRUSH if self.uiState.isMoving else self.NODE_CIRCLE_SELECTED_BRUSH
-        self.p.setPen(self.NODE_CIRCLE_PEN)
-        self.p.setBrush(brushColor)
+    def drawCircle(self, x, y, sameZ, isCurrent):
+        brushColor, penColor = None, None
+        pen = self.NODE_CIRCLE_CURRENT_PEN if isCurrent else self.NODE_CIRCLE_PEN
+        if sameZ:
+            brush = self.NODE_CIRCLE_CURRENT_BRUSH if isCurrent else self.NODE_CIRCLE_BRUSH
+        else:
+            brush = self.NODE_CIRCLE_WRONGZ_BRUSH
+
+        self.p.setPen(pen)
+        self.p.setBrush(brush)
         self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_DIAMETER, self.NODE_CIRCLE_DIAMETER)
 
     def drawHeader(self, landmarkPointIdx):
         self.p.setFont(self.ANNOTATION_FONT)
         self.p.setPen(self.ANNOTATION_PEN)
         topLeft = QRectF(self.HEADER_PADDING, 0, self.HEADER_MAX_WIDTH, 2 * self.HEADER_PADDING)
-        text = "Landmark, point %d" % (landmarkPointIdx)
+        text = "Landmark, point %d" % (landmarkPointIdx + 1)
         self.p.drawText(topLeft, Qt.AlignVCenter, text)
 
     def zoomedLocation(self, xyz):

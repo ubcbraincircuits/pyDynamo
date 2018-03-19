@@ -118,7 +118,6 @@ class StackWindow(QtWidgets.QMainWindow):
         elif (key == ord('A')):
             self.actionHandler.pan(-1, 0)
         elif (key == ord('S')):
-            # TODO - ctrl-s = save
             self.actionHandler.pan(0, 1)
         elif (key == ord('D')):
             self.actionHandler.pan(1, 0)

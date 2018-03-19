@@ -11,7 +11,7 @@ def parseMatlabBranch(fullState, pointsXYZ, annotations):
         assert xyz.shape == (3,)
         branch.addPoint(Point(
             id = fullState.nextPointID(),
-            location = tuple(xyz),
+            location = tuple(xyz * 1.0),
             annotation = ("" if len(annotation) == 0 else annotation[0])
         ))
     return branch

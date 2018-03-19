@@ -25,6 +25,8 @@ def convert(asDict, key, conversion, isArray=False):
 
 
 def convertToPoint(asDict):
+    if asDict is None:
+        return None
     convert(asDict, 'location', tuple)
     return Point(**asDict)
 

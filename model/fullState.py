@@ -94,6 +94,11 @@ class FullState:
         self.landmarkPointAt += -1 if backwards else 1
         self.landmarkPointAt = max(0, self.landmarkPointAt)
 
+    def deleteLandmark(self, landmarkId):
+        for landmarks in self.landmarks:
+            if landmarkId < len(landmarks):
+                landmarks.pop(landmarkId)
+
     def updateVolumeSize(self, volumeSize):
         # TODO: Something better when volume sizes don't match? ...
         if self.volumeSize is None:
@@ -140,3 +145,9 @@ class FullState:
         if not self.useColor:
             return None
         return ['r', 'g', 'b'][self.channel % 3]
+
+    def setLandmark(self, treeIndex, location):
+        assert self.landmarkPointAt >= 0
+        while len(self.landmarks[treeIndex]) <= self.landmarkPointAt:
+            self.landmarks[treeIndex].append(None)
+        self.landmarks[treeIndex][self.landmarkPointAt] = location

@@ -64,6 +64,13 @@ class DendriteVolumeCanvas(QWidget):
     def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
         location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt)
+
+        # Shortcut out landmark mode:
+        if self.uiState.parent().inLandmarkMode():
+            self.fullActions.setLandmark(self.windowIndex, location)
+            self.dynamoWindow.redrawAllStacks()
+            return
+
         modifiers = QApplication.keyboardModifiers()
         shiftPressed = modifiers & Qt.ShiftModifier
         rightClick = event.button() == Qt.RightButton

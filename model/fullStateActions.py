@@ -77,3 +77,11 @@ class FullStateActions():
             state = self.state.uiStates[i]
             newLocation = self.state.convertLocation(location, localIdx, i)
             state.endMove(newLocation, moveDownstream)
+
+    def setLandmark(self, localIdx, location):
+        self.history.pushState()
+        self.state.setLandmark(localIdx, location)
+
+    def deleteCurrentLandmark(self):
+        self.history.pushState()
+        self.state.deleteLandmark(self.state.landmarkPointAt)
