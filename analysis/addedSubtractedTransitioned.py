@@ -10,6 +10,8 @@ def addedSubtractedTransitioned(
     terminalDist=10,
     filoDist=10
 ):
+    """TODO - document."""
+
     # All outputs will be [# trees][# branches]
     nTrees = len(trees)
     nBranches = len(trees[-1].branches)

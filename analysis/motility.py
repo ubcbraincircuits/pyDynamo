@@ -12,6 +12,8 @@ def motility(trees,
     terminalDist=10,
     filoDist=10
 ):
+    """TODO - document."""
+
     print ("\n\nCalculating motility...")
     filoTypes, added, subtracted, _, masterChangedOut, _ = \
         addedSubtractedTransitioned(trees, excludeAxon, excludeBasal, terminalDist, filoDist)
@@ -70,7 +72,7 @@ def _calcFiloLengths(filoLengths, branch, excludeAxon, excludeBasal, filoDist):
     if isFilo:
         filoLengths[branchIdx] = branchLength
         return
-        
+
     # 5) Recurse to fill filolengths cache for all child branches:
     for point in branch.points:
         for childBranch in point.children:

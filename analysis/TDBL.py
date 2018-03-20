@@ -1,7 +1,3 @@
-"""
-.. module:: calc
-"""
-
 import util
 
 # Calculate total dendritic branch length for a dendritic arbor.
@@ -11,6 +7,7 @@ def TDBL(tree,
     includeFilo=True,
     filoDist=10
 ):
+    """TODO - document."""
     if not tree.rootPoint:
         return 0
     return _tdblPoint(tree.rootPoint, excludeAxon, excludeBasal, includeFilo, filoDist)

@@ -144,8 +144,6 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     return True
         return False
 
-
-
     # TODO - document
     def redrawAllStacks(self):
         for window in self.stackWindows:
