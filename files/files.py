@@ -54,7 +54,11 @@ def indexTree(tree):
         branch._parentTree = tree
         for point in branch.points:
             point.parentBranch = branch
-            # point.children = [] # HACK - implement or remove children property...
+        # Replace local clone of point with proper reference
+        if branch.parentPoint is not None: # Not sure what none signifies...
+            properParent = tree.getPointByID(branch.parentPoint.id)
+            if properParent is not None:
+                branch.setParentPoint(properParent)
 
 def findNextPointID(fullState):
     nextID = 0

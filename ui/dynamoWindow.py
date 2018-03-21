@@ -71,7 +71,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     def saveToNewFile(self):
         filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self,
-            "New dynamo save file", "", "Dynamo files (*.dyn)"
+            "New dynamo save file", "", "Dynamo files (*.dyn.gz)"
         )
         if filePath != "":
             if not filePath.endswith(".dyn.gz"):

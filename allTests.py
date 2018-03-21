@@ -13,9 +13,9 @@ def testMotility():
     motilityTest.run()
 
 def run():
-    testAbsOrient()
+    # testAbsOrient()
     # testHistory()
-    # testMotility()
+    testMotility()
 
 if __name__ == '__main__':
     run()
