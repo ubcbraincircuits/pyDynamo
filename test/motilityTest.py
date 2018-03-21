@@ -1,13 +1,13 @@
 import numpy as np
 import scipy.io
+import tempfile
 
 from util import emptyArrayMatrix
 
 from analysis import addedSubtractedTransitioned, motility, TDBL
-from files import importFromMatlab
+import files
 
 PROPERTIES = ['added', 'filolengths', 'tdbl', 'masterChanged', 'transitioned', 'masterNodes', 'subtracted', 'filotypes']
-
 
 def convertMasterNodesFromNumpy(masterNodesNp):
     r, c = masterNodesNp.shape
@@ -17,11 +17,13 @@ def convertMasterNodesFromNumpy(masterNodesNp):
             masterNodesArray[row][col] = (masterNodesNp[row, col][0] - 1).tolist()
     return masterNodesArray
 
-
-
 def calculateResults(path='data/movie5local.mat'):
     results = {}
-    fullState = importFromMatlab(path)
+    if path.endswith('.mat'):
+        fullState = files.importFromMatlab(path)
+    else:
+        assert path.endswith('.dyn.gz')
+        fullState = files.loadState(path)
     trees = fullState.trees
 
     allTDBL = [TDBL(tree, excludeAxon=True, excludeBasal=False, includeFilo=False, filoDist=5) for tree in trees]
@@ -39,7 +41,7 @@ def calculateResults(path='data/movie5local.mat'):
     motilities, filoLengths = motility(trees, excludeAxon=True, excludeBasal=False, terminalDist=5, filoDist=5)
     results['filolengths'] = filoLengths
 
-    return results
+    return fullState, results
 
 def loadAnswers(path='data/testMotility.mat'):
     answers = {}
@@ -64,13 +66,11 @@ def nanCompare(a, b):
     with np.errstate(invalid='ignore'):
         return ((np.abs(a - b) < 1e-9) | (np.isnan(a) & np.isnan(b)))
 
-def run():
-    results = calculateResults()
+def testAgainstGoldenFile():
+    _, results = calculateResults()
     answers = loadAnswers()
 
-    np.set_printoptions(precision=3)
     print ("\nResults:\n---------")
-
     VIDS = slice(0, 5)
     for prop in PROPERTIES:
         if np.all(nanCompare(answers[prop][VIDS], results[prop][VIDS])):
@@ -83,6 +83,35 @@ def run():
             print (results[prop][VIDS])
             print ("Match: ")
             print (nanCompare(answers[prop][VIDS], results[prop][VIDS]))
+
+def testRoundtrip():
+    fullState, resultsFromImport = calculateResults(path='data/movie5local.mat')
+
+    tmpFile = tempfile.NamedTemporaryFile(suffix='.dyn.gz')
+    print ("   >> saving to tmp file %s..." % (tmpFile.name))
+    files.saveState(fullState, tmpFile.name)
+    _, resultsFromSave = calculateResults(path=tmpFile.name)
+    tmpFile.close()
+
+    print ("\nResults:\n---------")
+    VIDS = slice(0, 5)
+    for prop in PROPERTIES:
+        if np.all(nanCompare(resultsFromImport[prop][VIDS], resultsFromSave[prop][VIDS])):
+            print ("Property %s matches! 🙌" % (prop))
+        else:
+            print ("Property %s doesn't match!" % (prop))
+            print ("From Import: ")
+            print (resultsFromImport[prop][VIDS])
+            print ("From Save: ")
+            print (resultsFromSave[prop][VIDS])
+            print ("Match: ")
+            print (nanCompare(resultsFromImport[prop][VIDS], resultsFromSave[prop][VIDS]))
+
+def run():
+    np.set_printoptions(precision=3)
+    # testAgainstGoldenFile()
+    testRoundtrip()
+    np.set_printoptions()
 
 if __name__ == '__main__':
     run()

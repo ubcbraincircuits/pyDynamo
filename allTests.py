@@ -3,18 +3,21 @@ from test import absOrientTest, historyTest, motilityTest
 def testAbsOrient():
     print ("AbsOrient test...")
     absOrientTest.run()
+    print ("")
 
 def testHistory():
     print ("History test...")
     historyTest.run()
+    print ("")
 
 def testMotility():
-    print ("\nMotility test...")
+    print ("Motility test...")
     motilityTest.run()
+    print ("")
 
 def run():
-    # testAbsOrient()
-    # testHistory()
+    testAbsOrient()
+    testHistory()
     testMotility()
 
 if __name__ == '__main__':
