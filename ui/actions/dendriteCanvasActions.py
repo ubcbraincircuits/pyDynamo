@@ -2,8 +2,8 @@ from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
 
 import util
-from .dendrite3DViewWindow import Dendrite3DViewWindow
-from .helpDialog import showHelpDialog
+from ..dendrite3DViewWindow import Dendrite3DViewWindow
+from ..helpDialog import showHelpDialog
 
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0

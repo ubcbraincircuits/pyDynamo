@@ -2,9 +2,23 @@
 .. module:: tree
 """
 import attr
+import numpy as np
 import util
 
 from util import SAVE_META
+
+@attr.s
+class Transform:
+    """Affine transform from pixel to world space."""
+
+    rotation = attr.ib(default=attr.Factory(lambda: np.eye(3)), metadata=SAVE_META)
+    """Rotation to apply to (x, y, z)."""
+
+    translation = attr.ib(default=attr.Factory(lambda: np.array([0.0, 0.0, 0.0])), metadata=SAVE_META)
+    """ (x, y, z) Translation to move all the points by."""
+
+    scale = attr.ib(default=attr.Factory(lambda: np.array([1.0, 1.0, 1.0])), metadata=SAVE_META)
+    """ (sX, sY, sZ) Scaling factors to multiply each axis by."""
 
 @attr.s
 class Point():
@@ -169,6 +183,9 @@ class Tree():
     branches = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
     """All branches making up this dendrite tree."""
 
+    transform = attr.ib(default=attr.Factory(Transform))
+    """Conversion for this tree from pixel to world coordinates."""
+
     # HACK - make faster, index points by ID
     def getPointByID(self, pointID):
         """Given the ID of a point, find the point object that matches."""
@@ -252,11 +269,13 @@ class Tree():
         return closestPoint
 
     def worldCoordPoints(self, points):
-        """Convert image pixel (x, y, z) to a real-world (x, y, z) position by scaling."""
-        SCALE = [0.3070, 0.3070, 1.5] # HACK: Store in state instead
-        x = [p.location[0] * SCALE[0] for p in points]
-        y = [p.location[1] * SCALE[1] for p in points]
-        z = [p.location[2] * SCALE[2] for p in points]
+        """Convert image pixel (x, y, z) to a real-world (x, y, z) position."""
+        x, y, z = [], [], []
+        for p in points:
+            pAt = np.array(p.location)
+            pAt = np.matmul(self.transform.rotation, pAt.T).T
+            pAt = (pAt + self.transform.translation) * self.transform.scale
+            x.append(pAt[0]), y.append(pAt[1]), z.append(pAt[2])
         return x, y, z
 
     def _recursiveMovePointDelta(self, point, delta):

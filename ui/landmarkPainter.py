@@ -55,7 +55,7 @@ class LandmarkPainter():
         self.p.setFont(self.ANNOTATION_FONT)
         self.p.setPen(self.ANNOTATION_PEN)
         topLeft = QRectF(self.HEADER_PADDING, 0, self.HEADER_MAX_WIDTH, 2 * self.HEADER_PADDING)
-        text = "Landmark, point %d" % (landmarkPointIdx + 1)
+        text = "Landmark mode: Point %d" % (landmarkPointIdx + 1)
         self.p.drawText(topLeft, Qt.AlignVCenter, text)
 
     def zoomedLocation(self, xyz):

@@ -1,9 +1,12 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
-from model import FullState, FullStateActions, Tree, UIState, History
+from model import FullState, Tree, UIState, History
 from files import AutoSaver, loadState, saveState, importFromMatlab
 
+import time
+
+from .actions import FullStateActions
 from .initialMenu import InitialMenu
 from .motility3DViewWindow import Motility3DViewWindow
 from .stackWindow import StackWindow
@@ -105,6 +108,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.redrawAllStacks()
             return True
         elif (key == ord('L')):
+            if self.fullState.inLandmarkMode():
+                self.calcLandmarkRotation()
             self.fullState.toggleLandmarkMode()
             self.redrawAllStacks()
             return True
@@ -188,6 +193,14 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.stackWindows.pop(windowIndex)
         for i in range(len(self.stackWindows)):
             self.stackWindows[i].windowIndex = i
+
+    def calcLandmarkRotation(self):
+        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,
+            "Calculating rotation from landmarks...", "Calculating rotation from landmarks.", parent=self)
+        msg.show()
+        self.fullActions.calculateBestOrientation()
+        time.sleep(5)
+        msg.hide()
 
     # TODO - listen to full state changes.
     def maybeAutoSave(self):

@@ -1,4 +1,8 @@
-from test import historyTest, motilityTest
+from test import absOrientTest, historyTest, motilityTest
+
+def testAbsOrient():
+    print ("AbsOrient test...")
+    absOrientTest.run()
 
 def testHistory():
     print ("History test...")
@@ -9,7 +13,8 @@ def testMotility():
     motilityTest.run()
 
 def run():
-    testHistory()
+    testAbsOrient()
+    # testHistory()
     # testMotility()
 
 if __name__ == '__main__':

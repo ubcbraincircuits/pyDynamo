@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtWidgets
 
 import files
 
-from .dendriteCanvasActions import DendriteCanvasActions
+from .actions.dendriteCanvasActions import DendriteCanvasActions
 from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer

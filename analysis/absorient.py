@@ -1,25 +1,68 @@
 import math
 import numpy as np
 
+# http://nghiaho.com/?page_id=671
 
-def rotation_matrix(axis, theta):
+# TODO: scaling?
+def absOrient(pointsFrom, pointsTo):
+    """Minimize ||R*pointsFrom + T - pointsTo||
+
+    pointsFrom: list( tuple(x, y, z) )
+    pointsTo: list( tuple(x, y, z) )
     """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
+
+    assert len(pointsFrom) == len(pointsTo), "absorient inputs must be same length"
+    nPoints = len(pointsFrom)
+
+    npFrom, npTo = np.array(pointsFrom), np.array(pointsTo)
+    midFrom, midTo = np.mean(npFrom, axis=0), np.mean(npTo, axis=0)
+    left, right = npFrom - midFrom, npTo - midTo
+
+    # HACK - what is M?
+    M = np.matmul(left.T, right) # 3x3
+    Sxx,Syx,Szx,Sxy,Syy,Szy,Sxz,Syz,Szz = tuple(M.T.flatten())
+    N = np.array([
+        [Sxx+Syy+Szz,     Syz-Szy,      Szx-Sxz,      Sxy-Syx],
+        [    Syz-Szy, Sxx-Syy-Szz,      Sxy+Syx,      Szx+Sxz],
+        [    Szx-Sxz,     Sxy+Syx, -Sxx+Syy-Szz,      Syz+Szy],
+        [    Sxy-Syx,     Szx+Sxz,      Syz+Szy, -Sxx-Syy+Szz]
+    ])
+
+    # V = vectors, D = diag(values)
+    eigVal, eigVec = np.linalg.eig(N)
+    eigMaxIdx = np.argmax(np.real(eigVal))
+    eigVal = np.diag(eigVal)
+    q = np.real(eigVec[:, eigMaxIdx])
+
+    qMax = np.argmax(np.abs(q))
+    # Sign ambiguity
+    q = q * np.sign(q[qMax])
+    R = quatern2orth(q)
+
+    T = midTo - np.matmul(R, midFrom)
+    fitTo = np.matmul(npFrom, R.T) + T
+    fitAsTuples = [tuple(row) for row in fitTo]
+    return fitAsTuples, R, T
+
+def quatern2orth(quat):
     """
-    axis = np.asarray(axis)
-    axis = axis/math.sqrt(np.dot(axis, axis))
-    a = math.cos(theta/2.0)
-    b, c, d = -axis*math.sin(theta/2.0)
-    aa, bb, cc, dd = a*a, b*b, c*c, d*d
-    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
-    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
-                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
-                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+    Map a quaternion to an orthonormal 3D matrix
+     R=quatern2orth(quat)
+    in:
+     quat: A quaternion [q0 qx qy qz]'
+    out:
+     R: The orthonormal 3D matrix induced by the
+        unit quaternion quat/norm(quat)
+    """
+    nrm = np.linalg.norm(quat)
+    assert nrm > 0, "Singular quaternion :("
+    quat = quat / nrm
+    q0, qx, qy, qz = tuple(quat)
+    v = np.array([qx, qy, qz])
 
-MAT = rotation_matrix([0, 0, 1], math.pi / 2.0)
-
-def hackRotate(points):
-    print (MAT.shape)
-    print (points.shape)
-    return np.dot(MAT, points.T).T
+    A = np.array([
+        [ q0, -qz,  qy],
+        [ qz,  q0, -qx],
+        [-qy,  qx,  q0]
+    ])
+    return np.outer(v, v) + np.matmul(A, A)
