@@ -109,9 +109,10 @@ def testRoundtrip():
 
 def run():
     np.set_printoptions(precision=3)
-    # testAgainstGoldenFile()
+    testAgainstGoldenFile()
     testRoundtrip()
     np.set_printoptions()
+    return True
 
 if __name__ == '__main__':
     run()

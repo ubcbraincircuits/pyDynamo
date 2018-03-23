@@ -28,7 +28,7 @@ def motility(trees,
     for treeIdx, tree in enumerate(trees):
         allTDBL[treeIdx] = TDBL(tree, excludeAxon, excludeBasal, includeFilo=True, filoDist=filoDist)
         for branch in tree.rootPoint.children:
-            _calcFiloLengths(filoLengths[treeIdx], branch, excludeAxon, excludeBasal, filoDist)
+            _calcFiloLengths(filoLengths[treeIdx], treeIdx, branch, excludeAxon, excludeBasal, filoDist)
 
     # Raw motility:
     lengthBefore, lengthAfter = filoLengths[:-1, :], filoLengths[1:, :]
@@ -55,7 +55,7 @@ def motility(trees,
     return motilities, filoLengths
 
 
-def _calcFiloLengths(filoLengths, branch, excludeAxon, excludeBasal, filoDist):
+def _calcFiloLengths(filoLengths, treeIdx, branch, excludeAxon, excludeBasal, filoDist):
     branchIdx = branch.indexInParent()
     pointsWithRoot = [branch.parentPoint] + branch.points
 
@@ -76,7 +76,7 @@ def _calcFiloLengths(filoLengths, branch, excludeAxon, excludeBasal, filoDist):
     # 5) Recurse to fill filolengths cache for all child branches:
     for point in branch.points:
         for childBranch in point.children:
-            _calcFiloLengths(filoLengths, childBranch, excludeAxon, excludeBasal, filoDist)
+            _calcFiloLengths(filoLengths, treeIdx, childBranch, excludeAxon, excludeBasal, filoDist)
 
     # 6) Add the final filo for this branch if it's short enough.
     filoLengths[branchIdx] = 0

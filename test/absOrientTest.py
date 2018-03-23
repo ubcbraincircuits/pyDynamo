@@ -14,14 +14,14 @@ def testAbsOrient():
     pointsFrom = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
     fitTo, R, T = absOrient(pointsFrom, pointsFrom)
     assert matchPoints(fitTo, pointsFrom)
-    assert np.isclose(R, np.eye(3)).all()
-    assert np.isclose(T, np.zeros((1, 3))).all()
+    assert np.allclose(R, np.eye(3))
+    assert np.allclose(T, np.zeros((1, 3)))
 
     pointsTo = [(1, 1, 0), (0, 1, 1), (0, 0, 0)]
     fitTo, R, T = absOrient(pointsFrom, pointsTo)
     assert matchPoints(fitTo, pointsTo)
-    assert np.isclose(R, np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]])).all()
-    assert np.isclose(T, np.array([0, 1, 0])).all()
+    assert np.allclose(R, np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]]))
+    assert np.allclose(T, np.array([0, 1, 0]))
 
     pointsFrom = [(1, 2, 3), (4, 5, 6), (3, 2, 1), (1, 0, 1), (1, 1, -5)]
     pointsTo = [(3, 2, 1), (4, -4, 4), (2, 3, 1), (0, 0, 8), (1, 2, -5)]
@@ -41,14 +41,15 @@ def testAbsOrient():
     ])
     shouldT = np.array([[0.95560393, 3.48869308, 1.73152283]])
     assert matchPoints(fitTo, shouldFit)
-    assert np.isclose(R, shouldR).all()
-    assert np.isclose(T, shouldT).all()
+    assert np.allclose(R, shouldR)
+    assert np.allclose(T, shouldT)
     print ("Abs Orient passed! 🙌")
 
 def run():
     np.set_printoptions(precision=4, suppress=True)
     testAbsOrient()
     np.set_printoptions()
+    return True
 
 if __name__ == '__main__':
     run()

@@ -32,6 +32,7 @@ def convertToPoint(asDict):
 
 def convertToBranch(asDict):
     convert(asDict, 'parentPoint', convertToPoint)
+    convert(asDict, 'reparentTo', convertToPoint)
     convert(asDict, 'points', convertToPoint, isArray=True)
     return Branch(**asDict)
 
@@ -54,12 +55,20 @@ def indexTree(tree):
         branch._parentTree = tree
         for point in branch.points:
             point.parentBranch = branch
-        # Replace local clone of point with proper reference
-        if branch.parentPoint is not None: # Not sure what none signifies...
-            properParent = tree.getPointByID(branch.parentPoint.id)
-            if properParent is not None:
-                branch.setParentPoint(properParent)
 
+        # Deal with the case where the branch had the wrong parent in matlab.
+        parent = branch.reparentTo or branch.parentPoint
+
+        # Replace local clone of point with proper reference
+        if parent is not None: # Not sure what none signifies...
+            properParent = tree.getPointByID(parent.id)
+            if properParent is not None:
+                if branch.reparentTo is not None:
+                    branch.reparentTo = properParent
+                    properParent.children.append(branch)
+                else:
+                    branch.setParentPoint(properParent)
+                    
 def findNextPointID(fullState):
     nextID = 0
     for tree in fullState.trees:

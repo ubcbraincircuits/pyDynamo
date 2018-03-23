@@ -9,11 +9,12 @@ def parseMatlabBranch(fullState, pointsXYZ, annotations):
     branch = Branch(id=fullState.nextBranchID())
     for xyz, annotation in zip(pointsXYZ, annotations):
         assert xyz.shape == (3,)
-        branch.addPoint(Point(
+        nextPoint = Point(
             id = fullState.nextPointID(),
             location = tuple(xyz * 1.0),
             annotation = ("" if len(annotation) == 0 else annotation[0])
-        ))
+        )
+        branch.addPoint(nextPoint)
     return branch
 
 # Read a single tree, by reading in all its branches and hooking them up
@@ -47,7 +48,7 @@ def parseMatlabTree(fullState, saveState):
             childListForPoints = branchList[0, i][0][1][0] # Child index list
             for j, childListForPoint in enumerate(childListForPoints):
                 for childIdx in np.nditer(childListForPoint, ['refs_ok', 'zerosize_ok']):
-                    if tree.branches[i].parentPoint is not None:
+                    if tree.branches[childIdx - 1].parentPoint is not None:
                         oldParent = tree.branches[childIdx - 1].parentPoint
                         newParent = tree.branches[i].points[j - 1]
                         moved = deltaSz(oldParent.location, newParent.location)
@@ -59,6 +60,7 @@ def parseMatlabTree(fullState, saveState):
                             ))
                             # HACK - add branch to children of parent, but keep old parent on branch
                             tree.branches[i].points[j - 1].children.append(tree.branches[childIdx - 1])
+                            tree.branches[childIdx - 1].reparentTo = tree.branches[i].points[j - 1]
                             continue
                     tree.branches[childIdx - 1].setParentPoint(tree.branches[i].points[j - 1])
     return tree

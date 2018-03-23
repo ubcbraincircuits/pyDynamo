@@ -72,6 +72,9 @@ class Branch():
     colorData = attr.ib(default=None, cmp=False) # Not used yet
     """Not sure...? Isn't used... """
 
+    reparentTo = attr.ib(default=None, metadata=SAVE_META)
+    """HACK - document"""
+
     def indexInParent(self):
         """Ordinal number of branch within the tree it is owned by."""
         return self._parentTree.branches.index(self)

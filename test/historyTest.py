@@ -96,6 +96,7 @@ def testParents():
 def run():
     testTree()
     testParents()
+    return True
 
 if __name__ == '__main__':
     run()
