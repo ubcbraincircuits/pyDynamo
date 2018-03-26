@@ -2,7 +2,7 @@ Analysis methods
 ================
 
 TDBL (Total Dendritic Branch length)
-----
+------------------------------------
 
 .. automodule:: analysis.TDBL
   :members:

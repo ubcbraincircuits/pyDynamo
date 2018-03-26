@@ -140,7 +140,29 @@
 <dl class="function">
 <dt>
 <code class="descclassname">analysis.TDBL.</code><code class="descname">TDBL</code><span class="sig-paren">(</span><em>tree</em>, <em>excludeAxon=True</em>, <em>excludeBasal=True</em>, <em>includeFilo=True</em>, <em>filoDist=10</em><span class="sig-paren">)</span></dt>
-<dd><p>TODO - document.</p>
+<dd><p>Calculate TDBL for a given tree.</p>
+<p>Total Dendritic Branch Length (TDBL) is the sum of the lenths of all dendrites within the tree.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trees</strong> (<em>list</em>) &#8211; The structure of the tree across time.</li>
+<li><strong>excludeAxon</strong> (<em>bool</em>) &#8211; Flag indicating whether axons should not contribute to TDBL.</li>
+<li><strong>excludeBasal</strong> (<em>bool</em>) &#8211; Flag indicating whether basal dendrites should not contribute to TDBL.</li>
+<li><strong>includeFilo</strong> (<em>bool</em>) &#8211; Flag indicating whether filo lengths should be included in TDBL.</li>
+<li><strong>filoDist</strong> (<em>float</em>) &#8211; Maximum distance a branch can be for it to be considered a filo.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Sum of all dendritic length in the tree.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -149,7 +171,34 @@
 <dl class="function">
 <dt>
 <code class="descclassname">analysis.motility.</code><code class="descname">motility</code><span class="sig-paren">(</span><em>trees</em>, <em>excludeAxon=True</em>, <em>excludeBasal=True</em>, <em>includeAS=False</em>, <em>terminalDist=10</em>, <em>filoDist=10</em><span class="sig-paren">)</span></dt>
-<dd><p>TODO - document.</p>
+<dd><p>Calculate motility of all branches across time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trees</strong> (<em>list</em>) &#8211; The structure of the tree across time.</li>
+<li><strong>excludeAxon</strong> (<em>bool</em>) &#8211; Flag indicating whether the motility of the axon should be skipped.</li>
+<li><strong>excludeBasal</strong> (<em>bool</em>) &#8211; Flag indicating whether the motility of basal dendrites should be skipped.</li>
+<li><strong>includeAS</strong> (<em>bool</em>) &#8211; Flag indicating whether changes of branches that were added/subtracted should be included.</li>
+<li><strong>terminalDist</strong> (<em>float</em>) &#8211; Maximum distance between last branch and end of dendrite for that to be considered a filo.</li>
+<li><strong>filoDist</strong> (<em>float</em>) &#8211; Maximum distance a branch can be for it to be considered a filo.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple containing:</p>
+<blockquote>
+<div><p>motility(dict): the raw changes, plus those normalized by tdbl/filo lengths/counts</p>
+<p>filoLengths(np.array): the length of filopodia on each each branch.</p>
+</div></blockquote>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -158,7 +207,37 @@
 <dl class="function">
 <dt>
 <code class="descclassname">analysis.addedSubtractedTransitioned.</code><code class="descname">addedSubtractedTransitioned</code><span class="sig-paren">(</span><em>trees</em>, <em>excludeAxon=True</em>, <em>excludeBasal=True</em>, <em>terminalDist=10</em>, <em>filoDist=10</em><span class="sig-paren">)</span></dt>
-<dd><p>TODO - document.</p>
+<dd><p>Calculate added/subtracted/transitioned status of all branches across time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>trees</strong> (<em>list</em>) &#8211; The structure of the tree across time.</li>
+<li><strong>excludeAxon</strong> (<em>bool</em>) &#8211; Flag indicating whether the motility of the axon should be skipped.</li>
+<li><strong>excludeBasal</strong> (<em>bool</em>) &#8211; Flag indicating whether the motility of basal dendrites should be skipped.</li>
+<li><strong>terminalDist</strong> (<em>float</em>) &#8211; Maximum distance between last branch and end of dendrite for that to be considered a filo.</li>
+<li><strong>filoDist</strong> (<em>float</em>) &#8211; Maximum distance a branch can be for it to be considered a filo.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p>tuple containing:</p>
+<blockquote>
+<div><p>filoTypes(np.array): the raw changes, plus those normalized by tdbl/filo lengths/counts</p>
+<p>added(np.array): Maps (tree, branch) to whether that branch first appeared in that tree.</p>
+<p>subtracted(np.array): Maps (tree, branch) to whether that branch disappeared in that tree.</p>
+<p>transitioned(np.array): Maps (tree, branch) to whether that branch changed type in that tree.</p>
+<p>masterChanged(np.array): Maps (tree, branch) to whether the branch changed master nodes in that tree.</p>
+<p>masterNodes(np.array): Maps (tree, branch) to list of master nodes for that branch in that tree.</p>
+</div></blockquote>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(tuple)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

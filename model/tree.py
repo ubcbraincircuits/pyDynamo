@@ -47,7 +47,7 @@ class Point():
         return self.parentBranch is None
 
     def indexInParent(self):
-        # """How far along the branch this point sits, 0 = first point after branch point."""
+        """How far along the branch this point sits, 0 = first point after branch point."""
         return self.parentBranch.indexForPoint(self)
 
 @attr.s

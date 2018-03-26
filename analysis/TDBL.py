@@ -7,7 +7,20 @@ def TDBL(tree,
     includeFilo=True,
     filoDist=10
 ):
-    """TODO - document."""
+    """Calculate TDBL for a given tree.
+
+    Total Dendritic Branch Length (TDBL) is the sum of the lenths of all dendrites within the tree.
+
+    Args:
+        trees (list): The structure of the tree across time.
+        excludeAxon (bool): Flag indicating whether axons should not contribute to TDBL.
+        excludeBasal (bool): Flag indicating whether basal dendrites should not contribute to TDBL.
+        includeFilo (bool): Flag indicating whether filo lengths should be included in TDBL.
+        filoDist (float): Maximum distance a branch can be for it to be considered a filo.
+
+    Returns:
+        float: Sum of all dendritic length in the tree.
+    """
     if not tree.rootPoint:
         return 0
     return _tdblPoint(tree.rootPoint, excludeAxon, excludeBasal, includeFilo, filoDist)

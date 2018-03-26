@@ -10,7 +10,30 @@ def addedSubtractedTransitioned(
     terminalDist=10,
     filoDist=10
 ):
-    """TODO - document."""
+    """Calculate added/subtracted/transitioned status of all branches across time.
+
+    Args:
+        trees (list): The structure of the tree across time.
+        excludeAxon (bool): Flag indicating whether the motility of the axon should be skipped.
+        excludeBasal (bool): Flag indicating whether the motility of basal dendrites should be skipped.
+        terminalDist (float): Maximum distance between last branch and end of dendrite for that to be considered a filo.
+        filoDist (float): Maximum distance a branch can be for it to be considered a filo.
+
+    Returns:
+        (tuple): tuple containing:
+
+            filoTypes(np.array): the raw changes, plus those normalized by tdbl/filo lengths/counts
+
+            added(np.array): Maps (tree, branch) to whether that branch first appeared in that tree.
+
+            subtracted(np.array): Maps (tree, branch) to whether that branch disappeared in that tree.
+
+            transitioned(np.array): Maps (tree, branch) to whether that branch changed type in that tree.
+
+            masterChanged(np.array): Maps (tree, branch) to whether the branch changed master nodes in that tree.
+
+            masterNodes(np.array): Maps (tree, branch) to list of master nodes for that branch in that tree.
+    """
 
     # All outputs will be [# trees][# branches]
     nTrees = len(trees)

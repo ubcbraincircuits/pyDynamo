@@ -140,7 +140,7 @@
 <span id="tree"></span><h2>Tree<a class="headerlink" href="#module-tree" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt>
-<em class="property">class </em><code class="descclassname">model.tree.</code><code class="descname">Branch</code><span class="sig-paren">(</span><em>id</em>, <em>parentTree=None</em>, <em>parentPoint=None</em>, <em>points=NOTHING</em>, <em>isEnded=False</em>, <em>colorData=None</em><span class="sig-paren">)</span></dt>
+<em class="property">class </em><code class="descclassname">model.tree.</code><code class="descname">Branch</code><span class="sig-paren">(</span><em>id</em>, <em>parentTree=None</em>, <em>parentPoint=None</em>, <em>points=NOTHING</em>, <em>isEnded=False</em>, <em>colorData=None</em>, <em>reparentTo=None</em><span class="sig-paren">)</span></dt>
 <dd><p>Single connected branch on a Tree</p>
 <dl class="method">
 <dt>
@@ -272,6 +272,12 @@
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt>
+<code class="descname">reparentTo</code><em class="property"> = None</em></dt>
+<dd><p>HACK - document</p>
+</dd></dl>
+
 <dl class="method">
 <dt>
 <code class="descname">setParentPoint</code><span class="sig-paren">(</span><em>parentPoint</em><span class="sig-paren">)</span></dt>
@@ -324,6 +330,12 @@
 
 <dl class="method">
 <dt>
+<code class="descname">indexInParent</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>How far along the branch this point sits, 0 = first point after branch point.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
 <code class="descname">isRoot</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd><p>Whether this point represents the root of the whole tree.</p>
 </dd></dl>
@@ -344,7 +356,31 @@
 
 <dl class="class">
 <dt>
-<em class="property">class </em><code class="descclassname">model.tree.</code><code class="descname">Tree</code><span class="sig-paren">(</span><em>rootPoint=None</em>, <em>branches=NOTHING</em><span class="sig-paren">)</span></dt>
+<em class="property">class </em><code class="descclassname">model.tree.</code><code class="descname">Transform</code><span class="sig-paren">(</span><em>rotation=NOTHING</em>, <em>translation=NOTHING</em>, <em>scale=NOTHING</em><span class="sig-paren">)</span></dt>
+<dd><p>Affine transform from pixel to world space.</p>
+<dl class="attribute">
+<dt>
+<code class="descname">rotation</code><em class="property"> = None</em></dt>
+<dd><p>Rotation to apply to (x, y, z).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">scale</code><em class="property"> = None</em></dt>
+<dd><p>(sX, sY, sZ) Scaling factors to multiply each axis by.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">translation</code><em class="property"> = None</em></dt>
+<dd><p>(x, y, z) Translation to move all the points by.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">model.tree.</code><code class="descname">Tree</code><span class="sig-paren">(</span><em>rootPoint=None</em>, <em>branches=NOTHING</em>, <em>transform=NOTHING</em><span class="sig-paren">)</span></dt>
 <dd><p>3D Tree structure.</p>
 <dl class="method">
 <dt>
@@ -442,10 +478,16 @@
 <dd><p>Soma, initial start of the main branch.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt>
+<code class="descname">transform</code><em class="property"> = None</em></dt>
+<dd><p>Conversion for this tree from pixel to world coordinates.</p>
+</dd></dl>
+
 <dl class="method">
 <dt>
 <code class="descname">worldCoordPoints</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span></dt>
-<dd><p>Convert image pixel (x, y, z) to a real-world (x, y, z) position by scaling.</p>
+<dd><p>Convert image pixel (x, y, z) to a real-world (x, y, z) position.</p>
 </dd></dl>
 
 </dd></dl>

@@ -12,7 +12,23 @@ def motility(trees,
     terminalDist=10,
     filoDist=10
 ):
-    """TODO - document."""
+    """Calculate motility of all branches across time.
+    
+    Args:
+        trees (list): The structure of the tree across time.
+        excludeAxon (bool): Flag indicating whether the motility of the axon should be skipped.
+        excludeBasal (bool): Flag indicating whether the motility of basal dendrites should be skipped.
+        includeAS (bool): Flag indicating whether changes of branches that were added/subtracted should be included.
+        terminalDist (float): Maximum distance between last branch and end of dendrite for that to be considered a filo.
+        filoDist (float): Maximum distance a branch can be for it to be considered a filo.
+
+    Returns:
+        (tuple): tuple containing:
+
+            motility(dict): the raw changes, plus those normalized by tdbl/filo lengths/counts
+
+            filoLengths(np.array): the length of filopodia on each each branch.
+    """
 
     print ("\n\nCalculating motility...")
     filoTypes, added, subtracted, _, masterChangedOut, _ = \
