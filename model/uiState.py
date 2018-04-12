@@ -16,6 +16,9 @@ class UIState():
     # Landmarks attached to the tree
     _landmarks = attr.ib(default=attr.Factory(list))
 
+    # 3D tensor of intensities for image voxels
+    imageVolume = attr.ib(default=None)
+
     # ID of currently active branch
     currentBranchID = attr.ib(default=None)
 
@@ -39,6 +42,13 @@ class UIState():
 
     def currentBranch(self):
         return self._tree.getBranchByID(self.currentBranchID)
+
+    def setImageVolume(self, newData):
+        self.imageVolume = np.array(newData)
+        self._parent.updateVolumeSize(self.imageVolume.shape)
+
+    def currentImage(self):
+        return self.imageVolume[self._parent.channel][self._parent.zAxisAt]
 
     def currentPoint(self):
         if self.currentPointID is None:

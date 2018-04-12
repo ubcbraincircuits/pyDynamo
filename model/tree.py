@@ -50,6 +50,17 @@ class Point():
         """How far along the branch this point sits, 0 = first point after branch point."""
         return self.parentBranch.indexForPoint(self)
 
+    def nextPointInBranch(self, delta=1):
+        """Walks a distance along the branch and returns the sibling."""
+        idx = self.indexInParent()
+        nextIdx = idx + delta
+        if nextIdx == -1:
+            return self.parentBranch.parentPoint
+        elif nextIdx >= 0 and nextIdx < len(self.parentBranch.points):
+            return self.parentBranch.points[nextIdx]
+        else:
+            return None
+
 @attr.s
 class Branch():
     """Single connected branch on a Tree"""

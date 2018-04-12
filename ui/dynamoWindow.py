@@ -15,13 +15,11 @@ from .tilefigs import tileFigs
 class DynamoWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
-
         self.stackWindows = []
         self.fullState = FullState()
         self.history = History(self.fullState)
         self.fullActions = FullStateActions(self.fullState, self.history)
         self.autoSaver = AutoSaver(self.fullState)
-
         self.initialMenu = InitialMenu(self)
         self.show()
         self.initialMenu.show()

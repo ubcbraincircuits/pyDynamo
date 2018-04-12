@@ -21,4 +21,8 @@ def tiffRead(path):
     tif = libtiff.TIFF.open(path, mode='r')
     stack = asMatrix([np.array(img) for img in tif.iter_images()], nChannels)
     tif.close()
+    ## MEGA HACK
+    stack = np.array(stack)
+    stack = np.swapaxes(stack, 0, 1)
+    stack = list(stack)
     return stack

@@ -21,12 +21,12 @@ class StackWindow(QtWidgets.QMainWindow):
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
         self.imagePath = imagePath;
-        imageVolume = files.tiffRead(imagePath)
-        uiState.parent().updateVolumeSize(np.shape(imageVolume))
+        # imageVolume = files.tiffRead(imagePath)
+        uiState.setImageVolume(files.tiffRead(imagePath))
 
         self.root = QtWidgets.QWidget(self)
         self.dendrites = DendriteVolumeCanvas(
-            windowIndex, imageVolume, fullActions, uiState, parent, self.root
+            windowIndex, fullActions, uiState, parent, self.root
         )
         self.actionHandler = DendriteCanvasActions(self.dendrites, imagePath, treeModel, uiState)
         self.fullActions = fullActions
@@ -57,9 +57,8 @@ class StackWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(_createTitle(self.windowIndex, newFilePath))
         self.imagePath = newFilePath
         self.uiState = newUiState
-        newVolume = files.tiffRead(newFilePath)
-        self.uiState.parent().updateVolumeSize(np.shape(newVolume))
-        self.dendrites.updateState(newVolume, newUiState)
+        self.uiState.setImageVolume(files.tiffRead(newFilePath))
+        self.dendrites.updateState(newUiState)
         self.actionHandler.updateUIState(newUiState)
 
     def redraw(self):
@@ -129,6 +128,8 @@ class StackWindow(QtWidgets.QMainWindow):
             self.redraw()
         elif (key == ord('Q')):
             self.actionHandler.getAnnotation(self)
+        elif (key == ord('R')):
+            self.actionHandler.registerImages(self.windowIndex)
         elif (key == QtCore.Qt.Key_Delete):
             self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint())
             self.parent().redrawAllStacks() # HACK - auto redraw on change

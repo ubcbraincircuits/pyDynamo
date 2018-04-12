@@ -5,6 +5,8 @@ import util
 from ..dendrite3DViewWindow import Dendrite3DViewWindow
 from ..helpDialog import showHelpDialog
 
+from model import recursiveAdjust
+
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
 
@@ -57,3 +59,9 @@ class DendriteCanvasActions():
     def launch3DView(self):
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.treeModel)
         viewWindow.show()
+
+    def regsiterImage(self, windowIndex):
+        if windowIndex == 0:
+            print ("Can't register the first image, nothing to register it against...")
+            return
+        recursiveAdjust

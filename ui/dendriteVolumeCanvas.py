@@ -17,12 +17,11 @@ class DendriteVolumeCanvas(QWidget):
     SCROLL_SENSITIVITY = 60.0
 
     def __init__(self,
-        windowIndex, volume, fullActions, uiState, dynamoWindow,
+        windowIndex, fullActions, uiState, dynamoWindow,
         *args, **kwargs
     ):
         super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
         self.windowIndex = windowIndex
-        self.volume = volume
         self.fullActions = fullActions
         self.uiState = uiState
         self.dynamoWindow = dynamoWindow
@@ -30,30 +29,25 @@ class DendriteVolumeCanvas(QWidget):
         l = QGridLayout(self)
         l.setContentsMargins(0, 0, 0, 0)
         self.imgView = QtImageViewer(self,
-            np2qt(self.currentImage(), normalize=True, channel=self.uiState.parent().colorChannel())
+            np2qt(uiState.currentImage(), normalize=True, channel=self.uiState.parent().colorChannel())
         )
         self.imgOverlay = DendriteOverlay(self)
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
         self.drawImage()
 
-    def updateState(self, newVolume, newUiState):
-        self.volume = newVolume
+    def updateState(self, newUiState):
         self.uiState = newUiState
         self.redraw()
 
     def redraw(self):
         self.drawImage()
 
-    def currentImage(self):
-        fullState = self.uiState.parent()
-        return self.volume[fullState.channel][fullState.zAxisAt]
-
     def drawImage(self):
         c1, c2 = self.uiState.colorLimits
         # TODO: use inbuilt clim if possible instead.
         # imageData = np.array(self.volume[self.uiState.parent().zAxisAt])
-        imageData = self.currentImage()
+        imageData = self.uiState.currentImage()
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
         imageData = snapToRange(imageData, 0.0, 1.0)
