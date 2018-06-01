@@ -13,6 +13,7 @@ __author__ = "Marcel Goldschen-Ohm <marcel.goldschen@gmail.com>"
 __version__ = '0.9.0'
 
 SINGLE_CLICK_SEC = 0.2
+SCROLL_SENSITIVITY = 100.0 # TODO - share with DendriteVolumeCanvas
 
 class QtImageViewer(QGraphicsView):
     """ PyQt image viewer widget for a QPixmap in a QGraphicsView scene with mouse zooming and panning.
@@ -126,6 +127,9 @@ class QtImageViewer(QGraphicsView):
         else:
             self._pixmapHandle = self.scene.addPixmap(pixmap)
         self.setSceneRect(QRectF(pixmap.rect()))  # Set scene size to image size.
+        # self.setSceneRect(QRectF(0., 0., 900., 900.))  # Set scene size to image size.
+        # self.setSceneRect(None)
+        # self.setSceneRect(self.parentView.frameGeometry())
         self.forceRepaint()
 
     def forceRepaint(self):
@@ -197,12 +201,12 @@ class QtImageViewer(QGraphicsView):
         # HACK
         modifiers = QApplication.keyboardModifiers()
         if modifiers & Qt.ShiftModifier:
-            self.handleZoomScroll(event.pixelDelta().y())
+            self.handleZoomScroll(event.angleDelta().y())
         else:
             self.parentView.wheelEvent(event)
 
     def handleZoomScroll(self, yDelta):
-        self.zoom(-yDelta / 100.0)
+        self.zoom(-yDelta / SCROLL_SENSITIVITY)
 
     def zoom(self, logAmount):
         scale = math.exp(logAmount)

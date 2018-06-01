@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QWidget, QGridLayout, QApplication
+from PyQt5.QtWidgets import QWidget, QGridLayout, QApplication, QLayout
 
 import numpy as np
 
@@ -14,7 +14,7 @@ from util import deltaSz, snapToRange
 
 class DendriteVolumeCanvas(QWidget):
     INVERT_SCROLL = False
-    SCROLL_SENSITIVITY = 60.0
+    SCROLL_SENSITIVITY = 100.0
 
     def __init__(self,
         windowIndex, fullActions, uiState, dynamoWindow,
@@ -26,12 +26,14 @@ class DendriteVolumeCanvas(QWidget):
         self.uiState = uiState
         self.dynamoWindow = dynamoWindow
 
-        l = QGridLayout(self)
-        l.setContentsMargins(0, 0, 0, 0)
         self.imgView = QtImageViewer(self,
             np2qt(uiState.currentImage(), normalize=True, channel=self.uiState.parent().colorChannel())
         )
         self.imgOverlay = DendriteOverlay(self)
+
+        l = QGridLayout(self)
+        l.setContentsMargins(0, 0, 0, 0)
+        l.setSizeConstraint(QLayout.SetFixedSize)
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
         self.drawImage()
@@ -57,6 +59,7 @@ class DendriteVolumeCanvas(QWidget):
 
     def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
+        print ("DVC w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
         location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt)
 
         # Shortcut out landmark mode:
@@ -105,7 +108,7 @@ class DendriteVolumeCanvas(QWidget):
 
 
     def wheelEvent(self,event):
-        scrollDelta = -(int)(np.ceil(event.pixelDelta().y() / self.SCROLL_SENSITIVITY))
+        scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
         if self.INVERT_SCROLL:
             scrollDelta *= -1
         self.fullActions.changeZAxis(scrollDelta)

@@ -35,6 +35,7 @@ class StackWindow(QtWidgets.QMainWindow):
 
         # Assemble the view hierarchy.
         l = QtWidgets.QGridLayout(self.root)
+        l.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         l.setContentsMargins(0, 0, 0, 0)
         l.addWidget(self.dendrites, 0, 0, QtCore.Qt.AlignCenter)
         self.root.setFocus()
@@ -91,6 +92,8 @@ class StackWindow(QtWidgets.QMainWindow):
         self.parent().updateUndoStack(isRedo=True)
 
     def keyPressEvent(self, event):
+        print ("SW w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
+
         if self.parent().childKeyPress(event):
             return
 
