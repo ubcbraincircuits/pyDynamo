@@ -58,59 +58,69 @@ class DendriteVolumeCanvas(QWidget):
             maintainZoom=True)
 
     def mouseClickEvent(self, event, pos):
-        super(DendriteVolumeCanvas, self).mousePressEvent(event)
-        print ("DVC w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
-        location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt * 1.0)
+        try:
+            super(DendriteVolumeCanvas, self).mousePressEvent(event)
+            print ("DVC w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
+            location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt * 1.0)
 
-        # Shortcut out landmark mode:
-        if self.uiState.parent().inLandmarkMode():
-            self.fullActions.setLandmark(self.windowIndex, location)
-            self.dynamoWindow.redrawAllStacks()
-            return
+            # Shortcut out landmark mode:
+            if self.uiState.parent().inLandmarkMode():
+                self.fullActions.setLandmark(self.windowIndex, location)
+                self.dynamoWindow.redrawAllStacks()
+                return
 
-        modifiers = QApplication.keyboardModifiers()
-        shiftPressed = modifiers & Qt.ShiftModifier
-        rightClick = event.button() == Qt.RightButton
+            modifiers = QApplication.keyboardModifiers()
+            shiftPressed = modifiers & Qt.ShiftModifier
+            rightClick = event.button() == Qt.RightButton
 
-        pointClicked = self.uiState._tree.closestPointTo(location, zFilter=True)
-        closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
-        if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
-            pointClicked = None
+            pointClicked = self.uiState._tree.closestPointTo(location, zFilter=True)
+            closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
+            if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
+                pointClicked = None
 
-        # Handle Right-click first; either delete the point, or start a new branch.
-        if rightClick:
-            if pointClicked:
-                self.fullActions.deletePoint(self.windowIndex, pointClicked)
-            else:
-                self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
-        # Next, moving; either switch moving point, cancel move, or move selected point to new spot.
-        elif self.uiState.isMoving:
-            if pointClicked:
-                if shiftPressed:
+            # Handle Right-click first; either delete the point, or start a new branch.
+            if rightClick:
+                if pointClicked:
+                    self.fullActions.deletePoint(self.windowIndex, pointClicked)
+                else:
+                    self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
+            # Next, moving; either switch moving point, cancel move, or move selected point to new spot.
+            elif self.uiState.isMoving:
+                if pointClicked:
+                    if shiftPressed:
+                        self.fullActions.beginMove(self.windowIndex, pointClicked)
+                    else:
+                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                else:
+                    self.fullActions.endMove(self.windowIndex, location, moveDownstream=shiftPressed)
+            # Next. shift; either start move, or add mid-branch point
+            elif shiftPressed:
+                if pointClicked:
                     self.fullActions.beginMove(self.windowIndex, pointClicked)
                 else:
+                    self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location)
+            # Otherwise - handle no modifier; either select point, or add to end of current branch.
+            else:
+                if pointClicked:
                     self.fullActions.selectPoint(self.windowIndex, pointClicked)
-            else:
-                self.fullActions.endMove(self.windowIndex, location, moveDownstream=shiftPressed)
-        # Next. shift; either start move, or add mid-branch point
-        elif shiftPressed:
-            if pointClicked:
-                self.fullActions.beginMove(self.windowIndex, pointClicked)
-            else:
-                self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location)
-        # Otherwise - handle no modifier; either select point, or add to end of current branch.
-        else:
-            if pointClicked:
-                self.fullActions.selectPoint(self.windowIndex, pointClicked)
-            else:
-                self.fullActions.addPointToCurrentBranchAndSelect(self.windowIndex, location)
-        self.dynamoWindow.redrawAllStacks() # HACK - redraw only those that have changed.
-
+                else:
+                    self.fullActions.addPointToCurrentBranchAndSelect(self.windowIndex, location)
+            self.dynamoWindow.redrawAllStacks() # HACK - redraw only those that have changed.
+        except Exception as e:
+            print ("Whoops - error on click: " + str(e))
 
     def wheelEvent(self,event):
-        scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
-        if self.INVERT_SCROLL:
-            scrollDelta *= -1
-        self.fullActions.changeZAxis(scrollDelta)
-        self.dynamoWindow.redrawAllStacks()
-        return True
+        """
+        try:
+            scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
+            if self.INVERT_SCROLL:
+                scrollDelta *= -1
+            self.fullActions.changeZAxis(scrollDelta)
+            self.dynamoWindow.redrawAllStacks()
+            return True
+        except Exception as e:
+            print ("Whoops - error on scroll: " + str(e))
+        """
+        print ("Scroll temporarily disabled")
+        print (type(event))
+        print (dir(event))

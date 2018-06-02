@@ -4,6 +4,8 @@ from PyQt5.Qt import Qt
 from model import FullState, Tree, UIState, History
 from files import AutoSaver, loadState, saveState, importFromMatlab
 
+import os
+import sys
 import time
 
 from .actions import FullStateActions
@@ -173,6 +175,20 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     def makeNewWindows(self, startFrom=0):
         for i in range(startFrom, len(self.fullState.filePaths)):
+            path = self.fullState.filePaths[i]
+            if not os.path.isfile(path):
+                msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,
+                    "Image not found...", "Could not locate volume " + path + "\nPlease specify the new location.", parent=self)
+                msg.exec()
+                path, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                    "New volume file location", "", "TIFF image (*.tif)"
+                )
+                if path == "":
+                    print ("Loading cancelled, quitting...")
+                    QtWidgets.QApplication.quit()
+                    sys.exit(0)
+                self.fullState.filePaths[i] = path
+
             childWindow = StackWindow(
                 i,
                 self.fullState.filePaths[i],

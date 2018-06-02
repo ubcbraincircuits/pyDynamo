@@ -21,6 +21,7 @@ class StackWindow(QtWidgets.QMainWindow):
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
         self.imagePath = imagePath;
+
         # imageVolume = files.tiffRead(imagePath)
         uiState.setImageVolume(files.tiffRead(imagePath))
 
