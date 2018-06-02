@@ -24,7 +24,6 @@ def tiffRead(path, useLibTiff=False):
     print ("TIF shape: ")
     print (shape)
 
-
     if useLibTiff:
         stack = []
         tif = libtiff.TIFF.open(path, mode='r')

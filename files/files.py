@@ -1,6 +1,7 @@
 import attr
 import json
 import gzip
+import numpy as np
 
 from util import SAVE_KEY
 
@@ -9,10 +10,17 @@ from model import *
 def attrFilter(attrData, value):
     return (SAVE_KEY in attrData.metadata) and attrData.metadata[SAVE_KEY]
 
+# https://stackoverflow.com/questions/11942364/typeerror-integer-is-not-json-serializable-when-serializing-json-in-python
+def npInt64Fix(o):
+    if isinstance(o, np.int64):
+        print ("Whoops - wrong data type (i64) for ", o, " - converting to int")
+        return int(o)
+    raise TypeError
+
 def saveState(fullState, path):
     asDict = attr.asdict(fullState, filter=attrFilter)
     with gzip.GzipFile(path, 'w') as outfile:
-        outfile.write(json.dumps(asDict, indent=2, sort_keys=True).encode('utf-8'))
+        outfile.write(json.dumps(asDict, indent=2, sort_keys=True, default=npInt64Fix).encode('utf-8'))
 
 ### HACK - use cattrs?
 def convert(asDict, key, conversion, isArray=False):
@@ -22,7 +30,6 @@ def convert(asDict, key, conversion, isArray=False):
         asDict[key] = conversion(asDict[key])
     else:
         asDict[key] = [conversion(value) for value in asDict[key]]
-
 
 def convertToPoint(asDict):
     if asDict is None:
@@ -68,7 +75,7 @@ def indexTree(tree):
                     properParent.children.append(branch)
                 else:
                     branch.setParentPoint(properParent)
-                    
+
 def findNextPointID(fullState):
     nextID = 0
     for tree in fullState.trees:

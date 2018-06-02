@@ -60,7 +60,7 @@ class DendriteVolumeCanvas(QWidget):
     def mouseClickEvent(self, event, pos):
         super(DendriteVolumeCanvas, self).mousePressEvent(event)
         print ("DVC w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
-        location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt)
+        location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt * 1.0)
 
         # Shortcut out landmark mode:
         if self.uiState.parent().inLandmarkMode():
