@@ -110,17 +110,11 @@ class DendriteVolumeCanvas(QWidget):
             print ("Whoops - error on click: " + str(e))
 
     def wheelEvent(self,event):
-        """
         try:
             scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
             if self.INVERT_SCROLL:
                 scrollDelta *= -1
             self.fullActions.changeZAxis(scrollDelta)
             self.dynamoWindow.redrawAllStacks()
-            return True
         except Exception as e:
             print ("Whoops - error on scroll: " + str(e))
-        """
-        print ("Scroll temporarily disabled")
-        print (type(event))
-        print (dir(event))

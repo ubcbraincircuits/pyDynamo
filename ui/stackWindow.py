@@ -93,50 +93,53 @@ class StackWindow(QtWidgets.QMainWindow):
         self.parent().updateUndoStack(isRedo=True)
 
     def keyPressEvent(self, event):
-        print ("SW w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
+        try:
+            print ("SW w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
 
-        if self.parent().childKeyPress(event):
-            return
+            if self.parent().childKeyPress(event):
+                return
 
-        # TODO: add menu items for some of these too.
-        key = event.key()
-        if (key == ord('3')):
-            self.actionHandler.launch3DView()
-        elif (key == ord('4')):
-            self.actionHandler.changeBrightness(-1, 0)
-        elif (key == ord('5')):
-            self.actionHandler.changeBrightness(1, 0)
-        elif (key == ord('6')):
-            self.actionHandler.changeBrightness(0, 0, reset=True)
-        elif (key == ord('7')):
-            self.actionHandler.changeBrightness(0, -1)
-        elif (key == ord('8')):
-            self.actionHandler.changeBrightness(0, 1)
-        elif (key == ord('X')):
-            self.actionHandler.zoom(-0.2) # ~= ln(0.8) as used in matlab
-        elif (key == ord('Z')):
-            self.actionHandler.zoom(0.2)
-        elif (key == ord('W')):
-            self.actionHandler.pan(0, -1)
-        elif (key == ord('A')):
-            self.actionHandler.pan(-1, 0)
-        elif (key == ord('S')):
-            self.actionHandler.pan(0, 1)
-        elif (key == ord('D')):
-            self.actionHandler.pan(1, 0)
-        elif (key == ord('F')):
-            self.dendrites.uiState.showAnnotations = not self.dendrites.uiState.showAnnotations
-            self.redraw()
-        elif (key == ord('V')):
-            self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
-            self.redraw()
-        elif (key == ord('Q')):
-            self.actionHandler.getAnnotation(self)
-        elif (key == ord('R')):
-            self.actionHandler.registerImages(self.windowIndex)
-        elif (key == QtCore.Qt.Key_Delete):
-            self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint())
-            self.parent().redrawAllStacks() # HACK - auto redraw on change
+            # TODO: add menu items for some of these too.
+            key = event.key()
+            if (key == ord('3')):
+                self.actionHandler.launch3DView()
+            elif (key == ord('4')):
+                self.actionHandler.changeBrightness(-1, 0)
+            elif (key == ord('5')):
+                self.actionHandler.changeBrightness(1, 0)
+            elif (key == ord('6')):
+                self.actionHandler.changeBrightness(0, 0, reset=True)
+            elif (key == ord('7')):
+                self.actionHandler.changeBrightness(0, -1)
+            elif (key == ord('8')):
+                self.actionHandler.changeBrightness(0, 1)
+            elif (key == ord('X')):
+                self.actionHandler.zoom(-0.2) # ~= ln(0.8) as used in matlab
+            elif (key == ord('Z')):
+                self.actionHandler.zoom(0.2)
+            elif (key == ord('W')):
+                self.actionHandler.pan(0, -1)
+            elif (key == ord('A')):
+                self.actionHandler.pan(-1, 0)
+            elif (key == ord('S')):
+                self.actionHandler.pan(0, 1)
+            elif (key == ord('D')):
+                self.actionHandler.pan(1, 0)
+            elif (key == ord('F')):
+                self.dendrites.uiState.showAnnotations = not self.dendrites.uiState.showAnnotations
+                self.redraw()
+            elif (key == ord('V')):
+                self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
+                self.redraw()
+            elif (key == ord('Q')):
+                self.actionHandler.getAnnotation(self)
+            elif (key == ord('R')):
+                self.actionHandler.registerImages(self.windowIndex)
+            elif (key == QtCore.Qt.Key_Delete):
+                self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint())
+                self.parent().redrawAllStacks() # HACK - auto redraw on change
+        except Exception as e:
+            print ("Whoops - error on keypress: " + str(e))
 
 # Utility for nicer formatting of the window, using index and just image file name.
 def _createTitle(index, path):
