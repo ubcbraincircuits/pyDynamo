@@ -22,7 +22,7 @@ Reassign the parent of a branch by shift-clicking a point and clicking the new p
 *O*: Open a new window
 *T*: Tile windows on screen
 *H*: Cycle line thicknesses
-*Ctrl-M* to save drawing session
+*Ctrl-S* to save drawing session
 *3*: open a 3d wire model of the current stack
 *M*: Show motility plot
 *C*: Change color channel

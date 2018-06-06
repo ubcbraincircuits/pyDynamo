@@ -17,7 +17,7 @@ class DendriteVolumeCanvas(QWidget):
     SCROLL_SENSITIVITY = 100.0
 
     def __init__(self,
-        windowIndex, fullActions, uiState, dynamoWindow,
+        windowIndex, fullActions, uiState, dynamoWindow, stackWindow,
         *args, **kwargs
     ):
         super(DendriteVolumeCanvas, self).__init__(*args, **kwargs)
@@ -25,6 +25,7 @@ class DendriteVolumeCanvas(QWidget):
         self.fullActions = fullActions
         self.uiState = uiState
         self.dynamoWindow = dynamoWindow
+        self.stackWindow = stackWindow
 
         self.imgView = QtImageViewer(self,
             np2qt(uiState.currentImage(), normalize=True, channel=self.uiState.parent().colorChannel())
