@@ -7,10 +7,11 @@ class FullStateActions():
         self.state = fullState
         self.history = history
 
-    def selectPoint(self, localIdx, point):
-        self.history.pushState()
+    def selectPoint(self, localIdx, point, avoidPush=False):
+        if not avoidPush:
+            self.history.pushState()
         for state in self.state.uiStates:
-            state.selectPointByID(point.id)
+            state.selectPointByID(None if point is None else point.id)
 
     def addPointToCurrentBranchAndSelect(self, localIdx, location):
         self.history.pushState()
@@ -55,9 +56,13 @@ class FullStateActions():
 
     def deletePoint(self, localIdx, point):
         self.history.pushState()
+        nextToSelect = None
         # TODO: Delete point vs delete entire branch of point
         for i in range(localIdx, len(self.state.uiStates)):
-            self.state.uiStates[i].deletePointByID(point.id)
+            next = self.state.uiStates[i].deletePointByID(point.id)
+            if nextToSelect is None:
+                nextToSelect = next
+        self.selectPoint(localIdx, nextToSelect, avoidPush=True)
 
     def changeZAxis(self, zDelta):
         # self.history.pushState()

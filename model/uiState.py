@@ -170,7 +170,7 @@ class UIState():
         for branch in self._tree.branches:
             if branch.parentPoint.id == pointID:
                 self.deleteBranch(branch)
-        self.selectPointByID(self._tree.removePointByID(pointID))
+        return self._tree.removePointByID(pointID)
 
     def endMove(self, newLocation, moveDownstream):
         assert self.isMoving and self.currentPointID is not None, "Can only end a move if actually moving a point"

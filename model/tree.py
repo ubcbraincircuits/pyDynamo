@@ -237,7 +237,12 @@ class Tree():
         """Removes a single point from the tree, identified by ID."""
         pointToRemove = self.getPointByID(pointID)
         if pointToRemove is not None:
-            return pointToRemove.parentBranch.removePointLocally(pointToRemove)
+            if pointToRemove.parentBranch is None:
+                assert pointToRemove.id == self.rootPoint.id
+                assert len(self.branches) == 0
+                self.rootPoint = None
+            else:
+                return pointToRemove.parentBranch.removePointLocally(pointToRemove)
         else:
             return None
 

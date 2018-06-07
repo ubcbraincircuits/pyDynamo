@@ -96,14 +96,14 @@ class StackWindow(QtWidgets.QMainWindow):
         self.actionHandler.showHotkeys()
 
     def undo(self):
-        self.parent().updateUndoStack(isRedo=False)
+        self.parent().updateUndoStack(isRedo=False, originWindow=self)
 
     def redo(self):
-        self.parent().updateUndoStack(isRedo=True)
+        self.parent().updateUndoStack(isRedo=True, originWindow=self)
 
     def keyPressEvent(self, event):
         try:
-            if self.parent().childKeyPress(event):
+            if self.parent().childKeyPress(event, self):
                 return
 
             # TODO: add menu items for some of these too.

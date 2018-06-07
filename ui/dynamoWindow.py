@@ -125,7 +125,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + filePath)
 
     # Global key handler for actions shared between all stack windows
-    def childKeyPress(self, event):
+    def childKeyPress(self, event, childWindow):
         key = event.key()
         ctrlPressed = (event.modifiers() & Qt.ControlModifier)
         shftPressed = (event.modifiers() & Qt.ShiftModifier)
@@ -172,7 +172,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.saveToFile()
             return True
         elif (key == ord('Z') and ctrlPressed):
-            self.updateUndoStack(isRedo=shftPressed)
+            self.updateUndoStack(isRedo=shftPressed, originWindow=childWindow)
             return True
 
         # Handle these only while doing landmarks:
@@ -265,12 +265,18 @@ class DynamoWindow(QtWidgets.QMainWindow):
         if self.autoSaver is not None:
             self.autoSaver.handleStateChange()
 
-    def updateUndoStack(self, isRedo):
+    def updateUndoStack(self, isRedo, originWindow=None):
+        if originWindow is not None:
+            originWindow.statusBar().showMessage("Redoing..." if isRedo else "Undoing...")
+        closeStatus = lambda: originWindow.statusBar().clearMessage() if originWindow is not None else None
+
         if isRedo:
             if not self.history.redo():
+                closeStatus()
                 return
         else:
             if not self.history.undo():
+                closeStatus()
                 return
 
         while len(self.stackWindows) > len(self.fullState.uiStates):
@@ -293,3 +299,4 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 )
                 self.stackWindows.append(childWindow)
                 childWindow.show()
+        closeStatus()

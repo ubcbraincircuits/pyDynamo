@@ -11,8 +11,8 @@ class InitialMenu(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle("Start ...")
-        self.statusBar().showMessage("Start ...", 2000)
+        self.setWindowTitle("Dynamo")
+        self.statusBar().showMessage("Select option to begin...",)
         self.centerWindow()
 
         # Options #1 - Start New

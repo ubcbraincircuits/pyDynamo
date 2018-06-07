@@ -73,13 +73,14 @@ class DendriteVolumeCanvas(QWidget):
             shiftPressed = (modifiers & Qt.ShiftModifier) > 0
             ctrlPressed = (modifiers & Qt.ControlModifier) > 0
             rightClick = event.button() == Qt.RightButton
+            middleClick = event.button() == Qt.MidButton
 
             pointClicked = self.uiState._tree.closestPointTo(location, zFilter=True)
             closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
             if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
                 pointClicked = None
 
-            # Handle Right-click first; either delete the point, or start a new branch.
+            # Handle Right-click/ctrl first; either delete the point, or start a new branch.
             if rightClick or ctrlPressed:
                 if pointClicked:
                     self.fullActions.deletePoint(self.windowIndex, pointClicked)
@@ -94,8 +95,8 @@ class DendriteVolumeCanvas(QWidget):
                         self.fullActions.selectPoint(self.windowIndex, pointClicked)
                 else:
                     self.fullActions.endMove(self.windowIndex, location, moveDownstream=shiftPressed)
-            # Next. shift; either start move, or add mid-branch point
-            elif shiftPressed:
+            # Next. Middle-click / shift; either start move, or add mid-branch point
+            elif middleClick or shiftPressed:
                 if pointClicked:
                     self.fullActions.beginMove(self.windowIndex, pointClicked)
                 else:
