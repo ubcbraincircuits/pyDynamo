@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.Qt import Qt
 
 from model import FullState, Tree, UIState, History
@@ -9,17 +9,16 @@ import sys
 import time
 
 from .actions import FullStateActions
+from .common import cursorPointer
 from .initialMenu import InitialMenu
 from .motility3DViewWindow import Motility3DViewWindow
 from .stackWindow import StackWindow
 from .tilefigs import tileFigs
 
 class DynamoWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, app, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
-
-        self.setWindowTitle("Dynamo")
-        self.statusBar().showMessage("Dynamo", 2000)
+        self.app = app
 
         self.stackWindows = []
         self.fullState = FullState()
@@ -27,12 +26,47 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.fullActions = FullStateActions(self.fullState, self.history)
         self.autoSaver = AutoSaver(self.fullState)
         self.initialMenu = InitialMenu(self)
+
+        self.root = self._setupUI()
         self.centerWindow()
         self.show()
         self.initialMenu.show()
 
+    def _setupUI(self):
+        self.setWindowTitle("Dynamo")
+        self.setWindowFlags(QtCore.Qt.WindowTitleHint)
+        self.setFixedSize(480, 320)
+        
+        p = self.palette()
+        p.setColor(self.backgroundRole(), QtCore.Qt.black)
+        self.setPalette(p)
+
+        # Dynamo logo
+        label = QtWidgets.QLabel(self)
+        pixmap = QtGui.QPixmap('img/tmpLogo.png')
+        label.resize(pixmap.width(), pixmap.height())
+        label.setPixmap(pixmap) #.scaled(label.size(), QtCore.Qt.IgnoreAspectRatio))        
+        
+        # Close button
+        buttonQ = QtWidgets.QPushButton("&Close Dynamo", self)
+        buttonQ.setToolTip("Clonse all Dynamo windows and exit")
+        buttonQ.clicked.connect(self.quit)
+        cursorPointer(buttonQ)
+
+        root = QtWidgets.QWidget(self)
+        l = QtWidgets.QVBoxLayout(root)
+        l.setContentsMargins(10, 10, 10, 10)
+        l.addWidget(label, 0 , QtCore.Qt.AlignHCenter)
+        l.addWidget(buttonQ, 0, QtCore.Qt.AlignHCenter)
+        root.setFocus()
+        self.setCentralWidget(root)
+        return root
+
+    def quit(self):
+        self.app.quit()
+
     def centerWindow(self):
-        self.resize(320, 240)
+        # self.resize(320, 240)
         frameGm = self.frameGeometry()
         centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
         frameGm.moveCenter(centerPoint)
@@ -70,9 +104,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.initialMenu.hide()
             self.makeNewWindows()
 
-    def closeEvent(self, event):
-        print ("CLOSE ignored")
-        print (event)
+    # def closeEvent(self, event):
         # event.ignore()
 
     def saveToFile(self):

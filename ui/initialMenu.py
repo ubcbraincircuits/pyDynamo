@@ -4,6 +4,8 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
+from .common import cursorPointer
+
 class InitialMenu(QtWidgets.QMainWindow):
     def __init__(self, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -17,16 +19,19 @@ class InitialMenu(QtWidgets.QMainWindow):
         buttonN = QtWidgets.QPushButton("&New from Stack(s)", self)
         buttonN.setToolTip("Start new labelling from one or more images")
         buttonN.clicked.connect(parent.newFromStacks)
+        cursorPointer(buttonN)
 
         # Option #2 - Load existing
         buttonL = QtWidgets.QPushButton("&Open from File", self)
         buttonL.setToolTip("Open a previous session")
         buttonL.clicked.connect(parent.openFromFile)
+        cursorPointer(buttonL)
 
         # Option #2 - Import from matlab
         buttonI = QtWidgets.QPushButton("&Import from Matlab .mat", self)
         buttonI.setToolTip("Import from Matlab save file")
         buttonI.clicked.connect(parent.importFromMatlab)
+        cursorPointer(buttonI)
 
         # Assemble the view hierarchy.
         self.root = QtWidgets.QWidget(self)
@@ -45,7 +50,7 @@ class InitialMenu(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.fileMenu)
 
     def centerWindow(self):
-        self.resize(320, 240)
+        self.setFixedSize(480, 320)
         frameGm = self.frameGeometry()
         centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
         frameGm.moveCenter(centerPoint)
