@@ -9,8 +9,8 @@ class InitialMenu(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle("Dynamo")
-        self.statusBar().showMessage("Dynamo", 2000)
+        self.setWindowTitle("Start ...")
+        self.statusBar().showMessage("Start ...", 2000)
         self.centerWindow()
 
         # Options #1 - Start New
@@ -45,7 +45,7 @@ class InitialMenu(QtWidgets.QMainWindow):
         self.menuBar().addMenu(self.fileMenu)
 
     def centerWindow(self):
-        self.resize(640, 480)
+        self.resize(320, 240)
         frameGm = self.frameGeometry()
         centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
         frameGm.moveCenter(centerPoint)

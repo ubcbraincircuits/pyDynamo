@@ -61,7 +61,6 @@ class DendriteVolumeCanvas(QWidget):
     def mouseClickEvent(self, event, pos):
         try:
             super(DendriteVolumeCanvas, self).mousePressEvent(event)
-            print ("DVC w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
             location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt * 1.0)
 
             # Shortcut out landmark mode:
@@ -70,8 +69,9 @@ class DendriteVolumeCanvas(QWidget):
                 self.dynamoWindow.redrawAllStacks()
                 return
 
-            modifiers = QApplication.keyboardModifiers()
-            shiftPressed = modifiers & Qt.ShiftModifier
+            modifiers = int(QApplication.keyboardModifiers())
+            shiftPressed = (modifiers & Qt.ShiftModifier) > 0
+            ctrlPressed = (modifiers & Qt.ControlModifier) > 0
             rightClick = event.button() == Qt.RightButton
 
             pointClicked = self.uiState._tree.closestPointTo(location, zFilter=True)
@@ -80,7 +80,7 @@ class DendriteVolumeCanvas(QWidget):
                 pointClicked = None
 
             # Handle Right-click first; either delete the point, or start a new branch.
-            if rightClick:
+            if rightClick or ctrlPressed:
                 if pointClicked:
                     self.fullActions.deletePoint(self.windowIndex, pointClicked)
                 else:

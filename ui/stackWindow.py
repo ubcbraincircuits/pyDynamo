@@ -103,8 +103,6 @@ class StackWindow(QtWidgets.QMainWindow):
 
     def keyPressEvent(self, event):
         try:
-            print ("SW w/h = ", self.frameGeometry().width(), self.frameGeometry().height())
-
             if self.parent().childKeyPress(event):
                 return
 

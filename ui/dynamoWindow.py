@@ -17,14 +17,26 @@ from .tilefigs import tileFigs
 class DynamoWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
+
+        self.setWindowTitle("Dynamo")
+        self.statusBar().showMessage("Dynamo", 2000)
+
         self.stackWindows = []
         self.fullState = FullState()
         self.history = History(self.fullState)
         self.fullActions = FullStateActions(self.fullState, self.history)
         self.autoSaver = AutoSaver(self.fullState)
         self.initialMenu = InitialMenu(self)
+        self.centerWindow()
         self.show()
         self.initialMenu.show()
+
+    def centerWindow(self):
+        self.resize(320, 240)
+        frameGm = self.frameGeometry()
+        centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
 
     def newFromStacks(self):
         self.openFilesAndAppendStacks()
