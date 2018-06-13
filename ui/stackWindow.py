@@ -147,6 +147,7 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.parent().redrawAllStacks() # HACK - auto redraw on change
         except Exception as e:
             print ("Whoops - error on keypress: " + str(e))
+            raise # POIUY
 
 # Utility for nicer formatting of the window, using index and just image file name.
 def _createTitle(index, path):

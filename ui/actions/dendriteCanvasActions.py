@@ -60,8 +60,14 @@ class DendriteCanvasActions():
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.treeModel)
         viewWindow.show()
 
-    def regsiterImage(self, windowIndex):
+    def registerImages(self, windowIndex):
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
-        recursiveAdjust
+        branchID, pointID = self.uiState.currentBranchID, self.uiState.currentPointID
+        if branchID is None or pointID is None:
+            print ("Need to select a point before you can register")
+            return
+        branch, point = self.uiState.currentBranch(), self.uiState.currentPoint()
+        pointOld = self.uiState.parent().trees[windowIndex - 1].closestPointTo(point.location)
+        recursiveAdjust(self.uiState.parent(), windowIndex, branch, point, pointOld)
