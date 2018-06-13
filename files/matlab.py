@@ -65,10 +65,17 @@ def parseMatlabTree(fullState, saveState):
                     tree.branches[childIdx - 1].setParentPoint(tree.branches[i].points[j - 1])
     return tree
 
+# Given save information, pull out saved landmark XYZs
+def parseLandmarks(saveState):
+    landmarks = saveState['info'][0]['landmarks'][0][0]
+    if landmarks.shape[0] != 3:
+        return []
+    return [tuple(landmarks[:, i]) for i in range(landmarks.shape[1])]
+
 # Load an existing dynamo matlab file, and convert it into the python dynamo format.
 def importFromMatlab(matlabPath):
     fullState = FullState()
-    filePaths, treeData = [], []
+    filePaths, treeData, landmarkData = [], [], []
 
     mat = sio.loadmat(matlabPath)
     saveStates = mat['savedata'][0]['state'][0]
@@ -78,5 +85,6 @@ def importFromMatlab(matlabPath):
         # TODO: check whether file exists, and prompt if not...
         filePaths.append(filePath)
         treeData.append(parseMatlabTree(fullState, saveState))
-    fullState.addFiles(filePaths, treeData)
+        landmarkData.append(parseLandmarks(saveState))
+    fullState.addFiles(filePaths, treeData, landmarkData)
     return fullState
