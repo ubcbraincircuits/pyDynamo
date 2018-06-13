@@ -6,9 +6,10 @@ from .dendritePainter import DendritePainter
 from .landmarkPainter import LandmarkPainter
 
 class DendriteOverlay(QWidget):
-    def __init__(self, dendriteCanvas, *args, **kwargs):
+    def __init__(self, dendriteCanvas, windowIndex, *args, **kwargs):
         super(QWidget, self).__init__(*args, **kwargs)
         self.dendriteCanvas = dendriteCanvas
+        self.windowIndex = windowIndex
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
 
     def paintEvent(self, event):
@@ -19,11 +20,14 @@ class DendriteOverlay(QWidget):
         p.begin(self)
 
         if fullState.inLandmarkMode():
+            landmarks = []
+            if (self.windowIndex < len(fullState.landmarks)):
+                landmarks = fullState.landmarks[self.windowIndex]
             LandmarkPainter(p,
                 fullState.zAxisAt,
                 self.dendriteCanvas.uiState,
                 self.dendriteCanvas.imgView.mapFromScene
-            ).drawLandmarks(self.dendriteCanvas.uiState._landmarks, fullState.landmarkPointAt)
+            ).drawLandmarks(landmarks, fullState.landmarkPointAt)
         else:
             DendritePainter(p,
                 fullState.zAxisAt,

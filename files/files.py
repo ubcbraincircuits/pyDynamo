@@ -15,6 +15,7 @@ def npInt64Fix(o):
     if isinstance(o, np.int64):
         print ("Whoops - wrong data type (i64) for ", o, " - converting to int")
         return int(o)
+    print ("ERROR - Can't save type: ", type(o))
     raise TypeError
 
 def saveState(fullState, path):
@@ -30,6 +31,9 @@ def convert(asDict, key, conversion, isArray=False):
         asDict[key] = conversion(asDict[key])
     else:
         asDict[key] = [conversion(value) for value in asDict[key]]
+
+def convertToListOfTuples(asDict):
+    return [tuple(value) for value in asDict]
 
 def convertToPoint(asDict):
     if asDict is None:
@@ -55,6 +59,7 @@ def convertToUIState(asDict):
 def convertToFullState(asDict):
     convert(asDict, 'trees', convertToTree, isArray=True)
     convert(asDict, 'uiStates', convertToUIState, isArray=True)
+    convert(asDict, 'landmarks', convertToListOfTuples, isArray=True)
     return FullState(**asDict)
 
 def indexTree(tree):

@@ -197,7 +197,7 @@ class Tree():
     branches = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
     """All branches making up this dendrite tree."""
 
-    transform = attr.ib(default=attr.Factory(Transform))
+    transform = attr.ib(default=attr.Factory(Transform), metadata=SAVE_META)
     """Conversion for this tree from pixel to world coordinates."""
 
     # HACK - make faster, index points by ID

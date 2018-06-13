@@ -13,9 +13,6 @@ class UIState():
     # Tree being shown in the UI.
     _tree = attr.ib(default=None)
 
-    # Landmarks attached to the tree
-    _landmarks = attr.ib(default=attr.Factory(list))
-
     # 3D tensor of intensities for image voxels
     imageVolume = attr.ib(default=None)
 

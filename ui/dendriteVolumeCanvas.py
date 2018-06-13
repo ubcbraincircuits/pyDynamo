@@ -30,7 +30,7 @@ class DendriteVolumeCanvas(QWidget):
         self.imgView = QtImageViewer(self,
             np2qt(uiState.currentImage(), normalize=True, channel=self.uiState.parent().colorChannel())
         )
-        self.imgOverlay = DendriteOverlay(self)
+        self.imgOverlay = DendriteOverlay(self, windowIndex)
 
         l = QGridLayout(self)
         l.setContentsMargins(0, 0, 0, 0)

@@ -17,6 +17,14 @@ def parseMatlabBranch(fullState, pointsXYZ, annotations):
         branch.addPoint(nextPoint)
     return branch
 
+# Read transform definition from the stack info
+def parseTransform(infoState):
+    t = Transform()
+    t.rotation = infoState['R'][0][0].tolist()
+    t.translation = infoState['offset'][0][0].T[0].tolist()
+    t.scale = (infoState['xres'][0][0][0][0], infoState['yres'][0][0][0][0], infoState['zres'][0][0][0][0])
+    return t
+
 # Read a single tree, by reading in all its branches and hooking them up
 def parseMatlabTree(fullState, saveState):
     tree = Tree()
@@ -63,6 +71,8 @@ def parseMatlabTree(fullState, saveState):
                             tree.branches[childIdx - 1].reparentTo = tree.branches[i].points[j - 1]
                             continue
                     tree.branches[childIdx - 1].setParentPoint(tree.branches[i].points[j - 1])
+
+    tree.transform = parseTransform(saveState['info'][0])
     return tree
 
 # Given save information, pull out saved landmark XYZs
