@@ -291,7 +291,7 @@ class Tree():
         """Convert image pixel (x, y, z) to a real-world (x, y, z) position."""
         x, y, z = [], [], []
         # HACK: Enter values on load?
-        self.transform.scale = np.array([0.3070, 0.3070, 1.5])
+        # self.transform.scale = np.array([0.3070, 0.3070, 1.5])
         for p in points:
             pAt = np.array(p.location)
             pAt = np.matmul(self.transform.rotation, pAt.T).T

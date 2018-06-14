@@ -5,6 +5,9 @@ from .tree import *
 
 from util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 
+# HACK
+import matplotlib.pyplot as plt
+
 @attr.s
 class UIState():
     # Full state this belongs within
@@ -40,7 +43,18 @@ class UIState():
     def currentBranch(self):
         return self._tree.getBranchByID(self.currentBranchID)
 
-    def setImageVolume(self, newData):
+    def setImageVolume(self, newData, normalize=True):
+        # Normalize first:
+        if normalize:
+            newData = newData.astype(np.float64) ** 0.8 # Gamma correction
+            for c in range(newData.shape[0]):
+                for i in range(newData.shape[1]):
+                    d = newData[c, i]
+                    mn = np.percentile(d, 10)
+                    mx = np.max(d)
+                    newData[c, i] = 255 * (d - mn) / (mx - mn)
+            newData = np.round(newData.clip(min=0)).astype(np.uint8)
+
         self.imageVolume = np.array(newData)
         self._parent.updateVolumeSize(self.imageVolume.shape)
 

@@ -9,6 +9,7 @@ def parseMatlabBranch(fullState, pointsXYZ, annotations):
     branch = Branch(id=fullState.nextBranchID())
     for xyz, annotation in zip(pointsXYZ, annotations):
         assert xyz.shape == (3,)
+        xyz = xyz - 1 # Matlab uses 1-based indices
         nextPoint = Point(
             id = fullState.nextPointID(),
             location = tuple(xyz * 1.0),
@@ -80,7 +81,7 @@ def parseLandmarks(saveState):
     landmarks = saveState['info'][0]['landmarks'][0][0]
     if landmarks.shape[0] != 3:
         return []
-    return [tuple(landmarks[:, i]) for i in range(landmarks.shape[1])]
+    return [tuple(landmarks[:, i] - 1) for i in range(landmarks.shape[1])] # 1-based indices
 
 # Load an existing dynamo matlab file, and convert it into the python dynamo format.
 def importFromMatlab(matlabPath):

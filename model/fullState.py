@@ -70,7 +70,7 @@ class FullState:
                 nextLandmarks = landmarkData[i]
             self.landmarks.append(nextLandmarks)
 
-            self.uiStates.append(UIState(parent=self, tree=nextTree, landmarks=nextLandmarks))
+            self.uiStates.append(UIState(parent=self, tree=nextTree))
 
     def toggleLineWidth(self):
         if self.lineWidth == 4:

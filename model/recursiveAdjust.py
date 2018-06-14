@@ -1,10 +1,14 @@
 import numpy as np
 import util
 
+import matplotlib.pyplot as plt
+
 import scipy.optimize
 from scipy.ndimage.filters import gaussian_filter
 
 from skimage import transform as tf
+
+WARP_MODE = 'edge'
 
 def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     """
@@ -21,6 +25,8 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     dLoc = (Rxy, Rxy, Rz)
 
     print('recadj: %d:%d %s->%s (%d,%d)' % (id, branch.indexInParent(), pointref.id, point.id, Rxy, Rz))
+    print (pointref.location)
+    print (point.location)
 
     # TO DO:
     # subsample images for speed?
@@ -85,18 +91,22 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         'Verbose': 0,
     }
     print ("XY transform fitting")
+    print ("Means: %f - %f" % (np.mean(newBox), np.mean(oldBox)))
     Bx, By, angle, fval = _registerImages(np.max(oldBox, axis=2), np.max(newBox, axis=2), opt)
+    I1 = np.mean(oldBox ** 2)
+    I2 = np.mean(newBox ** 2)
     if True or (id == 1 and point.id == "00000000"):
         print (id)
         print (point.id)
         print ("----------")
         print ("Register result:")
-        print (Bx, By, angle, fval)
+        # print (Bx, By, angle, fval)
+        print ('A : %f - F : %f' % (angle, fval))
+        print ('I1: %f - I2: %f' % (I1, I2))
         print ("----------")
         return
 
-    I1 = np.mean(np.power(oldBox, 2))
-    I2 = np.mean(np.power(newBox, 2))
+
     # I1 = mean(oldbox(:).^2);
     # I2 = mean(newbox(:).^2);
 
@@ -201,15 +211,20 @@ def _imageBoxIfInside(volume, channel, fr, to):
     print ("IBiI")
     print (fr)
     print (to)
+    print ("MEAN VOL = ")
+    print (np.mean(volume))
     to = util.locationPlus(to, (1, 1, 1)) # inclusive to exclusive upper bounds
     s = volume.shape # (channels, stacks, x, y)
     volumeXYZ = (s[2], s[3], s[1])
     for d in range(3): # Verify the box fits inside the volume:
-        if fr[d] < 0 or to[d] > volumeXYZ[d]:
+        if fr[d] < 0 or volumeXYZ[d] < to[d]:
             return None
-    subVolume = volume[channel, fr[2]:to[2], fr[0]:to[0], fr[1]:to[1]] # ZXY
-    subVolume = np.moveaxis(subVolume, 0, -1) # XYZ
+    subVolume = volume[channel, fr[2]:to[2], fr[1]:to[1], fr[0]:to[0]] # ZYX
+    subVolume = np.moveaxis(subVolume, 0, -1) # YXZ
+    # subVolume = np.swapaxes(subVolume, 0, 2) # XYZ
     print ("SVS", subVolume.shape)
+    print ("MEAN SUBVOL = ")
+    print (np.mean(subVolume))
     return subVolume
 
 def _registerImages(movingImg, staticImg, opt):
@@ -315,11 +330,13 @@ def _registerImages(movingImg, staticImg, opt):
         print (res.message)
         raise ("COULD NOT OPTIMIZE!")
     x = res.x
+    print ("BEST:")
+    print (x)
 
     trans = tf.AffineTransform(rotation=x[2], translation=(x[0], x[1]))
     # M = trans.matrix
     M = _makeTransformationMatrix((x[0], x[1]), x[2])
-    warpedImgSmooth = tf.warp(movingImgSmooth, trans)
+    warpedImgSmooth = tf.warp(movingImgSmooth, trans, mode=WARP_MODE)
 
     # [x,y]=ndgrid(0:(movingImg.shape[0]-1),0:(movingImg.shape[1]-1));
     x, y = np.meshgrid(range(movingImg.shape[0]), range(movingImg.shape[1]))
@@ -329,8 +346,15 @@ def _registerImages(movingImg, staticImg, opt):
     By = ((movingImg.shape[1]/2) + M[1, 0] * xd + M[1, 1] * yd + M[1, 2] * 1) - y;
     angle = trans.rotation
 
-    errorScale = 1 + 0.1 * np.sqrt(x[0] ** 2 + x[1] ** 2)
-    fval = _imageDifference(staticImgSmooth, warpedImgSmooth) * (errorScale)
+    f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+    print ("SHOWING")
+    print(np.min(movingImg.astype(np.float)), np.max(movingImg.astype(np.float)))
+    ax1.imshow(movingImgSmooth.astype(np.float), cmap='gray')
+    ax2.imshow(staticImgSmooth.astype(np.float), cmap='gray')
+    ax3.imshow(tf.warp(movingImgSmooth.astype(np.float), trans, mode=WARP_MODE), cmap='gray')
+    plt.show()
+
+    fval = _imageDifference(staticImgSmooth, warpedImgSmooth)
     return Bx, By, angle, fval
 
     """
@@ -353,7 +377,7 @@ def _registerImages(movingImg, staticImg, opt):
     print ("Fr: %s" % str(movingImg.shape))
     print ("To: %s" % str(staticImg.shape))
     trans.estimate(movingImg, staticImg)
-    warpedImg = tf.warp(movingImg, trans)
+    warpedImg = tf.warp(movingImg, trans, mode=WARP_MODE)
 
     M = trans.matrix
 
@@ -443,9 +467,9 @@ def _affineError(par,scale,I1,I2,type,mode):
         # 3D affine code removed...
 
     trans = tf.AffineTransform(rotation=par[2], translation=(par[0], par[1]))
-    warpedImg = tf.warp(I1, trans)
+    warpedImg = tf.warp(I1, trans, mode=WARP_MODE)
 
-    errorScale = 1 + 0.1 * np.sqrt(par[0] ** 2 + par[1] ** 2)
+    errorScale = 1 # + 0.1 * np.sqrt(par[0] ** 2 + par[1] ** 2)
     fval = _imageDifference(I2, warpedImg) * (errorScale)
     return fval
 
