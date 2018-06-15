@@ -5,8 +5,16 @@ from .tree import *
 
 from util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 
-# HACK
-import matplotlib.pyplot as plt
+# TODO: Move elsewhere
+def normalizeImage(imageData):
+    imageData = imageData.astype(np.float64) ** 0.8 # Gamma correction
+    for c in range(imageData.shape[0]):
+        for i in range(imageData.shape[1]):
+            d = imageData[c, i]
+            mn = np.percentile(d, 10)
+            mx = np.max(d)
+            imageData[c, i] = 255 * (d - mn) / (mx - mn)
+    return np.round(imageData.clip(min=0)).astype(np.uint8)
 
 @attr.s
 class UIState():

@@ -10,6 +10,12 @@ from skimage import transform as tf
 
 WARP_MODE = 'edge'
 
+def UINT8_WARP(image, transform):
+    assert image.dtype == np.uint8
+    warpDouble = tf.warp(image, transform, mode=WARP_MODE)
+    assert warpDouble.dtype == np.float64
+    return np.round(warpDouble * 255).astype(np.uint8)
+
 def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     """
     recursively adjusts points, i.e. the 'R' function
@@ -93,8 +99,8 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     print ("XY transform fitting")
     print ("Means: %f - %f" % (np.mean(newBox), np.mean(oldBox)))
     Bx, By, angle, fval = _registerImages(np.max(oldBox, axis=2), np.max(newBox, axis=2), opt)
-    I1 = np.mean(oldBox ** 2)
-    I2 = np.mean(newBox ** 2)
+    I1 = np.mean(oldBox.astype(np.int32) ** 2)
+    I2 = np.mean(newBox.astype(np.int32) ** 2)
     if True or (id == 1 and point.id == "00000000"):
         print (id)
         print (point.id)
@@ -227,7 +233,7 @@ def _imageBoxIfInside(volume, channel, fr, to):
     print (np.mean(subVolume))
     return subVolume
 
-def _registerImages(movingImg, staticImg, opt):
+def _registerImages(movingImg, staticImg, opt, drawTitle=None):
     # TODO
     """
     Inputs,
@@ -303,8 +309,8 @@ def _registerImages(movingImg, staticImg, opt):
     # % Parameter scaling of the Translation and Rotation
     scale=[1, 1, 1]
     # % Set initial affine parameters
-    x=[0, 0, 0]
-
+    # x=[0, 0, 0]
+    x = [0.5761, -5.8860, -0.1057]
     # for refine_itt=1:1   # WAT?!?!
         # if(refine_itt==2)
             # ISmoving=Imoving; ISstatic=Istatic;
@@ -314,29 +320,31 @@ def _registerImages(movingImg, staticImg, opt):
 
 
     def _affineRegistrationError(x):
-        return _affineError(x, scale, movingImgSmooth, staticImgSmooth, type='sd', mode=0)
+        return _affineError(x, scale, movingImgSmooth, staticImgSmooth)
 
-    """
-    	% Use struct because expanded optimset is part of the Optimization Toolbox.
-        %optim=struct('GradObj','off','Display','off','MaxIter',80,'MaxFunEvals',800,'TolFun',1e-6,'DiffMinChange',1e-6);
-        optim=struct('GradObj','off','GoalsExactAchieve',1,'Display','off','MaxIter',100,'MaxFunEvals',1000,'TolFun',1e-10,'DiffMinChange',1e-6);
-    	%optim=struct('GradObj','off','GoalsExactAchieve',1,'Display','off','MaxIter',100,'MaxFunEvals',1000,'TolFun',1e-14,'DiffMinChange',1e-6);
-        %[x, fval]=fminunc(@(x)affine_registration_error(x,scale,ISmoving,ISstatic,type_affine),x,optim);
-        [x, fval]=fminlbfgs(@(x)(affine_registration_error(x,scale,ISmoving,ISstatic,type_affine)*(1+ 0.1*sqrt(sum(x(1:2).^2)))),x,optim);
-    end
-    """
-    res = scipy.optimize.minimize(_affineRegistrationError, x, method='L-BFGS-B')
+    # 'MaxIter',100,'MaxFunEvals',1000,'TolFun',1e-10,'DiffMinChange',1e-6);
+    opt = {
+        'maxiter': 100,
+        'maxfun': 1000,
+        'ftol': 1e-10,
+        'disp': False,
+        # 'eps': 1e-6
+    }
+    # method = 'L-BFGS-B'
+    method = 'BFGS'
+    # method = 'Nelder-Mead'
+    res = scipy.optimize.minimize(_affineRegistrationError, x, method=method, tol=1e-10, options=opt)
     if not res.success:
         print (res.message)
-        raise ("COULD NOT OPTIMIZE!")
+        raise Exception("COULD NOT OPTIMIZE!")
     x = res.x
-    print ("BEST:")
-    print (x)
+    # print ("BEST:")
+    # print (x)
 
     trans = tf.AffineTransform(rotation=x[2], translation=(x[0], x[1]))
     # M = trans.matrix
     M = _makeTransformationMatrix((x[0], x[1]), x[2])
-    warpedImgSmooth = tf.warp(movingImgSmooth, trans, mode=WARP_MODE)
+    warpedImgSmooth = UINT8_WARP(movingImgSmooth, trans)
 
     # [x,y]=ndgrid(0:(movingImg.shape[0]-1),0:(movingImg.shape[1]-1));
     x, y = np.meshgrid(range(movingImg.shape[0]), range(movingImg.shape[1]))
@@ -346,13 +354,13 @@ def _registerImages(movingImg, staticImg, opt):
     By = ((movingImg.shape[1]/2) + M[1, 0] * xd + M[1, 1] * yd + M[1, 2] * 1) - y;
     angle = trans.rotation
 
-    f, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    print ("SHOWING")
-    print(np.min(movingImg.astype(np.float)), np.max(movingImg.astype(np.float)))
-    ax1.imshow(movingImgSmooth.astype(np.float), cmap='gray')
-    ax2.imshow(staticImgSmooth.astype(np.float), cmap='gray')
-    ax3.imshow(tf.warp(movingImgSmooth.astype(np.float), trans, mode=WARP_MODE), cmap='gray')
-    plt.show()
+    if drawTitle is not None:
+        f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+        fig.suptitle(drawTitle)
+        ax1.imshow(movingImgSmooth.astype(np.float), cmap='gray')
+        ax2.imshow(staticImgSmooth.astype(np.float), cmap='gray')
+        ax3.imshow(UINT8_WARP(movingImgSmooth, trans), cmap='gray')
+        plt.show()
 
     fval = _imageDifference(staticImgSmooth, warpedImgSmooth)
     return Bx, By, angle, fval
@@ -377,7 +385,7 @@ def _registerImages(movingImg, staticImg, opt):
     print ("Fr: %s" % str(movingImg.shape))
     print ("To: %s" % str(staticImg.shape))
     trans.estimate(movingImg, staticImg)
-    warpedImg = tf.warp(movingImg, trans, mode=WARP_MODE)
+    warpedImg = UINT8_WARP(movingImg, trans)
 
     M = trans.matrix
 
@@ -395,9 +403,9 @@ def _registerImages(movingImg, staticImg, opt):
     """
 
 def _imgGaussian(img, sigma):
-    return gaussian_filter(img.astype(np.float), sigma)
+    return np.round(gaussian_filter(img.astype(np.float), sigma)).astype(np.uint8)
 
-def _affineError(par,scale,I1,I2,type,mode):
+def _affineError(par,scale,I1,I2,drawTitle=None):
     """
     % This function affine_registration_error, uses affine transfomation of the
     % 3D input volume and calculates the registration error after transformation.
@@ -467,10 +475,20 @@ def _affineError(par,scale,I1,I2,type,mode):
         # 3D affine code removed...
 
     trans = tf.AffineTransform(rotation=par[2], translation=(par[0], par[1]))
-    warpedImg = tf.warp(I1, trans, mode=WARP_MODE)
+    warpedImg = UINT8_WARP(I1, trans)
 
-    errorScale = 1 # + 0.1 * np.sqrt(par[0] ** 2 + par[1] ** 2)
-    fval = _imageDifference(I2, warpedImg) * (errorScale)
+    if drawTitle is not None:
+        f, (ax1, ax2, ax3) = plt.subplots(1, 3)
+        f.suptitle(drawTitle)
+        ax1.imshow(I1.astype(np.float), cmap='gray')
+        ax2.imshow(I2.astype(np.float), cmap='gray')
+        ax3.imshow(warpedImg.astype(np.float), cmap='gray')
+        plt.show()
+
+    errorScale = 1 + 0.1 * np.sqrt(par[0] ** 2 + par[1] ** 2)
+    imgDelta = _imageDifference(I2, warpedImg)
+    fval = imgDelta * errorScale
+    print ("%s -> %f (%f * %f)" % (str(par), fval, imgDelta, errorScale))
     return fval
 
 
@@ -483,7 +501,7 @@ def affine_registration_error_2d(par,I1,I2,type,mode):
     # e = image_difference(I3,I2,type);
     M = _getTransformationMatrix(par)
     I3 = _affineTransform(I1, M, mode)
-    e = _imageDifference(I3, I2, type)
+    e = _imageDifference(I3, I2)
 
 def _getTransformationMatrix(par):
     assert len(par) == 3
@@ -498,7 +516,8 @@ def _makeTransformationMatrix(t, r):
 
 def _imageDifference(fr, to):
     # Squared difference
-    return np.mean((fr - to) ** 2)
+    delta = (fr.astype(np.int32) - to.astype(np.int32))
+    return np.mean(delta ** 2)
 
 def _movePixels():
     # TODO

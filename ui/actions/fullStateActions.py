@@ -1,3 +1,5 @@
+from PyQt5 import QtWidgets
+
 from analysis import absOrient
 
 from model.tree import *
@@ -99,16 +101,18 @@ class FullStateActions():
         for i in range(0, len(self.state.landmarks)):
             Xi, Yi, Zi = self.state.trees[i].worldCoordPoints(self.state.landmarks[i])
             matchIdx = []
-            assert len(Xi) == len(X0)
             for j in range(len(Xi)):
-                if Xi[j] is not None and X0[j] is not None:
+                if Xi[j] is not None and j < len(X0) and X0[j] is not None:
                     matchIdx.append(j)
             if (len(matchIdx) < 3):
-                msg = "Not enough landmarks to match! %d found for stack %d, need 3" % (matchIdx, i)
-                print (msg)
-                return msg
+                # TODO - pull out of here, pass in callback for error skips instead
+                msg = "Scan %d skipped: %d landmarks match initial, need 3." % (i, len(matchIdx))
+                msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information, msg, msg)
+                msg.show()
+                continue
             pointsFrom = [(Xi[j], Yi[j], Zi[j]) for j in matchIdx]
             pointsTo = [(X0[j], Y0[j], Z0[j]) for j in matchIdx]
             fit, R, T = absOrient(pointsFrom, pointsTo)
-            self.state.trees[i].transform.rotation = R
-            self.state.trees[i].transform.translation = T
+            # tolist() as state should not have (unsavable) numpy data
+            self.state.trees[i].transform.rotation = R.tolist()
+            self.state.trees[i].transform.translation = T.tolist()

@@ -293,7 +293,10 @@ class Tree():
         # HACK: Enter values on load?
         # self.transform.scale = np.array([0.3070, 0.3070, 1.5])
         for p in points:
-            pAt = np.array(p.location)
+            pAt = p
+            if hasattr(p, 'location'):
+                pAt = p.location
+            pAt = np.array(pAt)
             pAt = np.matmul(self.transform.rotation, pAt.T).T
             pAt = (pAt + self.transform.translation) * self.transform.scale
             x.append(pAt[0]), y.append(pAt[1]), z.append(pAt[2])
