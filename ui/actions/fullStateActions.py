@@ -106,7 +106,7 @@ class FullStateActions():
                     matchIdx.append(j)
             if (len(matchIdx) < 3):
                 # TODO - pull out of here, pass in callback for error skips instead
-                msg = "Scan %d skipped: %d landmarks match initial, need 3." % (i, len(matchIdx))
+                msg = "Scan [%d] skipped: %d landmarks match initial, need 3." % (i+1, len(matchIdx))
                 msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information, msg, msg)
                 msg.show()
                 continue

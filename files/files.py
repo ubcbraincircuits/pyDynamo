@@ -13,8 +13,11 @@ def attrFilter(attrData, value):
 # https://stackoverflow.com/questions/11942364/typeerror-integer-is-not-json-serializable-when-serializing-json-in-python
 def npInt64Fix(o):
     if isinstance(o, np.int64):
-        print ("Whoops - wrong data type (i64) for ", o, " - converting to int")
+        print ("WARNING: Wrong data type (i64) for ", o, " - converting to int")
         return int(o)
+    if type(o) is np.ndarray:
+        print ("WARNING: Wrong data type (numpy array) for ", o, " - converting to list")
+        return o.tolist()
     print ("ERROR - Can't save type: ", type(o))
     raise TypeError
 
