@@ -10,6 +10,14 @@ from skimage import transform as tf
 
 WARP_MODE = 'edge'
 
+def centreRotation(shape, R, T):
+    (x, y) = shape
+    dx, dy = (x - 1) // 2, (y - 1) // 2
+    tf_rotate = tf.SimilarityTransform(rotation=R)
+    tf_shift = tf.SimilarityTransform(translation=[-dx, -dy])
+    tf_shift_inv = tf.SimilarityTransform(translation=[dx + T[0], dy + T[1]])
+    return tf_shift + tf_rotate + tf_shift_inv
+
 def UINT8_WARP(image, transform):
     assert image.dtype == np.uint8
     warpDouble = tf.warp(image, transform, mode=WARP_MODE)
@@ -233,62 +241,7 @@ def _imageBoxIfInside(volume, channel, fr, to):
     print (np.mean(subVolume))
     return subVolume
 
-def _registerImages(movingImg, staticImg, opt, drawTitle=None):
-    # TODO
-    """
-    Inputs,
-%   Imoving : The image which will be registerd
-%   Istatic : The image on which Imoving will be registered
-%   Options : Registration options, see help below
-%
-% Outputs,
-
-%   Bx, By : The backwards transformation fields of the pixels in
-%       x and y direction seen from the  static image to the moving image.
-%   angle : rotation (?) in shift
-%   fVal : Error in final transform.
-
-%   Ireg : The registered moving image
-%   Bx, By : The backwards transformation fields of the pixels in
-%       x and y direction seen from the  static image to the moving image.
-%   Fx, Fy : The (approximated) forward transformation fields of the pixels in
-%       x and y direction seen from the moving image to the static image.
-%       (See the function backwards2forwards)
-% Options,
-%   Options.SigmaFluid : The sigma of the gaussian smoothing kernel of the pixel
-%                   velocity field / update field, this is a form of fluid
-%                   regularization, (default 4)
-%   Options.SigmaDiff : The sigma for smoothing the transformation field
-%                   is not part of the orignal demon registration, this is
-%                   a form of diffusion regularization, (default 1)
-%   Options.Interpolation : Linear (default) or Cubic.
-%   Options.Alpha : Constant which reduces the influence of edges (and noise)
-%                   and limits the update speed (default 4).
-%   Options.Similarity : Choose 'p' for single modality and 'm' for
-%                   images of different modalities. (default autodetect)
-%   Options.Registration: Rigid, Affine, NonRigid
-%   Options.MaxRef : Maximum number of grid refinements steps.
-%   Options.Verbose: Display Debug information 0,1 or 2
-    """
-
-
-    # % Disable warning
-    # warning('off', 'MATLAB:maxNumCompThreads:Deprecated')
-
-    # % Process inputs
-    # defaultoptions=struct('Similarity',[],'Registration','NonRigid','MaxRef',[],'Verbose',2,'SigmaFluid',4,'Alpha',4,'SigmaDiff',1,'Interpolation','Linear');
-    # if(~exist('Options','var')),
-        # Options=defaultoptions;
-    # else
-        # tags = fieldnames(defaultoptions);
-        # for i=1:length(tags)
-            #  if(~isfield(Options,tags{i})),  Options.(tags{i})=defaultoptions.(tags{i}); end
-        # end
-        # if(length(tags)~=length(fieldnames(Options))),
-            # warning('register_images:unknownoption','unknown options found');
-        # end
-    # end
-
+def _registerImages(movingImg, staticImg, opt, drawTitle=False):
     # % Resize the moving image to fit the static image
     # if(sum(size(Istatic)-size(Imoving))~=0)
         # Imoving = imresize(Imoving,size(Istatic),'bicubic');
@@ -324,16 +277,16 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=None):
 
     # 'MaxIter',100,'MaxFunEvals',1000,'TolFun',1e-10,'DiffMinChange',1e-6);
     opt = {
-        'maxiter': 100,
-        'maxfun': 1000,
-        'ftol': 1e-10,
+        # 'maxiter': 100,
+        # 'maxfun': 1000,
+        'ftol': 1e-6,
         'disp': False,
         # 'eps': 1e-6
     }
     # method = 'L-BFGS-B'
-    method = 'BFGS'
-    # method = 'Nelder-Mead'
-    res = scipy.optimize.minimize(_affineRegistrationError, x, method=method, tol=1e-10, options=opt)
+    # method = 'BFGS'
+    method = 'Nelder-Mead'
+    res = scipy.optimize.minimize(_affineRegistrationError, x, tol=1e-4, method=method, options=opt)
     if not res.success:
         print (res.message)
         raise Exception("COULD NOT OPTIMIZE!")
@@ -341,10 +294,12 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=None):
     # print ("BEST:")
     # print (x)
 
-    trans = tf.AffineTransform(rotation=x[2], translation=(x[0], x[1]))
-    # M = trans.matrix
-    M = _makeTransformationMatrix((x[0], x[1]), x[2])
+    # trans = tf.AffineTransform(rotation=x[2], translation=(x[0], x[1]))
+    trans = centreRotation(staticImgSmooth.shape, R=x[2], T=(x[1], x[0]))
+    M = trans.params
+    # M = _makeTransformationMatrix((x[0], x[1]), x[2])
     warpedImgSmooth = UINT8_WARP(movingImgSmooth, trans)
+    fval = _imageDifference(staticImgSmooth, warpedImgSmooth)
 
     # [x,y]=ndgrid(0:(movingImg.shape[0]-1),0:(movingImg.shape[1]-1));
     x, y = np.meshgrid(range(movingImg.shape[0]), range(movingImg.shape[1]))
@@ -354,98 +309,21 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=None):
     By = ((movingImg.shape[1]/2) + M[1, 0] * xd + M[1, 1] * yd + M[1, 2] * 1) - y;
     angle = trans.rotation
 
-    if drawTitle is not None:
+    if drawTitle:
+        title = "Best: %s (score %f)" % (str(res.x), fval)
         f, (ax1, ax2, ax3) = plt.subplots(1, 3)
-        fig.suptitle(drawTitle)
+        f.suptitle(title)
         ax1.imshow(movingImgSmooth.astype(np.float), cmap='gray')
         ax2.imshow(staticImgSmooth.astype(np.float), cmap='gray')
         ax3.imshow(UINT8_WARP(movingImgSmooth, trans), cmap='gray')
         plt.show()
 
-    fval = _imageDifference(staticImgSmooth, warpedImgSmooth)
     return Bx, By, angle, fval
-
-    """
-
-    # % Make the rigid transformation matrix
-    M=make_transformation_matrix(x(1:2),x(3));
-    angle = x(3);
-
-    # % Make center of the image transformation coordinates 0,0
-    [x,y]=ndgrid(0:(size(Imoving,1)-1),0:(size(Imoving,2)-1));
-    xd=x-(size(Imoving,1)/2); yd=y-(size(Imoving,2)/2);
-
-    # % Calculate the backwards transformation fields
-    Bx = ((size(Imoving,1)/2) + M(1,1) * xd + M(1,2) *yd + M(1,3) * 1)-x;
-    By = ((size(Imoving,2)/2) + M(2,1) * xd + M(2,2) *yd + M(2,3) * 1)-y;
-
-    return None
-    ""
-    trans = tf.AffineTransform()
-    print ("Fr: %s" % str(movingImg.shape))
-    print ("To: %s" % str(staticImg.shape))
-    trans.estimate(movingImg, staticImg)
-    warpedImg = UINT8_WARP(movingImg, trans)
-
-    M = trans.matrix
-
-    # [x,y]=ndgrid(0:(movingImg.shape[0]-1),0:(movingImg.shape[1]-1));
-    x, y = np.meshgrid(range(movingImg.shape[0]), range(movingImg.shape[1]))
-    xd = x - (movingImg.shape[0]/2)
-    yd = y - (movingImg.shape[1]/2)
-    Bx = ((movingImg.shape[0]/2) + M[0, 0] * xd + M[0, 1] * yd + M[0, 2] * 1) - x;
-    By = ((movingImg.shape[1]/2) + M[1, 0] * xd + M[1, 1] * yd + M[1, 2] * 1) - y;
-    angle = trans.rotation
-
-    errorScale = 1 + 0.1 * np.sqrt(trans.translation[0] ** 2 + trans.translation[1] ** 2)
-    fval = _imageDifference(staticImg, warpedImg) * (errorScale) # TODO - error scale during estimate?
-    return Bx, By, angle, fval
-    """
 
 def _imgGaussian(img, sigma):
     return np.round(gaussian_filter(img.astype(np.float), sigma)).astype(np.uint8)
 
 def _affineError(par,scale,I1,I2,drawTitle=None):
-    """
-    % This function affine_registration_error, uses affine transfomation of the
-    % 3D input volume and calculates the registration error after transformation.
-    %
-    % [e,egrad]=affine_registration_error(parameters,scale,I1,I2,type,Grid,Spacing,MaskI1,MaskI2,Points1,Points2,PStrength,mode);
-    %
-    % input,
-    %   parameters (in 2D) : Rigid vector of length 3 -> [translateX translateY rotate]
-    %                        or Affine vector of length 7 -> [translateX translateY
-    %                                           rotate resizeX resizeY shearXY
-    %                                           shearYX]
-    %
-    %   parameters (in 3D) : Rigid vector of length 6 : [translateX translateY translateZ
-    %                                           rotateX rotateY rotateZ]
-    %                       or Affine vector of length 15 : [translateX translateY translateZ,
-    %                             rotateX rotateY rotateZ resizeX resizeY
-    %                             resizeZ,
-    %                             shearXY, shearXZ, shearYX, shearYZ, shearZX, shearZY]
-    %
-    %   scale: Vector with Scaling of the input parameters with the same lenght
-    %               as the parameter vector.
-    %   I1: The 2D/3D image which is rigid or affine transformed
-    %   I2: The second 2D/3D image which is used to calculate the
-    %       registration error
-    %   type: The type of registration error used see registration_error.m
-    % (optional)
-    %   mode: If 0: linear interpolation and outside pixels set to nearest pixel
-    %            1: linear interpolation and outside pixels set to zero
-    %            2: cubic interpolation and outsite pixels set to nearest pixel
-    %            3: cubic interpolation and outside pixels set to zero
-    %
-    % outputs,
-    %   e: registration error between I1 and I2
-    %   egrad: error gradient of input parameters
-    % example,
-    %   see example_3d_affine.m
-    %
-    % Function is written by D.Kroon University of Twente (April 2009)
-    """
-
     # % Scale the inputs
     # par=par.*scale;
     assert scale == [1, 1, 1] # TODO - remove scale
@@ -453,28 +331,8 @@ def _affineError(par,scale,I1,I2,drawTitle=None):
     # % Delta
     delta = 1e-5
 
-    # Special case for simple squared difference (speed optimized code)
-    # if((size(I1,3)>3)&&(strcmp(type,'sd')))
-        # ... never used, as we're only passing 2D images
-
-
-    """
-    % Normal error calculation between the two images, and error gradient if needed
-    % by final differences
-    if(size(I1,3)<4)
-        e=affine_registration_error_2d(par,I1,I2,type,mode);
-        if(nargout>1)
-            egrad=zeros(1,length(par));
-            for i=1:length(par)
-                par2=par; par2(i)=par(i)+delta*scale(i);
-                egrad(i)=(affine_registration_error_2d(par2,I1,I2,type,mode)-e)/delta;
-            end
-        end
-    """
-    # else
-        # 3D affine code removed...
-
-    trans = tf.AffineTransform(rotation=par[2], translation=(par[0], par[1]))
+    # trans = tf.AffineTransform(rotation=par[2], translation=(par[1], par[0])) #Matlab translation is weird
+    trans = centreRotation(I1.shape, R=par[2], T=(par[1], par[0]))
     warpedImg = UINT8_WARP(I1, trans)
 
     if drawTitle is not None:
@@ -488,17 +346,11 @@ def _affineError(par,scale,I1,I2,drawTitle=None):
     errorScale = 1 + 0.1 * np.sqrt(par[0] ** 2 + par[1] ** 2)
     imgDelta = _imageDifference(I2, warpedImg)
     fval = imgDelta * errorScale
-    print ("%s -> %f (%f * %f)" % (str(par), fval, imgDelta, errorScale))
+    # print ("%s -> %f (%f * %f)" % (str(par), fval, imgDelta, errorScale))
     return fval
 
 
 def affine_registration_error_2d(par,I1,I2,type,mode):
-    # function e=affine_registration_error_2d(par,I1,I2,type,mode)
-    # M=getransformation_matrix(par);
-    # I3=affine_transform(I1,M,mode);
-
-    # % registration error calculation.
-    # e = image_difference(I3,I2,type);
     M = _getTransformationMatrix(par)
     I3 = _affineTransform(I1, M, mode)
     e = _imageDifference(I3, I2)

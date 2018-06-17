@@ -3,7 +3,7 @@ import numpy as np
 from files import tiffRead
 from model import normalizeImage
 
-from model.recursiveAdjust import _imgGaussian, _affineError
+from model.recursiveAdjust import _imgGaussian, _affineError, _registerImages
 
 def test():
     oldImg = tiffRead('data/testNeuron/R_Live1-1-2002_03-24-20.tif')
@@ -33,8 +33,11 @@ def test():
     # _affineError(x, [1, 1, 1], movingImgSmooth, staticImgSmooth, drawTitle=str(x))
 
 
-    x = [0, 0, np.pi / 3]
-    _affineError(x, [1, 1, 1], movingImgSmooth, staticImgSmooth, drawTitle=str(x))
+    # x = [10, -10, np.pi / 3]
+    # x = [-30, 15, 0]
+    # _affineError(x, [1, 1, 1], movingImgSmooth, staticImgSmooth, drawTitle=str(x))
+
+    _registerImages(movingImg, staticImg, None, drawTitle=True)
 
 def run():
     test()
