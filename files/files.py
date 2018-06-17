@@ -44,6 +44,9 @@ def convertToPoint(asDict):
     convert(asDict, 'location', tuple)
     return Point(**asDict)
 
+def convertToTransform(asDict):
+    return Transform(**asDict)
+
 def convertToBranch(asDict):
     convert(asDict, 'parentPoint', convertToPoint)
     convert(asDict, 'reparentTo', convertToPoint)
@@ -53,6 +56,7 @@ def convertToBranch(asDict):
 def convertToTree(asDict):
     convert(asDict, 'rootPoint', convertToPoint)
     convert(asDict, 'branches', convertToBranch, isArray=True)
+    convert(asDict, 'transform', convertToTransform)
     return Tree(**asDict)
 
 def convertToUIState(asDict):
