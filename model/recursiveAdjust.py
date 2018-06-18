@@ -39,8 +39,8 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     dLoc = (Rxy, Rxy, Rz)
 
     print('recadj: %d:%d %s->%s (%d,%d)' % (id, branch.indexInParent(), pointref.id, point.id, Rxy, Rz))
-    print (pointref.location)
-    print (point.location)
+    print(pointref.location)
+    print(point.location)
 
     # TO DO:
     # subsample images for speed?
@@ -51,7 +51,6 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
 
     # extract the 'boxes'; subimages for alignment
     xyz = pointref.location # round(state{id-1}.tree{branch}{1}(:, pointref));
-    print ("Point location", xyz)
     xyz = (int(np.round(xyz[0])), int(np.round(xyz[1])), int(np.round(xyz[2])))
     oldLocMin = util.locationMinus(xyz, dLoc)
     oldLocMax = util.locationPlus(xyz, dLoc)
@@ -67,7 +66,6 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     # end
     # oldbox = double(traits.imagestack{id-1}(yminold:ymaxold, xminold:xmaxold, zminold:zmaxold));
     volume = fullState.uiStates[id - 1].imageVolume
-    print ("Making old box...")
     oldBox = _imageBoxIfInside(volume, fullState.channel, oldLocMin, oldLocMax)
     if oldBox is None:
         # hilight this point
@@ -92,7 +90,6 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     # newbox = double(traits.imagestack{id}(ymin:ymax, xmin:xmax, zmin:zmax));
     volume = fullState.uiStates[id].imageVolume
     newBox = _imageBoxIfInside(volume, fullState.channel, newLocMin, newLocMax)
-    print ("Making new box...")
     if newBox is None:
         _recursiveHilight(branch, fromPointIdx=point.indexInParent())
         return
@@ -104,34 +101,34 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         'Registration': 'Rigid',
         'Verbose': 0,
     }
-    print ("XY transform fitting")
-    print ("Means: %f - %f" % (np.mean(newBox), np.mean(oldBox)))
+    # print ("XY transform fitting")
+    # print ("Means: %f - %f" % (np.mean(newBox), np.mean(oldBox)))
     Bx, By, angle, fval = _registerImages(np.max(oldBox, axis=2), np.max(newBox, axis=2), opt)
     I1 = np.mean(oldBox.astype(np.int32) ** 2)
     I2 = np.mean(newBox.astype(np.int32) ** 2)
     if True or (id == 1 and point.id == "00000000"):
-        print (id)
-        print (point.id)
+        # print (id)
+        # print (point.id)
         print ("----------")
         print ("Register result:")
         # print (Bx, By, angle, fval)
         print ('A : %f - F : %f' % (angle, fval))
         print ('I1: %f - I2: %f' % (I1, I2))
         print ("----------")
-        return
+        # return
 
 
     # I1 = mean(oldbox(:).^2);
     # I2 = mean(newbox(:).^2);
 
     # the alignment is poor; give up!
-    fTooBad = (fval is None) or fval > (np.max(I1,I2)*0.9)
+    fTooBad = (fval is None) or fval > (max(I1,I2)*0.9)
     xMoveTooFar = np.abs(Bx[Rxy+1,Rxy+1]) > (Rxy*0.8)
     yMoveTooFar = np.abs(By[Rxy+1,Rxy+1]) > (Rxy*0.8)
     if (np.abs(angle) > 0.3 or fTooBad or xMoveTooFar or yMoveTooFar):
         print ("Bad fit! larger window if %d < 25" % Rxy)
         if Rxy < 25: # try a larger window
-            recursiveAdjust(id, branch, point, pointref, 25, 4)
+            recursiveAdjust(fullState, id, branch, point, pointref, 25, 4)
         else:
             _recursiveHilight(branch, fromPointIdx=point.indexInParent())
             # state{id}.tree{branch}{4}(point:size(state{id}.tree{branch}{1},2)) = 1; %highlight this point
@@ -140,7 +137,25 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         return
 
     # Find optimal Z-offset for known 2d alignment
-    print ("Z transform fitting")
+    # print ("Z transform fitting")
+    mX, mY, mZ = np.dstack([Bx] * (2*Rz + 1)), np.dstack([By] * (2*Rz + 1)), np.zeros(oldBox.shape)
+    oldBoxShifted = _movePixels(oldBox, mX, mY, mZ)
+
+    bestZ, bestZScore = None, 0
+    for dZ in range(-Rz, Rz + 1):
+        zAt = xyz[0] + dZ
+        dLocZ = (Rxy, Rxy, Rz + dZ)
+        newLocMinZ = util.locationMinus(xyz, dLoc)
+        newLocMaxZ = util.locationPlus(xyz, dLoc)
+        newBoxZ = _imageBoxIfInside(volume, fullState.channel, newLocMinZ, newLocMaxZ)
+        if newBoxZ is None:
+            continue
+        delta = _imageDifference(oldBoxShifted, newBoxZ)
+        score = delta * (6 + abs(dZ) ** 1.1)
+        if bestZ is None or bestZScore > score:
+            bestZ, bestZScore = dZ, score
+
+    print ("Best Z is %d, delta = %d, score = %f" % (bestZ, xyz[0] + bestZ, bestZScore))
 
     """
     # TODO
@@ -155,14 +170,14 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
             score(Oz+Rz+1) = image_difference(oldIM,newIM,'sd',Mask) * (6 + abs(Oz) ** 1.1);
     """
 
-    # find optimum
-    minIdx = np.argmin(score)
-    minVal = score[minIdx]
-    # [minVal minIx] = np.min(score);
+    # # find optimum
+    # minIdx = np.argmin(score)
+    # minVal = score[minIdx]
+    # # [minVal minIx] = np.min(score);
 
     shiftX = -By[Rxy+1, Rxy+1]
     shiftY = -Bx[Rxy+1, Rxy+1]
-    shiftZ = minIdx - Rz - 1
+    shiftZ = dZ # minIdx - Rz - 1
     shift = (shiftX, shiftY, shiftZ)
     print ("Recursively moving branch by: %s" % (str(shift)))
 
@@ -196,20 +211,21 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     nextPointRef = pointref.nextPointInBranch()
     if nextPoint is not None and nextPointRef is not None:
         deltaXYZ = np.abs(util.locationMinus(nextPoint.location, point.location))
-        dXY = np.round(util.snapToRange(np.max(deltaXYZ[0:1]), 20, 30))
-        dZ = np.round(util.snapToRange(deltaXYZ[2], 2, 4) + 1)
-        recursiveAdjust(id, branch, nextPoint, nextPointRef, dXY, dZ)
+        dXY = int(round(util.snapToRange(np.max(deltaXYZ[0:1]), 20, 30)))
+        dZ = int(round(util.snapToRange(deltaXYZ[2], 2, 4) + 1))
+        recursiveAdjust(fullState, id, branch, nextPoint, nextPointRef, dXY, dZ)
 
     # for child = state{id}.tree{branch}{2}{point}
         # recursiveadjust(id, child, 2, 2);
     print ("Adjusting children...")
     for branch in point.children:
-        HACK = None # Load corresponding old point
-        recursiveAdjust(id, branch, branch.points[0], HACK)
+        pass
+        # HACK = None # Load corresponding old point
+        # recursiveAdjust(fullState, id, branch, branch.points[0], HACK)
     print ("Done!")
 
 def _recursiveMoveBranch(branch, shift, fromPointIdx=0):
-    for pointToMove in branch.points[fromPointIdx]:
+    for pointToMove in branch.points[fromPointIdx:]:
         pointToMove.location = util.locationPlus(pointToMove.location, shift)
         for childBranch in pointToMove.children:
             _recursiveMoveBranch(childBranch, shift)
@@ -222,11 +238,6 @@ def _recursiveHilight(branch, fromPointIdx=0):
             _recursiveHilight(childBranch)
 
 def _imageBoxIfInside(volume, channel, fr, to):
-    print ("IBiI")
-    print (fr)
-    print (to)
-    print ("MEAN VOL = ")
-    print (np.mean(volume))
     to = util.locationPlus(to, (1, 1, 1)) # inclusive to exclusive upper bounds
     s = volume.shape # (channels, stacks, x, y)
     volumeXYZ = (s[2], s[3], s[1])
@@ -235,10 +246,6 @@ def _imageBoxIfInside(volume, channel, fr, to):
             return None
     subVolume = volume[channel, fr[2]:to[2], fr[1]:to[1], fr[0]:to[0]] # ZYX
     subVolume = np.moveaxis(subVolume, 0, -1) # YXZ
-    # subVolume = np.swapaxes(subVolume, 0, 2) # XYZ
-    print ("SVS", subVolume.shape)
-    print ("MEAN SUBVOL = ")
-    print (np.mean(subVolume))
     return subVolume
 
 def _registerImages(movingImg, staticImg, opt, drawTitle=False):
@@ -371,6 +378,19 @@ def _imageDifference(fr, to):
     delta = (fr.astype(np.int32) - to.astype(np.int32))
     return np.mean(delta ** 2)
 
-def _movePixels():
-    # TODO
-    return None
+def _movePixels(oldVolume, dX, dY, dZ):
+    assert oldVolume.shape == dX.shape and oldVolume.shape == dY.shape and oldVolume.shape == dZ.shape
+    (nx, ny, nz) = oldVolume.shape
+    newVolume = np.zeros(oldVolume.shape)
+
+    for i in range(nx):
+        for j in range(ny):
+            for k in range(nz):
+                # TODO: bilinear interpolation
+                x = i + int(round(dX[i, j, k]))
+                y = j + int(round(dY[i, j, k]))
+                z = k + int(round(dZ[i, j, k]))
+                if 0 <= x and x < nx and 0 <= y and y < ny and 0 <= z and z < nz:
+                    newVolume[i, j, k] = oldVolume[x, y, z]
+
+    return newVolume

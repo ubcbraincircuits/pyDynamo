@@ -36,7 +36,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Dynamo")
         self.setWindowFlags(QtCore.Qt.WindowTitleHint)
         self.setFixedSize(480, 320)
-        
+
         p = self.palette()
         p.setColor(self.backgroundRole(), QtCore.Qt.black)
         self.setPalette(p)
@@ -45,8 +45,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
         label = QtWidgets.QLabel(self)
         pixmap = QtGui.QPixmap('img/tmpLogo.png')
         label.resize(pixmap.width(), pixmap.height())
-        label.setPixmap(pixmap) #.scaled(label.size(), QtCore.Qt.IgnoreAspectRatio))        
-        
+        label.setPixmap(pixmap) #.scaled(label.size(), QtCore.Qt.IgnoreAspectRatio))
+
         # Close button
         buttonQ = QtWidgets.QPushButton("&Close Dynamo", self)
         buttonQ.setToolTip("Clonse all Dynamo windows and exit")
@@ -245,6 +245,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
             childWindow.show()
         QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
+
+        HACK_WINDOW_TO_SELECT = 1 # POIUY
+        if (len(self.fullState.uiStates) > 0):
+            selectedPoint = self.fullState.uiStates[HACK_WINDOW_TO_SELECT].currentPoint()
+            if selectedPoint is not None:
+                self.fullActions.selectPoint(HACK_WINDOW_TO_SELECT, selectedPoint)
 
     def removeStackWindow(self, windowIndex):
         self.fullState.removeStack(windowIndex)
