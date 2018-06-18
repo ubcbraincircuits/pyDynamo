@@ -45,11 +45,11 @@ def addedSubtractedTransitioned(
     addedResult = np.full(resultShape, False)
     subtracted = np.full(resultShape, False)
     transitioned = np.full(resultShape, False)
-    masterChanged = np.full(resultShape, False)
+    masterChanged = np.full((nTrees - 1, nBranches), False)
     masterNodes = util.emptyArrayMatrix(nTrees, nBranches)
 
     for treeAt, tree in enumerate(trees):
-        _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeAt, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
+        _recursiveFiloTypes(filoTypes, masterNodes, trees, treeAt, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
 
     filoExists = (filoTypes > FiloType.ABSENT)
     filos = filoExists & (filoTypes < FiloType.BRANCH_ONLY) # NOTE: brackets needed for numpy precendence
@@ -59,14 +59,14 @@ def addedSubtractedTransitioned(
     subtracted = (filoBefore & ~filoExists[1:, :])
     transitioned = filoBefore & ~branches[:-1, :] & branches[1:, :]
 
-    masterChanged = MASTER_CHANGED_FUNC(masterNodes[:-1], masterNodes[1:])
+    fillMasterChanged(masterChanged, masterNodes)
     added[masterChanged] = False
     subtracted[masterChanged] = False
 
     return filoTypes, added, subtracted, transitioned, masterChanged, masterNodes
 
 # HACK : TODO: Migrate to ID-based results rather than index-based
-def _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeIdx, branchIdx, excludeAxon, excludeBasal, terminalDist, filoDist):
+def _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, branchIdx, excludeAxon, excludeBasal, terminalDist, filoDist):
     branch = trees[treeIdx].branches[branchIdx]
     pointsWithRoot = [branch.parentPoint] + branch.points
 
@@ -110,7 +110,7 @@ def _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeIdx, b
             else: # Not filo
                 # all terminal filopodia identified so far are actually interstitial
                 forceInterstitial = True
-                _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeIdx, childBranchIdx, excludeAxon, excludeBasal, terminalDist, filoDist)
+                _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, childBranchIdx, excludeAxon, excludeBasal, terminalDist, filoDist)
 
         # Turn all previous terminal filos into interstitial filos
         if forceInterstitial:
@@ -152,8 +152,10 @@ def _recursiveFiloTypes(filoTypes, masterNodes, masterChanged, trees, treeIdx, b
         masterNodes[treeIdx][branchIdx] = [branchIdx]
 
 
-def _masterChangedFunc(l1, l2):
-    if len(l2) == 0:
-        return False
-    return not len(set(l1) & set(l2)) > 0
-MASTER_CHANGED_FUNC = np.vectorize(_masterChangedFunc)
+def fillMasterChanged(masterChanged, masterNodes):
+    (nTrees, nBranches) = masterChanged.shape
+    for t in range(nTrees):
+        for b in range(nBranches):
+            l1 = masterNodes[ t ][b]
+            l2 = masterNodes[t+1][b]
+            masterChanged[t, b] = len(l2) > 0 and len(set(l1) & set(l2)) == 0

@@ -5,6 +5,7 @@ from .tree import *
 
 from util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 
+
 # TODO: Move elsewhere
 def normalizeImage(imageData):
     imageData = imageData.astype(np.float64) ** 0.8 # Gamma correction
@@ -24,8 +25,8 @@ class UIState():
     # Tree being shown in the UI.
     _tree = attr.ib(default=None)
 
-    # 3D tensor of intensities for image voxels
-    imageVolume = attr.ib(default=None)
+    # Path of image, use ImageCache to obtain actual volume
+    imagePath = attr.ib(default=None)
 
     # ID of currently active branch
     currentBranchID = attr.ib(default=None)
@@ -50,21 +51,6 @@ class UIState():
 
     def currentBranch(self):
         return self._tree.getBranchByID(self.currentBranchID)
-
-    def setImageVolume(self, newData, normalize=True):
-        # Normalize first:
-        if normalize:
-            newData = newData.astype(np.float64) ** 0.8 # Gamma correction
-            for c in range(newData.shape[0]):
-                for i in range(newData.shape[1]):
-                    d = newData[c, i]
-                    mn = np.percentile(d, 10)
-                    mx = np.max(d)
-                    newData[c, i] = 255 * (d - mn) / (mx - mn)
-            newData = np.round(newData.clip(min=0)).astype(np.uint8)
-
-        self.imageVolume = np.array(newData)
-        self._parent.updateVolumeSize(self.imageVolume.shape)
 
     def currentImage(self):
         return self.imageVolume[self._parent.channel][self._parent.zAxisAt]

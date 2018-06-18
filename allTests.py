@@ -27,9 +27,9 @@ def testRecursiveAdjust():
 
 def run():
     passed = True
-    # passed = passed and testAbsOrient()
-    # passed = passed and testHistory()
-    # passed = passed and testMotility()
+    passed = passed and testAbsOrient()
+    passed = passed and testHistory()
+    passed = passed and testMotility()
     passed = passed and testRecursiveAdjust()
     if passed:
         print ("\n 🙌🙌🙌 ALL TESTS PASSED 🙌🙌🙌\n")

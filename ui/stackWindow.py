@@ -11,6 +11,8 @@ from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 
+_IMG_CACHE = files.ImageCache()
+
 class StackWindow(QtWidgets.QMainWindow):
     def __init__(self, windowIndex, imagePath, fullActions, treeModel, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -20,10 +22,9 @@ class StackWindow(QtWidgets.QMainWindow):
 
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
-        self.imagePath = imagePath;
-
-        # imageVolume = files.tiffRead(imagePath)
-        uiState.setImageVolume(files.tiffRead(imagePath))
+        self.imagePath = imagePath
+        uiState.imagePath = imagePath
+        _IMG_CACHE.handleNewUIState(uiState)
 
         self.root = QtWidgets.QWidget(self)
         self.dendrites = DendriteVolumeCanvas(
@@ -68,9 +69,10 @@ class StackWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(_createTitle(self.windowIndex, newFilePath))
         self.imagePath = newFilePath
         self.uiState = newUiState
-        self.uiState.setImageVolume(files.tiffRead(newFilePath))
+        # self.uiState.setImagePath(newFilePath)
         self.dendrites.updateState(newUiState)
         self.actionHandler.updateUIState(newUiState)
+        _IMG_CACHE.handleNewUIState(newUiState)
 
     def redraw(self):
         self.dendrites.redraw()

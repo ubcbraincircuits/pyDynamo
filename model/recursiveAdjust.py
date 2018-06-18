@@ -65,7 +65,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     #         return;
     # end
     # oldbox = double(traits.imagestack{id-1}(yminold:ymaxold, xminold:xmaxold, zminold:zmaxold));
-    volume = fullState.uiStates[id - 1].imageVolume
+    volume = imgCache.volumeForUIState(fullState.uiStates[id - 1])
     oldBox = _imageBoxIfInside(volume, fullState.channel, oldLocMin, oldLocMax)
     if oldBox is None:
         # hilight this point
@@ -88,7 +88,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     #         return;
     # end
     # newbox = double(traits.imagestack{id}(ymin:ymax, xmin:xmax, zmin:zmax));
-    volume = fullState.uiStates[id].imageVolume
+    volume = imgCache.volumeForUIState(fullState.uiStates[id])
     newBox = _imageBoxIfInside(volume, fullState.channel, newLocMin, newLocMax)
     if newBox is None:
         _recursiveHilight(branch, fromPointIdx=point.indexInParent())

@@ -11,6 +11,9 @@ from .dendritePainter import DendritePainter
 from .dendriteOverlay import DendriteOverlay
 
 from util import deltaSz, snapToRange
+from files import ImageCache
+
+_IMGCACHE = ImageCache()
 
 class DendriteVolumeCanvas(QWidget):
     INVERT_SCROLL = False
@@ -28,7 +31,7 @@ class DendriteVolumeCanvas(QWidget):
         self.stackWindow = stackWindow
 
         self.imgView = QtImageViewer(self,
-            np2qt(uiState.currentImage(), normalize=True, channel=self.uiState.parent().colorChannel())
+            np2qt(self.currentImg(), normalize=True, channel=self.uiState.parent().colorChannel())
         )
         self.imgOverlay = DendriteOverlay(self, windowIndex)
 
@@ -38,6 +41,9 @@ class DendriteVolumeCanvas(QWidget):
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
         self.drawImage()
+
+    def currentImg(self):
+        return _IMGCACHE.imageForUIState(self.uiState)
 
     def updateState(self, newUiState):
         self.uiState = newUiState
@@ -50,7 +56,7 @@ class DendriteVolumeCanvas(QWidget):
         c1, c2 = self.uiState.colorLimits
         # TODO: use inbuilt clim if possible instead.
         # imageData = np.array(self.volume[self.uiState.parent().zAxisAt])
-        imageData = self.uiState.currentImage()
+        imageData = self.currentImg()
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
         imageData = snapToRange(imageData, 0.0, 1.0)

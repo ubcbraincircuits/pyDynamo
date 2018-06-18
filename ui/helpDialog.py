@@ -37,7 +37,7 @@ HELP_MSG = """
 <h3>Analysis</h3>
 <ul>
   <li><b>3</b> to open a 3d wire model of the current volume</li>
-  <li><b>B</b> to show motility plots for all volumes</li>
+  <li><b>Mcccc</b> to show motility plots for all volumes</li>
   <li><b>Q</b> to annotate a point
   <li><b>L</b> to set landmarks that allow for aligning volumes</li>
 </ul>
@@ -72,7 +72,7 @@ class HelpDialog(QDialog):
     label = QLabel(HELP_MSG, self)
     label.setTextFormat(QtCore.Qt.RichText)
     vLayout.addWidget(label, 0, QtCore.Qt.AlignHCenter)
-    self.setLayout(vLayout) 
+    self.setLayout(vLayout)
 
 def showHelpDialog():
     HelpDialog().exec_()

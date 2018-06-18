@@ -72,12 +72,13 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                         ax.scatter(x, y, z, c=color, s=sz)
 
                     # Show removed branches from last point:
-                    if self.treeModels[treeIdx - 1].branches[branchIdx] is not None:
+                    lastHasBranch = branchIdx < len(self.treeModels[treeIdx - 1].branches)
+                    if lastHasBranch and self.treeModels[treeIdx - 1].branches[branchIdx] is not None:
                         for childPoint in self.treeModels[treeIdx - 1].branches[branchIdx].points:
                             retracted = 0
                             for childBranch in childPoint.children:
-                                if childBranch is None or len(childBranch.points) == 0:
-                                    retracted += self.filoLengths[treeIdx - 1][childBranch]
+                                if not (childBranch is None or len(childBranch.points) == 0):
+                                    retracted += self.filoLengths[treeIdx - 1][childBranch.indexInParent()]
                             if retracted > 0:
                                 x, y, z = treeModel.worldCoordPoints([childPoint])
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
