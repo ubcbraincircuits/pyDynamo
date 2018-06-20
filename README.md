@@ -47,3 +47,7 @@ The recommended approach is:
 
 ## Analysis
 Currently analysis is done purely visually (i.e. 'M' or '3'), but as requirements on getting data out are clearer, there'll be a way added to export some metrics to a csv or similar.
+
+## Errors
+As pyDynamo is currently pre-release and under active development, it may also still crash occasionally.
+If this happens, let me know and I should be able to fix it - more error details should also be visible from the commandline in which the original `python dynamo.py` was run.
