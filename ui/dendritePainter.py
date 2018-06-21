@@ -23,6 +23,7 @@ class DendritePainter():
     NODE_CIRCLE_BRUSH = QBrush(Qt.white)
     NODE_CIRCLE_SELECTED_BRUSH = QBrush(Qt.cyan)
     NODE_CIRCLE_MOVING_BRUSH = QBrush(Qt.red)
+    HILIGHTED_CIRCLE_BRUSH = QBrush(Qt.green)
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
     ANNOTATION_FONT = QFont("Arial", 12, QFont.Bold)
@@ -65,14 +66,16 @@ class DendritePainter():
         x, y, z = self.zoomedLocation(point.location)
         annotation = point.annotation
         if z == self.zAt:
-            self.drawCircleThisZ(x, y, point.id == selectedPointID)
+            self.drawCircleThisZ(x, y, point.id == selectedPointID, point.hilighted)
             if annotation != "":
                 self.drawAnnotation(x, y, annotation)
 
-    def drawCircleThisZ(self, x, y, isSelected):
+    def drawCircleThisZ(self, x, y, isSelected, isHilighted):
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
             brushColor = self.NODE_CIRCLE_MOVING_BRUSH if self.uiState.isMoving else self.NODE_CIRCLE_SELECTED_BRUSH
+        elif isHilighted and self.uiState.showHilighted:
+            brushColor = self.HILIGHTED_CIRCLE_BRUSH 
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
         self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_DIAMETER, self.NODE_CIRCLE_DIAMETER)

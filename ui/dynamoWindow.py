@@ -132,7 +132,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
         print ("DYNAMO key %d" % (key))
 
-        if (key == ord('H')):
+        if (key == ord('J')):
             self.fullState.toggleLineWidth()
             self.redrawAllStacks()
             return True

@@ -31,7 +31,7 @@ class Point():
     """Node position as an (x, y, z) tuple."""
 
     parentBranch = attr.ib(default=None, repr=False, cmp=False)
-    """Branch this point belongs to"""
+    """Branch this point belongs to."""
 
     annotation = attr.ib(default="", cmp=False, metadata=SAVE_META)
     """Text annotation for node."""
@@ -40,7 +40,7 @@ class Point():
     """Branches coming off the node."""
 
     hilighted = attr.ib(default=None, cmp=False)
-    """Not sure...? Isn't used... """
+    """Indicates which points could not be registered."""
 
     def isRoot(self):
         """Whether this point represents the root of the whole tree."""
@@ -48,10 +48,14 @@ class Point():
 
     def indexInParent(self):
         """How far along the branch this point sits, 0 = first point after branch point."""
+        if self.parentBranch is None:
+            return 0 # Root is first
         return self.parentBranch.indexForPoint(self)
 
     def nextPointInBranch(self, delta=1):
         """Walks a distance along the branch and returns the sibling."""
+        if self.parentBranch is None:
+            return None # Root point alone in branch.
         idx = self.indexInParent()
         nextIdx = idx + delta
         if nextIdx == -1:
@@ -246,7 +250,7 @@ class Tree():
         else:
             return None
 
-    def movePoint(self, pointID, newLocation, moveDownstream=False):
+    def movePoint(self, pointID, newLocation, downstream=False):
         """Moves a point to a new loction, optionally also moving all downstream points by the same.
 
         :param pointID: ID of point to move.
@@ -256,7 +260,7 @@ class Tree():
         pointToMove = self.getPointByID(pointID)
         assert pointToMove is not None, "Trying to move an unknown point ID"
         delta = util.locationMinus(newLocation, pointToMove.location)
-        if moveDownstream:
+        if downstream:
             self._recursiveMovePointDelta(pointToMove, delta)
         else:
             # Non-recursive, so just move this one point:
@@ -272,12 +276,11 @@ class Tree():
         return result
 
     def closestPointTo(self, targetLocation, zFilter=False):
-        """Given a position, find the point closest to it.
+        """Given a position in the volume, find the point closest to it in image space.
 
         :param targetLocation: (x, y, z) location tuple.
         :param zFilter: If true, only items on the same zStack are considered.
         :returns: Point object of point closest to the target location."""
-        # TODO - need to fix for world coordinates?
         closestDist, closestPoint = None, None
         for point in self.flattenPoints():
             if zFilter and point.location[2] != targetLocation[2]:
@@ -285,6 +288,23 @@ class Tree():
             dist = util.deltaSz(targetLocation, point.location)
             if closestDist is None or dist < closestDist:
                 closestDist, closestPoint = dist, point
+        return closestPoint
+
+    def closestPointToWorldLocation(self, targetWorldLocation):
+        print ("Closest to %s" % (str(targetWorldLocation)))
+        """Given a position in world space, find the point closest to it in world space.
+
+        :param targetWorldLocation: (x, y, z) location tuple.
+        :returns: Point object of point closest to the target location."""
+        closestDist, closestPoint = None, None
+        allPoints = self.flattenPoints()
+        allX, allY, allZ = self.worldCoordPoints(allPoints)
+        for point, loc in zip(allPoints, zip(allX, allY, allZ)):
+        # for i in range(len(allPoints
+            dist = util.deltaSz(targetWorldLocation, loc) # (allX[i], allY[i], allZ[i]))
+            # print ("Point %s, at %s, world loc %s, dist %f" %(point.id, str(point.location), str(loc), dist))
+            if closestDist is None or dist < closestDist:
+                closestDist, closestPoint = dist, point #allPoints[i]
         return closestPoint
 
     def worldCoordPoints(self, points):
@@ -307,7 +327,7 @@ class Tree():
         point.location = util.locationPlus(point.location, delta)
         # First, move any branches coming off this point, by moving their first point
         for branch in self.branches:
-            if branch.parentPoint.id == point.id and len(branch.points) > 0:
+            if branch.parentPoint is not None and branch.parentPoint.id == point.id and len(branch.points) > 0:
                 self._recursiveMovePointDelta(branch.points[0], delta)
         # Next, move the next point on this branch (which will recursively do likewise...)
         if point.parentBranch is not None:

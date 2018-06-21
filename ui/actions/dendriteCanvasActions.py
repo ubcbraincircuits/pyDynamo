@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QRectF
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QMessageBox
 
 import util
 from ..dendrite3DViewWindow import Dendrite3DViewWindow
@@ -64,10 +64,23 @@ class DendriteCanvasActions():
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
-        branchID, pointID = self.uiState.currentBranchID, self.uiState.currentPointID
-        if branchID is None or pointID is None:
-            print ("Need to select a point before you can register")
-            return
-        branch, point = self.uiState.currentBranch(), self.uiState.currentPoint()
-        pointOld = self.uiState.parent().trees[windowIndex - 1].closestPointTo(point.location)
+
+        # TODO: Use selected points, not always root
+        branch = None
+        point = self.uiState.parent().trees[windowIndex].rootPoint
+        pointOld = self.uiState.parent().trees[windowIndex-1].rootPoint
+
+        # Un-hilight old points
+        for point in self.uiState.parent().trees[windowIndex].flattenPoints():
+            point.hilighted = False
+
+        self.canvas.stackWindow.statusBar().showMessage("Registering...")
+        self.canvas.stackWindow.repaint()
         recursiveAdjust(self.uiState.parent(), windowIndex, branch, point, pointOld)
+        self.uiState.showHilighted = True
+        self.canvas.redraw()
+        msg = QMessageBox(QMessageBox.Information, "Registration",
+            "Registration complete! Unregistered points shown in green, press 'h' to toggle hilight.", parent=self.canvas)
+        msg.show()
+        self.canvas.stackWindow.statusBar().clearMessage()
+        self.canvas.stackWindow.repaint()

@@ -43,6 +43,9 @@ class UIState():
     # UI Option for whether or not to show all branches, or just the nearby ones.
     drawAllBranches = attr.ib(default=False, metadata=SAVE_META)
 
+    # UI Option for whether or not to show higlighted points in a different color
+    showHilighted = attr.ib(default=False)
+
     # (lower-, upper-) bounds for intensities to show
     colorLimits = attr.ib(default=(0, 1), metadata=SAVE_META)
 
@@ -173,13 +176,13 @@ class UIState():
 
     def deletePointByID(self, pointID):
         for branch in self._tree.branches:
-            if branch.parentPoint.id == pointID:
+            if branch.parentPoint is not None and branch.parentPoint.id == pointID:
                 self.deleteBranch(branch)
         return self._tree.removePointByID(pointID)
 
-    def endMove(self, newLocation, moveDownstream):
+    def endMove(self, newLocation, downstream):
         assert self.isMoving and self.currentPointID is not None, "Can only end a move if actually moving a point"
-        self._tree.movePoint(self.currentPointID, newLocation, moveDownstream)
+        self._tree.movePoint(self.currentPointID, newLocation, downstream)
 
 
     def maybeCreateNewID(self, newPointID):

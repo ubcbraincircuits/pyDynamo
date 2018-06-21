@@ -56,11 +56,10 @@ class FullStateActions():
                 newLocation, newBranch, newSource, isAfter, newPoint.id
             )
 
-    def deletePoint(self, localIdx, point):
+    def deletePoint(self, localIdx, point, laterStacks):
         self.history.pushState()
         nextToSelect = None
-        # TODO: Delete point vs delete entire branch of point
-        for i in range(localIdx, len(self.state.uiStates)):
+        for i in range(localIdx, len(self.state.uiStates) if laterStacks else localIdx + 1):
             next = self.state.uiStates[i].deletePointByID(point.id)
             if nextToSelect is None:
                 nextToSelect = next
@@ -80,12 +79,12 @@ class FullStateActions():
         for i in range(len(self.state.uiStates)):
             self.state.uiStates[i].selectPointByID(point.id, isMove=(i >= localIdx))
 
-    def endMove(self, localIdx, location, moveDownstream):
+    def endMove(self, localIdx, location, downstream):
         self.history.pushState()
         for i in range(localIdx, len(self.state.uiStates)):
             state = self.state.uiStates[i]
             newLocation = self.state.convertLocation(location, localIdx, i)
-            state.endMove(newLocation, moveDownstream)
+            state.endMove(newLocation, downstream)
 
     def setLandmark(self, localIdx, location):
         self.history.pushState()

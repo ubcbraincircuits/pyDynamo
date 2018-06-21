@@ -89,7 +89,7 @@ class DendriteVolumeCanvas(QWidget):
             # Handle Right-click/ctrl first; either delete the point, or start a new branch.
             if rightClick or ctrlPressed:
                 if pointClicked:
-                    self.fullActions.deletePoint(self.windowIndex, pointClicked)
+                    self.fullActions.deletePoint(self.windowIndex, pointClicked, laterStacks=shiftPressed)
                 else:
                     self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
             # Next, moving; either switch moving point, cancel move, or move selected point to new spot.
@@ -100,7 +100,7 @@ class DendriteVolumeCanvas(QWidget):
                     else:
                         self.fullActions.selectPoint(self.windowIndex, pointClicked)
                 else:
-                    self.fullActions.endMove(self.windowIndex, location, moveDownstream=shiftPressed)
+                    self.fullActions.endMove(self.windowIndex, location, downstream=shiftPressed)
             # Next. Middle-click / shift; either start move, or add mid-branch point
             elif middleClick or shiftPressed:
                 if pointClicked:
@@ -116,6 +116,7 @@ class DendriteVolumeCanvas(QWidget):
             self.dynamoWindow.redrawAllStacks() # HACK - redraw only those that have changed.
         except Exception as e:
             print ("Whoops - error on click: " + str(e))
+            raise
 
     def wheelEvent(self,event):
         try:

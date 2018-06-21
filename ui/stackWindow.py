@@ -140,6 +140,9 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('V')):
                 self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
                 self.redraw()
+            elif (key == ord('H')):
+                self.dendrites.uiState.showHilighted = not self.dendrites.uiState.showHilighted
+                self.redraw()
             elif (key == ord('Q')):
                 self.actionHandler.getAnnotation(self)
             elif (key == ord('R')):
