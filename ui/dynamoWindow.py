@@ -140,7 +140,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
             tileFigs(self.stackWindows)
             return True
-        elif (key == ord('O')):
+        elif (key == ord('N')):
             self.openFilesAndAppendStacks()
             return True
         elif (key == ord('1')):
@@ -246,11 +246,13 @@ class DynamoWindow(QtWidgets.QMainWindow):
         QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
 
+        """
         HACK_WINDOW_TO_SELECT = 1 # POIUY
         if (len(self.fullState.uiStates) > 0):
             selectedPoint = self.fullState.uiStates[HACK_WINDOW_TO_SELECT].currentPoint()
             if selectedPoint is not None:
                 self.fullActions.selectPoint(HACK_WINDOW_TO_SELECT, selectedPoint)
+        """
 
     def removeStackWindow(self, windowIndex):
         self.fullState.removeStack(windowIndex)

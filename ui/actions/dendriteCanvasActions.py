@@ -60,27 +60,44 @@ class DendriteCanvasActions():
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.treeModel)
         viewWindow.show()
 
+    def importPoints(self, windowIndex):
+        if windowIndex == 0:
+            print ("Can't import points into the first image, nothing to import from...")
+        thisTree = self.uiState.parent().trees[windowIndex]
+        lastTree = self.uiState.parent().trees[windowIndex - 1]
+        assert thisTree is not None and lastTree is not None
+        thisTree.clearAndCopyFrom(lastTree)
+
     def registerImages(self, windowIndex):
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
 
-        # TODO: Use selected points, not always root
-        branch = None
-        point = self.uiState.parent().trees[windowIndex].rootPoint
-        pointOld = self.uiState.parent().trees[windowIndex-1].rootPoint
+        pointNew, pointOld, branch = None, None, None
+        # Use selected point if one is
+        if self.uiState.currentPointID is not None:
+            pointNew = self.uiState.parent().trees[windowIndex  ].getPointByID(
+                self.uiState.parent().uiStates[windowIndex  ].currentPointID)
+            pointOld = self.uiState.parent().trees[windowIndex-1].getPointByID(
+                self.uiState.parent().uiStates[windowIndex-1].currentPointID)
+            branch = pointNew.parentBranch
+        # Default to root if anything is wrong...
+        if pointNew is None or pointOld is None or branch is None:
+            branch = None
+            pointNew = self.uiState.parent().trees[windowIndex].rootPoint
+            pointOld = self.uiState.parent().trees[windowIndex-1].rootPoint
 
         # Un-hilight old points
-        for point in self.uiState.parent().trees[windowIndex].flattenPoints():
-            point.hilighted = False
+        for p in self.uiState.parent().trees[windowIndex].flattenPoints():
+            p.hilighted = False
 
         self.canvas.stackWindow.statusBar().showMessage("Registering...")
         self.canvas.stackWindow.repaint()
-        recursiveAdjust(self.uiState.parent(), windowIndex, branch, point, pointOld)
+        recursiveAdjust(self.uiState.parent(), windowIndex, branch, pointNew, pointOld)
         self.uiState.showHilighted = True
         self.canvas.redraw()
         msg = QMessageBox(QMessageBox.Information, "Registration",
             "Registration complete! Unregistered points shown in green, press 'h' to toggle hilight.", parent=self.canvas)
         msg.show()
         self.canvas.stackWindow.statusBar().clearMessage()
-        self.canvas.stackWindow.repaint()
+        # self.canvas.stackWindow.repaint()

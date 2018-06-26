@@ -336,6 +336,15 @@ class Tree():
             if nextIdx < len(point.parentBranch.points):
                 self._recursiveMovePointDelta(point.parentBranch.points[nextIdx], delta)
 
+    def clearAndCopyFrom(self, otherTree):
+        self.rootPoint = _clonePoint(otherTree.rootPoint)
+        for branch in otherTree.branches:
+            self.addBranch(_cloneBranch(branch))
+        for newBranch, oldBranch in zip(self.branches, otherTree.branches):
+            if oldBranch.parentPoint is not None:
+                newParent = self.getPointByID(oldBranch.parentPoint.id)
+                assert newParent is not None
+                newBranch.setParentPoint(newParent)
 
 ### Branch utilities
 
@@ -355,6 +364,19 @@ def _lastPointWithLabel(points, label):
         if point.annotation.find(label) != -1:
             lastPointIdx = i
     return lastPointIdx
+
+### Cloning utilities
+
+def _clonePoint(point):
+    return Point(id=point.id, location=point.location)
+
+def _cloneBranch(branch):
+    b = Branch(id=branch.id, reparentTo=branch.reparentTo)
+    for point in branch.points:
+        b.addPoint(_clonePoint(point))
+    return b
+
+
 
 #
 # Debug formatting for converting trees to string representation

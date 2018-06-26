@@ -64,6 +64,7 @@ class StackWindow(QtWidgets.QMainWindow):
         self.menuBar().addSeparator()
         self.menuBar().addMenu(self.help_menu)
         self.help_menu.addAction('&Shortcuts', self.actionHandler.showHotkeys, QtCore.Qt.Key_F1)
+        self.statusBar().showMessage("") # Force it to be visible, so we can use later.
 
     def updateState(self, newFilePath, newUiState):
         self.setWindowTitle(_createTitle(self.windowIndex, newFilePath))
@@ -145,8 +146,12 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.redraw()
             elif (key == ord('Q')):
                 self.actionHandler.getAnnotation(self)
+            elif (key == ord('I')):
+                self.actionHandler.importPoints(self.windowIndex)
+                self.redraw()
             elif (key == ord('R')):
                 self.actionHandler.registerImages(self.windowIndex)
+                self.redraw()
             elif (key == QtCore.Qt.Key_Delete):
                 self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint())
                 self.parent().redrawAllStacks() # HACK - auto redraw on change

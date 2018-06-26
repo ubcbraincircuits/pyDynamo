@@ -52,7 +52,7 @@ HELP_MSG = """
 <h3>Project</h3>
 <ul>
   <li><b>Ctrl-S</b> to save the current data to file</li>
-  <li><b>O</b> to add a new image stack</li>
+  <li><b>N</b> to add a new image stack</li>
   <li><b>T</b> to tile all the open images on screen</li>
 </ul>
 
