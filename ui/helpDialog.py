@@ -54,11 +54,8 @@ HELP_MSG = """
   <li><b>Ctrl-S</b> to save the current data to file</li>
   <li><b>N</b> to add a new image stack</li>
   <li><b>T</b> to tile all the open images on screen</li>
-</ul>
-
-<h3>Coming soon...</h3>
-<ul>
-  <li><b>R</b> to auto-register the current branch to the previous drawing.
+  <li><b>I</b> to import tree structure and locations from the previous stack to the current one</li>
+  <li><b>R</b> to adjust the current branch locations based off the branch in the previous stack</li>
 </ul>
 """
 
