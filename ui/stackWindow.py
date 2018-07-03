@@ -108,7 +108,7 @@ class StackWindow(QtWidgets.QMainWindow):
         try:
             if self.parent().childKeyPress(event, self):
                 return
-            shftPressed = (event.modifiers() & Qt.ShiftModifier)
+            shftPressed = (event.modifiers() & QtCore.Qt.ShiftModifier)
                   
             # TODO: add menu items for some of these too.
             key = event.key()
