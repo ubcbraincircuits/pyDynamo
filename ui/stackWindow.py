@@ -108,7 +108,8 @@ class StackWindow(QtWidgets.QMainWindow):
         try:
             if self.parent().childKeyPress(event, self):
                 return
-
+            shftPressed = (event.modifiers() & Qt.ShiftModifier)
+                  
             # TODO: add menu items for some of these too.
             key = event.key()
             if (key == ord('3')):
@@ -153,7 +154,7 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.actionHandler.registerImages(self.windowIndex)
                 self.redraw()
             elif (key == QtCore.Qt.Key_Delete):
-                self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint())
+                self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint(), laterStacks=shftPressed)
                 self.parent().redrawAllStacks() # HACK - auto redraw on change
         except Exception as e:
             print ("Whoops - error on keypress: " + str(e))
