@@ -10,12 +10,13 @@ Until then:
 
 1) Have python 3.6+ available (if you don't have it yet, see e.g. [Miniconda](https://conda.io/miniconda.html))
 2) Requires recent versions of the following packages:
+    * attrs
     * matplotlib
     * numpy
-    * PyQt5
+    * pyqt (version 5)
     * scikit-image
     * scipy
-    * tifffile
+    * tifffile (from conda-forge, if using conda. will require a conda update --all after)
 3) Once the repository is obtained locally (either checked out, or files downloaded), navigate to the root directory and run:
 ```
 $> python dynamo.py
@@ -39,14 +40,14 @@ The recommended approach is:
 3) Load the next .tif stack in the series
 4) Enter landmark mode (L), draw landmark locations, and exit (L again) to calculate between-image transform
 5) Generate points in this new stack, from either
-    * Importing from the previous drawing (**coming**)
+    * Importing from the previous drawing (I)
     * Importing from an SWC file (**coming**)
 6) Move/add/delete points as required to match the stack images.
 7) Register (R) to make sure that old points are mapped to new points correctly.
 8) Repeat from step 3 until all stacks are done.
 
 ## Analysis
-Currently analysis is done purely visually (i.e. 'M' or '3'), but as requirements on getting data out are clearer, there'll be a way added to export some metrics to a csv or similar.
+Currently analysis is done purely visually (i.e. 'M' or '3'), but as requirements on getting data out are clearer, there'll be a way added to export per-stack and per-branch metrics to a csv (or similar).
 
 ## Errors
 As pyDynamo is currently pre-release and under active development, it may also still crash occasionally.
