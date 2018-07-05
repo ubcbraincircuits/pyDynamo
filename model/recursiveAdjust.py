@@ -125,7 +125,12 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     for branch in point.children:
         for i in range(min(len(point.children), len(pointref.children))):
             branch, branchRef = point.children[i], pointref.children[i]
-            recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0])
+            if len(branch.points) > 0 and len(branchRef.points) > 0:
+                recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0])
+            else:
+                # At least one branch didn't have points. If the new branch did, set as unregsitered
+                if len(branch.points) > 0:
+                    _recursiveHilight(newTree, branch)
 
 
 def _recursiveMoveBranch(tree, branch, shift, fromPointIdx=0):
