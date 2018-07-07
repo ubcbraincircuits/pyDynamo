@@ -61,6 +61,9 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         _recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent())
         return
 
+    I1 = np.mean(oldBox.astype(np.int32) ** 2)
+    I2 = np.mean(newBox.astype(np.int32) ** 2)
+
     # align the z-projected images in XY
     opt = {
         'Similarity': 'p',
@@ -68,15 +71,19 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         'Verbose': 0,
     }
     Bx, By, angle, fval = _registerImages(np.max(oldBox, axis=2), np.max(newBox, axis=2), opt)
-    I1 = np.mean(oldBox.astype(np.int32) ** 2)
-    I2 = np.mean(newBox.astype(np.int32) ** 2)
 
     # the alignment is poor; give up!
     fTooBad = (fval is None) or fval > (max(I1,I2)*0.9)
-    print ("%f, %f > %f, %f > %f, %f > %f" % (abs(angle), fval, (max(I1,I2)*0.9), abs(Bx[Rxy+1,Rxy+1]), Rxy * 0.8, abs(By[Rxy+1,Rxy+1]), Rxy * 0.8))
-    xMoveTooFar = np.abs(Bx[Rxy+1,Rxy+1]) > (Rxy*0.8)
-    yMoveTooFar = np.abs(By[Rxy+1,Rxy+1]) > (Rxy*0.8)
-    if (np.abs(angle) > 0.3 or fTooBad or xMoveTooFar or yMoveTooFar):
+    angleTooFar, xMoveTooFar, yMoveTooFar = True, True, True
+    if fval is not None:
+        print ("%f, %f > %f, %f > %f, %f > %f" % (abs(angle), fval, (max(I1,I2)*0.9), abs(Bx[Rxy+1,Rxy+1]), Rxy * 0.8, abs(By[Rxy+1,Rxy+1]), Rxy * 0.8))
+        xMoveTooFar = np.abs(Bx[Rxy+1,Rxy+1]) > (Rxy*0.8)
+        yMoveTooFar = np.abs(By[Rxy+1,Rxy+1]) > (Rxy*0.8)
+        angleTooFar = np.abs(angle) > 0.3
+    else:
+        print ("Couldn't fit, skipping")
+
+    if (fTooBad or angleTooFar or xMoveTooFar or yMoveTooFar):
         print ("Bad fit! larger window if %d < 25" % Rxy)
         if Rxy < 25: # try a larger window
             recursiveAdjust(fullState, id, branch, point, pointref, 25, 4)
@@ -195,7 +202,8 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=False):
     res = scipy.optimize.minimize(_affineRegistrationError, x, tol=1e-4, method=method, options=opt)
     if not res.success:
         print (res.message)
-        raise Exception("COULD NOT OPTIMIZE!")
+        # raise Exception("COULD NOT OPTIMIZE!")
+        return None, None, None, None
     x = res.x
 
     trans = centreRotation(staticImgSmooth.shape, R=x[2], T=(x[1], x[0]))
