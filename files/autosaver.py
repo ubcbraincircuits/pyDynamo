@@ -44,5 +44,5 @@ class AutoSaver():
         name, ext = os.path.splitext(fullName)
         return os.path.join(
             autoSaveDir,
-            "%s_%s.dyn" % (name, time.strftime(DATETIME_SUFFIX_FORMAT))
+            "%s_%s.dyn.gz" % (name, time.strftime(DATETIME_SUFFIX_FORMAT))
         )
