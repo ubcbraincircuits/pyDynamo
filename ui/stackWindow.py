@@ -14,7 +14,7 @@ from .QtImageViewer import QtImageViewer
 _IMG_CACHE = files.ImageCache()
 
 class StackWindow(QtWidgets.QMainWindow):
-    def __init__(self, windowIndex, imagePath, fullActions, treeModel, uiState, parent):
+    def __init__(self, windowIndex, imagePath, fullActions, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -30,7 +30,7 @@ class StackWindow(QtWidgets.QMainWindow):
         self.dendrites = DendriteVolumeCanvas(
             windowIndex, fullActions, uiState, parent, self, self.root
         )
-        self.actionHandler = DendriteCanvasActions(self.dendrites, imagePath, treeModel, uiState)
+        self.actionHandler = DendriteCanvasActions(self.dendrites, imagePath, uiState)
         self.fullActions = fullActions
         self.uiState = uiState
         self.ignoreUndoCloseEvent = False
@@ -109,7 +109,7 @@ class StackWindow(QtWidgets.QMainWindow):
             if self.parent().childKeyPress(event, self):
                 return
             shftPressed = (event.modifiers() & QtCore.Qt.ShiftModifier)
-                  
+
             # TODO: add menu items for some of these too.
             key = event.key()
             if (key == ord('3')):

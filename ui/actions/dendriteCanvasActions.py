@@ -10,10 +10,9 @@ from model import recursiveAdjust
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
 
-    def __init__(self, dendriteCanvas, imagePath, treeModel, uiState):
+    def __init__(self, dendriteCanvas, imagePath, uiState):
         self.canvas = dendriteCanvas
         self.imagePath = imagePath
-        self.treeModel = treeModel
         self.uiState = uiState
 
     def updateUIState(self, newUiState):
@@ -57,7 +56,7 @@ class DendriteCanvasActions():
         showHelpDialog()
 
     def launch3DView(self):
-        viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.treeModel)
+        viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
         viewWindow.show()
 
     def importPoints(self, windowIndex):
