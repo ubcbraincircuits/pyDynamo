@@ -44,7 +44,7 @@ HELP_MSG = """
 <h3>View options</h3>
 <ul>
   <li><b>C</b> to change the displayed channel (if available)</li>
-  <li><b>F</b> to show/hide annotations</li>
+  <li><b>F</b> to toggle showing annotations / IDs / nothing.</li>
   <li><b>V</b> to show/hide points away from the current Z plane</li>
   <li><b>H</b> to show/hide hilighted points</li>
   <li><b>J</b> to cycle different line thicknesses</li>

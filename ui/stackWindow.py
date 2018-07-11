@@ -137,7 +137,15 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('D')):
                 self.actionHandler.pan(1, 0)
             elif (key == ord('F')):
-                self.dendrites.uiState.showAnnotations = not self.dendrites.uiState.showAnnotations
+                if self.dendrites.uiState.showAnnotations:
+                    self.dendrites.uiState.showAnnotations = False
+                    self.dendrites.uiState.showIDs = True
+                elif self.dendrites.uiState.showIDs:
+                    self.dendrites.uiState.showAnnotations = False
+                    self.dendrites.uiState.showIDs = False
+                else:
+                    self.dendrites.uiState.showAnnotations = True
+                    self.dendrites.uiState.showIDs = False
                 self.redraw()
             elif (key == ord('V')):
                 self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches

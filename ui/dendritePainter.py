@@ -64,25 +64,32 @@ class DendritePainter():
 
     def drawPoint(self, point, selectedPointID):
         x, y, z = self.zoomedLocation(point.location)
-        annotation = point.annotation
         if z == self.zAt:
             self.drawCircleThisZ(x, y, point.id == selectedPointID, point.hilighted)
-            if annotation != "":
-                self.drawAnnotation(x, y, annotation)
+            self.maybeDrawText(x, y, point)
 
     def drawCircleThisZ(self, x, y, isSelected, isHilighted):
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
             brushColor = self.NODE_CIRCLE_MOVING_BRUSH if self.uiState.isMoving else self.NODE_CIRCLE_SELECTED_BRUSH
         elif isHilighted and self.uiState.showHilighted:
-            brushColor = self.HILIGHTED_CIRCLE_BRUSH 
+            brushColor = self.HILIGHTED_CIRCLE_BRUSH
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
         self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_DIAMETER, self.NODE_CIRCLE_DIAMETER)
 
-    def drawAnnotation(self, x, y, text):
-        if not self.uiState.showAnnotations:
+    def maybeDrawText(self, x, y, point):
+        if not self.uiState.showAnnotations and not self.uiState.showIDs:
             return
+
+        text = ""
+        if self.uiState.showIDs:
+            text = point.id
+        if self.uiState.showAnnotations:
+            text = point.annotation
+        if text == "":
+            return
+
         self.p.setFont(self.ANNOTATION_FONT)
         self.p.setPen(self.ANNOTATION_PEN)
         textRect = QRectF(

@@ -82,7 +82,7 @@ class DendriteVolumeCanvas(QWidget):
             rightClick = event.button() == Qt.RightButton
             middleClick = event.button() == Qt.MidButton
 
-            pointClicked = self.uiState._tree.closestPointTo(location, zFilter=True)
+            pointClicked = self.pointNearPixel(location[0], location[1]) # self.uiState._tree.closestPointTo(location, zFilter=True)
             closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
             if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
                 pointClicked = None
@@ -119,7 +119,7 @@ class DendriteVolumeCanvas(QWidget):
             print ("Whoops - error on click: " + str(e))
             raise
 
-    def wheelEvent(self,event):
+    def wheelEvent(self, event):
         try:
             scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
             if self.INVERT_SCROLL:
@@ -129,6 +129,6 @@ class DendriteVolumeCanvas(QWidget):
         except Exception as e:
             print ("Whoops - error on scroll: " + str(e))
 
-    def positionNearMouse(pos):
-        location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt * 1.0)
-        return self.uiState._tree.closestPointTo(location, zFilter=True)
+    def pointNearPixel(self, x, y, zFilter=True):
+        location = (x, y, self.uiState.parent().zAxisAt * 1.0)
+        return self.uiState._tree.closestPointTo(location, zFilter)

@@ -38,7 +38,10 @@ class UIState():
     isMoving = attr.ib(default=False)
 
     # UI Option for whether or not to show annotations.
-    showAnnotations = attr.ib(default=True, metadata=SAVE_META)
+    showAnnotations = attr.ib(default=False, metadata=SAVE_META)
+
+    # UI Option for whether or not to show IDs (drawn like annotations).
+    showIDs = attr.ib(default=False, metadata=SAVE_META)
 
     # UI Option for whether or not to show all branches, or just the nearby ones.
     drawAllBranches = attr.ib(default=False, metadata=SAVE_META)
