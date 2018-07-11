@@ -94,10 +94,10 @@ class UIState():
                 self.currentBranchID = selectedPoint.parentBranch.id
             self.isMoving = isMove
         else:
-            self.currentPointID = None
-            self.currentBranchID = None
-            self.isMoving = False
-            assert not isMove
+            if not isMove:
+                self.currentPointID = None
+                self.currentBranchID = None
+                self.isMoving = False
 
     def addPointToCurrentBranchAndSelect(self, location, newPointID=None, newBranchID=None):
         newPoint = Point(self.maybeCreateNewID(newPointID), location)
@@ -184,8 +184,9 @@ class UIState():
         return self._tree.removePointByID(pointID)
 
     def endMove(self, newLocation, downstream):
-        assert self.isMoving and self.currentPointID is not None, "Can only end a move if actually moving a point"
-        self._tree.movePoint(self.currentPointID, newLocation, downstream)
+        # assert self.isMoving and self.currentPointID is not None, "Can only end a move if actually moving a point"
+        if self.isMoving and self.currentPointID is not None:
+            self._tree.movePoint(self.currentPointID, newLocation, downstream)
 
 
     def maybeCreateNewID(self, newPointID):

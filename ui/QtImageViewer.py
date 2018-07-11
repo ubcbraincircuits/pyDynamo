@@ -9,6 +9,9 @@ from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
 from PyQt5.QtGui import QImage, QPixmap, QPainterPath
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog, QApplication
 
+from util import deltaSz
+from .dendritePainter import DendritePainter
+
 __author__ = "Marcel Goldschen-Ohm <marcel.goldschen@gmail.com>"
 __version__ = '0.9.0'
 
@@ -146,16 +149,15 @@ class QtImageViewer(QGraphicsView):
         self.forceRepaint()
 
     def mouseMoveEvent(self, event):
-        """
-        TODO
+        QGraphicsView.mouseMoveEvent(self, event)
+
         scenePos = self.mapToScene(event.pos())
-        location = (scenePos.x(), scenePos.y(), self.uiState.parent().zAxisAt * 1.0)
+        location = (scenePos.x(), scenePos.y(), self.parentView.uiState.parent().zAxisAt * 1.0)
+        pointClicked = self.parentView.pointNearPixel(scenePos.x(), scenePos.y())
         closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
-        if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
-            pointClicked = None
-        print ('Mouse coords: ( %d : %d )' % (scenePos.x(), scenePos.y()))
-        """
-        pass
+        nearDistWorldSize = self.toSceneDist(DendritePainter.NODE_CIRCLE_CLICK_DIAMETER_PX)
+        mouseOverPoint = (closestDist is not None and closestDist <= nearDistWorldSize)
+        self.viewport().setCursor(Qt.OpenHandCursor if mouseOverPoint else Qt.ArrowCursor)
 
     def mousePressEvent(self, event):
         """ Start mouse pan or zoom mode.
@@ -181,6 +183,7 @@ class QtImageViewer(QGraphicsView):
         if timeDiff < SINGLE_CLICK_SEC: # TODO - check distance
             scenePos = self.mapToScene(event.pos())
             self.parentView.mouseClickEvent(event, scenePos)
+            QGraphicsView.mouseReleaseEvent(self, event)
             return
 
         QGraphicsView.mouseReleaseEvent(self, event)
@@ -253,3 +256,9 @@ class QtImageViewer(QGraphicsView):
 
     def getViewportRect(self):
         return self.mapToScene(self.viewport().geometry()).boundingRect()
+
+    def toSceneDist(self, pixelDist):
+        mappedA = self.mapToScene(0, 0)
+        mappedB = self.mapToScene(pixelDist, 0)
+        dX, dY = mappedA.x() - mappedB.x(), mappedA.y() - mappedB.y()
+        return math.sqrt(dX * dX + dY * dY)

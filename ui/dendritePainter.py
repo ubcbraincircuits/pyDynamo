@@ -18,7 +18,9 @@ Dashed line = line without end on this plane
 Only draw ones with Z < 3 difference, UNLESS all are drawn
 """
 class DendritePainter():
-    NODE_CIRCLE_DIAMETER = 5
+    NODE_CIRCLE_DIAMETER_PX = 5
+    NODE_CIRCLE_CLICK_DIAMETER_PX = NODE_CIRCLE_DIAMETER_PX * 1.2 # can click a bit further out
+
     NODE_CIRCLE_PEN = QPen(QBrush(Qt.black), 1, Qt.SolidLine)
     NODE_CIRCLE_BRUSH = QBrush(Qt.white)
     NODE_CIRCLE_SELECTED_BRUSH = QBrush(Qt.cyan)
@@ -76,7 +78,7 @@ class DendritePainter():
             brushColor = self.HILIGHTED_CIRCLE_BRUSH
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
-        self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_DIAMETER, self.NODE_CIRCLE_DIAMETER)
+        self.p.drawEllipse(QPointF(x, y), self.NODE_CIRCLE_DIAMETER_PX, self.NODE_CIRCLE_DIAMETER_PX)
 
     def maybeDrawText(self, x, y, point):
         if not self.uiState.showAnnotations and not self.uiState.showIDs:

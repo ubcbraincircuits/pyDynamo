@@ -82,9 +82,10 @@ class DendriteVolumeCanvas(QWidget):
             rightClick = event.button() == Qt.RightButton
             middleClick = event.button() == Qt.MidButton
 
-            pointClicked = self.pointNearPixel(location[0], location[1]) # self.uiState._tree.closestPointTo(location, zFilter=True)
+            pointClicked = self.pointNearPixel(location[0], location[1])
             closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
-            if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
+            nearDistWorldSize = self.imgView.toSceneDist(DendritePainter.NODE_CIRCLE_CLICK_DIAMETER_PX)
+            if closestDist is None or closestDist >= nearDistWorldSize:
                 pointClicked = None
 
             # Handle Right-click/ctrl first; either delete the point, or start a new branch.
