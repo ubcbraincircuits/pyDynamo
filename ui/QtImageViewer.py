@@ -82,6 +82,7 @@ class QtImageViewer(QGraphicsView):
 
         self.horizontalScrollBar().valueChanged.connect(self.viewportChangedByScroll)
         self.verticalScrollBar().valueChanged.connect(self.viewportChangedByScroll)
+        self.setMouseTracking(True)
 
     def hasImage(self):
         """ Returns whether or not the scene contains an image pixmap.
@@ -143,6 +144,18 @@ class QtImageViewer(QGraphicsView):
         """ Maintain current zoom on resize.
         """
         self.forceRepaint()
+
+    def mouseMoveEvent(self, event):
+        """
+        TODO
+        scenePos = self.mapToScene(event.pos())
+        location = (scenePos.x(), scenePos.y(), self.uiState.parent().zAxisAt * 1.0)
+        closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
+        if closestDist is None or closestDist >= DendritePainter.NODE_CIRCLE_DIAMETER:
+            pointClicked = None
+        print ('Mouse coords: ( %d : %d )' % (scenePos.x(), scenePos.y()))
+        """
+        pass
 
     def mousePressEvent(self, event):
         """ Start mouse pan or zoom mode.

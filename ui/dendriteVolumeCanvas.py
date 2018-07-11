@@ -40,6 +40,7 @@ class DendriteVolumeCanvas(QWidget):
         l.setSizeConstraint(QLayout.SetFixedSize)
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
+
         self.drawImage()
 
     def currentImg(self):
@@ -127,3 +128,7 @@ class DendriteVolumeCanvas(QWidget):
             self.dynamoWindow.redrawAllStacks()
         except Exception as e:
             print ("Whoops - error on scroll: " + str(e))
+
+    def positionNearMouse(pos):
+        location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt * 1.0)
+        return self.uiState._tree.closestPointTo(location, zFilter=True)
