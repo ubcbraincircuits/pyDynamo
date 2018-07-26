@@ -5,6 +5,7 @@ import util
 from ..dendrite3DViewWindow import Dendrite3DViewWindow
 from ..helpDialog import showHelpDialog
 
+from files import importFromSWC
 from model import recursiveAdjust
 
 class DendriteCanvasActions():
@@ -59,13 +60,21 @@ class DendriteCanvasActions():
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
         viewWindow.show()
 
-    def importPoints(self, windowIndex):
+    def importPointsFromLastStack(self, windowIndex):
         if windowIndex == 0:
             print ("Can't import points into the first image, nothing to import from...")
+            return
         thisTree = self.uiState.parent().trees[windowIndex]
         lastTree = self.uiState.parent().trees[windowIndex - 1]
         assert thisTree is not None and lastTree is not None
         thisTree.clearAndCopyFrom(lastTree)
+
+    def importPointsFromSWC(self, windowIndex, filePath):
+        thisTree = self.uiState.parent().trees[windowIndex]
+        assert thisTree is not None
+        newTree = importFromSWC(filePath)
+        if newTree is not None:
+            thisTree.clearAndCopyFrom(newTree)
 
     def registerImages(self, windowIndex):
         if windowIndex == 0:

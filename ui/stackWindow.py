@@ -108,6 +108,7 @@ class StackWindow(QtWidgets.QMainWindow):
         try:
             if self.parent().childKeyPress(event, self):
                 return
+            ctrlPressed = (event.modifiers() & QtCore.Qt.ControlModifier)
             shftPressed = (event.modifiers() & QtCore.Qt.ShiftModifier)
 
             # TODO: add menu items for some of these too.
@@ -156,7 +157,12 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('Q')):
                 self.actionHandler.getAnnotation(self)
             elif (key == ord('I')):
-                self.actionHandler.importPoints(self.windowIndex)
+                if ctrlPressed:
+                    filePath = self.getSWCFilePath()
+                    if filePath is not None:
+                        self.actionHandler.importPointsFromSWC(self.windowIndex, filePath)
+                else:
+                    self.actionHandler.importPointsFromLastStack(self.windowIndex)
                 self.redraw()
             elif (key == ord('R')):
                 self.actionHandler.registerImages(self.windowIndex)
@@ -167,6 +173,12 @@ class StackWindow(QtWidgets.QMainWindow):
         except Exception as e:
             print ("Whoops - error on keypress: " + str(e))
             raise # POIUY
+
+    def getSWCFilePath(self):
+        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+            "Import SWC file", "", "SWC file (*.swc)"
+        )
+        return filePath
 
 # Utility for nicer formatting of the window, using index and just image file name.
 def _createTitle(index, path):

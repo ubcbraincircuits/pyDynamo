@@ -66,7 +66,7 @@ class DendritePainter():
 
     def drawPoint(self, point, selectedPointID):
         x, y, z = self.zoomedLocation(point.location)
-        if z == self.zAt:
+        if round(z) == self.zAt:
             self.drawCircleThisZ(x, y, point.id == selectedPointID, point.hilighted)
             self.maybeDrawText(x, y, point)
 
@@ -101,7 +101,7 @@ class DendritePainter():
         self.p.drawText(textRect, Qt.AlignVCenter, text)
 
     def getLinePen(self, z1, z2):
-        inZ1, inZ2 = z1 == self.zAt, z2 == self.zAt
+        inZ1, inZ2 = round(z1) == self.zAt, round(z2) == self.zAt
         near1, near2 = self.isNearZ(z1), self.isNearZ(z2)
         if inZ1 or inZ2:
             color = colorForBranch(self.branchAt)
