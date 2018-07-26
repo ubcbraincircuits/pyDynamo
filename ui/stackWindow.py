@@ -30,6 +30,8 @@ class StackWindow(QtWidgets.QMainWindow):
         self.dendrites = DendriteVolumeCanvas(
             windowIndex, fullActions, uiState, parent, self, self.root
         )
+        # Re-enable for layout testing:
+        # self.dendrites.setStyleSheet("border: 1px solid red;")
         self.actionHandler = DendriteCanvasActions(self.dendrites, imagePath, uiState)
         self.fullActions = fullActions
         self.uiState = uiState
@@ -39,18 +41,11 @@ class StackWindow(QtWidgets.QMainWindow):
         l = QtWidgets.QGridLayout(self.root)
         # l.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         l.setContentsMargins(0, 0, 0, 0)
-        l.addWidget(self.dendrites, 0, 0, QtCore.Qt.AlignCenter)
+        l.addWidget(self.dendrites, 0, 0) #, QtCore.Qt.AlignCenter)
         self.root.setFocus()
         # self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         # self.root.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setCentralWidget(self.root)
-
-        # p = self.palette()
-        # p.setColor(self.backgroundRole(), QtCore.Qt.blue)
-        # self.setPalette(p)
-        # p = self.root.palette()
-        # p.setColor(self.root.backgroundRole(), QtCore.Qt.red)
-        # self.root.setPalette(p)
 
         # Top level menu:
         self.file_menu = QtWidgets.QMenu('&File', self)

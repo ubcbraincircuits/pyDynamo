@@ -71,7 +71,9 @@ class DendriteCanvasActions():
 
     def importPointsFromSWC(self, windowIndex, filePath):
         thisTree = self.uiState.parent().trees[windowIndex]
-        assert thisTree is not None
+        if thisTree is None or thisTree.rootPoint is not None:
+            print ("Arbor has points already, please only run on an empty image.")
+            return
         newTree = importFromSWC(filePath)
         if newTree is not None:
             thisTree.clearAndCopyFrom(newTree)

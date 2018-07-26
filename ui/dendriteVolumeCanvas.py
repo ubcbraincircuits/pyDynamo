@@ -37,7 +37,7 @@ class DendriteVolumeCanvas(QWidget):
 
         l = QGridLayout(self)
         l.setContentsMargins(0, 0, 0, 0)
-        l.setSizeConstraint(QLayout.SetFixedSize)
+        # l.setSizeConstraint(QLayout.SetFixedSize)
         l.addWidget(self.imgView, 0, 0)
         l.addWidget(self.imgOverlay, 0, 0)
 

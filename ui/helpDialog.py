@@ -55,6 +55,7 @@ HELP_MSG = """
   <li><b>N</b> to add a new image stack</li>
   <li><b>T</b> to tile all the open images on screen</li>
   <li><b>I</b> to import tree structure and locations from the previous stack to the current one</li>
+  <li><b>Ctrl-I</b> to import tree structure and locations from an .SWC file</li>
   <li><b>R</b> to adjust the current branch locations based off the branch in the previous stack</li>
 </ul>
 """

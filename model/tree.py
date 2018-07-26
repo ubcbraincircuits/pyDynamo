@@ -283,7 +283,7 @@ class Tree():
         :returns: Point object of point closest to the target location."""
         closestDist, closestPoint = None, None
         for point in self.flattenPoints():
-            if zFilter and point.location[2] != targetLocation[2]:
+            if zFilter and abs(point.location[2] - targetLocation[2]) > 1.0:
                 continue
             dist = util.deltaSz(targetLocation, point.location)
             if closestDist is None or dist < closestDist:
