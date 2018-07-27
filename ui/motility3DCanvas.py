@@ -68,8 +68,9 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                         else:
                             plot = False
                     if plot:
-                        x, y, z = treeModel.worldCoordPoints([branch.points[-1]])
-                        ax.scatter(x, y, z, c=color, s=sz)
+                        if len(branch.points) != 0 :
+                            x, y, z = treeModel.worldCoordPoints([branch.points[-1]])
+                            ax.scatter(x, y, z, c=color, s=sz)
 
                     # Show removed branches from last point:
                     lastHasBranch = branchIdx < len(self.treeModels[treeIdx - 1].branches)
