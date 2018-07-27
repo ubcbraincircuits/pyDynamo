@@ -48,6 +48,8 @@ class DendriteCanvasActions():
 
     def getAnnotation(self, window):
         currentPoint = self.uiState.currentPoint()
+        if currentPoint is None:
+            return
         text, okPressed = QInputDialog.getText(window,
             "Annotate point", "Enter annotation:", QLineEdit.Normal, currentPoint.annotation)
         if okPressed:

@@ -48,8 +48,9 @@ def addedSubtractedTransitioned(
     masterChanged = np.full((nTrees - 1, nBranches), False)
     masterNodes = util.emptyArrayMatrix(nTrees, nBranches)
 
-    for treeAt, tree in enumerate(trees):
-        _recursiveFiloTypes(filoTypes, masterNodes, trees, treeAt, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
+    for treeIdx, tree in enumerate(trees):
+        if trees[treeIdx] is not None and len(trees[treeIdx].branches) > 0: # Skip empty trees
+            _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
 
     filoExists = (filoTypes > FiloType.ABSENT)
     filos = filoExists & (filoTypes < FiloType.BRANCH_ONLY) # NOTE: brackets needed for numpy precendence

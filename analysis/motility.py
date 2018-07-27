@@ -13,7 +13,7 @@ def motility(trees,
     filoDist=10
 ):
     """Calculate motility of all branches across time.
-    
+
     Args:
         trees (list): The structure of the tree across time.
         excludeAxon (bool): Flag indicating whether the motility of the axon should be skipped.
@@ -43,8 +43,9 @@ def motility(trees,
     # Calculate Filo lengths for all trees:
     for treeIdx, tree in enumerate(trees):
         allTDBL[treeIdx] = TDBL(tree, excludeAxon, excludeBasal, includeFilo=True, filoDist=filoDist)
-        for branch in tree.rootPoint.children:
-            _calcFiloLengths(filoLengths[treeIdx], treeIdx, branch, excludeAxon, excludeBasal, filoDist)
+        if tree.rootPoint is not None:
+            for branch in tree.rootPoint.children:
+                _calcFiloLengths(filoLengths[treeIdx], treeIdx, branch, excludeAxon, excludeBasal, filoDist)
 
     # Raw motility:
     lengthBefore, lengthAfter = filoLengths[:-1, :], filoLengths[1:, :]

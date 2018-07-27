@@ -91,9 +91,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=sz)
 
 
-            # And finally draw the soma as a big sphere:
-            x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
-            ax.scatter(x, y, z, c=GREY_COLOUR, s=350)
+            # And finally draw the soma as a big sphere (if present):
+            if treeModel.rootPoint is not None:
+                x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
+                ax.scatter(x, y, z, c=GREY_COLOUR, s=350)
 
     def needToUpdate(self):
         for ax in self.axes:

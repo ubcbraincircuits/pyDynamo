@@ -18,6 +18,10 @@ class Dendrite3DCanvas(BaseMatplotlibCanvas):
         ax.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
         ax.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
 
+        # No tree, draw nothing...
+        if self.treeModel is None or self.treeModel.rootPoint is None:
+            return
+
         # Draw each branch in the same color as in the flat version:
         for i, branch in enumerate(self.treeModel.branches):
             if branch.parentPoint is None:
