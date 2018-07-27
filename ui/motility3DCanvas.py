@@ -13,7 +13,7 @@ GONE_COLOR   = (1.00, 0.00, 0.00, 1.0)
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Motility3DCanvas(BaseMatplotlibCanvas):
-    def __init__(self, treeModels, sizeFactor=70, *args, **kwargs):
+    def __init__(self, treeModels, sizeFactor=10, *args, **kwargs):
         self.treeModels = treeModels
         _, self.added, self.subtracted, self.transitioned, _, _ = addedSubtractedTransitioned(
             self.treeModels, excludeBasal=False, terminalDist=5, filoDist=5
