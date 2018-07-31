@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import time
+import os.path
 
 SAVE_KEY = 'persist'
 SAVE_META = {SAVE_KEY: True}
@@ -66,3 +67,7 @@ def lastPointWithLabelIdx(points, label):
         if point.annotation.find(label) != -1:
             lastPointIdx = i
     return lastPointIdx
+
+# Utility for nicer formatting of the window, using index and just image file name.
+def createTitle(index, path):
+    return "[%d] - %s" % (index + 1, os.path.basename(path))
