@@ -115,11 +115,14 @@ class UIState():
         return newPoint
 
     def addPointToNewBranchAndSelect(self, location, newPointID=None, newBranchID=None):
-        newPoint = Point(self.maybeCreateNewID(newPointID), location)
+        # Make new branch from current point.
         newBranchID = self.maybeCreateBranchID(newBranchID)
         newBranch = Branch(newBranchID, self._tree)
         newBranch.setParentPoint(self.currentPoint())
+        # Add new point to it.
+        newPoint = Point(self.maybeCreateNewID(newPointID), location)
         newBranch.addPoint(newPoint)
+        # And update the tree.
         self._tree.addBranch(newBranch)
         self.currentBranchID = newBranch.id
         self.currentPointID = newPoint.id

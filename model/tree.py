@@ -336,13 +336,15 @@ class Tree():
             if nextIdx < len(point.parentBranch.points):
                 self._recursiveMovePointDelta(point.parentBranch.points[nextIdx], delta)
 
-    def clearAndCopyFrom(self, otherTree):
-        self.rootPoint = _clonePoint(otherTree.rootPoint)
+    def clearAndCopyFrom(self, otherTree, idMaker):
+        pointIDMap = {}
+        self.rootPoint = _clonePoint(otherTree.rootPoint, idMaker, pointIDMap)
         for branch in otherTree.branches:
-            self.addBranch(_cloneBranch(branch))
+            self.addBranch(_cloneBranch(branch, idMaker, pointIDMap))
         for newBranch, oldBranch in zip(self.branches, otherTree.branches):
             if oldBranch.parentPoint is not None:
-                newParent = self.getPointByID(oldBranch.parentPoint.id)
+                assert oldBranch.parentPoint.id in pointIDMap
+                newParent = self.getPointByID(pointIDMap[oldBranch.parentPoint.id])
                 assert newParent is not None
                 newBranch.setParentPoint(newParent)
 
@@ -367,13 +369,21 @@ def _lastPointWithLabel(points, label):
 
 ### Cloning utilities
 
-def _clonePoint(point):
-    return Point(id=point.id, location=point.location)
+def _clonePoint(point, idMaker, pointIDMap):
+    assert point.id not in pointIDMap
+    newID = idMaker.nextPointID()
+    pointIDMap[point.id] = newID
+    # NOTE: SWC point ID can be stored here too if needed.
+    return Point(id=newID, location=point.location)
 
-def _cloneBranch(branch):
-    b = Branch(id=branch.id, reparentTo=branch.reparentTo)
+def _cloneBranch(branch, idMaker, pointIDMap):
+    assert branch.reparentTo is None or branch.reparentTo in pointIDMap
+    reparent = None if branch.reparentTo is None else pointIDMap[branch.reparentTo]
+
+    newID = idMaker.nextBranchID()
+    b = Branch(id=newID, reparentTo=reparent)
     for point in branch.points:
-        b.addPoint(_clonePoint(point))
+        b.addPoint(_clonePoint(point, idMaker, pointIDMap))
     return b
 
 
