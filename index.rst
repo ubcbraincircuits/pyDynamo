@@ -8,8 +8,10 @@ Contents
    :caption: Table of Contents
 
    docRst/install
-   docRst/model
+   docRst/stacks
+   docRst/drawing
    docRst/analysis
+   docRst/model
 
 This project was last updated on |date|.
 

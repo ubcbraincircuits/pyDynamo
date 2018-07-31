@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Analysis methods &mdash; PyDynamo 0.1 documentation</title>
+  <title>Stacks &mdash; PyDynamo 0.1 documentation</title>
   
 
   
@@ -31,8 +31,8 @@
 
   
     <link rel="top" title="PyDynamo 0.1 documentation" href="../index.html"/>
-        <link rel="next" title="Model objects" href="model.html"/>
-        <link rel="prev" title="Drawing" href="drawing.html"/> 
+        <link rel="next" title="Drawing" href="drawing.html"/>
+        <link rel="prev" title="Installation" href="install.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -84,14 +84,13 @@
                 <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stacks.html">Stacks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="drawing.html">Drawing</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Analysis methods</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#tdbl-total-dendritic-branch-length">TDBL (Total Dendritic Branch length)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#motility">Motility</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#added-subtracted-transitioned">Added/Subtracted/Transitioned</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Stacks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initial-options">Initial options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stack-list">Stack list</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="drawing.html">Drawing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Model objects</a></li>
 </ul>
 
@@ -123,11 +122,11 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Analysis methods</li>
+    <li>Stacks</li>
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/docRst/analysis.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/docRst/stacks.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -137,16 +136,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="analysis-methods">
-<h1>Analysis methods<a class="headerlink" href="#analysis-methods" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="tdbl-total-dendritic-branch-length">
-<h2>TDBL (Total Dendritic Branch length)<a class="headerlink" href="#tdbl-total-dendritic-branch-length" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="stacks">
+<h1>Stacks<a class="headerlink" href="#stacks" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="initial-options">
+<h2>Initial options<a class="headerlink" href="#initial-options" title="Permalink to this headline">¶</a></h2>
+<p>When you first start Dynamo, you have the following options:</p>
+<div class="figure align-center">
+<img alt="../_images/initialOptions.png" src="../_images/initialOptions.png" />
 </div>
-<div class="section" id="motility">
-<h2>Motility<a class="headerlink" href="#motility" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt><strong>New from Stacks</strong> (Ctrl-N)</dt>
+<dd>Choose this to start a new Dynamo project. Use this to load one or more .tif stacks,
+to which you can later draw on the dendritic structure.</dd>
+<dt><strong>Open from File</strong> (Ctrl-O)</dt>
+<dd>This option is used to reload an existing <code class="docutils literal"><span class="pre">.dyn.gz</span></code> file with .tif stacks and drawn tree structures.</dd>
+<dt><strong>Import from Matlab .mat</strong> (Ctrl-I)</dt>
+<dd>Use this to load a <code class="docutils literal"><span class="pre">.mat</span></code> matlab file created with an older version of Dynamo.</dd>
+</dl>
+<p>Note: when loading an existing file (either Ctrl-O or Ctrl-I), if the tif files cannot be found
+at their old location, you will be asked to find the new location of each file.</p>
 </div>
-<div class="section" id="added-subtracted-transitioned">
-<h2>Added/Subtracted/Transitioned<a class="headerlink" href="#added-subtracted-transitioned" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="stack-list">
+<h2>Stack list<a class="headerlink" href="#stack-list" title="Permalink to this headline">¶</a></h2>
+<p>After selecting the initial project option, a window containing a list of all stacks will be visible:</p>
+<div class="figure align-center">
+<img alt="../_images/stackListView.png" src="../_images/stackListView.png" />
+</div>
+<p>This will contain a list of all the stacks loaded in the project. From here, stacks can be
+hidden and made visible again. Additionally, if the data for a stack is incorrect,
+an entire stack can be deleted from the project.</p>
+<p>Pressing &#8216;T&#8217; will bring all visible stacks to the screen and tile them for simple viewing.</p>
 </div>
 </div>
 
@@ -157,10 +176,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="model.html" class="btn btn-neutral float-right" title="Model objects" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="drawing.html" class="btn btn-neutral float-right" title="Drawing" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="drawing.html" class="btn btn-neutral" title="Drawing" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="install.html" class="btn btn-neutral" title="Installation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
