@@ -1,3 +1,5 @@
+import numpy as np
+
 from analysis import addedSubtractedTransitioned, motility
 
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
@@ -15,19 +17,26 @@ GONE_COLOR   = (1.00, 0.00, 0.00, 0.75)
 class Motility3DCanvas(BaseMatplotlibCanvas):
     def __init__(self, treeModels, sizeFactor=10, *args, **kwargs):
         self.treeModels = treeModels
+        np.set_printoptions(precision=3)
         _, self.added, self.subtracted, self.transitioned, _, _ = addedSubtractedTransitioned(
             self.treeModels, excludeBasal=False, terminalDist=5, filoDist=5
         )
+        print ("ADD:")
+        print (self.added)
+        print ("SUB:")
+        print (self.subtracted)
+        print ("TRN:")
+        print (self.transitioned)
         mot, self.filoLengths = motility(
             self.treeModels, excludeBasal=False, includeAS=False, terminalDist=5, filoDist=5)
+        print (self.filoLengths)
+        np.set_printoptions()
         self.motility = mot['raw']
         self.sizeFactor = sizeFactor
 
         super(Motility3DCanvas, self).__init__(*args, in3D=True, subplots=len(treeModels), **kwargs)
         self.fig.canvas.mpl_connect('motion_notify_event', self.handleMove)
         # TODO: Use landmarks for mean shifting
-
-
 
     def compute_initial_figure(self):
         SZ_FACTOR = self.sizeFactor
@@ -78,14 +87,20 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                         for childPoint in self.treeModels[treeIdx - 1].branches[branchIdx].points:
                             retracted = 0
                             for childBranch in childPoint.children:
-                                if not (childBranch is None or len(childBranch.points) == 0):
+                                if childBranch is None or len(childBranch.points) == 0:
+                                    continue
+                                firstPointID = childBranch.points[0].id
+                                inCurrentTree = self.treeModels[treeIdx].getPointByID(firstPointID) is not None
+                                if not inCurrentTree:
                                     retracted += self.filoLengths[treeIdx - 1][childBranch.indexInParent()]
                             if retracted > 0:
                                 x, y, z = treeModel.worldCoordPoints([childPoint])
+                                print ("extra retraction: " + str(retracted))
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
                             drawAt = self.treeModels[treeIdx - 1].branches[branchIdx].points[-1] # End or parent?
                             if drawAt is not None:
+                                print ("extra subtraction: " + str(retracted))
                                 sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
                                 x, y, z = treeModel.worldCoordPoints([drawAt])
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=sz)

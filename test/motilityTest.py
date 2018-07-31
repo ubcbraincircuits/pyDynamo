@@ -2,9 +2,10 @@ import numpy as np
 import scipy.io
 import tempfile
 
-from util import emptyArrayMatrix
-
 from analysis import addedSubtractedTransitioned, motility, TDBL
+from util import emptyArrayMatrix
+from model import *
+
 import files
 
 PROPERTIES = ['added', 'filolengths', 'tdbl', 'masterChanged', 'transitioned', 'masterNodes', 'subtracted', 'filotypes']
@@ -26,11 +27,14 @@ def calculateResults(path='data/movie5local.mat'):
         fullState = files.loadState(path)
     trees = fullState.trees
 
-    allTDBL = [TDBL(tree, excludeAxon=True, excludeBasal=False, includeFilo=False, filoDist=5) for tree in trees]
+    TERM_DIST = 5
+    FILO_DIST = 5
+
+    allTDBL = [TDBL(tree, excludeAxon=True, excludeBasal=False, includeFilo=False, filoDist=FILO_DIST) for tree in trees]
     results['tdbl'] = np.array(allTDBL)
 
     filoTypes, added, subtracted, transitioned, masterChanged, masterNodes = \
-        addedSubtractedTransitioned(trees, excludeAxon=True, excludeBasal=False, terminalDist=5, filoDist=5)
+        addedSubtractedTransitioned(trees, excludeAxon=True, excludeBasal=False, terminalDist=TERM_DIST, filoDist=FILO_DIST)
     results['filotypes'] = np.vectorize(lambda t: t.value)(filoTypes)
     results['added'] = added
     results['subtracted'] = subtracted
@@ -38,7 +42,7 @@ def calculateResults(path='data/movie5local.mat'):
     results['masterChanged'] = masterChanged
     results['masterNodes'] = masterNodes
 
-    motilities, filoLengths = motility(trees, excludeAxon=True, excludeBasal=False, terminalDist=5, filoDist=5)
+    motilities, filoLengths = motility(trees, excludeAxon=True, excludeBasal=False, terminalDist=TERM_DIST, filoDist=FILO_DIST)
     results['filolengths'] = filoLengths
 
     return fullState, results
@@ -65,6 +69,13 @@ def nanCompare(a, b):
         a, b = a * 1, b * 1
     with np.errstate(invalid='ignore'):
         return ((np.abs(a - b) < 1e-9) | (np.isnan(a) & np.isnan(b)))
+
+def testSimpleAST():
+    fullState, results = calculateResults('data/astTest.dyn.gz')
+    print (results['filotypes'])
+    print (results['added'])
+    print (results['subtracted'])
+    print (results['transitioned'])
 
 def testAgainstGoldenFile():
     _, results = calculateResults()
@@ -107,10 +118,47 @@ def testRoundtrip():
             print ("Match: ")
             print (nanCompare(resultsFromImport[prop][VIDS], resultsFromSave[prop][VIDS]))
 
+def testImportNoChange(path='data/localFirst.dyn.gz'):
+    print ("Testing no motility changes after nodes copied...")
+    fullState = files.loadState(path)
+    assert len(fullState.trees) == 1
+
+    treeA = fullState.trees[0]
+    treeB = Tree()
+    treeB.clearAndCopyFrom(treeA)
+    trees = [treeA, treeB]
+
+    print ("\nResults:\n---------")
+
+    # TDBL the same for identical trees
+    allTDBL = [TDBL(tree, excludeAxon=True, excludeBasal=False, includeFilo=False, filoDist=5) for tree in trees]
+    # print (allTDBL)
+    assert allTDBL[0] == allTDBL[1]
+    print ("🙌 TDBL match!")
+
+    filoTypes, added, subtracted, transitioned, masterChanged, masterNodes = \
+        addedSubtractedTransitioned(trees, excludeAxon=True, excludeBasal=False, terminalDist=5, filoDist=5)
+
+    assert not np.any(added)
+    assert not np.any(subtracted)
+    assert not np.any(transitioned)
+    print ("🙌 Nothing added, subtracted or transitioned!")
+
+    motilities, filoLengths = motility(trees, excludeAxon=True, excludeBasal=False, terminalDist=5, filoDist=5)
+    mot = motilities['raw'][0]
+    assert np.all(np.logical_or(mot == 0, np.isnan(mot)))
+    assert np.all(np.logical_or(filoLengths[0] == filoLengths[1], np.isnan(filoLengths[0])))
+
+    filoTypes = np.vectorize(lambda t: t.value)(filoTypes)
+    assert np.array_equal(filoTypes[0], filoTypes[1])
+    print ("🙌 Filotypes, filo lengths match!")
+
 def run():
     np.set_printoptions(precision=3)
-    testAgainstGoldenFile()
-    testRoundtrip()
+    testSimpleAST()
+    # testAgainstGoldenFile()
+    # testRoundtrip()
+    # testImportNoChange()
     np.set_printoptions()
     return True
 

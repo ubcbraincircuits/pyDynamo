@@ -30,7 +30,7 @@ def motility(trees,
             filoLengths(np.array): the length of filopodia on each each branch.
     """
 
-    print ("\n\nCalculating motility...")
+    # print ("\n\nCalculating motility...")
     filoTypes, added, subtracted, _, masterChangedOut, _ = \
         addedSubtractedTransitioned(trees, excludeAxon, excludeBasal, terminalDist, filoDist)
 
