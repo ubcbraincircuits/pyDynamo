@@ -12,6 +12,7 @@ from .actions import FullStateActions
 from .common import cursorPointer
 from .initialMenu import InitialMenu
 from .motility3DViewWindow import Motility3DViewWindow
+from .stackListWindow import StackListWindow
 from .stackWindow import StackWindow
 from .tilefigs import tileFigs
 
@@ -26,6 +27,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.fullActions = FullStateActions(self.fullState, self.history)
         self.autoSaver = AutoSaver(self.fullState)
         self.initialMenu = InitialMenu(self)
+        self.stackList = StackListWindow(self)
 
         self.root = self._setupUI()
         self.centerWindow()
@@ -76,7 +78,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.openFilesAndAppendStacks()
         if len(self.stackWindows) > 0:
             self.initialMenu.hide()
-            self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
+            self.stackList.show()
+            # Focus on the first non-closed stack window:
+            self.focusFirstOpenStackWindow()
             QtWidgets.QApplication.processEvents()
             tileFigs(self.stackWindows)
 
@@ -85,6 +89,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             "Open dynamo save file", "", "Dynamo files (*.dyn.gz)"
         )
         if filePath != "":
+            self.stackList.show()
             self.fullState = loadState(filePath)
             self.history = History(self.fullState)
             self.fullActions = FullStateActions(self.fullState, self.history)
@@ -97,15 +102,13 @@ class DynamoWindow(QtWidgets.QMainWindow):
             "Import matlab save file", "", "Matlab file (*.mat)"
         )
         if filePath != "":
+            self.stackList.show()
             self.fullState = importFromMatlab(filePath)
             self.history = History(self.fullState)
             self.fullActions = FullStateActions(self.fullState, self.history)
             self.autoSaver = AutoSaver(self.fullState)
             self.initialMenu.hide()
             self.makeNewWindows()
-
-    # def closeEvent(self, event):
-        # event.ignore()
 
     def saveToFile(self):
         if self.fullState._rootPath is not None:
@@ -137,8 +140,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.redrawAllStacks()
             return True
         elif (key == ord('T')):
-            self.stackWindows[0].setFocus(Qt.ActiveWindowFocusReason)
-            tileFigs(self.stackWindows)
+            self.focusFirstOpenStackWindow()
+            openWindows = [window for window in self.stackWindows if window is not None]
+            tileFigs(openWindows)
             return True
         elif (key == ord('N')):
             self.openFilesAndAppendStacks()
@@ -193,17 +197,18 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     return True
         return False
 
-    # TODO - document
+    # For all stacks, redraw those who have a window open:
     def redrawAllStacks(self):
         for window in self.stackWindows:
-            window.dendrites.drawImage()
+            if window is not None:
+                window.dendrites.drawImage()
         self.maybeAutoSave()
 
-    # TODO - document
+    # For all stacks, move the image for those who have a window open:
     def handleDendriteMoveViewRect(self, viewRect):
         for window in self.stackWindows:
-            # HACK - very dots, much wow.
-            window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
+            if window is not None:
+                window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
         self.maybeAutoSave()
 
     # TODO - document
@@ -244,20 +249,40 @@ class DynamoWindow(QtWidgets.QMainWindow):
             childWindow.show()
         QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
+        self.stackList.updateListFromStacks()
 
-        """
-        HACK_WINDOW_TO_SELECT = 1 # POIUY
-        if (len(self.fullState.uiStates) > 0):
-            selectedPoint = self.fullState.uiStates[HACK_WINDOW_TO_SELECT].currentPoint()
-            if selectedPoint is not None:
-                self.fullActions.selectPoint(HACK_WINDOW_TO_SELECT, selectedPoint)
-        """
+    def removeStackWindow(self, windowIndex, deleteData=False):
+        if not deleteData:
+            # Mark window as none, but keep all the data around:
+            self.stackWindows[windowIndex] = None
+        else:
+            self.fullState.removeStack(windowIndex)
+            self.stackWindows[windowIndex].ignoreUndoCloseEvent = True
+            self.stackWindows[windowIndex].close()
+            self.stackWindows.pop(windowIndex)
+            for i in range(len(self.stackWindows)):
+                if self.stackWindows[i] is not None:
+                    self.stackWindows[i].updateWindowIndex(i)
+        self.stackList.updateListFromStacks()
 
-    def removeStackWindow(self, windowIndex):
-        self.fullState.removeStack(windowIndex)
-        self.stackWindows.pop(windowIndex)
-        for i in range(len(self.stackWindows)):
-            self.stackWindows[i].windowIndex = i
+    def toggleStackWindowVisibility(self, windowIndex):
+        # Recreate the window if it is hidden...
+        if self.stackWindows[windowIndex] is None:
+            self.stackWindows[windowIndex] = StackWindow(
+                windowIndex,
+                self.fullState.filePaths[windowIndex],
+                self.fullActions,
+                self.fullState.uiStates[windowIndex],
+                self
+            )
+            self.stackWindows[windowIndex].show()
+        # Or hide it if not:
+        else:
+            self.stackWindows[windowIndex].ignoreUndoCloseEvent = True
+            self.stackWindows[windowIndex].close()
+            self.stackWindows[windowIndex] = None
+        self.stackList.updateListFromStacks()
+
 
     def calcLandmarkRotation(self):
         msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,
@@ -290,11 +315,13 @@ class DynamoWindow(QtWidgets.QMainWindow):
             lastWindow = self.stackWindows.pop()
             lastWindow.ignoreUndoCloseEvent = True
             lastWindow.close()
+            lastWindow.ignoreUndoCloseEvent = False
 
         for i in range(len(self.fullState.uiStates)):
             if i < len(self.stackWindows):
-                self.stackWindows[i].updateState(
-                    self.fullState.filePaths[i], self.fullState.uiStates[i])
+                if self.stackWindows[i] is not None:
+                    self.stackWindows[i].updateState(
+                        self.fullState.filePaths[i], self.fullState.uiStates[i])
             else:
                 childWindow = StackWindow(
                     i,
@@ -306,3 +333,14 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 self.stackWindows.append(childWindow)
                 childWindow.show()
         closeStatus()
+        self.stackList.updateListFromStacks()
+
+    # Walk through windows, find first non-closed, and focus it.
+    def focusFirstOpenStackWindow(self):
+        firstStackWindow = None
+        for i in range(len(self.stackWindows)):
+            if self.stackWindows[i] is not None:
+                firstStackWindow = self.stackWindows[i]
+                break
+        if firstStackWindow is not None:
+            firstStackWindow.setFocus(Qt.ActiveWindowFocusReason)

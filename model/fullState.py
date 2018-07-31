@@ -140,7 +140,7 @@ class FullState:
         self.landmarks.pop(index)
         self.uiStates.pop(index)
         # TODO - remove undo state for that stack too
-
+    
     def colorChannel(self):
         if not self.useColor:
             return None

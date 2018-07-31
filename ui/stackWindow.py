@@ -1,10 +1,10 @@
 import math
 import numpy as np
-import os.path
 
 from PyQt5 import QtCore, QtWidgets
 
 import files
+import util
 
 from .actions.dendriteCanvasActions import DendriteCanvasActions
 from .dendriteVolumeCanvas import DendriteVolumeCanvas
@@ -18,13 +18,15 @@ class StackWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle(_createTitle(windowIndex, imagePath))
 
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
         self.imagePath = imagePath
         uiState.imagePath = imagePath
         _IMG_CACHE.handleNewUIState(uiState)
+
+        self.windowIndex = windowIndex
+        self.updateTitle()
 
         self.root = QtWidgets.QWidget(self)
         self.dendrites = DendriteVolumeCanvas(
@@ -61,34 +63,30 @@ class StackWindow(QtWidgets.QMainWindow):
         self.help_menu.addAction('&Shortcuts', self.actionHandler.showHotkeys, QtCore.Qt.Key_F1)
         self.statusBar().showMessage("") # Force it to be visible, so we can use later.
 
+    def closeEvent(self, event):
+        if not self.ignoreUndoCloseEvent:
+            self.parent().removeStackWindow(self.windowIndex)
+
     def updateState(self, newFilePath, newUiState):
-        self.setWindowTitle(_createTitle(self.windowIndex, newFilePath))
         self.imagePath = newFilePath
         self.uiState = newUiState
-        # self.uiState.setImagePath(newFilePath)
         self.dendrites.updateState(newUiState)
         self.actionHandler.updateUIState(newUiState)
         _IMG_CACHE.handleNewUIState(newUiState)
+        self.updateTitle()
+
+    def updateWindowIndex(self, windowIndex):
+        self.windowIndex = windowIndex
+        self.updateTitle()
+
+    def updateTitle(self):
+        self.setWindowTitle(util.createTitle(self.windowIndex, self.imagePath))
 
     def redraw(self):
         self.dendrites.redraw()
 
     def fileQuit(self):
         self.close()
-
-    def closeEvent(self, event):
-        if self.ignoreUndoCloseEvent:
-            event.accept()
-            return
-        msg = "Close this stack?"
-        reply = QtWidgets.QMessageBox.question(
-            self, 'Close?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
-        )
-        if reply == QtWidgets.QMessageBox.Yes:
-            self.parent().removeStackWindow(self.windowIndex)
-            event.accept()
-        else:
-            event.ignore()
 
     def showHotkeys(self):
         self.actionHandler.showHotkeys()
@@ -174,7 +172,3 @@ class StackWindow(QtWidgets.QMainWindow):
             "Import SWC file", "", "SWC file (*.swc)"
         )
         return filePath
-
-# Utility for nicer formatting of the window, using index and just image file name.
-def _createTitle(index, path):
-    return "[%d] - %s" % (index + 1, os.path.basename(path))
