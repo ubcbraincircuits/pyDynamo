@@ -52,9 +52,11 @@ class FullStateActions():
             newLocation = self.state.convertLocation(location, localIdx, i)
             newBranch = self.state.analogousBranch(currentBranch, localIdx, i)
             newSource = self.state.analogousPoint(currentSource, localIdx, i)
-            state.addKnownPointMidBranchAndSelect(
-                newLocation, newBranch, newSource, isAfter, newPoint.id
-            )
+            # Only add to later ones if the points exist in the tree:
+            if newBranch is not None and newSource is not None:
+                state.addKnownPointMidBranchAndSelect(
+                    newLocation, newBranch, newSource, isAfter, newPoint.id
+                )
 
     def deletePoint(self, localIdx, point, laterStacks):
         self.history.pushState()
