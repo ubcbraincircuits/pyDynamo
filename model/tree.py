@@ -151,7 +151,7 @@ class Branch():
         :returns: The point before this one"""
         if point not in self.points:
             print ("Deleting point not in the branch? Whoops")
-            return1
+            return
         index = self.points.index(point)
         self.points.remove(point)
         return self.parentPoint if index == 0 else self.points[index - 1]
@@ -243,8 +243,11 @@ class Tree():
         if pointToRemove is not None:
             if pointToRemove.parentBranch is None:
                 assert pointToRemove.id == self.rootPoint.id
-                assert len(self.branches) == 0
-                self.rootPoint = None
+                if len(self.branches) == 0:
+                    self.rootPoint = None
+                else:
+                    print ("You can't remove the soma if other points exist - please remove those first!")
+                    return None
             else:
                 return pointToRemove.parentBranch.removePointLocally(pointToRemove)
         else:

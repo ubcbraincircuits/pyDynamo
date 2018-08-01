@@ -32,11 +32,11 @@ def testSWC():
 
 def run():
     passed = True
-    # passed = passed and testAbsOrient()
-    # passed = passed and testHistory()
+    passed = passed and testAbsOrient()
+    passed = passed and testHistory()
     passed = passed and testMotility()
-    # passed = passed and testRecursiveAdjust()
-    # passed = passed and testSWC()
+    passed = passed and testRecursiveAdjust()
+    passed = passed and testSWC()
     if passed:
         print ("\n 🙌🙌🙌 ALL TESTS PASSED 🙌🙌🙌\n")
 

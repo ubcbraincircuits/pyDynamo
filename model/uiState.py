@@ -63,7 +63,7 @@ class UIState():
 
     def currentPoint(self):
         if self.currentPointID is None:
-            return self._tree.rootPoint
+            return None
         return self._tree.getPointByID(self.currentPointID)
 
     def deleteBranch(self, branch):
@@ -104,17 +104,25 @@ class UIState():
         if self._tree.rootPoint is None:
             self._tree.rootPoint = newPoint
         else:
-            if self.currentBranchID is None:
-                newBranchID = self.maybeCreateBranchID(newBranchID)
-                newBranch = Branch(newBranchID, self._tree)
-                newBranch.setParentPoint(self._tree.rootPoint)
-                self._tree.addBranch(newBranch)
-                self.currentBranchID = newBranch.id
+            if self.currentBranch() is None:
+                if len(self._tree.branches) == 0:
+                    # First branch, so create it
+                    newBranchID = self.maybeCreateBranchID(newBranchID)
+                    newBranch = Branch(newBranchID, self._tree)
+                    newBranch.setParentPoint(self._tree.rootPoint)
+                    self._tree.addBranch(newBranch)
+                    self.currentBranchID = newBranch.id
+                else:
+                    # We have branches, but none selected, so skip this stack.
+                    return None
             self.currentBranch().addPoint(newPoint)
             self.currentPointID = newPoint.id
         return newPoint
 
     def addPointToNewBranchAndSelect(self, location, newPointID=None, newBranchID=None):
+        if self.currentPoint() is None:
+            return None, None
+
         # Make new branch from current point.
         newBranchID = self.maybeCreateBranchID(newBranchID)
         newBranch = Branch(newBranchID, self._tree)
@@ -132,8 +140,9 @@ class UIState():
         branch = self.currentBranch()
         if branch is None:
             return None, False
-
         currentPoint = self.currentPoint()
+        if currentPoint is None:
+            return None, False
         currentPointIndex = branch.indexForPoint(self.currentPoint())
         newPoint = Point(self.maybeCreateNewID(None), location)
         newPointIndex = None
@@ -181,9 +190,10 @@ class UIState():
         self.currentPointID = newPoint.id
 
     def deletePointByID(self, pointID):
-        for branch in self._tree.branches:
-            if branch.parentPoint is not None and branch.parentPoint.id == pointID:
-                self.deleteBranch(branch)
+        if pointID != self._tree.rootPoint.id:
+            for branch in self._tree.branches:
+                if branch.parentPoint is not None and branch.parentPoint.id == pointID:
+                    self.deleteBranch(branch)
         return self._tree.removePointByID(pointID)
 
     def endMove(self, newLocation, downstream):

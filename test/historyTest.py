@@ -78,7 +78,7 @@ def testTree():
     print ("Tree history passed! 🙌")
 
 def testParents():
-    fullState = files.loadState("data/local5.dyn.gz")
+    fullState = files.loadState("data/simple5.dyn.gz")
     fullID = id(fullState)
     for uiState in fullState.uiStates:
         assert id(uiState.parent()) == fullID

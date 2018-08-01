@@ -52,7 +52,7 @@ class DendritePainter():
 
     def drawBranchLines(self, branch):
         for i in range(len(branch.points)):
-            previousPoint = branch.parentPoint if i == 0 else branch.points[i-1]
+            previousPoint = branch.parentPoint if i == 0 else branch.points[i - 1]
             lastX, lastY, lastZ = self.zoomedLocation(previousPoint.location)
             thisX, thisY, thisZ = self.zoomedLocation(branch.points[i].location)
             linePen = self.getLinePen(lastZ, thisZ)

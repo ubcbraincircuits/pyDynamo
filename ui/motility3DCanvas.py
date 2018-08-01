@@ -21,15 +21,8 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
         _, self.added, self.subtracted, self.transitioned, _, _ = addedSubtractedTransitioned(
             self.treeModels, excludeBasal=False, terminalDist=5, filoDist=5
         )
-        print ("ADD:")
-        print (self.added)
-        print ("SUB:")
-        print (self.subtracted)
-        print ("TRN:")
-        print (self.transitioned)
         mot, self.filoLengths = motility(
             self.treeModels, excludeBasal=False, includeAS=False, terminalDist=5, filoDist=5)
-        print (self.filoLengths)
         np.set_printoptions()
         self.motility = mot['raw']
         self.sizeFactor = sizeFactor
@@ -95,12 +88,12 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                     retracted += self.filoLengths[treeIdx - 1][childBranch.indexInParent()]
                             if retracted > 0:
                                 x, y, z = treeModel.worldCoordPoints([childPoint])
-                                print ("extra retraction: " + str(retracted))
+                                # print ("extra retraction: " + str(retracted))
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
                             drawAt = self.treeModels[treeIdx - 1].branches[branchIdx].points[-1] # End or parent?
                             if drawAt is not None:
-                                print ("extra subtraction: " + str(retracted))
+                                # print ("extra subtraction: " + str(retracted))
                                 sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
                                 x, y, z = treeModel.worldCoordPoints([drawAt])
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=sz)
