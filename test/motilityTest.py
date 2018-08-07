@@ -125,7 +125,8 @@ def testImportNoChange(path='data/localFirst.dyn.gz'):
 
     treeA = fullState.trees[0]
     treeB = Tree()
-    treeB.clearAndCopyFrom(treeA)
+    treeB.clearAndCopyFrom(treeA, fullState)
+    treeB._parentState = treeA._parentState
     trees = [treeA, treeB]
 
     print ("\nResults:\n---------")
@@ -156,9 +157,9 @@ def testImportNoChange(path='data/localFirst.dyn.gz'):
 def run():
     np.set_printoptions(precision=3)
     testSimpleAST()
-    # testAgainstGoldenFile()
-    # testRoundtrip()
-    # testImportNoChange()
+    testAgainstGoldenFile()
+    testRoundtrip()
+    testImportNoChange()
     np.set_printoptions()
     return True
 
