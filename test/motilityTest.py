@@ -127,6 +127,11 @@ def testImportNoChange(path='data/localFirst.dyn.gz'):
     treeB = Tree()
     treeB.clearAndCopyFrom(treeA, fullState)
     treeB._parentState = treeA._parentState
+    # Copy branch and point IDs:
+    for i in range(len(treeA.branches)):
+        treeB.branches[i].id = treeA.branches[i].id
+        for j in range(len(treeA.branches[i].points)):
+            treeB.branches[i].points[j].id = treeA.branches[i].points[j].id
     trees = [treeA, treeB]
 
     print ("\nResults:\n---------")

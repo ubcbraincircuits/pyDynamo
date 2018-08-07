@@ -20,24 +20,17 @@ def addedSubtractedTransitioned(
         filoDist (float): Maximum distance a branch can be for it to be considered a filo.
 
     Returns:
-        (tuple): tuple containing:
-
-            filoTypes(np.array): the raw changes, plus those normalized by tdbl/filo lengths/counts
-
-            added(np.array): Maps (tree, branch) to whether that branch first appeared in that tree.
-
-            subtracted(np.array): Maps (tree, branch) to whether that branch disappeared in that tree.
-
-            transitioned(np.array): Maps (tree, branch) to whether that branch changed type in that tree.
-
-            masterChanged(np.array): Maps (tree, branch) to whether the branch changed master nodes in that tree.
-
-            masterNodes(np.array): Maps (tree, branch) to list of master nodes for that branch in that tree.
+    TODO
     """
 
-    # All outputs will be [# trees][# branches]
     nTrees = len(trees)
-    nBranches = len(trees[-1].branches)
+    branchIDList = util.sortedBranchIDList(trees)
+    nBranches = len(branchIDList)
+
+    branchIDLookup = {}
+    for i in range(nBranches):
+        branchIDLookup[branchIDList[i]] = i
+
     resultShape = (nTrees, nBranches)
 
     # Outputs:
@@ -50,7 +43,7 @@ def addedSubtractedTransitioned(
 
     for treeIdx, tree in enumerate(trees):
         if trees[treeIdx] is not None and len(trees[treeIdx].branches) > 0: # Skip empty trees
-            _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
+            _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
 
     filoExists = (filoTypes > FiloType.ABSENT)
     filos = filoExists & (filoTypes < FiloType.BRANCH_ONLY) # NOTE: brackets needed for numpy precendence
@@ -67,8 +60,12 @@ def addedSubtractedTransitioned(
     return filoTypes, added, subtracted, transitioned, masterChanged, masterNodes
 
 # HACK : TODO: Migrate to ID-based results rather than index-based
-def _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, branchIdx, excludeAxon, excludeBasal, terminalDist, filoDist):
-    branch = trees[treeIdx].branches[branchIdx]
+def _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, branchIdx, excludeAxon, excludeBasal, terminalDist, filoDist):
+    branch = trees[treeIdx].getBranchByID(branchIDList[branchIdx])
+    if branch is None:
+        filoTypes[treeIdx][branchIdx] = FiloType.ABSENT
+        return
+
     pointsWithRoot = [branch.parentPoint] + branch.points
 
     # Exclude: 1) empty branches, plus 2) axons and 3) basal dendrites if not needed.
@@ -90,9 +87,14 @@ def _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, branchIdx, exclu
 
         forceInterstitial = False
         for childBranch in point.children:
-            childBranchIdx = childBranch.indexInParent()
             if len(childBranch.points) < 1:
                 continue # Skip empty branches
+
+            if childBranch.id not in branchIDList:
+                continue # branch is not known? what?
+
+            childBranchIdx = branchIDList.index(childBranch.id)
+
 
             childIsFilo, childLength = childBranch.isFilo(filoDist)
             if childIsFilo:
@@ -111,7 +113,7 @@ def _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, branchIdx, exclu
             else: # Not filo
                 # all terminal filopodia identified so far are actually interstitial
                 forceInterstitial = True
-                _recursiveFiloTypes(filoTypes, masterNodes, trees, treeIdx, childBranchIdx, excludeAxon, excludeBasal, terminalDist, filoDist)
+                _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, childBranchIdx, excludeAxon, excludeBasal, terminalDist, filoDist)
 
         # Turn all previous terminal filos into interstitial filos
         if forceInterstitial:

@@ -32,6 +32,9 @@ def parseMatlabTree(fullState, saveState):
     branchList = saveState['tree'][0]
 
     for i in range(branchList.shape[1]):
+        # HACK: Matlab uses branch index as ID:
+        fullState._nextBranchID = i
+
         if len(branchList[0, i]) > 0:
             # Load in branch:
             branchData = branchList[0, i][0]
