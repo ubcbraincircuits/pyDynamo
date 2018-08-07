@@ -12,6 +12,7 @@ from .actions import FullStateActions
 from .common import cursorPointer
 from .initialMenu import InitialMenu
 from .motility3DViewWindow import Motility3DViewWindow
+from .settingsWindow import SettingsWindow
 from .stackListWindow import StackListWindow
 from .stackWindow import StackWindow
 from .tilefigs import tileFigs
@@ -27,6 +28,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.fullActions = FullStateActions(self.fullState, self.history)
         self.autoSaver = AutoSaver(self.fullState)
         self.initialMenu = InitialMenu(self)
+        self.settingsWindow = SettingsWindow(self)
         self.stackList = StackListWindow(self)
 
         self.root = self._setupUI()
@@ -209,6 +211,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
             if window is not None:
                 window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
         self.maybeAutoSave()
+
+    # Make the settings dialog visible:
+    def openSettings(self):
+        self.settingsWindow.openFromState(self.fullState)
 
     # TODO - document
     def openFilesAndAppendStacks(self):

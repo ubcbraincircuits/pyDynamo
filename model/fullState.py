@@ -1,5 +1,6 @@
 import attr
 
+from .options import ProjectOptions
 from .tree import *
 from .uiState import *
 
@@ -21,6 +22,9 @@ class FullState:
 
     # Image-specific options, one for each of the files above
     uiStates = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+
+    # Project options
+    projectOptions = attr.ib(default=attr.Factory(ProjectOptions), metadata=SAVE_META)
 
     # Size of volume (# channels, x, y, z), needs to be the same between stacks
     volumeSize = attr.ib(default=None)
@@ -140,7 +144,7 @@ class FullState:
         self.landmarks.pop(index)
         self.uiStates.pop(index)
         # TODO - remove undo state for that stack too
-    
+
     def colorChannel(self):
         if not self.useColor:
             return None
