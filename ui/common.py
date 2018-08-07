@@ -10,7 +10,6 @@ from PyQt5.QtCore import Qt
 def cursorPointer(widget):
   widget.setCursor(QCursor(Qt.PointingHandCursor))
 
-
 # Convert an edit box into a float value, using a default if it's invalid.
 def floatOrDefault(lineEdit, value):
     try:

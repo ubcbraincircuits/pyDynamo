@@ -96,7 +96,6 @@ def importFromMatlab(matlabPath):
         filePaths.append(filePath)
         tree = parseMatlabTree(fullState, saveState)
         # Note: Pull out scale from transform, move it to global scale:
-        print (tree.transform.scale)
         fullState.projectOptions.pixelSizes = tree.transform.scale
         tree.transform.scale = [1, 1, 1]
         treeData.append(tree)
