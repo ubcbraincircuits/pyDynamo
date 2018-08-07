@@ -15,7 +15,9 @@ class BaseMatplotlibCanvas(FigureCanvas):
         self.compute_initial_figure()
         super(BaseMatplotlibCanvas, self).__init__(fig)
         if in3D:
-            [ax.mouse_init() for ax in self.axes]
+            for ax in self.axes:
+                ax.mouse_init()
+                ax.view_init(elev=-90, azim=-90)
         self.setParent(parent)
         self.setStyleSheet("background-color:black;")
         FigureCanvas.setSizePolicy(self,
