@@ -170,7 +170,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.redrawAllStacks()
             return True
         elif (key == ord('M')):
-            viewWindow = Motility3DViewWindow(self, self.fullState.trees)
+            opt = self.fullState.projectOptions.motilityOptions
+            viewWindow = Motility3DViewWindow(self, self.fullState.trees, opt)
             viewWindow.show()
             return True
         elif (key == ord('S') and ctrlPressed):

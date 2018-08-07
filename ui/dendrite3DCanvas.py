@@ -1,3 +1,5 @@
+import numpy as np
+
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 from .dendritePainter import colorForBranch
 
@@ -33,6 +35,17 @@ class Dendrite3DCanvas(BaseMatplotlibCanvas):
         # And finally draw the soma as a big sphere:
         x, y, z = self.treeModel.worldCoordPoints([self.treeModel.rootPoint])
         ax.scatter(x, y, z, c=colorForBranch(0), s=100)
+
+        # Scale results to keep same aspect ratio (matplotlib apsect='equal' is broken in 3d...)
+        x, y, z = self.treeModel.worldCoordPoints(self.treeModel.flattenPoints())
+        xmin, xmax = np.min(x), np.max(x)
+        ymin, ymax = np.min(y), np.max(y)
+        zmin, zmax = np.min(z), np.max(z)
+        r = (0.5 * max(xmax - xmin, ymax - ymin, zmax - zmin)) * 1.1
+        xM, yM, zM = (xmax + xmin) / 2, (ymax + ymin) / 2, (zmax + zmin) / 2
+        ax.set_xlim3d(xM - r, xM + r)
+        ax.set_ylim3d(yM - r, yM + r)
+        ax.set_zlim3d(zM - r, zM + r)
 
     def needToUpdate(self):
         self.axes[0].cla()

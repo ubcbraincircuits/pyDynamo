@@ -9,3 +9,11 @@ from PyQt5.QtCore import Qt
 #   Same as CSS's cursor:pointer, should be used for clickable things.
 def cursorPointer(widget):
   widget.setCursor(QCursor(Qt.PointingHandCursor))
+
+
+# Convert an edit box into a float value, using a default if it's invalid.
+def floatOrDefault(lineEdit, value):
+    try:
+        return float(lineEdit.text())
+    except ValueError:
+        return value
