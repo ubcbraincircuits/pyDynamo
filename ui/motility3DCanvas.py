@@ -98,7 +98,8 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                 # print ("extra retraction: " + str(retracted))
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
-                            drawAt = self.treeModels[treeIdx - 1].branches[branchIdx].points[-1] # End or parent?
+                            # Draw at the parent of the subtracted branch, not the end point.
+                            drawAt = self.treeModels[treeIdx - 1].branches[branchIdx].parentPoint
                             if drawAt is not None:
                                 # print ("extra subtraction: " + str(retracted))
                                 sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
