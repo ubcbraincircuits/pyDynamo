@@ -4,6 +4,7 @@ from .addedSubtractedTransitioned import addedSubtractedTransitioned
 from .TDBL import TDBL
 
 from model import FiloType
+import util
 
 def motility(trees,
     excludeAxon=True,
@@ -35,7 +36,10 @@ def motility(trees,
         addedSubtractedTransitioned(trees, excludeAxon, excludeBasal, terminalDist, filoDist)
 
     # Outputs:
-    nTrees, nBranches = len(trees), len(trees[-1].branches)
+    nTrees = len(trees)
+    branchIDList = util.sortedBranchIDList(trees)
+    nBranches = len(branchIDList)
+
     resultShape = (nTrees, nBranches)
     filoLengths = np.full(resultShape, np.nan)
     allTDBL = np.zeros(nTrees)
@@ -45,7 +49,7 @@ def motility(trees,
         allTDBL[treeIdx] = TDBL(tree, excludeAxon, excludeBasal, includeFilo=True, filoDist=filoDist)
         if tree.rootPoint is not None:
             for branch in tree.rootPoint.children:
-                _calcFiloLengths(filoLengths[treeIdx], treeIdx, branch, excludeAxon, excludeBasal, filoDist)
+                _calcFiloLengths(branchIDList, filoLengths[treeIdx], treeIdx, branch, excludeAxon, excludeBasal, filoDist)
 
     # Raw motility:
     lengthBefore, lengthAfter = filoLengths[:-1, :], filoLengths[1:, :]
@@ -72,8 +76,12 @@ def motility(trees,
     return motilities, filoLengths
 
 
-def _calcFiloLengths(filoLengths, treeIdx, branch, excludeAxon, excludeBasal, filoDist):
-    branchIdx = branch.indexInParent()
+def _calcFiloLengths(branchIDList, filoLengths, treeIdx, branch, excludeAxon, excludeBasal, filoDist):
+    if branch.id not in branchIDList:
+        filoLengths[branchIdx] = 0 # Hmm...shouldn't happen.
+        return 0
+
+    branchIdx = branchIDList.index(branch.id)
     pointsWithRoot = [branch.parentPoint] + branch.points
 
     # 1) If the branch has not been created yet, or is empty, abort
@@ -93,7 +101,7 @@ def _calcFiloLengths(filoLengths, treeIdx, branch, excludeAxon, excludeBasal, fi
     # 5) Recurse to fill filolengths cache for all child branches:
     for point in branch.points:
         for childBranch in point.children:
-            _calcFiloLengths(filoLengths, treeIdx, childBranch, excludeAxon, excludeBasal, filoDist)
+            _calcFiloLengths(branchIDList, filoLengths, treeIdx, childBranch, excludeAxon, excludeBasal, filoDist)
 
     # 6) Add the final filo for this branch if it's short enough.
     filoLengths[branchIdx] = 0
