@@ -141,8 +141,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             return True
         elif (key == ord('T')):
             self.focusFirstOpenStackWindow()
-            openWindows = [window for window in self.stackWindows if window is not None]
-            tileFigs(openWindows)
+            tileFigs(self.stackWindows)
             return True
         elif (key == ord('N')):
             self.openFilesAndAppendStacks()

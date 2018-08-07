@@ -5,6 +5,9 @@ from PyQt5.QtWidgets import QDesktopWidget
 
 # pyqt5 version of matlab tilefigs function
 def tileFigs(stackWindows):
+    # Filter out only open windows:
+    stackWindows = [w for w in stackWindows if w is not None]
+
     assert len(stackWindows) > 0
     hspc   = 10 # Horisontal space.
     topspc = 40 # Space above top figure.
