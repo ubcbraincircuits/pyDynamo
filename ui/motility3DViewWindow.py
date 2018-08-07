@@ -6,13 +6,13 @@ from PyQt5 import QtCore, QtWidgets
 from .motility3DCanvas import Motility3DCanvas
 
 class Motility3DViewWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent, treeModels):
+    def __init__(self, parent, treeModels, opt):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle('Motility')
 
         root = QtWidgets.QWidget(self)
-        view3D = Motility3DCanvas(treeModels)
+        view3D = Motility3DCanvas(parent, treeModels, opt)
 
         # Assemble the view hierarchy.
         l = QtWidgets.QVBoxLayout(root)

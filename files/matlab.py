@@ -93,9 +93,12 @@ def importFromMatlab(matlabPath):
     for i in range(saveStates.shape[1]):
         saveState = saveStates[0, i][0]
         filePath = saveState['info'][0]['filename'][0][0][0]
-        # TODO: check whether file exists, and prompt if not...
         filePaths.append(filePath)
-        treeData.append(parseMatlabTree(fullState, saveState))
+        tree = parseMatlabTree(fullState, saveState)
+        # Note: Pull out scale from transform, move it to global scale:
+        fullState.projectOptions.pixelSizes = tree.transform.scale
+        tree.transform.scale = [1, 1, 1]
+        treeData.append(tree)
         landmarkData.append(parseLandmarks(saveState))
     fullState.addFiles(filePaths, treeData, landmarkData)
     return fullState

@@ -63,10 +63,18 @@ def convertToUIState(asDict):
     convert(asDict, 'colorLimits', tuple)
     return UIState(**asDict)
 
+def convertToMotilityOptions(asDict):
+    return MotilityOptions(**asDict)
+
+def convertToProjectOptions(asDict):
+    convert(asDict, 'motilityOptions', convertToMotilityOptions)
+    return ProjectOptions(**asDict)
+
 def convertToFullState(asDict):
     convert(asDict, 'trees', convertToTree, isArray=True)
     convert(asDict, 'uiStates', convertToUIState, isArray=True)
     convert(asDict, 'landmarks', convertToListOfTuples, isArray=True)
+    convert(asDict, 'projectOptions', convertToProjectOptions)
     return FullState(**asDict)
 
 def indexTree(tree):
@@ -108,6 +116,7 @@ def indexFullState(fullState, path):
     for i, state in enumerate(fullState.uiStates):
         state._parent = fullState
         state._tree = fullState.trees[i]
+        state._tree._parentState = state
     fullState._nextPointID = findNextPointID(fullState)
     fullState._nextBranchID = findNextBranchID(fullState)
     fullState._rootPath = path

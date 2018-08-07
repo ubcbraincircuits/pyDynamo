@@ -15,14 +15,21 @@ GONE_COLOR   = (1.00, 0.00, 0.00, 0.75)
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Motility3DCanvas(BaseMatplotlibCanvas):
-    def __init__(self, treeModels, sizeFactor=10, *args, **kwargs):
+    def __init__(self, parent, treeModels, opt, sizeFactor=10, *args, **kwargs):
         self.treeModels = treeModels
+        self.options = opt
         np.set_printoptions(precision=3)
+
         _, self.added, self.subtracted, self.transitioned, _, _ = addedSubtractedTransitioned(
-            self.treeModels, excludeBasal=False, terminalDist=5, filoDist=5
+            self.treeModels,
+            excludeAxon=opt.excludeAxon, excludeBasal=opt.excludeBasal,
+            terminalDist=opt.terminalDist, filoDist=opt.filoDist
         )
         mot, self.filoLengths = motility(
-            self.treeModels, excludeBasal=False, includeAS=False, terminalDist=5, filoDist=5)
+            self.treeModels,
+            excludeAxon=opt.excludeAxon, excludeBasal=opt.excludeBasal, includeAS=opt.includeAS,
+            terminalDist=opt.terminalDist, filoDist=opt.filoDist
+        )
         np.set_printoptions()
         self.motility = mot['raw']
         self.sizeFactor = sizeFactor
@@ -103,6 +110,18 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
             if treeModel.rootPoint is not None:
                 x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
                 ax.scatter(x, y, z, c=GREY_COLOUR, s=350)
+
+            # Make equal aspect ratio:
+            x, y, z = treeModel.worldCoordPoints(treeModel.flattenPoints())
+            xmin, xmax = np.min(x), np.max(x)
+            ymin, ymax = np.min(y), np.max(y)
+            zmin, zmax = np.min(z), np.max(z)
+            r = (0.5 * max(xmax - xmin, ymax - ymin, zmax - zmin)) * 1.1
+            xM, yM, zM = (xmax + xmin) / 2, (ymax + ymin) / 2, (zmax + zmin) / 2
+            ax.set_xlim3d(xM - r, xM + r)
+            ax.set_ylim3d(yM - r, yM + r)
+            ax.set_zlim3d(zM - r, zM + r)
+
 
     def needToUpdate(self):
         for ax in self.axes:

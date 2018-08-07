@@ -7,4 +7,5 @@ from .uiState import UIState, normalizeImage
 from .fullState import FullState
 from .history import History
 from .filoType import FiloType
+from .options import MotilityOptions, ProjectOptions
 from .recursiveAdjust import recursiveAdjust

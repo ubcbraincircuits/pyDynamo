@@ -204,6 +204,9 @@ class Tree():
     transform = attr.ib(default=attr.Factory(Transform), metadata=SAVE_META)
     """Conversion for this tree from pixel to world coordinates."""
 
+    _parentState = attr.ib(default=None, repr=False, cmp=False)
+    """UI State this belongs to."""
+
     # HACK - make faster, index points by ID
     def getPointByID(self, pointID):
         """Given the ID of a point, find the point object that matches."""
@@ -313,8 +316,7 @@ class Tree():
     def worldCoordPoints(self, points):
         """Convert image pixel (x, y, z) to a real-world (x, y, z) position."""
         x, y, z = [], [], []
-        # HACK: Enter values on load?
-        # self.transform.scale = np.array([0.3070, 0.3070, 1.5])
+        globalScale = self._parentState._parent.projectOptions.pixelSizes
         for p in points:
             pAt = p
             if hasattr(p, 'location'):
@@ -322,6 +324,7 @@ class Tree():
             pAt = np.array(pAt)
             pAt = np.matmul(self.transform.rotation, pAt.T).T
             pAt = (pAt + self.transform.translation) * self.transform.scale
+            pAt = pAt * globalScale
             x.append(pAt[0]), y.append(pAt[1]), z.append(pAt[2])
         return x, y, z
 
