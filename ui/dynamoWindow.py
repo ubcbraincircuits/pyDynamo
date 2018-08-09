@@ -175,7 +175,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
             viewWindow.show()
             return True
         elif (key == ord('S') and ctrlPressed):
-            self.saveToFile()
+            if shftPressed:
+                self.saveToNewFile()
+            else:
+                self.saveToFile()
             return True
         elif (key == ord('Z') and ctrlPressed):
             self.updateUndoStack(isRedo=shftPressed, originWindow=childWindow)
