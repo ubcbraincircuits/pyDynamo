@@ -69,7 +69,7 @@ class DendriteCanvasActions():
         thisTree = self.uiState.parent().trees[windowIndex]
         lastTree = self.uiState.parent().trees[windowIndex - 1]
         assert thisTree is not None and lastTree is not None
-        thisTree.clearAndCopyFrom(lastTree, self.uiState.parent())
+        thisTree.clearAndCopyFrom(lastTree, None) # No id maker, so clone IDs
 
     def importPointsFromSWC(self, windowIndex, filePath):
         thisTree = self.uiState.parent().trees[windowIndex]

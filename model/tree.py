@@ -377,7 +377,7 @@ def _lastPointWithLabel(points, label):
 
 def _clonePoint(point, idMaker, pointIDMap):
     assert point.id not in pointIDMap
-    newID = idMaker.nextPointID()
+    newID = point.id if idMaker is None else idMaker.nextPointID()
     pointIDMap[point.id] = newID
     # NOTE: SWC point ID can be stored here too if needed.
     return Point(id=newID, location=point.location)
@@ -386,7 +386,7 @@ def _cloneBranch(branch, idMaker, pointIDMap):
     assert branch.reparentTo is None or branch.reparentTo in pointIDMap
     reparent = None if branch.reparentTo is None else pointIDMap[branch.reparentTo]
 
-    newID = idMaker.nextBranchID()
+    newID = branch.id if idMaker is None else idMaker.nextBranchID()
     b = Branch(id=newID, reparentTo=reparent)
     for point in branch.points:
         b.addPoint(_clonePoint(point, idMaker, pointIDMap))
