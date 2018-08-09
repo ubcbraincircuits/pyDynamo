@@ -65,6 +65,8 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
 
             # Draw filo for each branch:
             if treeIdx > 0:
+                oldTreeModel = self.treeModels[treeIdx - 1]
+
                 for branch in treeModel.branches:
                     branchIdx = self.branchIDList.index(branch.id)
 
@@ -101,7 +103,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                 if not inCurrentTree:
                                     retracted += self.filoLengths[treeIdx - 1][childBranchIdx]
                             if retracted > 0:
-                                x, y, z = treeModel.worldCoordPoints([childPoint])
+                                x, y, z = oldTreeModel.worldCoordPoints([childPoint])
+                                childPointInNew = treeModel.getPointByID(childPoint.id)
+                                if childPointInNew is not None:
+                                    x, y, z = treeModel.worldCoordPoints([childPointInNew])
                                 # print ("extra retraction: " + str(retracted))
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
@@ -110,7 +115,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                             if drawAt is not None:
                                 # print ("extra subtraction: " + str(retracted))
                                 sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
-                                x, y, z = treeModel.worldCoordPoints([drawAt])
+                                x, y, z = oldTreeModel.worldCoordPoints([drawAt])
+                                drawAtInNew = treeModel.getPointByID(drawAt.id)
+                                if drawAtInNew is not None:
+                                    x, y, z = treeModel.worldCoordPoints([drawAtInNew])
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=sz)
 
 
