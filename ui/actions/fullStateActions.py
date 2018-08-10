@@ -19,6 +19,9 @@ class FullStateActions():
         self.history.pushState()
         localState = self.state.uiStates[localIdx]
         newPoint = localState.addPointToCurrentBranchAndSelect(location)
+        if newPoint is None:
+            # Points exist, but none selected. Skipping.
+            return
         newPointBranchID = None if newPoint.isRoot() else newPoint.parentBranch.id
 
         for i in range(localIdx + 1, len(self.state.uiStates)):
