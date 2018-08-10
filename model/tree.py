@@ -52,6 +52,10 @@ class Point():
             return 0 # Root is first
         return self.parentBranch.indexForPoint(self)
 
+    def isLastInBranch(self):
+        """Return whether this point is the terminal point in the branch."""
+        return self.nextPointInBranch() is None
+
     def nextPointInBranch(self, delta=1):
         """Walks a distance along the branch and returns the sibling."""
         if self.parentBranch is None:
@@ -65,7 +69,7 @@ class Point():
         else:
             return None
 
-    def flattenSubtreePoints(self, startIdx=0):
+    def flattenSubtreePoints(self):
         """Return all points downstream from this point."""
         if self.parentBranch is not None:
             return self.parentBranch.flattenSubtreePoints(startIdx=self.indexInParent())
@@ -75,6 +79,9 @@ class Point():
             points.extend(child.flattenSubtreePoints())
         return points
 
+    def subtreeContainsID(self, pointID):
+        """Whether the given point ID exists anywhere further down the tree."""
+        return pointID in [p.id for p in self.flattenSubtreePoints()]
 
 @attr.s
 class Branch():
@@ -105,12 +112,16 @@ class Branch():
         """Ordinal number of branch within the tree it is owned by."""
         return self._parentTree.branches.index(self)
 
-    def indexForPoint(self, pointTarget):
-        """Given a point, return how far along the branch it sits."""
+    def indexForPointID(self, pointID):
+        """Given a point ID, return how far along the branch it sits."""
         for idx, point in enumerate(self.points):
-            if point.id == pointTarget.id:
+            if point.id == pointID:
                 return idx
         return -1
+
+    def indexForPoint(self, pointTarget):
+        """Given a point, return how far along the branch it sits."""
+        return self.indexForPointID(pointTarget.id)
 
     def isEmpty(self):
         """Whether the branch has no points other than the branch point."""
@@ -169,6 +180,8 @@ class Branch():
 
     def setParentPoint(self, parentPoint):
         """Sets the parent point for this branch, and adds the branch to its parent's children."""
+        if self.parentPoint is not None and self in self.parentPoint.children:
+            self.parentPoint.children.remove(self) # Remove from previous parent first, if needed
         self.parentPoint = parentPoint
         self.parentPoint.children.append(self)
 
@@ -180,6 +193,10 @@ class Branch():
             for child in p.children:
                 points.extend(child.flattenSubtreePoints())
         return points
+
+    def subtreeContainsID(self, pointID):
+        """Whether the given point ID exists on this branch or subbranches down the tree."""
+        return pointID in [p.id for p in self.flattenSubtreePoints()]
 
     def worldLengths(self, fromIdx=0):
         """Returns world length of the branch, plus the length to the last branch point.
@@ -275,6 +292,40 @@ class Tree():
                 return pointToRemove.parentBranch.removePointLocally(pointToRemove)
         else:
             return None
+
+    def reparentPoint(self, childPoint, newParent, newBranchID=None):
+        """Changes a point (and its later siblings) to a new branch off the given parent."""
+        if childPoint.parentBranch is None:
+            # should not be allowed, skip
+            print ("Can't reparent the root! Ignoring...")
+            return None
+        oldBranch, newBranch = childPoint.parentBranch, newParent.parentBranch
+
+        if newParent.isLastInBranch() and not newParent.isRoot():
+            # Append the child point to the new parent's branch
+            atIdx = childPoint.indexInParent()
+            while len(oldBranch.points) > atIdx:
+                toMove = oldBranch.points[atIdx]
+                oldBranch.removePointLocally(toMove)
+                newBranch.addPoint(toMove)
+            return None
+        else:
+            # Otherwise, move a whole branch - creating a new one if needed
+            newBranch = childPoint.parentBranch
+            newID = None
+            atIdx = childPoint.indexInParent()
+
+            if atIdx > 0: # need to split the old branch
+                newID = newBranchID if newBranchID is not None else self._parentState._parent.nextBranchID()
+                newBranch = Branch(id=newID)
+                while len(oldBranch.points) > atIdx:
+                    toMove = oldBranch.points[atIdx]
+                    oldBranch.removePointLocally(toMove)
+                    newBranch.addPoint(toMove)
+                self.addBranch(newBranch)
+            newBranch.setParentPoint(newParent)
+            return newID
+
 
     def movePoint(self, pointID, newLocation, downstream=False):
         """Moves a point to a new loction, optionally also moving all downstream points by the same.

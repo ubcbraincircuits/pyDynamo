@@ -112,4 +112,8 @@ class DendriteCanvasActions():
             "Registration complete! Unregistered points shown in green, press 'h' to toggle hilight.", parent=self.canvas)
         msg.show()
         self.canvas.stackWindow.statusBar().clearMessage()
-        # self.canvas.stackWindow.repaint()
+
+    def startReplaceParent(self):
+        self.uiState.isMove = False
+        self.uiState.isReparenting = True
+        self.canvas.redraw()

@@ -37,6 +37,9 @@ class UIState():
     # Whether the current point is being moved (True) or just selected (False)
     isMoving = attr.ib(default=False)
 
+    # Whether the current point is being reparented (True) or just selected (False)
+    isReparenting = attr.ib(default=False)
+
     # UI Option for whether or not to show annotations.
     showAnnotations = attr.ib(default=False, metadata=SAVE_META)
 
@@ -98,6 +101,8 @@ class UIState():
                 self.currentPointID = None
                 self.currentBranchID = None
                 self.isMoving = False
+        self.isReparenting = False
+
 
     def addPointToCurrentBranchAndSelect(self, location, newPointID=None, newBranchID=None):
         newPoint = Point(self.maybeCreateNewID(newPointID), location)

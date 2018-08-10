@@ -57,6 +57,7 @@ class StackWindow(QtWidgets.QMainWindow):
         self.edit_menu = QtWidgets.QMenu('&Edit', self)
         self.edit_menu.addAction('Undo', self.undo, QtCore.Qt.CTRL + QtCore.Qt.Key_Z)
         self.edit_menu.addAction('Redo', self.redo, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_Z)
+        self.edit_menu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R)
         self.menuBar().addMenu(self.edit_menu)
         self.help_menu = QtWidgets.QMenu('&Help', self)
         self.menuBar().addSeparator()
@@ -100,6 +101,9 @@ class StackWindow(QtWidgets.QMainWindow):
 
     def redo(self):
         self.parent().updateUndoStack(isRedo=True, originWindow=self)
+
+    def reparent(self):
+        self.actionHandler.startReplaceParent()
 
     def keyPressEvent(self, event):
         try:
