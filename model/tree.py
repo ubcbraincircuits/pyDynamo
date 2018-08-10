@@ -65,6 +65,17 @@ class Point():
         else:
             return None
 
+    def flattenSubtreePoints(self, startIdx=0):
+        """Return all points downstream from this point."""
+        if self.parentBranch is not None:
+            return self.parentBranch.flattenSubtreePoints(startIdx=self.indexInParent())
+        # Root point, needs special logic
+        points = [self]
+        for child in self.children:
+            points.extend(child.flattenSubtreePoints())
+        return points
+
+
 @attr.s
 class Branch():
     """Single connected branch on a Tree"""
@@ -160,6 +171,15 @@ class Branch():
         """Sets the parent point for this branch, and adds the branch to its parent's children."""
         self.parentPoint = parentPoint
         self.parentPoint.children.append(self)
+
+    def flattenSubtreePoints(self, startIdx=0):
+        """Return all points on this branch and subbranches."""
+        points = []
+        for p in self.points[startIdx:]:
+            points.append(p)
+            for child in p.children:
+                points.extend(child.flattenSubtreePoints())
+        return points
 
     def worldLengths(self, fromIdx=0):
         """Returns world length of the branch, plus the length to the last branch point.
@@ -276,10 +296,7 @@ class Tree():
         """Returns all points in the tree, as a single list."""
         if self.rootPoint is None:
             return []
-        result = [self.rootPoint]
-        for branch in self.branches:
-            result.extend(branch.points)
-        return result
+        return self.rootPoint.flattenSubtreePoints()
 
     def closestPointTo(self, targetLocation, zFilter=False):
         """Given a position in the volume, find the point closest to it in image space.

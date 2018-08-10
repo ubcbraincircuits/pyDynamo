@@ -100,7 +100,7 @@ class DendriteCanvasActions():
             pointOld = self.uiState.parent().trees[windowIndex-1].rootPoint
 
         # Un-hilight old points
-        for p in self.uiState.parent().trees[windowIndex].flattenPoints():
+        for p in pointNew.flattenSubtreePoints():
             p.hilighted = False
 
         self.canvas.stackWindow.statusBar().showMessage("Registering...")
