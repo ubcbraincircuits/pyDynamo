@@ -36,7 +36,6 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     Rxy      -radius, in pixels, of field to be compared
     Rz       -radius, in z axis, of field to be compared
     """
-
     newTree = fullState.uiStates[id]._tree
     dLoc = (Rxy, Rxy, Rz)
 
@@ -75,16 +74,14 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     # the alignment is poor; give up!
     fTooBad = (fval is None) or fval > (max(I1,I2)*0.9)
     angleTooFar, xMoveTooFar, yMoveTooFar = True, True, True
+    print ("Registering %s...\t" % (point.id), end='')
     if fval is not None:
-        print ("%f, %f > %f, %f > %f, %f > %f" % (abs(angle), fval, (max(I1,I2)*0.9), abs(Bx[Rxy+1,Rxy+1]), Rxy * 0.8, abs(By[Rxy+1,Rxy+1]), Rxy * 0.8))
         xMoveTooFar = np.abs(Bx[Rxy+1,Rxy+1]) > (Rxy*0.8)
         yMoveTooFar = np.abs(By[Rxy+1,Rxy+1]) > (Rxy*0.8)
         angleTooFar = np.abs(angle) > 0.3
-    else:
-        print ("Couldn't fit, skipping")
 
     if (fTooBad or angleTooFar or xMoveTooFar or yMoveTooFar):
-        print ("Bad fit! larger window if %d < 25" % Rxy)
+        print ("bad fit! larger window if %d < 25" % Rxy)
         if Rxy < 25: # try a larger window
             recursiveAdjust(fullState, id, branch, point, pointref, 25, 4)
         else:
@@ -107,17 +104,17 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         score = delta * (6 + abs(dZ) ** 1.1)
         if bestZ is None or bestZScore > score:
             bestZ, bestZScore = dZ, score
-    # print ("Best Z is %d, delta = %d, score = %f" % (xyz[2] + bestZ, bestZ, bestZScore))
 
     shiftX = -By[Rxy, Rxy]
     shiftY = -Bx[Rxy, Rxy]
     shiftZ = bestZ # minIdx - Rz - 1
     shift = (shiftX, shiftY, shiftZ)
-    print('Point at (%.3f, %.3f, %.3f), best angle %.4f, moving branch by: (%.3f, %.3f, %.3f)' % \
-        (point.location[0] + 1, point.location[1] + 1, point.location[2] + 1, angle, shiftX, shiftY, shiftZ))
+    print ("moving by (%.3f, %.3f, %.3f)" % (shiftX, shiftY, shiftZ))
 
     # Point successfully registered to Pointref!
     point.id = pointref.id
+    if point.indexInParent() == 0 and point.parentBranch is not None and pointref.parentBranch is not None:
+        point.parentBranch.id = pointref.parentBranch.id
     _recursiveMoveBranch(newTree, branch, shift, fromPointIdx=point.indexInParent())
 
     nextPoint = point.nextPointInBranch()
@@ -128,16 +125,19 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         dZ = int(round(util.snapToRange(deltaXYZ[2], 2, 4) + 1))
         recursiveAdjust(fullState, id, branch, nextPoint, nextPointRef, dXY, dZ)
 
-    # TODO - match up branches properly
-    for branch in point.children:
-        for i in range(min(len(point.children), len(pointref.children))):
-            branch, branchRef = point.children[i], pointref.children[i]
-            if len(branch.points) > 0 and len(branchRef.points) > 0:
-                recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0])
-            else:
-                # At least one branch didn't have points. If the new branch did, set as unregsitered
-                if len(branch.points) > 0:
-                    _recursiveHilight(newTree, branch)
+    # TODO - match up branches more cleverly, not just based on order
+    for i, branch in enumerate(point.children):
+        if i >= len(pointref.children): # unmatched branch
+            _recursiveHilight(newTree, branch)
+            continue
+
+        branchRef = pointref.children[i]
+        if len(branch.points) == 0:
+            continue # empty branch, skip
+        elif len(branchRef.points) == 0:
+            _recursiveHilight(newTree, branch) # can't match to empty branch
+        else:
+            recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0])
 
 
 def _recursiveMoveBranch(tree, branch, shift, fromPointIdx=0):
