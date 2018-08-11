@@ -68,6 +68,7 @@ def lastPointWithLabelIdx(points, label):
             lastPointIdx = i
     return lastPointIdx
 
+# Sorted list of all branch IDs found in the given list of trees.
 def sortedBranchIDList(trees):
     ids = set()
     for tree in trees:
