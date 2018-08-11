@@ -1,5 +1,7 @@
 import numpy as np
 
+import util
+
 from analysis import addedSubtractedTransitioned, motility
 
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
@@ -20,6 +22,7 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
         self.options = opt
         np.set_printoptions(precision=3)
 
+        self.branchIDList = util.sortedBranchIDList(self.treeModels)
         _, self.added, self.subtracted, self.transitioned, _, _ = addedSubtractedTransitioned(
             self.treeModels,
             excludeAxon=opt.excludeAxon, excludeBasal=opt.excludeBasal,
@@ -62,7 +65,11 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
 
             # Draw filo for each branch:
             if treeIdx > 0:
-                for branchIdx, branch in enumerate(treeModel.branches):
+                oldTreeModel = self.treeModels[treeIdx - 1]
+
+                for branch in treeModel.branches:
+                    branchIdx = self.branchIDList.index(branch.id)
+
                     plot = True
                     if self.added[treeIdx-1][branchIdx]:
                         color, sz = ADDED_COLOR, self.filoLengths[treeIdx][branchIdx] * SZ_FACTOR
@@ -82,19 +89,24 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                             ax.scatter(x, y, z, c=color, s=sz)
 
                     # Show removed branches from last point:
-                    lastHasBranch = branchIdx < len(self.treeModels[treeIdx - 1].branches)
-                    if lastHasBranch and self.treeModels[treeIdx - 1].branches[branchIdx] is not None:
-                        for childPoint in self.treeModels[treeIdx - 1].branches[branchIdx].points:
+                    branchInLast = self.treeModels[treeIdx - 1].getBranchByID(branch.id)
+                    if branchInLast is not None:
+                        for childPoint in branchInLast.points:
                             retracted = 0
                             for childBranch in childPoint.children:
                                 if childBranch is None or len(childBranch.points) == 0:
                                     continue
+                                childBranchIdx = self.branchIDList.index(childBranch.id)
+
                                 firstPointID = childBranch.points[0].id
                                 inCurrentTree = self.treeModels[treeIdx].getPointByID(firstPointID) is not None
                                 if not inCurrentTree:
-                                    retracted += self.filoLengths[treeIdx - 1][childBranch.indexInParent()]
+                                    retracted += self.filoLengths[treeIdx - 1][childBranchIdx]
                             if retracted > 0:
-                                x, y, z = treeModel.worldCoordPoints([childPoint])
+                                x, y, z = oldTreeModel.worldCoordPoints([childPoint])
+                                childPointInNew = treeModel.getPointByID(childPoint.id)
+                                if childPointInNew is not None:
+                                    x, y, z = treeModel.worldCoordPoints([childPointInNew])
                                 # print ("extra retraction: " + str(retracted))
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
@@ -103,7 +115,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                             if drawAt is not None:
                                 # print ("extra subtraction: " + str(retracted))
                                 sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
-                                x, y, z = treeModel.worldCoordPoints([drawAt])
+                                x, y, z = oldTreeModel.worldCoordPoints([drawAt])
+                                drawAtInNew = treeModel.getPointByID(drawAt.id)
+                                if drawAtInNew is not None:
+                                    x, y, z = treeModel.worldCoordPoints([drawAtInNew])
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=sz)
 
 

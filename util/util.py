@@ -68,6 +68,13 @@ def lastPointWithLabelIdx(points, label):
             lastPointIdx = i
     return lastPointIdx
 
+# Sorted list of all branch IDs found in the given list of trees.
+def sortedBranchIDList(trees):
+    ids = set()
+    for tree in trees:
+        ids |= set([b.id for b in tree.branches])
+    return sorted(list(ids))
+
 # Utility for nicer formatting of the window, using index and just image file name.
 def createTitle(index, path):
     return "[%d] - %s" % (index + 1, os.path.basename(path))
