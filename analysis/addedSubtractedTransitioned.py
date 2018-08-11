@@ -20,7 +20,7 @@ def addedSubtractedTransitioned(
         filoDist (float): Maximum distance a branch can be for it to be considered a filo.
 
     Returns:
-    TODO
+        TODO
     """
 
     nTrees = len(trees)
@@ -59,7 +59,7 @@ def addedSubtractedTransitioned(
 
     return filoTypes, added, subtracted, transitioned, masterChanged, masterNodes
 
-# HACK : TODO: Migrate to ID-based results rather than index-based
+
 def _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, branchIdx, excludeAxon, excludeBasal, terminalDist, filoDist):
     branch = trees[treeIdx].getBranchByID(branchIDList[branchIdx])
     if branch is None:
@@ -94,8 +94,6 @@ def _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, br
                 continue # branch is not known? what?
 
             childBranchIdx = branchIDList.index(childBranch.id)
-
-
             childIsFilo, childLength = childBranch.isFilo(filoDist)
             if childIsFilo:
                 distPointToEnd = totalLength - cumulativeLengths[pointIdx]
