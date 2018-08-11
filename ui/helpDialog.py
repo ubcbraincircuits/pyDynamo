@@ -2,6 +2,8 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QDialog, QLabel, QMessageBox, QVBoxLayout
 
 HELP_MSG = """
+<table><tr><td>
+
 <h1>Mouse</h1>
 <h3>Clicking on a point...</h3>
 <ul>
@@ -21,7 +23,20 @@ HELP_MSG = """
   <li><b>Shift-Scroll</b> to zoom in and out.</li>
 </ul>
 
+</td><td>
+
 <h1>Shortcuts</h1>
+<h3>Drawing</h3>
+<ul>
+  <li><b>Q</b> to annotate a point</li>
+  <li><b>Ctrl-R</b> to replace the parent of a point (click next on the new parent)</li>
+  <li><b>L</b> to set landmarks that allow for aligning volumes</li>
+</ul>
+<h3>Analysis</h3>
+<ul>
+  <li><b>3</b> to open a 3d wire model of the current volume</li>
+  <li><b>M</b> to show motility plots for all volumes</li>
+</ul>
 <h3>Navigation</h3>
 <ul>
   <li><b>1</b> and <b>2</b> to move through the Z stacks</li>
@@ -34,13 +49,6 @@ HELP_MSG = """
   <li><b>6</b> to reset brightness to default</li>
   <li><b>7</b> and <b>8</b> to change the upper brightness limit</li>
 </ul>
-<h3>Analysis</h3>
-<ul>
-  <li><b>3</b> to open a 3d wire model of the current volume</li>
-  <li><b>M</b> to show motility plots for all volumes</li>
-  <li><b>Q</b> to annotate a point
-  <li><b>L</b> to set landmarks that allow for aligning volumes</li>
-</ul>
 <h3>View options</h3>
 <ul>
   <li><b>C</b> to change the displayed channel (if available)</li>
@@ -48,16 +56,19 @@ HELP_MSG = """
   <li><b>V</b> to show/hide points away from the current Z plane</li>
   <li><b>H</b> to show/hide hilighted points</li>
   <li><b>J</b> to cycle different line thicknesses</li>
+  <li><b>T</b> to tile all the open images on screen</li>
 </ul>
 <h3>Project</h3>
 <ul>
-  <li><b>Ctrl-S</b> to save the current data to file</li>
+  <li><b>Ctrl-S</b> to save the current data over its current file</li>
+  <li><b>Ctrl-Shift-S</b> to save the current data to a new file</li>
   <li><b>N</b> to add a new image stack</li>
-  <li><b>T</b> to tile all the open images on screen</li>
   <li><b>I</b> to import tree structure and locations from the previous stack to the current one</li>
   <li><b>Ctrl-I</b> to import tree structure and locations from an .SWC file</li>
   <li><b>R</b> to adjust the current branch locations based off the branch in the previous stack</li>
 </ul>
+
+</td></tr></table>
 """
 
 class HelpDialog(QDialog):

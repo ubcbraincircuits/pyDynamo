@@ -25,6 +25,7 @@ class DendritePainter():
     NODE_CIRCLE_BRUSH = QBrush(Qt.white)
     NODE_CIRCLE_SELECTED_BRUSH = QBrush(Qt.cyan)
     NODE_CIRCLE_MOVING_BRUSH = QBrush(Qt.red)
+    NODE_CIRCLE_REPARENTING_BRUSH = QBrush(Qt.blue)
     HILIGHTED_CIRCLE_BRUSH = QBrush(Qt.green)
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
@@ -73,7 +74,11 @@ class DendritePainter():
     def drawCircleThisZ(self, x, y, isSelected, isHilighted):
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
-            brushColor = self.NODE_CIRCLE_MOVING_BRUSH if self.uiState.isMoving else self.NODE_CIRCLE_SELECTED_BRUSH
+            brushColor = self.NODE_CIRCLE_SELECTED_BRUSH
+            if self.uiState.isMoving:
+                brushColor = self.NODE_CIRCLE_MOVING_BRUSH
+            elif self.uiState.isReparenting:
+                brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH 
         elif isHilighted and self.uiState.showHilighted:
             brushColor = self.HILIGHTED_CIRCLE_BRUSH
         self.p.setPen(self.NODE_CIRCLE_PEN)

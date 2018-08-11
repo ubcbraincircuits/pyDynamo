@@ -88,8 +88,14 @@ class DendriteVolumeCanvas(QWidget):
             if closestDist is None or closestDist >= nearDistWorldSize:
                 pointClicked = None
 
-            # Handle Right-click/ctrl first; either delete the point, or start a new branch.
-            if rightClick or ctrlPressed:
+            # Handle reparent first: either reparent, or cancel reparenting.
+            if self.uiState.isReparenting:
+                if pointClicked:
+                    self.fullActions.reparent(self.windowIndex, pointClicked)
+                else:
+                    self.uiState.isReparenting = False # Nothing clicked, cancel reparent action
+            # Next, Right-click/ctrl first; either delete the point, or start a new branch.
+            elif rightClick or ctrlPressed:
                 if pointClicked:
                     self.fullActions.deletePoint(self.windowIndex, pointClicked, laterStacks=shiftPressed)
                 else:

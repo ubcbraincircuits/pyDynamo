@@ -99,6 +99,36 @@ class FullStateActions():
         self.history.pushState()
         self.state.deleteLandmark(self.state.landmarkPointAt)
 
+    def reparent(self, localIdx, sourceParent):
+        self.history.pushState()
+        sourcePoint = self.state.uiStates[localIdx].currentPoint()
+        newBranchID = None
+
+        for i in range(len(self.state.uiStates)):
+            state = self.state.uiStates[i]
+            # Find the next down the branch to use as the reparented child...
+            childPoint = None
+            localSourcePoint = sourcePoint
+            while childPoint is None and localSourcePoint is not None:
+                childPoint = state._tree.getPointByID(localSourcePoint.id)
+                localSourcePoint = localSourcePoint.nextPointInBranch()
+            # ... and the previous parent up the branch to use as the new parent.
+            newParent = None
+            localSourceParent = sourceParent
+            while newParent is None and localSourceParent is not None:
+                newParent = state._tree.getPointByID(localSourceParent.id)
+                localSourceParent = localSourceParent.nextPointInBranch(delta=-1)
+
+            if childPoint is None or newParent is None:
+                continue # Ignore, need both points.
+
+            if childPoint.subtreeContainsID(newParent.id):
+                print ("Can't set that as the parent, it will cause a loop!")
+                return
+            newBranchID = state._tree.reparentPoint(childPoint, newParent, newBranchID)
+
+        self.state.uiStates[localIdx].isReparenting = False
+
     def calculateBestOrientation(self):
         X0, Y0, Z0 = self.state.trees[0].worldCoordPoints(self.state.landmarks[0])
 
