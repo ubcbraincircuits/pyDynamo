@@ -135,7 +135,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         ctrlPressed = (event.modifiers() & Qt.ControlModifier)
         shftPressed = (event.modifiers() & Qt.ShiftModifier)
 
-        print ("DYNAMO key %d" % (key))
+        # print ("DYNAMO key %d" % (key))
 
         if (key == ord('J')):
             self.fullState.toggleLineWidth()
