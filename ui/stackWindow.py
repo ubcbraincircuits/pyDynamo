@@ -169,11 +169,16 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.actionHandler.registerImages(self.windowIndex)
                 self.redraw()
             elif (key == QtCore.Qt.Key_Delete):
-                self.fullActions.deletePoint(self.windowIndex, self.uiState.currentPoint(), laterStacks=shftPressed)
-                self.parent().redrawAllStacks() # HACK - auto redraw on change
+                toDelete = self.uiState.currentPoint()
+                if toDelete is None:
+                    print ("Need to select a point before you can delete...")
+                else:
+                    self.fullActions.deletePoint(self.windowIndex, toDelete, laterStacks=shftPressed)
+                    self.parent().redrawAllStacks() # HACK - auto redraw on change
         except Exception as e:
             print ("Whoops - error on keypress: " + str(e))
-            raise # POIUY
+            # TODO: add this back in if the app feels stable?
+            # raise
 
     def getSWCFilePath(self):
         filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
