@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import traceback
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -177,6 +178,7 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.parent().redrawAllStacks() # HACK - auto redraw on change
         except Exception as e:
             print ("Whoops - error on keypress: " + str(e))
+            traceback.print_exc()
             # TODO: add this back in if the app feels stable?
             # raise
 

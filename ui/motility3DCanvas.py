@@ -67,6 +67,9 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
             if treeIdx > 0:
                 oldTreeModel = self.treeModels[treeIdx - 1]
 
+                # For debugging puposes, maybe remove?
+                growCount, shrinkCount = 0, 0
+
                 for branch in treeModel.branches:
                     branchIdx = self.branchIDList.index(branch.id)
 
@@ -78,8 +81,12 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                         plot = False # Don't draw transitions ?!
                     else:
                         mot = self.motility[treeIdx-1][branchIdx]
-                        if abs(mot) > MIN_MOTILITY:
+                        if abs(mot) > MIN_MOTILITY and len(branch.points) > 0:
                             color = GROW_COLOR if mot > 0 else SHRINK_COLOR
+                            if mot > 0:
+                                growCount += 1
+                            else:
+                                shrinkCount += 1
                             sz = abs(mot) * SZ_FACTOR
                         else:
                             plot = False
@@ -121,6 +128,13 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                     x, y, z = treeModel.worldCoordPoints([drawAtInNew])
                                 ax.scatter(x, y, z, c=GONE_COLOR, s=sz)
 
+                # For debugging puposes, maybe remove?
+                print ("Stack #%d -> #%d" % (treeIdx, treeIdx + 1))
+                print ("  - #Added        = %d" % np.sum(self.added[treeIdx-1]))
+                print ("  - #Subtracted   = %d" % np.sum(self.subtracted[treeIdx-1]))
+                print ("  - #Transitioned = %d" % np.sum(self.transitioned[treeIdx-1]))
+                print ("  - #Grown        = %d" % growCount)
+                print ("  - #Shrunk       = %d" % shrinkCount)
 
             # And finally draw the soma as a big sphere (if present):
             if treeModel.rootPoint is not None:
