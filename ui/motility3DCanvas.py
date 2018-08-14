@@ -14,6 +14,7 @@ TRANS_COLOR =  (0.00, 0.00, 0.00, 0.0) # Not shown ?! TODO: verify
 GROW_COLOR =   (0.00, 1.00, 1.00, 0.75)
 SHRINK_COLOR = (1.00, 0.00, 1.00, 0.75)
 GONE_COLOR   = (1.00, 0.00, 0.00, 0.75)
+YELLOW = (1.00, 1.00, 0.00, 0.75)
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Motility3DCanvas(BaseMatplotlibCanvas):
@@ -115,10 +116,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                 if childPointInNew is not None:
                                     x, y, z = treeModel.worldCoordPoints([childPointInNew])
                                 # print ("extra retraction: " + str(retracted))
-                                ax.scatter(x, y, z, c=GONE_COLOR, s=(retracted * SZ_FACTOR))
+                                ax.scatter(x, y, z, c=YELLOW, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
                             # Draw at the parent of the subtracted branch, not the end point.
-                            drawAt = self.treeModels[treeIdx - 1].branches[branchIdx].parentPoint
+                            drawAt = branchInLast.parentPoint
                             if drawAt is not None:
                                 # print ("extra subtraction: " + str(retracted))
                                 sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
