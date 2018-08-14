@@ -53,13 +53,26 @@ class StackWindow(QtWidgets.QMainWindow):
         # Top level menu:
         self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('&Project Settings...', self.openSettings, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_P)
+        self.file_menu.addAction('Import from previous stack', self.importFromPreviousStack, QtCore.Qt.Key_I)
+        self.file_menu.addAction('Import from SWC', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
         self.file_menu.addAction('Quit &Window', self.fileQuit, QtCore.Qt.CTRL + QtCore.Qt.Key_W)
         self.menuBar().addMenu(self.file_menu)
+
         self.edit_menu = QtWidgets.QMenu('&Edit', self)
         self.edit_menu.addAction('Undo', self.undo, QtCore.Qt.CTRL + QtCore.Qt.Key_Z)
         self.edit_menu.addAction('Redo', self.redo, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_Z)
+        self.edit_menu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R)
         self.edit_menu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R)
         self.menuBar().addMenu(self.edit_menu)
+
+        self.edit_menu = QtWidgets.QMenu('&View', self)
+        self.edit_menu.addAction('Zoom In', self.zoomIn, QtCore.Qt.Key_X)
+        self.edit_menu.addAction('Zoom Out', self.zoomOut, QtCore.Qt.Key_Z)
+        self.edit_menu.addAction('View 3D Neuron', self.view3D, QtCore.Qt.Key_3)
+        self.edit_menu.addAction('Show/Hide all branches', self.toggleAllBranches, QtCore.Qt.Key_V)
+        self.edit_menu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H)
+        self.menuBar().addMenu(self.edit_menu)
+
         self.help_menu = QtWidgets.QMenu('&Help', self)
         self.menuBar().addSeparator()
         self.menuBar().addMenu(self.help_menu)
@@ -103,8 +116,39 @@ class StackWindow(QtWidgets.QMainWindow):
     def redo(self):
         self.parent().updateUndoStack(isRedo=True, originWindow=self)
 
+    def register(self):
+        self.actionHandler.registerImages(self.windowIndex)
+        self.redraw()
+
     def reparent(self):
         self.actionHandler.startReplaceParent()
+
+    def zoomIn(self):
+        self.actionHandler.zoom(-0.2) # ~= ln(0.8) as used in matlab
+
+    def zoomOut(self):
+        self.actionHandler.zoom(0.2)
+
+    def view3D(self):
+        self.actionHandler.launch3DView()
+
+    def toggleAllBranches(self):
+        self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
+        self.redraw()
+
+    def toggleHilight(self):
+        self.dendrites.uiState.showHilighted = not self.dendrites.uiState.showHilighted
+        self.redraw()
+
+    def importFromPreviousStack(self):
+        self.actionHandler.importPointsFromLastStack(self.windowIndex)
+        self.redraw()
+
+    def importFromSWC(self):
+        filePath = self.getSWCFilePath()
+        if filePath is not None and filePath is not '':
+            self.actionHandler.importPointsFromSWC(self.windowIndex, filePath)
+            self.redraw()
 
     def keyPressEvent(self, event):
         try:
@@ -115,9 +159,7 @@ class StackWindow(QtWidgets.QMainWindow):
 
             # TODO: add menu items for some of these too.
             key = event.key()
-            if (key == ord('3')):
-                self.actionHandler.launch3DView()
-            elif (key == ord('4')):
+            if (key == ord('4')):
                 self.actionHandler.changeBrightness(-1, 0)
             elif (key == ord('5')):
                 self.actionHandler.changeBrightness(1, 0)
@@ -127,10 +169,6 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.actionHandler.changeBrightness(0, -1)
             elif (key == ord('8')):
                 self.actionHandler.changeBrightness(0, 1)
-            elif (key == ord('X')):
-                self.actionHandler.zoom(-0.2) # ~= ln(0.8) as used in matlab
-            elif (key == ord('Z')):
-                self.actionHandler.zoom(0.2)
             elif (key == ord('W')):
                 self.actionHandler.pan(0, -1)
             elif (key == ord('A')):
@@ -150,25 +188,8 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.dendrites.uiState.showAnnotations = True
                     self.dendrites.uiState.showIDs = False
                 self.redraw()
-            elif (key == ord('V')):
-                self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
-                self.redraw()
-            elif (key == ord('H')):
-                self.dendrites.uiState.showHilighted = not self.dendrites.uiState.showHilighted
-                self.redraw()
             elif (key == ord('Q')):
                 self.actionHandler.getAnnotation(self)
-            elif (key == ord('I')):
-                if ctrlPressed:
-                    filePath = self.getSWCFilePath()
-                    if filePath is not None:
-                        self.actionHandler.importPointsFromSWC(self.windowIndex, filePath)
-                else:
-                    self.actionHandler.importPointsFromLastStack(self.windowIndex)
-                self.redraw()
-            elif (key == ord('R')):
-                self.actionHandler.registerImages(self.windowIndex)
-                self.redraw()
             elif (key == QtCore.Qt.Key_Delete):
                 toDelete = self.uiState.currentPoint()
                 if toDelete is None:
