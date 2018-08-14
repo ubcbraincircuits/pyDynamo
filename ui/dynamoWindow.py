@@ -11,7 +11,6 @@ import time
 from .actions import FullStateActions
 from .common import cursorPointer
 from .initialMenu import InitialMenu
-from .motility3DViewWindow import Motility3DViewWindow
 from .settingsWindow import SettingsWindow
 from .stackListWindow import StackListWindow
 from .stackWindow import StackWindow
@@ -135,20 +134,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         ctrlPressed = (event.modifiers() & Qt.ControlModifier)
         shftPressed = (event.modifiers() & Qt.ShiftModifier)
 
-        # print ("DYNAMO key %d" % (key))
-
-        if (key == ord('J')):
-            self.fullState.toggleLineWidth()
-            self.redrawAllStacks()
-            return True
-        elif (key == ord('T')):
-            self.focusFirstOpenStackWindow()
-            tileFigs(self.stackWindows)
-            return True
-        elif (key == ord('N')):
-            self.openFilesAndAppendStacks()
-            return True
-        elif (key == ord('1')):
+        if (key == ord('1')):
             self.fullActions.changeZAxis(1)
             self.redrawAllStacks()
             return True
@@ -161,27 +147,6 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 self.calcLandmarkRotation()
             self.fullState.toggleLandmarkMode()
             self.redrawAllStacks()
-            return True
-        elif (key == ord('C')):
-            if shftPressed:
-                self.fullState.useColor = not self.fullState.useColor
-            else:
-                self.fullActions.nextChannel()
-            self.redrawAllStacks()
-            return True
-        elif (key == ord('M')):
-            opt = self.fullState.projectOptions.motilityOptions
-            viewWindow = Motility3DViewWindow(self, self.fullState.trees, opt)
-            viewWindow.show()
-            return True
-        elif (key == ord('S') and ctrlPressed):
-            if shftPressed:
-                self.saveToNewFile()
-            else:
-                self.saveToFile()
-            return True
-        elif (key == ord('Z') and ctrlPressed):
-            self.updateUndoStack(isRedo=shftPressed, originWindow=childWindow)
             return True
 
         # Handle these only while doing landmarks:
