@@ -7,14 +7,14 @@ from analysis import addedSubtractedTransitioned, motility
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 from .dendritePainter import colorForBranch
 
-MIN_MOTILITY = 0.1
-GREY_COLOUR =  (0.75, 0.75, 0.75, 1.0)
-ADDED_COLOR =  (0.00, 1.00, 0.00, 0.75)
-TRANS_COLOR =  (0.00, 0.00, 0.00, 0.0) # Not shown ?! TODO: verify
-GROW_COLOR =   (0.00, 1.00, 1.00, 0.75)
-SHRINK_COLOR = (1.00, 0.00, 1.00, 0.75)
-GONE_COLOR   = (1.00, 0.00, 0.00, 0.75)
-YELLOW = (1.00, 1.00, 0.00, 0.75)
+MIN_MOTILITY  = 0.1
+GREY_COLOUR   = (0.75, 0.75, 0.75, 1.00)
+ADDED_COLOR   = (0.00, 1.00, 0.00, 0.75)
+TRANS_COLOR   = (0.00, 0.00, 0.00, 0.00) # Not shown ?! TODO: verify
+GROW_COLOR    = (0.00, 1.00, 1.00, 0.75)
+SHRINK_COLOR  = (1.00, 0.00, 1.00, 0.75)
+GONE_COLOR    = (1.00, 0.00, 0.00, 0.75)
+RETRACT_COLOR = (1.00, 1.00, 0.00, 0.75)
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Motility3DCanvas(BaseMatplotlibCanvas):
@@ -116,7 +116,7 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                 if childPointInNew is not None:
                                     x, y, z = treeModel.worldCoordPoints([childPointInNew])
                                 # print ("extra retraction: " + str(retracted))
-                                ax.scatter(x, y, z, c=YELLOW, s=(retracted * SZ_FACTOR))
+                                ax.scatter(x, y, z, c=RETRACT_COLOR, s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
                             # Draw at the parent of the subtracted branch, not the end point.
                             drawAt = branchInLast.parentPoint
