@@ -1,0 +1,20 @@
+.img-inline {
+  display: flex;
+}
+
+.img-inline .figure {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  align-items: center;
+}
+
+.img-inline img {
+  /*width: 90%;*/
+}
+
+.img-inline p {
+  width: 90%;
+  text-align: center;
+}

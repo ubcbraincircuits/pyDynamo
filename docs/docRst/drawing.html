@@ -28,6 +28,8 @@
   
 
   
+    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
 
   
     <link rel="top" title="PyDynamo 0.1 documentation" href="../index.html"/>
@@ -86,7 +88,10 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stacks.html">Stacks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Drawing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#moving">Moving</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reparenting">Reparenting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#landmarking">Landmarking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other">Other</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis methods</a></li>
@@ -137,9 +142,88 @@
             
   <div class="section" id="drawing">
 <h1>Drawing<a class="headerlink" href="#drawing" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="options">
-<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
-<p>TODO</p>
+<p>First, click anywhere to add the initial point to your stack. This should be placed at the soma.</p>
+<div class="figure align-center">
+<img alt="../_images/initialPoint.png" src="../_images/initialPoint.png" />
+</div>
+<p>Next, you can click into empty space to continue the current branch into that area.
+Make sure to also change Z-stack (scroll-wheel, or buttons 1 &amp; 2) to place it in the right spot.</p>
+<div class="figure align-center">
+<img alt="../_images/continueBranch.png" src="../_images/continueBranch.png" />
+</div>
+<p>New branches can be made by selecting the branch point, then right-clicking the new position,
+or clicking while holding Ctrl:</p>
+<div class="img-inline container">
+<div class="figure" id="id1">
+<img alt="../_images/selectPoint.png" src="../_images/selectPoint.png" />
+<p class="caption"><span class="caption-text">First select a point...</span></p>
+</div>
+<div class="figure" id="id2">
+<img alt="../_images/newBranch.png" src="../_images/newBranch.png" />
+<p class="caption"><span class="caption-text">...then Right/Ctrl-click to create a point on a new branch</span></p>
+</div>
+</div>
+<p>Similarly, new points can be added mid-branch by first selecting a neighboring point on that branch,
+then middle-clicking the new position, or clicking while holding Shift:</p>
+<div class="img-inline container">
+<div class="figure" id="id3">
+<img alt="../_images/selectPoint.png" src="../_images/selectPoint.png" />
+<p class="caption"><span class="caption-text">First select a point...</span></p>
+</div>
+<div class="figure" id="id4">
+<img alt="../_images/midBranch.png" src="../_images/midBranch.png" />
+<p class="caption"><span class="caption-text">...then Middle/Shift-click to create a point mid-branch</span></p>
+</div>
+</div>
+<div class="section" id="moving">
+<h2>Moving<a class="headerlink" href="#moving" title="Permalink to this headline">¶</a></h2>
+<p>To move a point, first middle-click (or shift-click) a point, which will turn it red. Next, click
+on the new location to move it to. If you want to move all downstream points, hold shift at the same time.</p>
+<div class="img-inline container">
+<div class="figure" id="id5">
+<img alt="../_images/movePoint1.png" src="../_images/movePoint1.png" />
+<p class="caption"><span class="caption-text">Shift-click to begin moving...</span></p>
+</div>
+<div class="figure" id="id6">
+<img alt="../_images/movePoint2.png" src="../_images/movePoint2.png" />
+<p class="caption"><span class="caption-text">...then click to move, optionally holding shift to move others.</span></p>
+</div>
+</div>
+</div>
+<div class="section" id="reparenting">
+<h2>Reparenting<a class="headerlink" href="#reparenting" title="Permalink to this headline">¶</a></h2>
+<p>If a point is attached to the wrong parent, this can be fixed. First, select the point, then press
+Ctrl-R to start the reparenting, which will turn it blue. Next, click the new parent.</p>
+<div class="img-inline container">
+<div class="figure" id="id7">
+<img alt="../_images/reparent1.png" src="../_images/reparent1.png" />
+<p class="caption"><span class="caption-text">Shift-click to begin moving...</span></p>
+</div>
+<div class="figure" id="id8">
+<img alt="../_images/reparent2.png" src="../_images/reparent2.png" />
+<p class="caption"><span class="caption-text">...then click to move, optionally holding shift to move others.</span></p>
+</div>
+</div>
+</div>
+<div class="section" id="landmarking">
+<h2>Landmarking<a class="headerlink" href="#landmarking" title="Permalink to this headline">¶</a></h2>
+<p>TODO: Ignore this feature for now.</p>
+</div>
+<div class="section" id="other">
+<h2>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h2>
+<p>Multiple other drawing options are available through key commands.
+These are all listed in a help dialog (shortcut F1), and includes:</p>
+<ul class="simple">
+<li>W/A/S/D to pan around the image</li>
+<li>1/2 to change current Z stack</li>
+<li>X/Z to zoom in and out</li>
+<li>4/5 to change lower brightness limits, 7/8 to change upper, and 6 to reset.</li>
+<li>C to change displayed channel. Shift-C to use color to draw the image.</li>
+<li>F to toggle showing annotations / IDs / nothing</li>
+<li>V to toggle showing branches away from the current Z stack.</li>
+<li>H to toggle showing hilights.</li>
+<li>J to rotate through different line thicknesses.</li>
+</ul>
 </div>
 </div>
 
