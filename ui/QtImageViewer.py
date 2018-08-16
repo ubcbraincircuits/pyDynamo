@@ -151,11 +151,12 @@ class QtImageViewer(QGraphicsView):
     def mouseMoveEvent(self, event):
         QGraphicsView.mouseMoveEvent(self, event)
 
+        fullState = self.parentView.uiState.parent()
         scenePos = self.mapToScene(event.pos())
-        location = (scenePos.x(), scenePos.y(), self.parentView.uiState.parent().zAxisAt * 1.0)
+        location = (scenePos.x(), scenePos.y(), fullState.zAxisAt * 1.0)
         pointClicked = self.parentView.pointNearPixel(scenePos.x(), scenePos.y())
         closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
-        nearDistWorldSize = self.toSceneDist(DendritePainter.NODE_CIRCLE_CLICK_DIAMETER_PX)
+        nearDistWorldSize = self.toSceneDist(fullState.closeToCirclePx())
         mouseOverPoint = (closestDist is not None and closestDist <= nearDistWorldSize)
         self.viewport().setCursor(Qt.OpenHandCursor if mouseOverPoint else Qt.ArrowCursor)
 

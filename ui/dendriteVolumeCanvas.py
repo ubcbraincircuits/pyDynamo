@@ -84,7 +84,8 @@ class DendriteVolumeCanvas(QWidget):
 
             pointClicked = self.pointNearPixel(location[0], location[1])
             closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
-            nearDistWorldSize = self.imgView.toSceneDist(DendritePainter.NODE_CIRCLE_CLICK_DIAMETER_PX)
+
+            nearDistWorldSize = self.imgView.toSceneDist(self.uiState.parent().closeToCircleDist())
             if closestDist is None or closestDist >= nearDistWorldSize:
                 pointClicked = None
 

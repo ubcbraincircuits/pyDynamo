@@ -90,4 +90,4 @@ These are all listed in a help dialog (shortcut F1), and includes:
 * F to toggle showing annotations / IDs / nothing
 * V to toggle showing branches away from the current Z stack.
 * H to toggle showing hilights.
-* J to rotate through different line thicknesses.
+* J to rotate through different line thicknesses, Shift-J for circle size.

@@ -44,6 +44,9 @@ class FullState:
     # Shared UI Option for dendrite line width
     lineWidth = attr.ib(default=3)
 
+    # Shared UI Option for diameter of point circles
+    dotSize = attr.ib(default=5)
+
     # Keep track of the ID for the next point created, used for making more unique identifiers.
     _nextPointID = 0
 
@@ -83,6 +86,12 @@ class FullState:
             self.lineWidth = 1
         else:
             self.lineWidth += 1
+
+    def toggleDotSize(self):
+        if self.dotSize == 9:
+            self.dotSize = 3
+        else:
+            self.dotSize += 2
 
     def changeZAxis(self, delta):
         self.zAxisAt = snapToRange(self.zAxisAt + delta, 0, self.volumeSize[1] - 1)
@@ -157,3 +166,7 @@ class FullState:
         while len(self.landmarks[treeIndex]) <= self.landmarkPointAt:
             self.landmarks[treeIndex].append(None)
         self.landmarks[treeIndex][self.landmarkPointAt] = location
+
+    def closeToCirclePx(self):
+        """Scales a circle size by a buffer around it to allow clicking near."""
+        return self.dotSize * 1.2

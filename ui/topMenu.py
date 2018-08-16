@@ -35,7 +35,8 @@ class TopMenu():
         viewMenu.addAction('View 3D Neuron', self.view3D, QtCore.Qt.Key_3)
         viewMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
         viewMenu.addSeparator()
-        viewMenu.addAction('Toggle line width', self.toggleLineWidth, QtCore.Qt.Key_J)
+        viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J)
+        viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J)
         viewMenu.addAction('Change channel', self.changeChannel, QtCore.Qt.Key_C)
         viewMenu.addAction('Turn on/off colours', self.toggleColor, QtCore.Qt.SHIFT + QtCore.Qt.Key_C)
         viewMenu.addAction('Show/Hide all branches', self.toggleAllBranches, QtCore.Qt.Key_V)
@@ -111,8 +112,12 @@ class TopMenu():
         opt = parent.fullState.projectOptions.motilityOptions
         Motility3DViewWindow(parent, parent.fullState.trees, opt).show()
 
-    def toggleLineWidth(self):
+    def toggleLineSize(self):
         self._global().fullState.toggleLineWidth()
+        self._global().redrawAllStacks()
+
+    def toggleDotSize(self):
+        self._global().fullState.toggleDotSize()
         self._global().redrawAllStacks()
 
     def changeChannel(self):
