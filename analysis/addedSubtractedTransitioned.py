@@ -43,7 +43,12 @@ def addedSubtractedTransitioned(
 
     for treeIdx, tree in enumerate(trees):
         if trees[treeIdx] is not None and len(trees[treeIdx].branches) > 0: # Skip empty trees
-            _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, 0, excludeAxon, excludeBasal, terminalDist, filoDist)
+            for branch in trees[treeIdx].rootPoint.children:
+                branchIdx = branchIDList.index(branch.id)
+                _recursiveFiloTypes(
+                    branchIDList, filoTypes, masterNodes, trees, treeIdx, branchIdx,
+                    excludeAxon, excludeBasal, terminalDist, filoDist
+                )
 
     filoExists = (filoTypes > FiloType.ABSENT)
     filos = filoExists & (filoTypes < FiloType.BRANCH_ONLY) # NOTE: brackets needed for numpy precendence
@@ -81,6 +86,7 @@ def _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, br
     # Walk down each child in turn:
     totalLength, totalLengthToLastBranch = branch.worldLengths()
     cumulativeLengths = branch.cumulativeWorldLengths()
+    forceInterstitial = False
     for pointIdx, point in enumerate(branch.points):
         if len(point.children) == 0:
             continue # Skip childless points
