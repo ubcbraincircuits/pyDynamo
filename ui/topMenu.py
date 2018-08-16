@@ -124,11 +124,11 @@ class TopMenu():
         self._global().redrawAllStacks()
 
     def toggleAllBranches(self):
-        self.dendrites.uiState.drawAllBranches = not self.dendrites.uiState.drawAllBranches
+        self.stackWindow.uiState.drawAllBranches = not self.stackWindow.uiState.drawAllBranches
         self.redraw()
 
     def toggleHilight(self):
-        self.dendrites.uiState.showHilighted = not self.dendrites.uiState.showHilighted
+        self.stackWindow.uiState.showHilighted = not self.stackWindow.uiState.showHilighted
         self.redraw()
 
     def tileFigs(self):
@@ -140,7 +140,7 @@ class TopMenu():
         self._local().showHotkeys()
 
     # Misc:
-    def redraw():
+    def redraw(self):
         self.stackWindow.redraw()
 
     def getSWCFilePath(self):
