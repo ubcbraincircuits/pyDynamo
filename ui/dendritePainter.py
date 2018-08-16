@@ -54,6 +54,8 @@ class DendritePainter():
     def drawBranchLines(self, branch):
         for i in range(len(branch.points)):
             previousPoint = branch.parentPoint if i == 0 else branch.points[i - 1]
+            if previousPoint is None:
+                continue # In theory should not get triggered, but added just in case.
             lastX, lastY, lastZ = self.zoomedLocation(previousPoint.location)
             thisX, thisY, thisZ = self.zoomedLocation(branch.points[i].location)
             linePen = self.getLinePen(lastZ, thisZ)
@@ -78,7 +80,7 @@ class DendritePainter():
             if self.uiState.isMoving:
                 brushColor = self.NODE_CIRCLE_MOVING_BRUSH
             elif self.uiState.isReparenting:
-                brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH 
+                brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH
         elif isHilighted and self.uiState.showHilighted:
             brushColor = self.HILIGHTED_CIRCLE_BRUSH
         self.p.setPen(self.NODE_CIRCLE_PEN)
