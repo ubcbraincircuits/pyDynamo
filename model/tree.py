@@ -245,9 +245,9 @@ class Tree():
     """UI State this belongs to."""
 
     # HACK - make faster, index points by ID
-    def getPointByID(self, pointID):
+    def getPointByID(self, pointID, includeDisconnected=False):
         """Given the ID of a point, find the point object that matches."""
-        for point in self.flattenPoints():
+        for point in self.flattenPoints(includeDisconnected):
             if point.id == pointID:
                 return point
         return None
@@ -343,11 +343,17 @@ class Tree():
             # Non-recursive, so just move this one point:
             pointToMove.location = newLocation
 
-    def flattenPoints(self):
+    def flattenPoints(self, includeDisconnected=False):
         """Returns all points in the tree, as a single list."""
         if self.rootPoint is None:
             return []
-        return self.rootPoint.flattenSubtreePoints()
+        if not includeDisconnected:
+            return self.rootPoint.flattenSubtreePoints()
+        # Use this version when the parent/child tree structure hasn't been set up:
+        points = [self.rootPoint]
+        for b in self.branches:
+            points.extend(b.points)
+        return points
 
     def closestPointTo(self, targetLocation, zFilter=False):
         """Given a position in the volume, find the point closest to it in image space.
@@ -357,7 +363,7 @@ class Tree():
         :returns: Point object of point closest to the target location."""
         closestDist, closestPoint = None, None
         for point in self.flattenPoints():
-            if zFilter and abs(point.location[2] - targetLocation[2]) > 1.0:
+            if zFilter and round(point.location[2]) != round(targetLocation[2]):
                 continue
             dist = util.deltaSz(targetLocation, point.location)
             if closestDist is None or dist < closestDist:
@@ -365,7 +371,6 @@ class Tree():
         return closestPoint
 
     def closestPointToWorldLocation(self, targetWorldLocation):
-        print ("Closest to %s" % (str(targetWorldLocation)))
         """Given a position in world space, find the point closest to it in world space.
 
         :param targetWorldLocation: (x, y, z) location tuple.
@@ -374,9 +379,7 @@ class Tree():
         allPoints = self.flattenPoints()
         allX, allY, allZ = self.worldCoordPoints(allPoints)
         for point, loc in zip(allPoints, zip(allX, allY, allZ)):
-        # for i in range(len(allPoints
             dist = util.deltaSz(targetWorldLocation, loc) # (allX[i], allY[i], allZ[i]))
-            # print ("Point %s, at %s, world loc %s, dist %f" %(point.id, str(point.location), str(loc), dist))
             if closestDist is None or dist < closestDist:
                 closestDist, closestPoint = dist, point #allPoints[i]
         return closestPoint
@@ -411,16 +414,17 @@ class Tree():
                 self._recursiveMovePointDelta(point.parentBranch.points[nextIdx], delta)
 
     def clearAndCopyFrom(self, otherTree, idMaker):
-        pointIDMap = {}
-        self.rootPoint = _clonePoint(otherTree.rootPoint, idMaker, pointIDMap)
+        pointMap = {}
+        self.rootPoint = _clonePoint(otherTree.rootPoint, idMaker, pointMap)
         for branch in otherTree.branches:
-            self.addBranch(_cloneBranch(branch, idMaker, pointIDMap))
+            self.addBranch(_cloneBranch(branch, idMaker, pointMap))
         for newBranch, oldBranch in zip(self.branches, otherTree.branches):
             if oldBranch.parentPoint is not None:
-                assert oldBranch.parentPoint.id in pointIDMap
-                newParent = self.getPointByID(pointIDMap[oldBranch.parentPoint.id])
-                assert newParent is not None
-                newBranch.setParentPoint(newParent)
+                assert oldBranch.parentPoint.id in pointMap
+                newBranch.setParentPoint(pointMap[oldBranch.parentPoint.id])
+            if oldBranch.reparentTo is not None:
+                assert oldBranch.reparentTo.id in pointMap
+                newBranch.reparentTo = pointMap[oldBranch.reparentTo.id]
 
 ### Branch utilities
 
@@ -443,21 +447,19 @@ def _lastPointWithLabel(points, label):
 
 ### Cloning utilities
 
-def _clonePoint(point, idMaker, pointIDMap):
-    assert point.id not in pointIDMap
+def _clonePoint(point, idMaker, pointMap):
+    assert point.id not in pointMap
     newID = point.id if idMaker is None else idMaker.nextPointID()
-    pointIDMap[point.id] = newID
     # NOTE: SWC point ID can be stored here too if needed.
-    return Point(id=newID, location=point.location)
+    newPoint = Point(id=newID, location=point.location)
+    pointMap[point.id] = newPoint
+    return newPoint
 
-def _cloneBranch(branch, idMaker, pointIDMap):
-    assert branch.reparentTo is None or branch.reparentTo in pointIDMap
-    reparent = None if branch.reparentTo is None else pointIDMap[branch.reparentTo]
-
+def _cloneBranch(branch, idMaker, pointMap):
     newID = branch.id if idMaker is None else idMaker.nextBranchID()
-    b = Branch(id=newID, reparentTo=reparent)
+    b = Branch(id=newID)
     for point in branch.points:
-        b.addPoint(_clonePoint(point, idMaker, pointIDMap))
+        b.addPoint(_clonePoint(point, idMaker, pointMap))
     return b
 
 
@@ -468,12 +470,12 @@ def _cloneBranch(branch, idMaker, pointIDMap):
 def printPoint(tree, point, pad="", isFirst=False):
     print (pad + ("-> " if isFirst else "   ") + str(point))
     pad = pad + "   "
-    for branch in tree.branches:
+    for branch in point.children:
         if branch.parentPoint == point:
             printBranch(tree, branch, pad)
 
 def printBranch(tree, branch, pad=""):
-    if branch.points[0] == branch.parentPoint:
+    if len(branch.points) > 0 and branch.points[0] == branch.parentPoint:
         print ("BRANCH IS OWN PARENT? :(")
         return
     print (pad + "-> Branch " + branch.id + " = ")
