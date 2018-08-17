@@ -88,7 +88,7 @@ def indexTree(tree):
 
         # Replace local clone of point with proper reference
         if parent is not None: # Not sure what none signifies...
-            properParent = tree.getPointByID(parent.id)
+            properParent = tree.getPointByID(parent.id, includeDisconnected=True)
             if properParent is not None:
                 if branch.reparentTo is not None:
                     branch.reparentTo = properParent
