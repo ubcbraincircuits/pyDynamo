@@ -149,7 +149,7 @@ class TopMenu():
         self.stackWindow.redraw()
 
     def getSWCFilePath(self):
-        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self.stackWindow,
             "Import SWC file", "", "SWC file (*.swc)"
         )
         return filePath
