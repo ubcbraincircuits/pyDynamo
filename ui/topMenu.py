@@ -78,7 +78,7 @@ class TopMenu():
         filePath = getOpenFileName(self.stackWindow,
             "Import SWC file", "", "SWC file (*.swc)"
         )
-        if filePathz is not None and filePath is not '':
+        if filePath is not None and filePath is not '':
             self._local().importPointsFromSWC(self.stackWindow.windowIndex, filePath)
             self.redraw()
 
