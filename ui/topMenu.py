@@ -1,10 +1,14 @@
 from PyQt5 import QtCore, QtWidgets
 
+from util.testableFilePicker import getOpenFileName
+
 from .motility3DViewWindow import Motility3DViewWindow
 from .tilefigs import tileFigs
 
 class TopMenu():
     def __init__(self, stackWindow):
+        print ("INIT ")
+        print (stackWindow)
         self.stackWindow = stackWindow
         menuBar = stackWindow.menuBar()
 
@@ -68,11 +72,14 @@ class TopMenu():
         self._global().saveToNewFile()
 
     def importFromPreviousStack(self):
+        print (self.stackWindow)
         self._local().importPointsFromLastStack(self.stackWindow.windowIndex)
         self.redraw()
 
     def importFromSWC(self):
-        filePath = self.getSWCFilePath()
+        filePath = getOpenFileName(self.stackWindow,
+            "Import SWC file", "", "SWC file (*.swc)"
+        )
         if filePath is not None and filePath is not '':
             self._local().importPointsFromSWC(self.stackWindow.windowIndex, filePath)
             self.redraw()
@@ -147,9 +154,3 @@ class TopMenu():
     # Misc:
     def redraw(self):
         self.stackWindow.redraw()
-
-    def getSWCFilePath(self):
-        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self.stackWindow,
-            "Import SWC file", "", "SWC file (*.swc)"
-        )
-        return filePath

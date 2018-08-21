@@ -3,6 +3,7 @@ from PyQt5.Qt import Qt
 
 from model import FullState, Tree, UIState, History
 from files import AutoSaver, loadState, saveState, importFromMatlab
+from util.testableFilePicker import getOpenFileName
 
 import os
 import sys
@@ -17,7 +18,7 @@ from .stackWindow import StackWindow
 from .tilefigs import tileFigs
 
 class DynamoWindow(QtWidgets.QMainWindow):
-    def __init__(self, app, parent=None):
+    def __init__(self, app=None, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.app = app
 
@@ -66,7 +67,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
         return root
 
     def quit(self):
-        self.app.quit()
+        if self.app is not None:
+            self.app.quit()
 
     def centerWindow(self):
         # self.resize(320, 240)
@@ -81,9 +83,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.initialMenu.hide()
             self.stackList.show()
             # Focus on the first non-closed stack window:
-            self.focusFirstOpenStackWindow()
             QtWidgets.QApplication.processEvents()
             tileFigs(self.stackWindows)
+            self.focusFirstOpenStackWindow()
 
     def openFromFile(self):
         filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
@@ -187,8 +189,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     # TODO - document
     def openFilesAndAppendStacks(self):
-        filePaths, _ = QtWidgets.QFileDialog.getOpenFileNames(self,
-            "Open image stacks", "", "Image files (*.tif)"
+        filePaths = getOpenFileName(self,
+            "Open image stacks", "", "Image files (*.tif)", multiFile=True
         )
         if len(filePaths) == 0:
             return
@@ -224,6 +226,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
         self.stackList.updateListFromStacks()
+        self.stackWindows[-1].setFocus(True)
 
     def removeStackWindow(self, windowIndex, deleteData=False):
         if not deleteData:
@@ -317,4 +320,5 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 firstStackWindow = self.stackWindows[i]
                 break
         if firstStackWindow is not None:
-            firstStackWindow.setFocus(Qt.ActiveWindowFocusReason)
+            firstStackWindow.setFocus(True)
+            #firstStackWindow.setFocus(Qt.ActiveWindowFocusReason)
