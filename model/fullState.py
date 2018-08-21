@@ -142,7 +142,7 @@ class FullState:
 
 
     def analogousPoint(self, sourcePoint, sourceID, targetID):
-        if sourceID == targetID:
+        if sourcePoint is None or sourceID == targetID:
             return sourcePoint
         return self.uiStates[targetID]._tree.getPointByID(sourcePoint.id)
 

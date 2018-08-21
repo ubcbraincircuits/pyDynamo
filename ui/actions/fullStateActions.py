@@ -87,13 +87,14 @@ class FullStateActions():
         for i in range(len(self.state.uiStates)):
             self.state.uiStates[i].selectPointByID(point.id, isMove=(i >= localIdx))
 
-    def endMove(self, localIdx, location, downstream):
+    def endMove(self, localIdx, location, downstream, laterStacks):
         self.history.pushState()
         localState = self.state.uiStates[localIdx]
         # Need to copy the point before it gets moved a few lines from now.
         refPoint = localState.currentPoint()
         unmovedPoint = attr.evolve(refPoint)
-        for i in range(localIdx, len(self.state.uiStates)):
+
+        for i in range(localIdx, len(self.state.uiStates) if laterStacks else localIdx + 1):
             state = self.state.uiStates[i]
             newLocation = self.state.convertLocation(localIdx, i, location, unmovedPoint)
             state.endMove(newLocation, downstream)
