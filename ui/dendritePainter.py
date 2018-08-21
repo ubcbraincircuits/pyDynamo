@@ -39,6 +39,9 @@ class DendritePainter():
         self.branchAt = 0
 
     def drawTree(self, tree):
+        if self.uiState.hideAll:
+            return # Hidden, no paint for you.
+
         selectedPointID = self.uiState.currentPointID
         for branch in tree.branches:
             self.drawBranchLines(branch)

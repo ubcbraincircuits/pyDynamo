@@ -76,6 +76,10 @@ class DendriteVolumeCanvas(QWidget):
                 self.dynamoWindow.redrawAllStacks()
                 return
 
+            # Shortcut out if the stack's tree is hidden:
+            if self.uiState.hideAll:
+                return
+
             modifiers = int(QApplication.keyboardModifiers())
             shiftPressed = (modifiers & Qt.ShiftModifier) > 0
             ctrlPressed = (modifiers & Qt.ControlModifier) > 0

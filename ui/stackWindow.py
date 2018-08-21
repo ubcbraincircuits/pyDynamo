@@ -79,7 +79,7 @@ class StackWindow(QtWidgets.QMainWindow):
             ctrlPressed = (event.modifiers() & QtCore.Qt.ControlModifier)
             shftPressed = (event.modifiers() & QtCore.Qt.ShiftModifier)
 
-            # TODO: add menu items for some of these too.
+            # Actions here all apply even if the stack's tree is hidden:
             key = event.key()
             if (key == ord('4')):
                 self.actionHandler.changeBrightness(-1, 0)
@@ -99,7 +99,12 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.actionHandler.pan(0, 1)
             elif (key == ord('D')):
                 self.actionHandler.pan(1, 0)
-            elif (key == ord('F')):
+
+            if self.uiState.hideAll:
+                return
+
+            # Actions only apply if the stack's tree is visible:
+            if (key == ord('F')):
                 if self.dendrites.uiState.showAnnotations:
                     self.dendrites.uiState.showAnnotations = False
                     self.dendrites.uiState.showIDs = True

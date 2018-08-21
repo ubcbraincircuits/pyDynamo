@@ -52,6 +52,9 @@ class UIState():
     # UI Option for whether or not to show higlighted points in a different color
     showHilighted = attr.ib(default=False)
 
+    # UI Option for whether or not to show *all* the points and dendrites
+    hideAll = attr.ib(default=False)
+
     # (lower-, upper-) bounds for intensities to show
     colorLimits = attr.ib(default=(0, 1), metadata=SAVE_META)
 

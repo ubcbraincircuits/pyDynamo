@@ -51,11 +51,13 @@ HELP_MSG = """
 </ul>
 <h3>View options</h3>
 <ul>
+  <li><b>J</b> to cycle different line thicknesses</li>
+  <li><b>Shift-J</b> to cycle different dot thicknesses</li>
   <li><b>C</b> to change the displayed channel (if available)</li>
   <li><b>F</b> to toggle showing annotations / IDs / nothing.</li>
   <li><b>V</b> to show/hide points away from the current Z plane</li>
   <li><b>H</b> to show/hide hilighted points</li>
-  <li><b>J</b> to cycle different line thicknesses</li>
+  <li><b>Shift-H</b> to show/hide hide the entire tree</li>
   <li><b>T</b> to tile all the open images on screen</li>
 </ul>
 <h3>Project</h3>
