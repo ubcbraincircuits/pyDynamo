@@ -4,7 +4,7 @@ from .options import ProjectOptions
 from .tree import *
 from .uiState import *
 
-from util import SAVE_META
+from util import SAVE_META, locationMinus, locationPlus
 
 @attr.s
 class FullState:
@@ -119,15 +119,27 @@ class FullState:
         if self.volumeSize is None:
             self.volumeSize = volumeSize
 
-    def convertLocation(self, sourceLocation, sourceID, targetID):
-        # given a point, pass it through the transformation from source to
-        # target, with the branch base as the translation reference source
-        # and landmarks as the rotation reference. return the position.
-        noRotation = True # all(all(state{targetID}.info.R == eye(3))) || isempty(state{targetID}.info.R)
-        if sourceID == targetID or noRotation:
-            return sourceLocation
-        # TODO - rotation logic, see matlab.
-        return sourceLocation # HACK - support rotations
+    def convertLocation(self, sourceID, targetID, sourceLocation, sourcePointBefore=None):
+        # TODO: Use stack transform once registration is useful?
+        # TODO: Also perhaps use pointAfter to guide even better when it exists.
+        if sourcePointBefore is None:
+            return sourceLocation # No reference point, so just copy.
+
+        # Walk backwards until we find a point in both stacks to use as a reference
+        targetPointBefore = None
+        while sourcePointBefore is not None and targetPointBefore is None:
+            targetPointBefore = self.analogousPoint(sourcePointBefore, sourceID, targetID)
+            if targetPointBefore is None:
+                sourcePointBefore = sourcePointBefore.nextPointInBranch(delta=-1)
+
+        if targetPointBefore is None:
+            return sourceLocation # Still no upstream reference point, so copy.
+
+        # Keep same delta. Loc_source - PB_source = Delta = Loc_target - PB_target
+        # So Loc_target = PB_target + (Loc_source - PB_source)
+        sourceDelta = locationMinus(sourceLocation, sourcePointBefore.location)
+        return locationPlus(targetPointBefore.location, sourceDelta)
+
 
     def analogousPoint(self, sourcePoint, sourceID, targetID):
         if sourceID == targetID:

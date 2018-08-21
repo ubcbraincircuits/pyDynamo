@@ -7,8 +7,6 @@ from .tilefigs import tileFigs
 
 class TopMenu():
     def __init__(self, stackWindow):
-        print ("INIT ")
-        print (stackWindow)
         self.stackWindow = stackWindow
         menuBar = stackWindow.menuBar()
 
