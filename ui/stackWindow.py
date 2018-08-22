@@ -20,6 +20,7 @@ class StackWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowMinMaxButtonsHint)
 
         # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
@@ -79,7 +80,7 @@ class StackWindow(QtWidgets.QMainWindow):
             ctrlPressed = (event.modifiers() & QtCore.Qt.ControlModifier)
             shftPressed = (event.modifiers() & QtCore.Qt.ShiftModifier)
 
-            # TODO: add menu items for some of these too.
+            # Actions here all apply even if the stack's tree is hidden:
             key = event.key()
             if (key == ord('4')):
                 self.actionHandler.changeBrightness(-1, 0)
@@ -99,7 +100,12 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.actionHandler.pan(0, 1)
             elif (key == ord('D')):
                 self.actionHandler.pan(1, 0)
-            elif (key == ord('F')):
+
+            if self.uiState.hideAll:
+                return
+
+            # Actions only apply if the stack's tree is visible:
+            if (key == ord('F')):
                 if self.dendrites.uiState.showAnnotations:
                     self.dendrites.uiState.showAnnotations = False
                     self.dendrites.uiState.showIDs = True

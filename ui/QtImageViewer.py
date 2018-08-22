@@ -131,9 +131,6 @@ class QtImageViewer(QGraphicsView):
         else:
             self._pixmapHandle = self.scene.addPixmap(pixmap)
         self.setSceneRect(QRectF(pixmap.rect()))  # Set scene size to image size.
-        # self.setSceneRect(QRectF(0., 0., 900., 900.))  # Set scene size to image size.
-        # self.setSceneRect(None)
-        # self.setSceneRect(self.parentView.frameGeometry())
         self.forceRepaint()
 
     def forceRepaint(self):
@@ -147,6 +144,8 @@ class QtImageViewer(QGraphicsView):
         """ Maintain current zoom on resize.
         """
         self.forceRepaint()
+        self.zoom(0) # Force image to fit.
+        # Note: This means if you slowly resize, it'll gradually zoom out. Not idea, but ok?
 
     def mouseMoveEvent(self, event):
         QGraphicsView.mouseMoveEvent(self, event)

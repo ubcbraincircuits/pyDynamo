@@ -76,6 +76,10 @@ class DendriteVolumeCanvas(QWidget):
                 self.dynamoWindow.redrawAllStacks()
                 return
 
+            # Shortcut out if the stack's tree is hidden:
+            if self.uiState.hideAll:
+                return
+
             modifiers = int(QApplication.keyboardModifiers())
             shiftPressed = (modifiers & Qt.ShiftModifier) > 0
             ctrlPressed = (modifiers & Qt.ControlModifier) > 0
@@ -95,12 +99,6 @@ class DendriteVolumeCanvas(QWidget):
                     self.fullActions.reparent(self.windowIndex, pointClicked)
                 else:
                     self.uiState.isReparenting = False # Nothing clicked, cancel reparent action
-            # Next, Right-click/ctrl first; either delete the point, or start a new branch.
-            elif rightClick or ctrlPressed:
-                if pointClicked:
-                    self.fullActions.deletePoint(self.windowIndex, pointClicked, laterStacks=shiftPressed)
-                else:
-                    self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
             # Next, moving; either switch moving point, cancel move, or move selected point to new spot.
             elif self.uiState.isMoving:
                 if pointClicked:
@@ -109,7 +107,16 @@ class DendriteVolumeCanvas(QWidget):
                     else:
                         self.fullActions.selectPoint(self.windowIndex, pointClicked)
                 else:
-                    self.fullActions.endMove(self.windowIndex, location, downstream=shiftPressed)
+                    # NOTE: laterStacks is ctrl here, and shift for deletion.
+                    # Not ideal, but downstream was already bound to shift here.
+                    self.fullActions.endMove(self.windowIndex, location,
+                        downstream=shiftPressed, laterStacks=ctrlPressed)
+            # Next, Right-click/ctrl first; either delete the point, or start a new branch.
+            elif rightClick or ctrlPressed:
+                if pointClicked:
+                    self.fullActions.deletePoint(self.windowIndex, pointClicked, laterStacks=shiftPressed)
+                else:
+                    self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
             # Next. Middle-click / shift; either start move, or add mid-branch point
             elif middleClick or shiftPressed:
                 if pointClicked:

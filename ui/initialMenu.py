@@ -49,6 +49,9 @@ class InitialMenu(QtWidgets.QMainWindow):
         self.fileMenu.addAction('&Import', parent.importFromMatlab, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
         self.menuBar().addMenu(self.fileMenu)
 
+        # (Expose for testing)
+        self.buttonN, self.buttonL, self.buttonI = buttonN, buttonL, buttonI
+
     def centerWindow(self):
         self.setFixedSize(480, 320)
         frameGm = self.frameGeometry()

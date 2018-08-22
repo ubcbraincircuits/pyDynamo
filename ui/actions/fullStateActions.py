@@ -1,3 +1,5 @@
+import attr
+
 from PyQt5 import QtWidgets
 
 from analysis import absOrient
@@ -18,6 +20,7 @@ class FullStateActions():
     def addPointToCurrentBranchAndSelect(self, localIdx, location):
         self.history.pushState()
         localState = self.state.uiStates[localIdx]
+        currentSource = localState.currentPoint()
         newPoint = localState.addPointToCurrentBranchAndSelect(location)
         if newPoint is None:
             # Points exist, but none selected. Skipping.
@@ -26,7 +29,7 @@ class FullStateActions():
 
         for i in range(localIdx + 1, len(self.state.uiStates)):
             state = self.state.uiStates[i]
-            newLocation = self.state.convertLocation(location, localIdx, i)
+            newLocation = self.state.convertLocation(localIdx, i, location, currentSource)
             state.addPointToCurrentBranchAndSelect(newLocation, newPoint.id, newPointBranchID)
 
     def addPointToNewBranchAndSelect(self, localIdx, location):
@@ -37,7 +40,7 @@ class FullStateActions():
 
         for i in range(localIdx + 1, len(self.state.uiStates)):
             state = self.state.uiStates[i]
-            newLocation = self.state.convertLocation(location, localIdx, i)
+            newLocation = self.state.convertLocation(localIdx, i, location, currentSource)
             state.selectPointByID(currentSource.id)
             state.addPointToNewBranchAndSelect(newLocation, newPoint.id, newBranch.id)
 
@@ -52,7 +55,7 @@ class FullStateActions():
 
         for i in range(localIdx + 1, len(self.state.uiStates)):
             state = self.state.uiStates[i]
-            newLocation = self.state.convertLocation(location, localIdx, i)
+            newLocation = self.state.convertLocation(localIdx, i, location, currentSource)
             newBranch = self.state.analogousBranch(currentBranch, localIdx, i)
             newSource = self.state.analogousPoint(currentSource, localIdx, i)
             # Only add to later ones if the points exist in the tree:
@@ -84,11 +87,16 @@ class FullStateActions():
         for i in range(len(self.state.uiStates)):
             self.state.uiStates[i].selectPointByID(point.id, isMove=(i >= localIdx))
 
-    def endMove(self, localIdx, location, downstream):
+    def endMove(self, localIdx, location, downstream, laterStacks):
         self.history.pushState()
-        for i in range(localIdx, len(self.state.uiStates)):
+        localState = self.state.uiStates[localIdx]
+        # Need to copy the point before it gets moved a few lines from now.
+        refPoint = localState.currentPoint()
+        unmovedPoint = attr.evolve(refPoint)
+
+        for i in range(localIdx, len(self.state.uiStates) if laterStacks else localIdx + 1):
             state = self.state.uiStates[i]
-            newLocation = self.state.convertLocation(location, localIdx, i)
+            newLocation = self.state.convertLocation(localIdx, i, location, unmovedPoint)
             state.endMove(newLocation, downstream)
 
     def setLandmark(self, localIdx, location):

@@ -9,7 +9,14 @@ HELP_MSG = """
 <ul>
   <li><b>Click</b> to select the point</li>
   <li><b>Right-/Ctrl-click</b> to delete the point</li>
-  <li><b>Mid-/Shift-click</b> to move a point
+  <li><b>Mid-/Shift-click</b> to move a point, then...
+    <ul>
+      <li>Click to move just that point in the current stack</li>
+      <li>Shift-click to move that point and all points later in the tree</li>
+      <li>Ctrl-click to move that point in the current and all later stacks</li>
+      <li>Ctrl-Shift-click to move all points down the tree in all later stacks</li>
+    </ul>
+  </li>
 </ul>
 <h3>Clicking in empty space...</h3>
 <ul>
@@ -51,11 +58,13 @@ HELP_MSG = """
 </ul>
 <h3>View options</h3>
 <ul>
+  <li><b>J</b> to cycle different line thicknesses</li>
+  <li><b>Shift-J</b> to cycle different dot thicknesses</li>
   <li><b>C</b> to change the displayed channel (if available)</li>
   <li><b>F</b> to toggle showing annotations / IDs / nothing.</li>
   <li><b>V</b> to show/hide points away from the current Z plane</li>
   <li><b>H</b> to show/hide hilighted points</li>
-  <li><b>J</b> to cycle different line thicknesses</li>
+  <li><b>Shift-H</b> to show/hide hide the entire tree</li>
   <li><b>T</b> to tile all the open images on screen</li>
 </ul>
 <h3>Project</h3>

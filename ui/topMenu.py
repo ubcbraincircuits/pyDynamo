@@ -1,5 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 
+from util.testableFilePicker import getOpenFileName
+
 from .motility3DViewWindow import Motility3DViewWindow
 from .tilefigs import tileFigs
 
@@ -41,6 +43,7 @@ class TopMenu():
         viewMenu.addAction('Turn on/off colours', self.toggleColor, QtCore.Qt.SHIFT + QtCore.Qt.Key_C)
         viewMenu.addAction('Show/Hide all branches', self.toggleAllBranches, QtCore.Qt.Key_V)
         viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H)
+        viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
         viewMenu.addAction('Tile windows on screen', self.tileFigs, QtCore.Qt.Key_T)
         menuBar.addMenu(viewMenu)
 
@@ -68,11 +71,14 @@ class TopMenu():
         self._global().saveToNewFile()
 
     def importFromPreviousStack(self):
+        print (self.stackWindow)
         self._local().importPointsFromLastStack(self.stackWindow.windowIndex)
         self.redraw()
 
     def importFromSWC(self):
-        filePath = self.getSWCFilePath()
+        filePath = getOpenFileName(self.stackWindow,
+            "Import SWC file", "", "SWC file (*.swc)"
+        )
         if filePath is not None and filePath is not '':
             self._local().importPointsFromSWC(self.stackWindow.windowIndex, filePath)
             self.redraw()
@@ -136,6 +142,10 @@ class TopMenu():
         self.stackWindow.uiState.showHilighted = not self.stackWindow.uiState.showHilighted
         self.redraw()
 
+    def toggleShowAll(self):
+        self.stackWindow.uiState.hideAll = not self.stackWindow.uiState.hideAll
+        self.redraw()
+
     def tileFigs(self):
         self._global().focusFirstOpenStackWindow()
         tileFigs(self._global().stackWindows)
@@ -147,9 +157,3 @@ class TopMenu():
     # Misc:
     def redraw(self):
         self.stackWindow.redraw()
-
-    def getSWCFilePath(self):
-        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self.stackWindow,
-            "Import SWC file", "", "SWC file (*.swc)"
-        )
-        return filePath
