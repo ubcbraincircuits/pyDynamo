@@ -174,6 +174,9 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                 if ax == event.inaxes:
                     continue
                 ax.view_init(elev=eAx.elev, azim=eAx.azim)
+                ax.set_xlim3d(event.inaxes.get_xlim3d(), emit=False)
+                ax.set_ylim3d(event.inaxes.get_ylim3d(), emit=False)
+                ax.set_zlim3d(event.inaxes.get_zlim3d(), emit=False)
 
     def previous(self, toEnd):
         endIdx = 0
