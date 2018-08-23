@@ -116,7 +116,8 @@ class TopMenu():
     def viewMorphometrics(self):
         parent = self._global()
         opt = parent.fullState.projectOptions.motilityOptions
-        Motility3DViewWindow(parent, parent.fullState.trees, opt).show()
+        Motility3DViewWindow(parent, self.stackWindow.windowIndex,
+            parent.fullState.trees, parent.fullState.filePaths, opt).show()
 
     def toggleLineSize(self):
         self._global().fullState.toggleLineWidth()
