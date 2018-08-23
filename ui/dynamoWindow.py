@@ -234,8 +234,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.stackWindows[windowIndex] = None
         else:
             self.fullState.removeStack(windowIndex)
-            self.stackWindows[windowIndex].ignoreUndoCloseEvent = True
-            self.stackWindows[windowIndex].close()
+            if self.stackWindows[windowIndex] is not None:
+                self.stackWindows[windowIndex].ignoreUndoCloseEvent = True
+                self.stackWindows[windowIndex].close()
             self.stackWindows.pop(windowIndex)
             for i in range(len(self.stackWindows)):
                 if self.stackWindows[i] is not None:
