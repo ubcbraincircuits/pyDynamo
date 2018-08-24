@@ -39,13 +39,28 @@ class Motility3DViewWindow(QtWidgets.QMainWindow):
         self.resize(screenWidth, screenWidth / treesShown * scaleFactor)
         self.updateButtons()
 
-    def keyPressEvent(self, event):
-        ctrlPressed = (event.modifiers() & QtCore.Qt.ControlModifier)
-        key = event.key()
-        if key == QtCore.Qt.Key_Left:
-            self.previous(ctrlPressed)
-        elif key == QtCore.Qt.Key_Right:
-            self.next(ctrlPressed)
+        # Set up menu
+        fileMenu = QtWidgets.QMenu('&View', self)
+        fileMenu.addAction('Show 3D', self.show3D, QtCore.Qt.Key_3)
+        fileMenu.addAction('Show 2D Dendrograms', self.show2D, QtCore.Qt.Key_2)
+        fileMenu.addSeparator()
+        fileMenu.addAction('First Stack', self.firstStack, QtCore.Qt.CTRL + QtCore.Qt.Key_Left)
+        fileMenu.addAction('Previous Stack', self.previous, QtCore.Qt.Key_Left)
+        fileMenu.addAction('Next Stack', self.next, QtCore.Qt.Key_Right)
+        fileMenu.addAction('Last Stack', self.lastStack, QtCore.Qt.CTRL + QtCore.Qt.Key_Right)
+        self.menuBar().addMenu(fileMenu)
+
+    def show3D(self):
+        self.view3D.set3D(True)
+
+    def show2D(self):
+        self.view3D.set3D(False)
+
+    def firstStack(self):
+        self.previous(True)
+
+    def lastStack(self):
+        self.next(False)
 
     def previous(self, toEnd=False):
         self.view3D.previous(toEnd)
