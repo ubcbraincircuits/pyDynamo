@@ -26,5 +26,7 @@ def run(path='test/files/example2.dyn.gz'):
         x.append(pointX[p.id])
         y.append(pointY[p.id])
     plt.scatter(x, y, s=10, c='white', marker='D')
-    plt.show()
+    # Disable for now, should verify actual x/y position results.
+    if False:
+        plt.show()
     return True
