@@ -16,10 +16,14 @@ SHRINK_COLOR  = (1.00, 0.00, 1.00, 0.75)
 GONE_COLOR    = (1.00, 0.00, 0.00, 0.75)
 RETRACT_COLOR = (1.00, 1.00, 0.00, 0.75)
 
+MAX_TREE_COUNT = 3 # Only show this many trees, scroll to the others.
+
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Motility3DCanvas(BaseMatplotlibCanvas):
-    def __init__(self, parent, treeModels, opt, sizeFactor=10, *args, **kwargs):
+    def __init__(self, parent, selectedTree, treeModels, filePaths, opt, sizeFactor=10, *args, **kwargs):
+        self.firstTree = max(0, min(selectedTree - 1, len(treeModels) - MAX_TREE_COUNT))
         self.treeModels = treeModels
+        self.filePaths = filePaths
         self.options = opt
         np.set_printoptions(precision=3)
 
@@ -38,7 +42,8 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
         self.motility = mot['raw']
         self.sizeFactor = sizeFactor
 
-        super(Motility3DCanvas, self).__init__(*args, in3D=True, subplots=len(treeModels), **kwargs)
+        nPlots = min(len(treeModels), MAX_TREE_COUNT)
+        super(Motility3DCanvas, self).__init__(*args, in3D=True, subplots=nPlots, **kwargs)
         self.fig.canvas.mpl_connect('motion_notify_event', self.handleMove)
         # TODO: Use landmarks for mean shifting
 
@@ -46,8 +51,11 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
         SZ_FACTOR = self.sizeFactor
 
         # Update colors to be white on black:
-        for treeIdx, ax in enumerate(self.axes):
+        print ("")
+        for offset, ax in enumerate(self.axes):
+            treeIdx = self.firstTree + offset
             treeModel = self.treeModels[treeIdx]
+            ax.set_title(util.createTitle(treeIdx, self.filePaths[treeIdx]))
             ax.set_facecolor("white")
             ax.w_xaxis.set_pane_color((1.0,1.0,1.0,1.0))
             ax.w_yaxis.set_pane_color((1.0,1.0,1.0,1.0))
@@ -153,7 +161,6 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
             ax.set_ylim3d(yM - r, yM + r)
             ax.set_zlim3d(zM - r, zM + r)
 
-
     def needToUpdate(self):
         for ax in self.axes:
             ax.cla()
@@ -167,7 +174,23 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                 if ax == event.inaxes:
                     continue
                 ax.view_init(elev=eAx.elev, azim=eAx.azim)
+                ax.set_xlim3d(event.inaxes.get_xlim3d(), emit=False)
+                ax.set_ylim3d(event.inaxes.get_ylim3d(), emit=False)
+                ax.set_zlim3d(event.inaxes.get_zlim3d(), emit=False)
 
+    def previous(self, toEnd):
+        endIdx = 0
+        nextIdx = endIdx if toEnd else max(self.firstTree - 1, endIdx)
+        if nextIdx != self.firstTree:
+            self.firstTree = nextIdx
+            self.needToUpdate()
+
+    def next(self, toEnd):
+        endIdx = len(self.treeModels) - MAX_TREE_COUNT
+        nextIdx = endIdx if toEnd else min(self.firstTree + 1, endIdx)
+        if nextIdx != self.firstTree:
+            self.firstTree = nextIdx
+            self.needToUpdate()
 
     # def mousePressEvent(self, event):
         # print ("Clicked: (%d %d)" % (event.globalX(), event.globalY()))
