@@ -1,7 +1,7 @@
 # Run all of these by running 'pytest' in this directory.
 # e.g. pytest -sk 'ui' will run the tests containing 'ui' in the name. (or e.g. -sk 'not ui')
 
-from test import absOrientTest, historyTest, motilityTest, recursiveAdjustTest, swcTest, uiFileActionsTest
+from test import absOrientTest, dendrogramTest, historyTest, motilityTest, recursiveAdjustTest, swcTest, uiFileActionsTest
 
 def test_absOrient():
     print ("AbsOrient test...")
@@ -33,10 +33,16 @@ def test_ui(qtbot):
     assert uiFileActionsTest.run(qtbot)
     print ("")
 
+def test_dendrogram():
+    print ("Dendrogram test...")
+    assert dendrogramTest.run()
+    print ("")
+
 if __name__ == '__main__':
     test_absOrient()
     test_history()
     test_motility()
     test_recursiveAdjust()
     test_SWC()
+    test_dendrogram()
     print ("\n 🙌🙌🙌 ALL NON-UI TESTS PASSED 🙌🙌🙌\n")
