@@ -52,6 +52,9 @@ class UIState():
     # UI Option for whether or not to show all branches, or just the nearby ones.
     drawAllBranches = attr.ib(default=False, metadata=SAVE_META)
 
+    # UI Option for whether to flatten all z planes into one image.
+    zProject = attr.ib(default=False)
+
     # UI Option for whether or not to show higlighted points in a different color
     showHilighted = attr.ib(default=False)
 

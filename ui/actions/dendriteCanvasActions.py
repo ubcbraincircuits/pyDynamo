@@ -58,6 +58,10 @@ class DendriteCanvasActions():
     def showHotkeys(self):
         showHelpDialog()
 
+    def toggleZProjection(self):
+        self.uiState.zProject = not self.uiState.zProject
+        self.canvas.redraw()
+
     def launch3DView(self):
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
         viewWindow.show()

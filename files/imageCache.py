@@ -30,7 +30,11 @@ class ImageCache:
 
     # Get the current 2D image for a state, using the full state's current channel and Z axis
     def imageForUIState(self, uiState):
-        return self.getVolume(uiState.imagePath)[uiState._parent.channel][uiState._parent.zAxisAt]
+        channelImage = self.getVolume(uiState.imagePath)[uiState._parent.channel]
+        if uiState.zProject:
+            return np.amax(channelImage, axis=0)
+        else:
+            return channelImage[uiState._parent.zAxisAt]
 
     # Returns volume for a tif path, possibly loading it first if not yet cached.
     def getVolume(self, path):
