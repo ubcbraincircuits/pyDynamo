@@ -25,13 +25,14 @@ def UINT8_WARP(image, transform):
     assert warpDouble.dtype == np.float64
     return np.round(warpDouble * 255).astype(np.uint8)
 
-def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
+def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=30, Rz=4):
     """
     recursively adjusts points, i.e. the 'R' function
     id       -image on which to adjust (reference is id-1)
     branch   -the branch being adjusted
     point    -point in id being adjusted
     pointref -point in id-1 being adjusted
+    callback -called for progress updates
 
     Rxy      -radius, in pixels, of field to be compared
     Rz       -radius, in z axis, of field to be compared
@@ -47,7 +48,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     volume = _IMG_CACHE.getVolume(fullState.uiStates[id - 1].imagePath)
     oldBox = _imageBoxIfInside(volume, fullState.channel, oldLocMin, oldLocMax)
     if oldBox is None:
-        _recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent())
+        callback(_recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent()))
         return
 
     xyz = point.location
@@ -57,7 +58,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
     newBox = _imageBoxIfInside(volume, fullState.channel, newLocMin, newLocMax)
     if newBox is None:
-        _recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent())
+        callback(_recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent()))
         return
 
     I1 = np.mean(oldBox.astype(np.int32) ** 2)
@@ -83,9 +84,9 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
     if (fTooBad or angleTooFar or xMoveTooFar or yMoveTooFar):
         print ("bad fit! larger window if %d < 25" % Rxy)
         if Rxy < 25: # try a larger window
-            recursiveAdjust(fullState, id, branch, point, pointref, 25, 4)
+            recursiveAdjust(fullState, id, branch, point, pointref, callback, 25, 4)
         else:
-            _recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent())
+            callback(_recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent()))
         return
 
     # Find optimal Z-offset for known 2d alignment
@@ -113,6 +114,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
 
     # Point successfully registered to Pointref!
     _safelySetPointID(fullState, newTree, point, pointref.id)
+    callback(1)
     if point.indexInParent() == 0 and point.parentBranch is not None and pointref.parentBranch is not None:
         _safelySetBranchID(fullState, newTree, point.parentBranch, pointref.parentBranch.id)
     _recursiveMoveBranch(newTree, branch, shift, fromPointIdx=point.indexInParent())
@@ -123,21 +125,21 @@ def recursiveAdjust(fullState, id, branch, point, pointref, Rxy=30, Rz=4):
         deltaXYZ = np.abs(util.locationMinus(nextPoint.location, point.location))
         dXY = int(round(util.snapToRange(np.max(deltaXYZ[0:1]), 20, 30)))
         dZ = int(round(util.snapToRange(deltaXYZ[2], 2, 4) + 1))
-        recursiveAdjust(fullState, id, branch, nextPoint, nextPointRef, dXY, dZ)
+        recursiveAdjust(fullState, id, branch, nextPoint, nextPointRef, callback, dXY, dZ)
 
     # TODO - match up branches more cleverly, not just based on order
     for i, branch in enumerate(point.children):
         if i >= len(pointref.children): # unmatched branch
-            _recursiveHilight(newTree, branch)
+            callback(_recursiveHilight(newTree, branch))
             continue
 
         branchRef = pointref.children[i]
         if len(branch.points) == 0:
             continue # empty branch, skip
         elif len(branchRef.points) == 0:
-            _recursiveHilight(newTree, branch) # can't match to empty branch
+            callback(_recursiveHilight(newTree, branch)) # can't match to empty branch
         else:
-            recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0])
+            recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0], callback)
 
 
 def _recursiveMoveBranch(tree, branch, shift, fromPointIdx=0):
@@ -154,15 +156,21 @@ def _recursiveMoveBranch(tree, branch, shift, fromPointIdx=0):
             for childBranch in pointToMove.children:
                 _recursiveMoveBranch(tree, childBranch, shift)
 
+# Hilight all down-tree points (mark as un-registered), and return the number hilighted
 def _recursiveHilight(tree, branch, fromPointIdx=0):
+    nHilighted = 0
     if branch is None:
-        for point in tree.flattenPoints():
+        points = tree.flattenPoints()
+        for point in points:
             point.hilighted = True
+        nHilighted = len(points)
     else:
         for pointToHilight in branch.points[fromPointIdx:]:
             pointToHilight.hilighted = True
+            nHilighted = 1
             for childBranch in pointToHilight.children:
-                _recursiveHilight(tree, childBranch)
+                nHilighted += _recursiveHilight(tree, childBranch)
+    return nHilighted
 
 def _imageBoxIfInside(volume, channel, fr, to):
     to = util.locationPlus(to, (1, 1, 1)) # inclusive to exclusive upper bounds
