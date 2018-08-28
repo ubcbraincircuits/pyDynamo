@@ -18,19 +18,19 @@ class InitialMenu(QtWidgets.QMainWindow):
         # Options #1 - Start New
         buttonN = QtWidgets.QPushButton("&New from Stack(s)", self)
         buttonN.setToolTip("Start new labelling from one or more images")
-        buttonN.clicked.connect(parent.newFromStacks)
+        buttonN.clicked.connect(self.newFromStacks)
         cursorPointer(buttonN)
 
         # Option #2 - Load existing
         buttonL = QtWidgets.QPushButton("&Open from File", self)
         buttonL.setToolTip("Open a previous session")
-        buttonL.clicked.connect(parent.openFromFile)
+        buttonL.clicked.connect(self.openFromFile)
         cursorPointer(buttonL)
 
         # Option #2 - Import from matlab
         buttonI = QtWidgets.QPushButton("&Import from Matlab .mat", self)
         buttonI.setToolTip("Import from Matlab save file")
-        buttonI.clicked.connect(parent.importFromMatlab)
+        buttonI.clicked.connect(self.importFromMatlab)
         cursorPointer(buttonI)
 
         # Assemble the view hierarchy.
@@ -44,9 +44,9 @@ class InitialMenu(QtWidgets.QMainWindow):
 
         # Top level menu:
         self.fileMenu = QtWidgets.QMenu('&File', self)
-        self.fileMenu.addAction('&New', parent.newFromStacks, QtCore.Qt.CTRL + QtCore.Qt.Key_N)
-        self.fileMenu.addAction('&Open', parent.openFromFile, QtCore.Qt.CTRL + QtCore.Qt.Key_O)
-        self.fileMenu.addAction('&Import', parent.importFromMatlab, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
+        self.fileMenu.addAction('&New', self.newFromStacks, QtCore.Qt.CTRL + QtCore.Qt.Key_N)
+        self.fileMenu.addAction('&Open', self.openFromFile, QtCore.Qt.CTRL + QtCore.Qt.Key_O)
+        self.fileMenu.addAction('&Import', self.importFromMatlab, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
         self.menuBar().addMenu(self.fileMenu)
 
         # (Expose for testing)
@@ -61,3 +61,13 @@ class InitialMenu(QtWidgets.QMainWindow):
 
     def keyPressEvent(self, event):
         self.parent().keyPressEvent(event)
+
+    # Button/Menu events to redirect:
+    def newFromStacks(self):
+        self.parent().newFromStacks()
+
+    def openFromFile(self):
+        self.parent().openFromFile()
+
+    def importFromMatlab(self):
+        self.parent().importFromMatlab()

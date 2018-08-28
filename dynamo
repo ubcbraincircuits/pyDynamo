@@ -1,1 +1,1 @@
-python3 dynamo.py
+python3 dynamo.py "$@"

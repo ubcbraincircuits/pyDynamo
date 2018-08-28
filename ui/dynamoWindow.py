@@ -18,8 +18,8 @@ from .stackWindow import StackWindow
 from .tilefigs import tileFigs
 
 class DynamoWindow(QtWidgets.QMainWindow):
-    def __init__(self, app=None, parent=None):
-        QtWidgets.QMainWindow.__init__(self, parent)
+    def __init__(self, app, argv):
+        QtWidgets.QMainWindow.__init__(self, None)
         self.app = app
 
         self.stackWindows = []
@@ -34,7 +34,19 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.root = self._setupUI()
         self.centerWindow()
         self.show()
-        self.initialMenu.show()
+
+        if len(argv) == 1:
+            fileToOpen = argv[0]
+            if fileToOpen.endswith(".dyn.gz"):
+                self.openFromFile(fileToOpen)
+            elif fileToOpen.endswith(".mat"):
+                self.importFromMatlab(fileToOpen)
+            elif fileToOpen.endswith(".tif") or fileToOpen.endswith(".tiff"):
+                self.newFromStacks([fileToOpen])
+            else:
+                print ("Unknown file format: " + fileToOpen)
+        else:
+            self.initialMenu.show()
 
     def _setupUI(self):
         self.setWindowTitle("Dynamo")
@@ -77,8 +89,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    def newFromStacks(self):
-        self.openFilesAndAppendStacks()
+    def newFromStacks(self, filePaths=None):
+        self.openFilesAndAppendStacks(filePaths)
         if len(self.stackWindows) > 0:
             self.initialMenu.hide()
             self.stackList.show()
@@ -87,10 +99,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
             tileFigs(self.stackWindows)
             self.focusFirstOpenStackWindow()
 
-    def openFromFile(self):
-        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
-            "Open dynamo save file", "", "Dynamo files (*.dyn.gz)"
-        )
+    def openFromFile(self, filePath=""):
+        print ("File: '%s'" % filePath)
+        if filePath == "":
+            filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                "Open dynamo save file", "", "Dynamo files (*.dyn.gz)"
+            )
         if filePath != "":
             self.stackList.show()
             self.fullState = loadState(filePath)
@@ -100,10 +114,11 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.initialMenu.hide()
             self.makeNewWindows()
 
-    def importFromMatlab(self):
-        filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
-            "Import matlab save file", "", "Matlab file (*.mat)"
-        )
+    def importFromMatlab(self, filePath=""):
+        if filePath == "":
+            filePath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                "Import matlab save file", "", "Matlab file (*.mat)"
+            )
         if filePath != "":
             self.stackList.show()
             self.fullState = importFromMatlab(filePath)
@@ -188,10 +203,11 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.settingsWindow.openFromState(self.fullState)
 
     # TODO - document
-    def openFilesAndAppendStacks(self):
-        filePaths = getOpenFileName(self,
-            "Open image stacks", "", "Image files (*.tif)", multiFile=True
-        )
+    def openFilesAndAppendStacks(self, filePaths=None):
+        if filePaths is None:
+            filePaths = getOpenFileName(self,
+                "Open image stacks", "", "Image files (*.tif)", multiFile=True
+            )
         if len(filePaths) == 0:
             return
         offset = len(self.fullState.filePaths)
