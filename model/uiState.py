@@ -1,7 +1,10 @@
 import attr
 import math
+import numpy as np
 
-from .tree import *
+from .tree.branch import Branch
+from .tree.point import Point
+from .tree.tree import Tree
 
 from util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 

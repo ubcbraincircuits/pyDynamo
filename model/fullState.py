@@ -1,7 +1,9 @@
 import attr
 
 from .options import ProjectOptions
-from .tree import *
+from .tree.branch import Branch
+from .tree.point import Point
+from .tree.tree import Tree
 from .uiState import *
 
 from util import SAVE_META, locationMinus, locationPlus

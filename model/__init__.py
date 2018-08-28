@@ -2,7 +2,10 @@
 .. module:: model
 """
 
-from .tree import Transform, Point, Branch, Tree, printTree
+from .tree.branch import Branch
+from .tree.point import Point
+from .tree.transform import Transform
+from .tree.tree import Tree, printTree
 from .uiState import UIState, normalizeImage
 from .fullState import FullState
 from .history import History
