@@ -32,7 +32,7 @@ def _pointXFromBranch(branch, branchIsFiloMap, branchDrawnLeft, filoDist):
                     forceLeft = branchDrawnLeft[childBranch.id]
                     forceRight = not branchDrawnLeft[childBranch.id]
                 preferLeft = len(childBranchesLeft) <= len(childBranchesRight)
-                print (forceLeft, forceRight, preferLeft)
+
                 if forceLeft or (preferLeft and not forceRight):
                     childBranchesLeft = childBranchesLeft + [childBranch]
                     branchDrawnLeft[childBranch.id] = True
