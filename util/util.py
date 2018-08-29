@@ -78,3 +78,13 @@ def sortedBranchIDList(trees):
 # Utility for nicer formatting of the window, using index and just image file name.
 def createTitle(index, path):
     return "[%d] - %s" % (index + 1, os.path.basename(path))
+
+# When using relative Z, offset each uiState to make sure the selected points are shown
+def zStackForUiState(uiState):
+    zAt = uiState._parent.zAxisAt
+    if uiState._parent.relativeZFromCurrentPoint:
+        herePoint = uiState.currentPoint()
+        therePoint = uiState._parent.uiStates[0].currentPoint()
+        if herePoint is not None and therePoint is not None:
+            zAt = int(round(zAt - therePoint.location[2] + herePoint.location[2]))
+    return zAt

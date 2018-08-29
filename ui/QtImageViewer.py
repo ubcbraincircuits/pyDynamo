@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
 from PyQt5.QtGui import QImage, QPixmap, QPainterPath
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog, QApplication
 
-from util import deltaSz
+from util import deltaSz, zStackForUiState
 from .dendritePainter import DendritePainter
 
 __author__ = "Marcel Goldschen-Ohm <marcel.goldschen@gmail.com>"
@@ -152,8 +152,9 @@ class QtImageViewer(QGraphicsView):
 
         fullState = self.parentView.uiState.parent()
         scenePos = self.mapToScene(event.pos())
-        location = (scenePos.x(), scenePos.y(), fullState.zAxisAt * 1.0)
-        pointClicked = self.parentView.pointNearPixel(scenePos.x(), scenePos.y())
+        zAt = zStackForUiState(self.parentView.uiState) * 1.0
+        location = (scenePos.x(), scenePos.y(), zAt)
+        pointClicked = self.parentView.pointNearPixel(location)
         closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
         nearDistWorldSize = self.toSceneDist(fullState.closeToCirclePx())
         mouseOverPoint = (closestDist is not None and closestDist <= nearDistWorldSize)

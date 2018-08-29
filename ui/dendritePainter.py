@@ -4,6 +4,8 @@ from PyQt5.QtCore import Qt, QPointF, QRectF
 import matplotlib.pyplot as plt
 import numpy as np
 
+import util
+
 LINE_COLOR_COUNT = 7
 LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
 
@@ -31,9 +33,9 @@ class DendritePainter():
     ANNOTATION_HEIGHT = 40
     ANNOTATION_MAX_WIDTH = 512
 
-    def __init__(self, painter, currentZ, uiState, zoomMapFunc):
+    def __init__(self, painter, uiState, zoomMapFunc):
         self.p = painter
-        self.zAt = currentZ
+        self.zAt = util.zStackForUiState(uiState)
         self.uiState = uiState
         self.zoomMapFunc = zoomMapFunc
         self.branchAt = 0

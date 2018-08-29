@@ -70,9 +70,6 @@ class UIState():
     def currentBranch(self):
         return self._tree.getBranchByID(self.currentBranchID)
 
-    def currentImage(self):
-        return self.imageVolume[self._parent.channel][self._parent.zAxisAt]
-
     def currentPoint(self):
         if self.currentPointID is None:
             return None

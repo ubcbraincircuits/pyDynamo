@@ -34,6 +34,9 @@ class FullState:
     # Shared UI position in the Z plane
     zAxisAt = attr.ib(default=0)
 
+    # Whether zAxisAt is absolute (False), or relative to the current point (True)
+    relativeZFromCurrentPoint = attr.ib(default=False)
+
     # Shared color channel information
     channel = attr.ib(default=0)
 

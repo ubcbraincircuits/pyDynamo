@@ -24,13 +24,11 @@ class DendriteOverlay(QWidget):
             if (self.windowIndex < len(fullState.landmarks)):
                 landmarks = fullState.landmarks[self.windowIndex]
             LandmarkPainter(p,
-                fullState.zAxisAt,
                 self.dendriteCanvas.uiState,
                 self.dendriteCanvas.imgView.mapFromScene
             ).drawLandmarks(landmarks, fullState.landmarkPointAt)
         else:
             DendritePainter(p,
-                fullState.zAxisAt,
                 self.dendriteCanvas.uiState,
                 self.dendriteCanvas.imgView.mapFromScene
             ).drawTree(self.dendriteCanvas.uiState._tree)

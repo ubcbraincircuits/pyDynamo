@@ -10,7 +10,7 @@ from .QtImageViewer import QtImageViewer
 from .dendritePainter import DendritePainter
 from .dendriteOverlay import DendriteOverlay
 
-from util import deltaSz, snapToRange
+from util import deltaSz, snapToRange, zStackForUiState
 from files import ImageCache
 
 _IMGCACHE = ImageCache()
@@ -55,8 +55,6 @@ class DendriteVolumeCanvas(QWidget):
 
     def drawImage(self):
         c1, c2 = self.uiState.colorLimits
-        # TODO: use inbuilt clim if possible instead.
-        # imageData = np.array(self.volume[self.uiState.parent().zAxisAt])
         imageData = self.currentImg()
         imageData = imageData / np.amax(imageData)
         imageData = (imageData - c1) / (c2 - c1)
@@ -68,7 +66,8 @@ class DendriteVolumeCanvas(QWidget):
     def mouseClickEvent(self, event, pos):
         try:
             super(DendriteVolumeCanvas, self).mousePressEvent(event)
-            location = (pos.x(), pos.y(), self.uiState.parent().zAxisAt * 1.0)
+            zAt = zStackForUiState(self.uiState) * 1.0
+            location = (pos.x(), pos.y(), zAt)
 
             # Shortcut out landmark mode:
             if self.uiState.parent().inLandmarkMode():
@@ -86,7 +85,7 @@ class DendriteVolumeCanvas(QWidget):
             rightClick = event.button() == Qt.RightButton
             middleClick = event.button() == Qt.MidButton
 
-            pointClicked = self.pointNearPixel(location[0], location[1])
+            pointClicked = self.pointNearPixel(location)
             closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
 
             nearDistWorldSize = self.imgView.toSceneDist(self.uiState.parent().closeToCirclePx())
@@ -144,6 +143,5 @@ class DendriteVolumeCanvas(QWidget):
         except Exception as e:
             print ("Whoops - error on scroll: " + str(e))
 
-    def pointNearPixel(self, x, y, zFilter=True):
-        location = (x, y, self.uiState.parent().zAxisAt * 1.0)
+    def pointNearPixel(self, location, zFilter=True):
         return self.uiState._tree.closestPointTo(location, zFilter)

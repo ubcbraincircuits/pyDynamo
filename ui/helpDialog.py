@@ -66,6 +66,7 @@ HELP_MSG = """
   <li><b>H</b> to show/hide hilighted points</li>
   <li><b>Shift-H</b> to show/hide hide the entire tree</li>
   <li><b>_ (underscore)</b> to flatten all Z-stacks to one image.</li>
+  <li><b>= (equals)</b> to toggle the Z-stack being relative to selected point.</li>
   <li><b>T</b> to tile all the open images on screen</li>
 </ul>
 <h3>Project</h3>

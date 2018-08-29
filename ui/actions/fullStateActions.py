@@ -17,6 +17,12 @@ class FullStateActions():
         for state in self.state.uiStates:
             state.selectPointByID(None if point is None else point.id)
 
+        pointThere = self.state.uiStates[0].currentPoint()
+        if pointThere is not None:
+            self.state.zAxisAt = int(round(pointThere.location[2]))
+        else:
+            self.state.zAxisAt = int(round(point.location[2]))
+
     def addPointToCurrentBranchAndSelect(self, localIdx, location):
         self.history.pushState()
         localState = self.state.uiStates[localIdx]
@@ -74,9 +80,10 @@ class FullStateActions():
         self.selectPoint(localIdx, nextToSelect, avoidPush=True)
 
     def changeZAxis(self, zDelta):
-        # self.history.pushState()
-        # TODO - how to store history on scroll
         self.state.changeZAxis(zDelta)
+
+    def toggleRelativeZ(self):
+        self.state.relativeZFromCurrentPoint = not self.state.relativeZFromCurrentPoint
 
     def nextChannel(self):
         self.history.pushState()
