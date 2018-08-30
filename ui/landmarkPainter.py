@@ -21,9 +21,9 @@ class LandmarkPainter():
     HEADER_PADDING = 20
     HEADER_MAX_WIDTH = 512
 
-    def __init__(self, painter, currentZ, uiState, zoomMapFunc):
+    def __init__(self, painter, uiState, zoomMapFunc):
         self.p = painter
-        self.zAt = currentZ
+        self.zAt = util.zStackForUiState(uiState)
         self.uiState = uiState
         self.zoomMapFunc = zoomMapFunc
         self.branchAt = 0

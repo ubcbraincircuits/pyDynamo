@@ -1,7 +1,9 @@
 import attr
 
 from .options import ProjectOptions
-from .tree import *
+from .tree.branch import Branch
+from .tree.point import Point
+from .tree.tree import Tree
 from .uiState import *
 
 from util import SAVE_META, locationMinus, locationPlus
@@ -31,6 +33,9 @@ class FullState:
 
     # Shared UI position in the Z plane
     zAxisAt = attr.ib(default=0)
+
+    # Whether zAxisAt is absolute (False), or relative to the current point (True)
+    relativeZFromCurrentPoint = attr.ib(default=False)
 
     # Shared color channel information
     channel = attr.ib(default=0)

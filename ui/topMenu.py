@@ -44,6 +44,8 @@ class TopMenu():
         viewMenu.addAction('Show/Hide all branches', self.toggleAllBranches, QtCore.Qt.Key_V)
         viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H)
         viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
+        viewMenu.addAction('Toggle Z being relative to selected point', self.relativeZ, QtCore.Qt.Key_Equal)
+        viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
         viewMenu.addAction('Tile windows on screen', self.tileFigs, QtCore.Qt.Key_T)
         menuBar.addMenu(viewMenu)
 
@@ -147,9 +149,17 @@ class TopMenu():
         self.stackWindow.uiState.hideAll = not self.stackWindow.uiState.hideAll
         self.redraw()
 
+    def relativeZ(self):
+        self._global().fullActions.toggleRelativeZ()
+        self._global().redrawAllStacks()
+
+    def zProject(self):
+        self._local().toggleZProjection()
+
     def tileFigs(self):
         self._global().focusFirstOpenStackWindow()
         tileFigs(self._global().stackWindows)
+
 
     # Help menu callbacks:
     def showHotkeys(self):

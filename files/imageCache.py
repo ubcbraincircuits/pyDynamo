@@ -4,6 +4,8 @@
 
 import numpy as np
 
+import util
+
 from .tiff import tiffRead
 
 class ImageCache:
@@ -30,7 +32,14 @@ class ImageCache:
 
     # Get the current 2D image for a state, using the full state's current channel and Z axis
     def imageForUIState(self, uiState):
-        return self.getVolume(uiState.imagePath)[uiState._parent.channel][uiState._parent.zAxisAt]
+        channelImage = self.getVolume(uiState.imagePath)[uiState._parent.channel]
+        if uiState.zProject:
+            return np.amax(channelImage, axis=0)
+        else:
+            zAt = util.zStackForUiState(uiState)
+            if zAt < 0 or zAt >= channelImage.shape[0]:
+                return np.zeros(channelImage[0].shape)
+            return channelImage[zAt]
 
     # Returns volume for a tif path, possibly loading it first if not yet cached.
     def getVolume(self, path):

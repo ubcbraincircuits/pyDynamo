@@ -19,4 +19,5 @@ def tiffRead(path):
 
     if len(shape) == 3:
         stack = np.expand_dims(stack, axis=0)
+    # stack = np.swapaxes(stack, 1, 2)
     return stack

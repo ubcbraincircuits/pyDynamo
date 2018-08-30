@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.transforms import Bbox
 
 class BaseMatplotlibCanvas(FigureCanvas):
     # Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.).
@@ -46,3 +47,27 @@ class BaseMatplotlibCanvas(FigureCanvas):
                 ax.view_init(elev=-90, azim=-90)
         else:
             self.axes = [self.fig.add_subplot(1, subplots, i + 1) for i in range(subplots)]
+
+    def saveAxesAsPng(self):
+        filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+            "PNG output file", "", "PNG files (*.png)"
+        )
+        if filePath is None or filePath == "":
+            return
+        if not filePath.endswith(".png"):
+            filePath += ".png"
+        for i, ax in enumerate(self.axes):
+            axPath = filePath
+            if len(self.axes) > 1:
+                axPath = filePath.replace('.png', '_%d.png' % (i))
+            self.fig.savefig(axPath, bbox_inches=self._axesExtent(ax))
+
+    def _axesExtent(self, ax, pad=0.0):
+        # For text objects, we need to draw the figure first
+        ax.figure.canvas.draw()
+        items = ax.get_xticklabels() + ax.get_yticklabels()
+        # items += [ax, ax.title, ax.xaxis.label, ax.yaxis.label]
+        items += [ax, ax.title]
+        bbox = Bbox.union([item.get_window_extent() for item in items])
+        bbox = bbox.expanded(1.0 + pad, 1.0 + pad)
+        return bbox.transformed(self.fig.dpi_scale_trans.inverted())

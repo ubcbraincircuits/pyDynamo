@@ -58,6 +58,10 @@ class DendriteCanvasActions():
     def showHotkeys(self):
         showHelpDialog()
 
+    def toggleZProjection(self):
+        self.uiState.zProject = not self.uiState.zProject
+        self.canvas.redraw()
+
     def launch3DView(self):
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
         viewWindow.show()
@@ -100,12 +104,22 @@ class DendriteCanvasActions():
             pointOld = self.uiState.parent().trees[windowIndex-1].rootPoint
 
         # Un-hilight old points
-        for p in pointNew.flattenSubtreePoints():
+        allSubtreePoints = pointNew.flattenSubtreePoints()
+        pointCount = len(allSubtreePoints)
+        for p in allSubtreePoints:
             p.hilighted = False
 
-        self.canvas.stackWindow.statusBar().showMessage("Registering...")
+        # Progress bar! Note: array here as it's edited inside the callback.
+        pointAt = [0]
+        self.canvas.stackWindow.statusBar().showMessage(
+            "Registering...  %d/%d points processed." % (pointAt[0], pointCount))
         self.canvas.stackWindow.repaint()
-        recursiveAdjust(self.uiState.parent(), windowIndex, branch, pointNew, pointOld)
+        def progressUpdate(pointsProcessed):
+            pointAt[0] += pointsProcessed
+            self.canvas.stackWindow.statusBar().showMessage(
+                "Registering...  %d/%d points processed." % (pointAt[0], pointCount))
+
+        recursiveAdjust(self.uiState.parent(), windowIndex, branch, pointNew, pointOld, progressUpdate)
         self.uiState.showHilighted = True
         self.canvas.redraw()
         msg = QMessageBox(QMessageBox.Information, "Registration",

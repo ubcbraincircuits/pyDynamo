@@ -40,15 +40,22 @@ class Motility3DViewWindow(QtWidgets.QMainWindow):
         self.updateButtons()
 
         # Set up menu
-        fileMenu = QtWidgets.QMenu('&View', self)
-        fileMenu.addAction('Show 3D', self.show3D, QtCore.Qt.Key_3)
-        fileMenu.addAction('Show 2D Dendrograms', self.show2D, QtCore.Qt.Key_2)
-        fileMenu.addSeparator()
-        fileMenu.addAction('First Stack', self.firstStack, QtCore.Qt.CTRL + QtCore.Qt.Key_Left)
-        fileMenu.addAction('Previous Stack', self.previous, QtCore.Qt.Key_Left)
-        fileMenu.addAction('Next Stack', self.next, QtCore.Qt.Key_Right)
-        fileMenu.addAction('Last Stack', self.lastStack, QtCore.Qt.CTRL + QtCore.Qt.Key_Right)
+        fileMenu = QtWidgets.QMenu('File', self)
+        fileMenu.addAction('Save images to .png...', self.saveImagesAsPng, QtCore.Qt.CTRL + QtCore.Qt.Key_S)
         self.menuBar().addMenu(fileMenu)
+        
+        viewMenu = QtWidgets.QMenu('View', self)
+        viewMenu.addAction('Show 3D', self.show3D, QtCore.Qt.Key_3)
+        viewMenu.addAction('Show 2D Dendrograms', self.show2D, QtCore.Qt.Key_2)
+        viewMenu.addSeparator()
+        viewMenu.addAction('First Stack', self.firstStack, QtCore.Qt.CTRL + QtCore.Qt.Key_Left)
+        viewMenu.addAction('Previous Stack', self.previous, QtCore.Qt.Key_Left)
+        viewMenu.addAction('Next Stack', self.next, QtCore.Qt.Key_Right)
+        viewMenu.addAction('Last Stack', self.lastStack, QtCore.Qt.CTRL + QtCore.Qt.Key_Right)
+        self.menuBar().addMenu(viewMenu)
+
+    def saveImagesAsPng(self):
+        self.view3D.saveAxesAsPng()
 
     def show3D(self):
         self.view3D.set3D(True)
