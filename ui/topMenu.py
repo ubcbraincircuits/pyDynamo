@@ -74,11 +74,11 @@ class TopMenu():
         self._global().saveToNewFile()
 
     def importFromPreviousStack(self):
-        print (self.stackWindow)
         self._local().importPointsFromLastStack(self.stackWindow.windowIndex)
         self.redraw()
 
     def importFromSWC(self):
+        print ("IMPORT SWC")
         filePath = getOpenFileName(self.stackWindow,
             "Import SWC file", "", "SWC file (*.swc)"
         )
