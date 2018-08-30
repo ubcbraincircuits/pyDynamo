@@ -76,9 +76,10 @@ class QtImageViewer(QGraphicsView):
         self.lastMousePressSec = -1
         self.lastMousePressPos = None
 
-        # HACK - ignore moving view twice when local change gets sent global
+        # HACK - ignore moving view twice when local change gets sent global, or initial zoom.
         self.ignoreScrollChange = False
         self.ignoreGlobalMoveViewRect = False
+        self.onlyPerformLocalViewRect = False
 
         if imageData is not None:
             self.setImage(imageData)
@@ -144,7 +145,9 @@ class QtImageViewer(QGraphicsView):
         """ Maintain current zoom on resize.
         """
         self.forceRepaint()
-        self.zoom(0) # Force image to fit.
+        self.onlyPerformLocalViewRect = True
+        self.zoom(0) # Force image to fit, but only in this screen.
+        self.onlyPerformLocalViewRect = False
         # Note: This means if you slowly resize, it'll gradually zoom out. Not idea, but ok?
 
     def mouseMoveEvent(self, event):
@@ -239,7 +242,8 @@ class QtImageViewer(QGraphicsView):
         self.ignoreGlobalMoveViewRect = True
         if not alreadySetFromScroll:
             self.fitInView(newViewRect, self.aspectRatioMode) # Only set locally if not done already...
-        self.parentView.dynamoWindow.handleDendriteMoveViewRect(newViewRect)
+        if not self.onlyPerformLocalViewRect:
+            self.parentView.dynamoWindow.handleDendriteMoveViewRect(newViewRect)
         self.ignoreGlobalMoveViewRect = False
 
     def handleGlobalMoveViewRect(self, newViewRect):
