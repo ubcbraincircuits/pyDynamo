@@ -48,7 +48,7 @@ HELP_MSG = """
 <ul>
   <li><b>1</b> and <b>2</b> to move through the Z stacks</li>
   <li><b>W, A, S</b> and <b>D</b> to pan around the image</li>
-  <li><b>Z</b> and <b>X</b> to zoom in and out</li>
+  <li><b>X</b> and <b>Z</b> to zoom in and out respectively</li>
 </ul>
 <h3>Contrast</h3>
 <ul>
@@ -56,6 +56,10 @@ HELP_MSG = """
   <li><b>6</b> to reset brightness to default</li>
   <li><b>7</b> and <b>8</b> to change the upper brightness limit</li>
 </ul>
+
+</td><td>
+
+<h1>Shortcuts</h1>
 <h3>View options</h3>
 <ul>
   <li><b>J</b> to cycle different line thicknesses</li>
@@ -65,8 +69,8 @@ HELP_MSG = """
   <li><b>V</b> to show/hide points away from the current Z plane</li>
   <li><b>H</b> to show/hide hilighted points</li>
   <li><b>Shift-H</b> to show/hide hide the entire tree</li>
-  <li><b>_ (underscore)</b> to flatten all Z-stacks to one image.</li>
   <li><b>= (equals)</b> to toggle the Z-stack being relative to selected point.</li>
+  <li><b>_ (underscore)</b> to flatten all Z-stacks to one image.</li>
   <li><b>T</b> to tile all the open images on screen</li>
 </ul>
 <h3>Project</h3>
@@ -77,6 +81,8 @@ HELP_MSG = """
   <li><b>I</b> to import tree structure and locations from the previous stack to the current one</li>
   <li><b>Ctrl-I</b> to import tree structure and locations from an .SWC file</li>
   <li><b>R</b> to adjust the current branch locations based off the branch in the previous stack</li>
+  <li><b>Ctrl-W</b> to close the current stack window</li>
+  <li><b>Ctrl-Shift-W</b> to close all of dynamo.</li>
 </ul>
 
 </td></tr></table>

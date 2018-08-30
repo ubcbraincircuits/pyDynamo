@@ -20,6 +20,7 @@ class TopMenu():
         fileMenu.addSeparator()
         fileMenu.addAction('&Project Settings...', self.openSettings, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_P)
         fileMenu.addAction('Close &Window', self.closeWindow, QtCore.Qt.CTRL + QtCore.Qt.Key_W)
+        fileMenu.addAction('Close Dynamo', self.closeDynamo, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_W)
         menuBar.addMenu(fileMenu)
 
         editMenu = QtWidgets.QMenu('&Edit', stackWindow)
@@ -90,6 +91,9 @@ class TopMenu():
 
     def closeWindow(self):
         self.stackWindow.close()
+
+    def closeDynamo(self):
+        self._global().quit()
 
     # Edit menu callbacks:
     def undo(self):
