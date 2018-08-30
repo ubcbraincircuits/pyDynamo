@@ -42,19 +42,18 @@ class StackListWindow(QtWidgets.QMainWindow):
         # Clear, add all items, and resize to fit:
         self.list.clear()
         for i in range(n):
-            self._addItem(i, p.fullState.filePaths[i], p.stackWindows[i])
+            self._addItem(i, p.fullState.filePaths[i], p.fullState.uiStates[i].isHidden)
         self.list.resize(self.list.sizeHint())
         self.resize(self.list.sizeHint())
 
-    def _addItem(self, idx, filePath, stackWindow):
+    def _addItem(self, idx, filePath, stackHidden):
         """Adds a single row into the list, and attaches events."""
-        stackHidden = stackWindow is None
         title = util.createTitle(idx, filePath)
 
         # Build the widget itself.
         container = QtWidgets.QWidget()
         wText =  QtWidgets.QLabel(title)
-        bViz = QtWidgets.QPushButton("Show " if stackHidden else "Hide")
+        bViz = QtWidgets.QPushButton("Show" if stackHidden else "Hide")
         bDel = QtWidgets.QPushButton("Delete")
         l = QtWidgets.QHBoxLayout()
         l.addWidget(wText)

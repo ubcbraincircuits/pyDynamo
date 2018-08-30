@@ -89,14 +89,10 @@ class DendriteCanvasActions():
             print ("Can't register the first image, nothing to register it against...")
             return
 
-        pointNew, pointOld, branch = None, None, None
-        # Use selected point if one is
-        if self.uiState.currentPointID is not None:
-            pointNew = self.uiState.parent().trees[windowIndex  ].getPointByID(
-                self.uiState.parent().uiStates[windowIndex  ].currentPointID)
-            pointOld = self.uiState.parent().trees[windowIndex-1].getPointByID(
-                self.uiState.parent().uiStates[windowIndex-1].currentPointID)
-            branch = pointNew.parentBranch
+        pointNew = self.uiState.currentPoint()
+        pointOld = self.uiState.currentPoint()
+        branch = None if pointNew is None else pointNew.parentBranch
+
         # Default to root if anything is wrong...
         if pointNew is None or pointOld is None or branch is None:
             branch = None

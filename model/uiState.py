@@ -8,18 +8,6 @@ from .tree.tree import Tree
 
 from util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 
-
-# TODO: Move elsewhere
-def normalizeImage(imageData):
-    imageData = imageData.astype(np.float64) ** 0.8 # Gamma correction
-    for c in range(imageData.shape[0]):
-        for i in range(imageData.shape[1]):
-            d = imageData[c, i]
-            mn = np.percentile(d, 10)
-            mx = np.max(d)
-            imageData[c, i] = 255 * (d - mn) / (mx - mn)
-    return np.round(imageData.clip(min=0)).astype(np.uint8)
-
 @attr.s
 class UIState():
     # Full state this belongs within
@@ -31,11 +19,14 @@ class UIState():
     # Path of image, use ImageCache to obtain actual volume
     imagePath = attr.ib(default=None)
 
-    # ID of currently active branch
-    currentBranchID = attr.ib(default=None)
+    # Whether the stack is shown or hidden
+    isHidden = attr.ib(default=False, metadata=SAVE_META)
 
     # ID of currently active point
     currentPointID = attr.ib(default=None)
+
+    # Cache of the current point
+    _currentPointCache = attr.ib(default=None)
 
     # Whether the current point is being moved (True) or just selected (False)
     isMoving = attr.ib(default=False)
@@ -68,12 +59,17 @@ class UIState():
         return self._parent
 
     def currentBranch(self):
-        return self._tree.getBranchByID(self.currentBranchID)
+        # No branches, or no current point:
+        if len(self._tree.branches) == 0 or self._currentPointCache is None:
+            return None
+        if self._currentPointCache.parentBranch is not None:
+            return self._currentPointCache.parentBranch
+        else:
+            # Root point, to place on first branch.
+            return self._tree.branches
 
     def currentPoint(self):
-        if self.currentPointID is None:
-            return None
-        return self._tree.getPointByID(self.currentPointID)
+        return self._currentPointCache
 
     def deleteBranch(self, branch):
         # Need to remove backwards, as we're removing while we're iterating
@@ -81,6 +77,7 @@ class UIState():
         for i in reverseIndex:
             self.deletePointByID(branch.points[i].id)
         self._tree.removeBranch(branch)
+        self._currentPointCache = None
 
     def changeBrightness(self, lowerDelta, upperDelta):
         self.colorLimits = (
@@ -91,42 +88,34 @@ class UIState():
     ## Local actions to apply only to this stack.
 
     def selectPointByID(self, selectedID, isMove=False):
-        selectedPoint = self._tree.getPointByID(selectedID)
-        if selectedPoint is not None:
-            self.currentPointID = selectedID
-            if selectedPoint.isRoot():
-                if len(self._tree.branches) > 0:
-                    self.currentBranchID = self._tree.branches[0].id
-                else:
-                    self.currentBranchID = None
-            else:
-                self.currentBranchID = selectedPoint.parentBranch.id
+        self._currentPointCache = self._tree.getPointByID(selectedID)
+        if self._currentPointCache is not None:
+            self.currentPointID = self._currentPointCache.id
             self.isMoving = isMove
         else:
             if not isMove:
                 self.currentPointID = None
-                self.currentBranchID = None
                 self.isMoving = False
         self.isReparenting = False
-
 
     def addPointToCurrentBranchAndSelect(self, location, newPointID=None, newBranchID=None):
         newPoint = Point(self.maybeCreateNewID(newPointID), location)
         if self._tree.rootPoint is None:
             self._tree.rootPoint = newPoint
         else:
-            if self.currentBranch() is None:
+            branch = self.currentBranch()
+            if branch is None:
                 if len(self._tree.branches) == 0:
                     # First branch, so create it
                     newBranchID = self.maybeCreateBranchID(newBranchID)
-                    newBranch = Branch(newBranchID, self._tree)
-                    newBranch.setParentPoint(self._tree.rootPoint)
-                    self._tree.addBranch(newBranch)
-                    self.currentBranchID = newBranch.id
+                    branch = Branch(newBranchID, self._tree)
+                    branch.setParentPoint(self._tree.rootPoint)
+                    self._tree.addBranch(branch)
                 else:
                     # We have branches, but none selected, so skip this stack.
                     return None
-            self.currentBranch().addPoint(newPoint)
+            branch.addPoint(newPoint)
+            self._currentPointCache = newPoint
             self.currentPointID = newPoint.id
         return newPoint
 
@@ -143,8 +132,8 @@ class UIState():
         newBranch.addPoint(newPoint)
         # And update the tree.
         self._tree.addBranch(newBranch)
-        self.currentBranchID = newBranch.id
         self.currentPointID = newPoint.id
+        self._currentPointCache = newPoint
         return newPoint, newBranch
 
     def addPointMidBranchAndSelect(self, location):
@@ -185,6 +174,7 @@ class UIState():
 
         branch.insertPointBefore(newPoint, newPointIndex)
         self.currentPointID = newPoint.id
+        self._currentPointCache = newPoint
         # Returns added point, and whether it was before or after the source
         return newPoint, isAfter
 
@@ -197,8 +187,8 @@ class UIState():
         elif isAfter:
             newIndex += 1
         branch.insertPointBefore(newPoint, newIndex)
-        self.currentBranchID = branch.id
         self.currentPointID = newPoint.id
+        self._currentPointCache = newPoint
 
     def deletePointByID(self, pointID):
         if pointID != self._tree.rootPoint.id:
@@ -211,7 +201,6 @@ class UIState():
         # assert self.isMoving and self.currentPointID is not None, "Can only end a move if actually moving a point"
         if self.isMoving and self.currentPointID is not None:
             self._tree.movePoint(self.currentPointID, newLocation, downstream)
-
 
     def maybeCreateNewID(self, newPointID):
         return newPointID if newPointID is not None else self._parent.nextPointID()

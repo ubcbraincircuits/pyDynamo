@@ -12,7 +12,7 @@ def _pointNear(locA, locB):
     return util.deltaSz(locA, locB) < 1e-9
 
 def _init(qtbot):
-    dynamoWindow = DynamoWindow(None, ["dynamo.py"])
+    dynamoWindow = DynamoWindow(None, [])
     dynamoWindow.show()
     qtbot.addWidget(dynamoWindow)
     return dynamoWindow
@@ -39,7 +39,7 @@ def run(qtbot):
 
     # Import SWC from file:
     setNextTestPaths(swc1Path)
-    qtbot.keyClick(sW, 'i', Qt.ControlModifier)
+    qtbot.keyClick(sW, 'i', modifier=Qt.ControlModifier)
 
     assert dW.fullState.trees[0].rootPoint.id == '00000000'
     assert (229.0, 211.0, 25.0) == dW.fullState.trees[0].rootPoint.location
@@ -82,4 +82,6 @@ def run(qtbot):
 
     hilighted = [p.id for p in dW.fullState.trees[1].flattenPoints() if p.hilighted]
     assert ['0000006c', '0000002b'] == hilighted
+
+    dW.quit()
     return True
