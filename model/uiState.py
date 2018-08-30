@@ -31,6 +31,9 @@ class UIState():
     # Path of image, use ImageCache to obtain actual volume
     imagePath = attr.ib(default=None)
 
+    # Whether the stack is shown or hidden
+    isHidden = attr.ib(default=False, metadata=SAVE_META)
+
     # ID of currently active branch
     currentBranchID = attr.ib(default=None)
 

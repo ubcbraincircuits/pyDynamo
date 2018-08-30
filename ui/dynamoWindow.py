@@ -230,24 +230,33 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     sys.exit(0)
                 self.fullState.filePaths[i] = path
 
-            childWindow = StackWindow(
-                i,
-                self.fullState.filePaths[i],
-                self.fullActions,
-                self.fullState.uiStates[i],
-                self
-            )
-            self.stackWindows.append(childWindow)
-            childWindow.show()
+            if self.fullState.uiStates[i].isHidden:
+                self.stackWindows.append(None)
+            else:
+                childWindow = StackWindow(
+                    i,
+                    self.fullState.filePaths[i],
+                    self.fullActions,
+                    self.fullState.uiStates[i],
+                    self
+                )
+                childWindow.show()
+                self.stackWindows.append(childWindow)
+
         QtWidgets.QApplication.processEvents()
         tileFigs(self.stackWindows)
         self.stackList.updateListFromStacks()
-        self.stackWindows[-1].setFocus(True)
+        # Start with focus on the last open window:
+        for lastWindow in reversed(self.stackWindows):
+            if lastWindow is not None:
+                lastWindow.setFocus(True)
+                break
 
     def removeStackWindow(self, windowIndex, deleteData=False):
         if not deleteData:
             # Mark window as none, but keep all the data around:
             self.stackWindows[windowIndex] = None
+            self.fullState.uiStates[windowIndex].isHidden = True
         else:
             self.fullState.removeStack(windowIndex)
             if self.stackWindows[windowIndex] is not None:
@@ -261,7 +270,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     def toggleStackWindowVisibility(self, windowIndex):
         # Recreate the window if it is hidden...
-        if self.stackWindows[windowIndex] is None:
+        if self.fullState.uiStates[windowIndex].isHidden:
+            self.fullState.uiStates[windowIndex].isHidden = False
             self.stackWindows[windowIndex] = StackWindow(
                 windowIndex,
                 self.fullState.filePaths[windowIndex],
@@ -272,6 +282,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.stackWindows[windowIndex].show()
         # Or hide it if not:
         else:
+            self.fullState.uiStates[windowIndex].isHidden = True
             self.stackWindows[windowIndex].ignoreUndoCloseEvent = True
             self.stackWindows[windowIndex].close()
             self.stackWindows[windowIndex] = None
@@ -312,20 +323,48 @@ class DynamoWindow(QtWidgets.QMainWindow):
             lastWindow.ignoreUndoCloseEvent = False
 
         for i in range(len(self.fullState.uiStates)):
+            newHidden = self.fullState.uiStates[i].isHidden
+
             if i < len(self.stackWindows):
-                if self.stackWindows[i] is not None:
-                    self.stackWindows[i].updateState(
-                        self.fullState.filePaths[i], self.fullState.uiStates[i])
+                if newHidden:
+                    # new hidden, old not hidden, so hide old and remove
+                    if self.stackWindows[i] is not None:
+                        self.stackWindows[i].ignoreUndoCloseEvent = True
+                        self.stackWindows[i].close()
+                        self.stackWindows[i] = None
+                    # new hidden, old hidden, so stackWindows[i] stays None
+                    else:
+                        pass
+                else:
+                    # new shown, old shown, so update in-place:
+                    if self.stackWindows[i] is not None:
+                        self.stackWindows[i].updateState(
+                            self.fullState.filePaths[i], self.fullState.uiStates[i])
+                    # new shown, old not shown, so create new:
+                    else:
+                        childWindow = StackWindow(
+                            i,
+                            self.fullState.filePaths[i],
+                            self.fullActions,
+                            self.fullState.uiStates[i],
+                            self
+                        )
+                        childWindow.show()
+                        self.stackWindows[i] = childWindow
             else:
-                childWindow = StackWindow(
-                    i,
-                    self.fullState.filePaths[i],
-                    self.fullActions,
-                    self.fullState.uiStates[i],
-                    self
-                )
-                self.stackWindows.append(childWindow)
-                childWindow.show()
+                if newHidden:
+                    self.stackWindows.append(None)
+                else:
+                    childWindow = StackWindow(
+                        i,
+                        self.fullState.filePaths[i],
+                        self.fullActions,
+                        self.fullState.uiStates[i],
+                        self
+                    )
+                    childWindow.show()
+                    self.stackWindows.append(childWindow)
+
         closeStatus()
         self.stackList.updateListFromStacks()
 
@@ -338,4 +377,3 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 break
         if firstStackWindow is not None:
             firstStackWindow.setFocus(True)
-            #firstStackWindow.setFocus(Qt.ActiveWindowFocusReason)

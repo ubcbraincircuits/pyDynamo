@@ -18,6 +18,9 @@ _IMG_CACHE = files.ImageCache()
 class StackWindow(QtWidgets.QMainWindow):
     def __init__(self, windowIndex, imagePath, fullActions, uiState, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
+
+        assert not uiState.isHidden # Only have windows attached to shown states.
+
         self.windowIndex = windowIndex
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowMinMaxButtonsHint)
@@ -56,6 +59,7 @@ class StackWindow(QtWidgets.QMainWindow):
             self.parent().removeStackWindow(self.windowIndex)
 
     def updateState(self, newFilePath, newUiState):
+        assert not newUiState.isHidden # Only have windows attached to shown states.
         self.imagePath = newFilePath
         self.uiState = newUiState
         self.dendrites.updateState(newUiState)
