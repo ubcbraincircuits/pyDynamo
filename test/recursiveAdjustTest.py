@@ -1,16 +1,14 @@
 import numpy as np
 
-from files import tiffRead
-from model import normalizeImage
+from files import tiffRead, ImageCache
 
 from model.recursiveAdjust import _imgGaussian, _affineError, _registerImages
 
-def test():
-    oldImg = tiffRead('data/testNeuron/R_Live1-1-2002_03-24-20.tif')
-    newImg = tiffRead('data/testNeuron/R_Live1-1-2002_04-06-27.tif')
+_IMAGE_CACHE = ImageCache()
 
-    oldImg = normalizeImage(oldImg)
-    newImg = normalizeImage(newImg)
+def test():
+    oldImg = _IMAGE_CACHE.getVolume('data/testNeuron/R_Live1-1-2002_03-24-20.tif')
+    newImg =  _IMAGE_CACHE.getVolume('data/testNeuron/R_Live1-1-2002_04-06-27.tif')
 
     oldVolume = oldImg[0, 46:55, 756:817, 128:189] # ZYX
     newVolume = newImg[0, 48:57, 776:837, 120:181] # ZYX

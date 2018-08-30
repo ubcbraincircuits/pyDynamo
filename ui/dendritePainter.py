@@ -44,7 +44,9 @@ class DendritePainter():
         if self.uiState.hideAll:
             return # Hidden, no paint for you.
 
-        selectedPointID = self.uiState.currentPointID
+        selectedPoint = self.uiState.currentPoint()
+        selectedPointID = None if selectedPoint is None else selectedPoint.id
+        
         for branch in tree.branches:
             self.drawBranchLines(branch)
             self.branchAt = self.branchAt + 1
