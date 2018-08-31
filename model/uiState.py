@@ -22,6 +22,9 @@ class UIState():
     # Whether the stack is shown or hidden
     isHidden = attr.ib(default=False, metadata=SAVE_META)
 
+    # Which z Axis to display
+    zAxisAt = attr.ib(default=0, metadata=SAVE_META)
+
     # ID of currently active point
     currentPointID = attr.ib(default=None)
 

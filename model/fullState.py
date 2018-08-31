@@ -6,7 +6,9 @@ from .tree.point import Point
 from .tree.tree import Tree
 from .uiState import *
 
-from util import SAVE_META, locationMinus, locationPlus
+from util import SAVE_META, ImageCache, locationMinus, locationPlus
+
+_IMG_CACHE = ImageCache()
 
 @attr.s
 class FullState:
@@ -32,7 +34,7 @@ class FullState:
     volumeSize = attr.ib(default=None)
 
     # Shared UI position in the Z plane
-    zAxisAt = attr.ib(default=0)
+    # zAxisAt = attr.ib(default=0)
 
     # Whether zAxisAt is absolute (False), or relative to the current point (True)
     relativeZFromCurrentPoint = attr.ib(default=False)
@@ -98,8 +100,26 @@ class FullState:
         else:
             self.dotSize += 2
 
-    def changeZAxis(self, delta):
-        self.zAxisAt = snapToRange(self.zAxisAt + delta, 0, self.volumeSize[1] - 1)
+    def changeAllZAxis(self, delta):
+        delta = int(round(delta))
+
+        scrollForwards, scrollBackwards = None, None
+        for uiState in self.uiStates:
+            uiState.zAxisAt += delta
+            zCount = _IMG_CACHE.getVolume(uiState.imagePath).shape[1] # C, Z, X, Y
+            if scrollForwards is None:
+                scrollForwards, scrollBackwards = -uiState.zAxisAt, uiState.zAxisAt + 1 - zCount
+            else:
+                scrollForwards = min(scrollForwards, -uiState.zAxisAt)
+                scrollBackwards = min(scrollBackwards, uiState.zAxisAt + 1 - zCount)
+
+        # If scrolling past the ends, snap back:
+        if scrollForwards > 0:
+            for uiState in self.uiStates:
+                uiState.zAxisAt += scrollForwards
+        elif scrollBackwards > 0:
+            for uiState in self.uiStates:
+                uiState.zAxisAt -= scrollBackwards
 
     def changeChannel(self, delta):
         self.channel = (self.channel + delta) % self.volumeSize[0]
@@ -144,7 +164,6 @@ class FullState:
         # So Loc_target = PB_target + (Loc_source - PB_source)
         sourceDelta = locationMinus(sourceLocation, sourcePointBefore.location)
         return locationPlus(targetPointBefore.location, sourceDelta)
-
 
     def analogousPoint(self, sourcePoint, sourceID, targetID):
         if sourcePoint is None or sourceID == targetID:

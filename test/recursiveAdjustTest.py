@@ -1,6 +1,6 @@
 import numpy as np
 
-from files import tiffRead, ImageCache
+from util import ImageCache, tiffRead
 
 from model.recursiveAdjust import _imgGaussian, _affineError, _registerImages
 

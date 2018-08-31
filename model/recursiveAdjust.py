@@ -5,11 +5,10 @@ from scipy.ndimage.filters import gaussian_filter
 from skimage import transform as tf
 
 import util
-from files.imageCache import ImageCache
 
 WARP_MODE = 'edge'
 
-_IMG_CACHE = ImageCache()
+_IMG_CACHE = util.ImageCache()
 
 def centreRotation(shape, R, T):
     (x, y) = shape

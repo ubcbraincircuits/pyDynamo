@@ -10,8 +10,7 @@ from .QtImageViewer import QtImageViewer
 from .dendritePainter import DendritePainter
 from .dendriteOverlay import DendriteOverlay
 
-from util import deltaSz, snapToRange, zStackForUiState
-from files import ImageCache
+from util import ImageCache, deltaSz, snapToRange, zStackForUiState
 
 _IMGCACHE = ImageCache()
 
@@ -138,7 +137,7 @@ class DendriteVolumeCanvas(QWidget):
             scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
             if self.INVERT_SCROLL:
                 scrollDelta *= -1
-            self.fullActions.changeZAxis(scrollDelta)
+            self.fullActions.changeAllZAxis(scrollDelta)
             self.dynamoWindow.redrawAllStacks()
         except Exception as e:
             print ("Whoops - error on scroll: " + str(e))

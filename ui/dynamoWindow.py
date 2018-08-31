@@ -152,11 +152,11 @@ class DynamoWindow(QtWidgets.QMainWindow):
         shftPressed = (event.modifiers() & Qt.ShiftModifier)
 
         if (key == ord('1')):
-            self.fullActions.changeZAxis(1)
+            self.fullActions.changeAllZAxis(1)
             self.redrawAllStacks()
             return True
         elif (key == ord('2')):
-            self.fullActions.changeZAxis(-1)
+            self.fullActions.changeAllZAxis(-1)
             self.redrawAllStacks()
             return True
         elif (key == ord('L')):

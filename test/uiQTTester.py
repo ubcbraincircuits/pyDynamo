@@ -30,6 +30,7 @@ progversion = "0.1"
 
 from calc import absorient
 import files
+import util
 
 n = 5
 POINTS = np.random.rand(n, 3)
@@ -151,7 +152,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         l = QtWidgets.QVBoxLayout(self.main_widget)
 
-        hackVolume = files.tiffRead('data/Live4-1-2015_09-16-03.tif')
+        hackVolume = util.tiffRead('data/Live4-1-2015_09-16-03.tif')
         hackVolume = np.array(hackVolume[:int(len(hackVolume) / 2)])
         hackVolume = hackVolume[::2, ::16, ::16]
         hackVolume = (hackVolume - hackVolume.min()) / (hackVolume.max() - hackVolume.min())
