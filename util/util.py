@@ -79,12 +79,9 @@ def sortedBranchIDList(trees):
 def createTitle(index, path):
     return "[%d] - %s" % (index + 1, os.path.basename(path))
 
-# When using relative Z, offset each uiState to make sure the selected points are shown
+# When using relative Z, each uiState has its own Z - otherwise, all share the first state's Z.
 def zStackForUiState(uiState):
-    zAt = uiState._parent.zAxisAt
     if uiState._parent.relativeZFromCurrentPoint:
-        herePoint = uiState.currentPoint()
-        therePoint = uiState._parent.uiStates[0].currentPoint()
-        if herePoint is not None and therePoint is not None:
-            zAt = int(round(zAt - therePoint.location[2] + herePoint.location[2]))
-    return zAt
+        return uiState.zAxisAt
+    else:
+        return uiState._parent.uiStates[0].zAxisAt

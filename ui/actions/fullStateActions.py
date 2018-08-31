@@ -16,12 +16,16 @@ class FullStateActions():
             self.history.pushState()
         for state in self.state.uiStates:
             state.selectPointByID(None if point is None else point.id)
-
+            selected = state.currentPoint()
+            if selected is not None:
+                state.zAxisAt = int(round(selected.location[2]))
+        """
         pointThere = self.state.uiStates[0].currentPoint()
         if pointThere is not None:
             self.state.zAxisAt = int(round(pointThere.location[2]))
         else:
             self.state.zAxisAt = int(round(point.location[2]))
+        """
 
     def addPointToCurrentBranchAndSelect(self, localIdx, location):
         self.history.pushState()
@@ -79,8 +83,8 @@ class FullStateActions():
                 nextToSelect = next
         self.selectPoint(localIdx, nextToSelect, avoidPush=True)
 
-    def changeZAxis(self, zDelta):
-        self.state.changeZAxis(zDelta)
+    def changeAllZAxis(self, zDelta):
+        self.state.changeAllZAxis(zDelta)
 
     def toggleRelativeZ(self):
         self.state.relativeZFromCurrentPoint = not self.state.relativeZFromCurrentPoint

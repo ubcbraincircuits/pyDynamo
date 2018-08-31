@@ -13,7 +13,7 @@ from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
 from .topMenu import TopMenu
 
-_IMG_CACHE = files.ImageCache()
+_IMG_CACHE = util.ImageCache()
 
 class StackWindow(QtWidgets.QMainWindow):
     def __init__(self, windowIndex, imagePath, fullActions, uiState, parent):

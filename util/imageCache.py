@@ -3,10 +3,26 @@
 """
 
 import numpy as np
+from tifffile import TiffFile
 
 import util
 
-from .tiff import tiffRead
+# libtiff.libtiff_ctypes.suppress_warnings()
+
+def tiffRead(path):
+    # First use tifffile to get channel data (not supported by libtiff?)
+    shape, stack = None, None
+    with TiffFile(path) as tif:
+        shape = tif.asarray().shape
+        stack = tif.asarray()
+    nChannels = shape[0] if len(shape) == 4 else 1
+    print ("TIF shape: %s" % str(shape))
+
+    if len(shape) == 3:
+        stack = np.expand_dims(stack, axis=0)
+    # stack = np.swapaxes(stack, 1, 2)
+    return stack
+
 
 class ImageCache:
     """Singleton cache mapping .tif file path to Image volumes.
