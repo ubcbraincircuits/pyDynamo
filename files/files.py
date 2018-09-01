@@ -117,6 +117,7 @@ def indexFullState(fullState, path):
         state._parent = fullState
         state._tree = fullState.trees[i]
         state._tree._parentState = state
+        state.imagePath = fullState.filePaths[i]
     fullState._nextPointID = findNextPointID(fullState)
     fullState._nextBranchID = findNextBranchID(fullState)
     fullState._rootPath = path

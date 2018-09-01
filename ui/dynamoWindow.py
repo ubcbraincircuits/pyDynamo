@@ -229,6 +229,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     QtWidgets.QApplication.quit()
                     sys.exit(0)
                 self.fullState.filePaths[i] = path
+                self.fullState.uiStates[i].imagePath = path
 
             if self.fullState.uiStates[i].isHidden:
                 self.stackWindows.append(None)
