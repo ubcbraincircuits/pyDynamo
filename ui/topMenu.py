@@ -16,7 +16,8 @@ class TopMenu():
         fileMenu.addAction('Save As...', self.saveAs, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_S)
         fileMenu.addSeparator()
         fileMenu.addAction('Import from previous stack', self.importFromPreviousStack, QtCore.Qt.Key_I)
-        fileMenu.addAction('Import from SWC', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
+        fileMenu.addAction('Import from SWC...', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
+        fileMenu.addAction('Export to SWC...', self.exportToSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_E)
         fileMenu.addSeparator()
         fileMenu.addAction('&Project Settings...', self.openSettings, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_P)
         fileMenu.addAction('Close &Window', self.closeWindow, QtCore.Qt.CTRL + QtCore.Qt.Key_W)
@@ -78,13 +79,15 @@ class TopMenu():
         self.redraw()
 
     def importFromSWC(self):
-        print ("IMPORT SWC")
         filePath = getOpenFileName(self.stackWindow,
             "Import SWC file", "", "SWC file (*.swc)"
         )
         if filePath is not None and filePath is not '':
             self._local().importPointsFromSWC(self.stackWindow.windowIndex, filePath)
             self.redraw()
+
+    def exportToSWC(self):
+        self._global().exportToSWC()
 
     def openSettings(self):
         self._global().openSettings()
