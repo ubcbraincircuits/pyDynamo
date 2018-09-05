@@ -25,7 +25,6 @@ class StackWindow(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowMinMaxButtonsHint)
 
-        # TODO - option for when imagePath=None, have a button to load an image?
         assert imagePath is not None
         self.imagePath = imagePath
         uiState.imagePath = imagePath

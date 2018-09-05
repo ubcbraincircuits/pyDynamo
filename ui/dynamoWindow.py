@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.Qt import Qt
 
 from model import FullState, Tree, UIState, History
-from files import AutoSaver, loadState, saveState, importFromMatlab
+from files import AutoSaver, loadState, saveState, importFromMatlab, exportToSWC
 from util.testableFilePicker import getOpenFileName
 
 import os
@@ -144,6 +144,18 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.fullState._rootPath = filePath
             saveState(self.fullState, filePath)
             QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + filePath)
+
+    def exportToSWC(self):
+        dirPath = QtWidgets.QFileDialog.getExistingDirectory(self,
+            "Folder for SWC files", ""
+        )
+        if dirPath is not None and dirPath is not '':
+            for path, tree in zip(self.fullState.filePaths, self.fullState.trees):
+                childPath = os.path.basename(path)
+                childPath = childPath.replace(".tif", "").replace(".tiff", "")
+                childPath = childPath + ".swc"
+                exportToSWC(dirPath, childPath, tree, self.fullState)
+        QtWidgets.QMessageBox.information(self, "Save complete", "SWC files saved!")
 
     # Global key handler for actions shared between all stack windows
     def childKeyPress(self, event, childWindow):
