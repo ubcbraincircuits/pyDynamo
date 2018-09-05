@@ -68,6 +68,7 @@ class BaseMatplotlibCanvas(FigureCanvas):
         items = ax.get_xticklabels() + ax.get_yticklabels()
         # items += [ax, ax.title, ax.xaxis.label, ax.yaxis.label]
         items += [ax, ax.title]
+        # items = [ax]
         bbox = Bbox.union([item.get_window_extent() for item in items])
         bbox = bbox.expanded(1.0 + pad, 1.0 + pad)
         return bbox.transformed(self.fig.dpi_scale_trans.inverted())
