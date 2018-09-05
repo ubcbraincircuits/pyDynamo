@@ -57,6 +57,13 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
     def compute_initial_figure(self):
         SZ_FACTOR = self.sizeFactor
 
+        xminD, xmaxD, yminD, ymaxD = 0, 0, 0, 0
+        if self.dendrogram:
+            allX = [x for treeX in self.dendrogramX for x in treeX.values()]
+            allY = [y for treeY in self.dendrogramY for y in treeY.values()]
+            xminD, xmaxD = np.min(allX), np.max(allX)
+            yminD, ymaxD = np.min(allY), np.max(allY)
+
         # Update colors to be white on black:
         print ("")
         for offset, ax in enumerate(self.axes):
@@ -195,6 +202,11 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                 ax.set_xlim3d(xM - r, xM + r)
                 ax.set_ylim3d(yM - r, yM + r)
                 ax.set_zlim3d(zM - r, zM + r)
+            else:
+                xM, yM = (xmaxD + xminD) / 2, (ymaxD + yminD) / 2
+                xR, yR = (0.5 * (xmaxD - xminD) * 1.1), (0.5 * (ymaxD - yminD) * 1.1)
+                ax.set_xlim(xM - xR, xM + xR)
+                ax.set_ylim(yM - yR, yM + yR)
 
     def needToUpdate(self):
         for ax in self.axes:
