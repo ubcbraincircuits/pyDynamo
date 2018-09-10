@@ -210,6 +210,11 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
         self.maybeAutoSave()
 
+    # Find a point or branch by ID:
+    def findByID(self, pointOrBranchID):
+        self.fullActions.findPointOrBranch(pointOrBranchID)
+        self.redrawAllStacks()
+
     # Make the settings dialog visible:
     def openSettings(self):
         self.settingsWindow.openFromState(self.fullState)

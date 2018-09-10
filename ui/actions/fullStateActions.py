@@ -19,13 +19,26 @@ class FullStateActions():
             selected = state.currentPoint()
             if selected is not None:
                 state.zAxisAt = int(round(selected.location[2]))
-        """
-        pointThere = self.state.uiStates[0].currentPoint()
-        if pointThere is not None:
-            self.state.zAxisAt = int(round(pointThere.location[2]))
-        else:
-            self.state.zAxisAt = int(round(point.location[2]))
-        """
+
+    def findPointOrBranch(self, pointOrBranchID):
+        selectedPoint = None
+        for tree in self.state.trees:
+            # Check point ID first.
+            selectedPoint = tree.getPointByID(pointOrBranchID)
+            if selectedPoint is None:
+                # Not a point, check branch.
+                selectedBranch = tree.getBranchByID(pointOrBranchID)
+                if selectedBranch is not None and len(selectedBranch) > 0:
+                    selectedPoint = selectedBranch.points[0]
+            if selectedPoint is not None:
+                break
+
+        # Found something to select, so pick it and finish
+        if selectedPoint is not None:
+            self.selectPoint(0, selectedPoint, avoidPush=True)
+            return
+
+
 
     def addPointToCurrentBranchAndSelect(self, localIdx, location):
         self.history.pushState()
