@@ -183,6 +183,32 @@ class Tree():
             x.append(pAt[0]), y.append(pAt[1]), z.append(pAt[2])
         return x, y, z
 
+    def spatialAndTreeDist(self, p1, p2):
+        """Given two points in the tree, return both the 3D spatial distance,
+        as well as how far to travel along the tree."""
+        x, y, z = self.worldCoordPoints([p1, p2])
+        p1Location = (x[0], y[0], z[0])
+        p2Location = (x[1], y[1], z[1])
+        spatialDist = util.deltaSz(p1Location, p2Location)
+
+        path1, path2 = p1.pathFromRoot(), p2.pathFromRoot()
+        lastMatch = 0
+        while lastMatch < len(path1) and lastMatch < len(path2) and path1[lastMatch].id == path2[lastMatch].id:
+            lastMatch += 1
+        lastMatch -= 1
+        path1X, path1Y, path1Z = self.worldCoordPoints(path1[lastMatch:])
+        path2X, path2Y, path2Z = self.worldCoordPoints(path2[lastMatch:])
+        treeDist = 0.0
+        for i in range(len(path1X) - 1):
+            p1 = (path1X[ i ], path1Y[ i ], path1Z[ i ])
+            p2 = (path1X[i+1], path1Y[i+1], path1Z[i+1])
+            treeDist += util.deltaSz(p1, p2)
+        for i in range(len(path2X) - 1):
+            p1 = (path2X[ i ], path2Y[ i ], path2Z[ i ])
+            p2 = (path2X[i+1], path2Y[i+1], path2Z[i+1])
+            treeDist += util.deltaSz(p1, p2)
+        return spatialDist, treeDist
+
     def _recursiveMovePointDelta(self, point, delta):
         """Recursively move a point, plus all its children and later neighbours."""
         point.location = util.locationPlus(point.location, delta)

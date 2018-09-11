@@ -70,3 +70,12 @@ class Point():
     def subtreeContainsID(self, pointID):
         """Whether the given point ID exists anywhere further down the tree."""
         return pointID in [p.id for p in self.flattenSubtreePoints()]
+
+    def pathFromRoot(self):
+        """Points in order to get from the root to this point."""
+        points = []
+        pointAt = self
+        while pointAt is not None:
+            points.append(pointAt)
+            pointAt = pointAt.nextPointInBranch(delta=-1)
+        return list(reversed(points))
