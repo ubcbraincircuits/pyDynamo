@@ -69,7 +69,7 @@ class UIState():
             return self._currentPointCache.parentBranch
         else:
             # Root point, to place on first branch.
-            return self._tree.branches
+            return self._tree.branches[0]
 
     def currentPoint(self):
         return self._currentPointCache
