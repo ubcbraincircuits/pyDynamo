@@ -218,12 +218,12 @@ class QtImageViewer(QGraphicsView):
         QGraphicsView.mouseDoubleClickEvent(self, event)
 
     def wheelEvent(self, event):
-        # HACK
+        # Shift-scroll = zoom in/out of image.
+        # Without shift (i.e. normal scroll) handled by DendriteVolumeCanvas
         modifiers = QApplication.keyboardModifiers()
         if modifiers & Qt.ShiftModifier:
             self.handleZoomScroll(event.angleDelta().y())
-        else:
-            self.parentView.wheelEvent(event)
+            event.accept()
 
     def handleZoomScroll(self, yDelta):
         self.zoom(-yDelta / SCROLL_SENSITIVITY)

@@ -28,6 +28,8 @@ class TopMenu():
         editMenu.addAction('Undo', self.undo, QtCore.Qt.CTRL + QtCore.Qt.Key_Z)
         editMenu.addAction('Redo', self.redo, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_Z)
         editMenu.addSeparator()
+        editMenu.addAction('Find', self.find, QtCore.Qt.CTRL + QtCore.Qt.Key_F)
+        editMenu.addSeparator()
         editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R)
         editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R)
         menuBar.addMenu(editMenu)
@@ -104,6 +106,12 @@ class TopMenu():
 
     def redo(self):
         self._global().updateUndoStack(isRedo=True, originWindow=self.stackWindow)
+
+    def find(self):
+        pointOrBranchID, okPressed = QtWidgets.QInputDialog.getText(self.stackWindow,
+            "Find by ID", "Point or Branch ID:", QtWidgets.QLineEdit.Normal, "")
+        if okPressed:
+            self._global().findByID(pointOrBranchID)
 
     def register(self):
         self._local().registerImages(self.stackWindow.windowIndex)

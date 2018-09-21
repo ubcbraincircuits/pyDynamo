@@ -182,8 +182,8 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                 print ("  - #Added        = %d" % np.sum(self.added[treeIdx-1]))
                 print ("  - #Subtracted   = %d" % np.sum(self.subtracted[treeIdx-1]))
                 print ("  - #Transitioned = %d" % np.sum(self.transitioned[treeIdx-1]))
-                print ("  - #Grown        = %d" % growCount)
-                print ("  - #Shrunk       = %d" % shrinkCount)
+                print ("  - #Extensions        = %d" % growCount)
+                print ("  - #Retractions       = %d" % shrinkCount)
 
             # And finally draw the soma as a big sphere (if present):
             if treeModel.rootPoint is not None:
