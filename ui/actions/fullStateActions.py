@@ -99,9 +99,6 @@ class FullStateActions():
     def changeAllZAxis(self, zDelta):
         self.state.changeAllZAxis(zDelta)
 
-    def toggleRelativeZ(self):
-        self.state.relativeZFromCurrentPoint = not self.state.relativeZFromCurrentPoint
-
     def nextChannel(self):
         self.history.pushState()
         self.state.changeChannel(1)

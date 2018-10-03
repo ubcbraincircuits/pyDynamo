@@ -24,7 +24,7 @@ def UINT8_WARP(image, transform):
     assert warpDouble.dtype == np.float64
     return np.round(warpDouble * 255).astype(np.uint8)
 
-def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=30, Rz=4):
+def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz=4):
     """
     recursively adjusts points, i.e. the 'R' function
     id       -image on which to adjust (reference is id-1)
@@ -188,9 +188,8 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=False):
     movingImgSmooth = _imgGaussian(movingImg, 1.5)
     staticImgSmooth = _imgGaussian(staticImg, 1.5)
 
-    # % Set initial affine parameters
-    # x = [0, 0, 0]
-    x = [0.5761, -5.8860, -0.1057]
+    # Set initial affine parameters
+    x = [0, 0, 0]
 
     def _affineRegistrationError(x):
         return _affineError(x, movingImgSmooth, staticImgSmooth)
@@ -217,6 +216,7 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=False):
     M = trans.params
     warpedImgSmooth = UINT8_WARP(movingImgSmooth, trans)
     fval = _imageDifference(staticImgSmooth, warpedImgSmooth)
+    # TODO: use _affineError(x, movingImgSmooth, staticImgSmooth) to include displacement penalty?
 
     x, y = np.meshgrid(range(movingImg.shape[0]), range(movingImg.shape[1]))
     xd = x - (movingImg.shape[0]/2)
@@ -231,9 +231,15 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=False):
         title = "Best: %s (score %f)" % (str(res.x), fval)
         f, (ax1, ax2, ax3) = plt.subplots(1, 3)
         f.suptitle(title)
-        ax1.imshow(movingImgSmooth.astype(np.float), cmap='gray')
-        ax2.imshow(staticImgSmooth.astype(np.float), cmap='gray')
-        ax3.imshow(UINT8_WARP(movingImgSmooth, trans), cmap='gray')
+        img1 = np.copy(movingImgSmooth.astype(np.float))
+        img2 = np.copy(staticImgSmooth.astype(np.float))
+        img3 = np.copy(UINT8_WARP(movingImgSmooth, trans))
+        img1[img1.shape[0] // 2, img1.shape[1] // 2] = 1.0
+        img2[img2.shape[0] // 2, img2.shape[1] // 2] = 1.0
+        img3[img3.shape[0] // 2, img3.shape[1] // 2] = 255
+        ax1.imshow(img1, cmap='gray')
+        ax2.imshow(img2, cmap='gray')
+        ax3.imshow(img3, cmap='gray')
         plt.show()
 
     return Bx, By, angle, fval
@@ -248,9 +254,15 @@ def _affineError(par,I1,I2,drawTitle=None):
     if drawTitle is not None:
         f, (ax1, ax2, ax3) = plt.subplots(1, 3)
         f.suptitle(drawTitle)
-        ax1.imshow(I1.astype(np.float), cmap='gray')
-        ax2.imshow(I2.astype(np.float), cmap='gray')
-        ax3.imshow(warpedImg.astype(np.float), cmap='gray')
+        img1 = np.copy(I1.astype(np.float))
+        img2 = np.copy(I2.astype(np.float))
+        img3 = np.copy(warpedImg.astype(np.float))
+        img1[img1.shape[0] // 2, img1.shape[1] // 2] = 1.0
+        img2[img2.shape[0] // 2, img2.shape[1] // 2] = 1.0
+        img3[img3.shape[0] // 2, img3.shape[1] // 2] = 1.0
+        ax1.imshow(img1, cmap='gray')
+        ax2.imshow(img2, cmap='gray')
+        ax3.imshow(img3, cmap='gray')
         plt.show()
 
     errorScale = 1 + 0.1 * np.sqrt(par[0] ** 2 + par[1] ** 2)

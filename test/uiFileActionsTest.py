@@ -71,13 +71,17 @@ def run(qtbot):
     assert 23 == len(dW.fullState.trees[1].branches)
     assert 194 == len(dW.fullState.trees[1].flattenPoints())
 
-    # Register, make sure points have moved!
+    # Register, make sure points have moved back!
     qtbot.keyClick(dW.stackWindows[1], 'r')
+    print (dW.fullState.trees[1].rootPoint.location)
+    print (dW.fullState.trees[1].branches[5].points[2].location)
+
+    # Back near where we started...
     assert _pointNear(
-        (229.0112843123887, 211.00676163998858, 25.0),
+        (229.0, 211.0, 25.0),
         dW.fullState.trees[1].rootPoint.location)
     assert _pointNear(
-        (277.5048473944195, 287.93487362244144, 20.1444),
+        (277.04, 288.029, 20.1444),
         dW.fullState.trees[1].branches[5].points[2].location)
 
     hilighted = [p.id for p in dW.fullState.trees[1].flattenPoints() if p.hilighted]

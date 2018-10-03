@@ -33,12 +33,6 @@ class FullState:
     # Size of volume (# channels, x, y, z), needs to be the same between stacks
     volumeSize = attr.ib(default=None)
 
-    # Shared UI position in the Z plane
-    # zAxisAt = attr.ib(default=0)
-
-    # Whether zAxisAt is absolute (False), or relative to the current point (True)
-    relativeZFromCurrentPoint = attr.ib(default=False)
-
     # Shared color channel information
     channel = attr.ib(default=0)
 

@@ -90,7 +90,7 @@ class DendriteCanvasActions():
             return
 
         pointNew = self.uiState.currentPoint()
-        pointOld = self.uiState.currentPoint()
+        pointOld = self.uiState.parent().uiStates[windowIndex-1].currentPoint()
         branch = None if pointNew is None else pointNew.parentBranch
 
         # Default to root if anything is wrong...
