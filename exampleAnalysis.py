@@ -45,7 +45,8 @@ def runBranchAnalysis(path=None):
     # List of analysis functions to produce answers across each tree:
     toRun = [
         branchLengths,
-        branchType
+        branchType,
+        branchHasAnnotationFunc('axon'),
     ]
     # Named arguments passed in to the functions
     arguments = {
@@ -111,5 +112,5 @@ if __name__ == '__main__':
     # Path is first command-line argument, if provided.
     path = sys.argv[1] if len(sys.argv) > 1 else None
     # runTreeAnalysis(path)
-    # runBranchAnalysis(path)
-    runFiloTipCluster(path)
+    runBranchAnalysis(path)
+    # runFiloTipCluster(path)

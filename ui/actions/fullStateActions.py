@@ -38,8 +38,6 @@ class FullStateActions():
             self.selectPoint(0, selectedPoint, avoidPush=True)
             return
 
-
-
     def addPointToCurrentBranchAndSelect(self, localIdx, location):
         self.history.pushState()
         localState = self.state.uiStates[localIdx]
@@ -179,3 +177,27 @@ class FullStateActions():
             # tolist() as state should not have (unsavable) numpy data
             self.state.trees[i].transform.rotation = R.tolist()
             self.state.trees[i].transform.translation = T.tolist()
+
+    def getAnnotation(self, localIdx, window, copyToAllPoints):
+        self.history.pushState()
+        localState = self.state.uiStates[localIdx]
+        currentPoint = localState.currentPoint()
+        if currentPoint is None:
+            return
+
+        title = "Annotate point" + (" in all later stacks" if copyToAllPoints else "")
+        text, okPressed = QtWidgets.QInputDialog.getText(window,
+            title, "Enter annotation:", QtWidgets.QLineEdit.Normal, currentPoint.annotation)
+        if okPressed:
+            if copyToAllPoints:
+                localID = currentPoint.id
+                for i in range(localIdx, len(self.state.trees)):
+                    selectedPoint = self.state.trees[i].getPointByID(localID)
+                    if selectedPoint is not None:
+                        old = selectedPoint.annotation
+                        if old is None or old == "" or text.startswith(old) or old.startswith(text):
+                            selectedPoint.annotation = text
+                        else:
+                            selectedPoint.annotation += " " + text
+            else:
+                currentPoint.annotation = text
