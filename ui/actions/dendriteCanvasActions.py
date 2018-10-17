@@ -46,15 +46,6 @@ class DendriteCanvasActions():
             self.uiState.changeBrightness(lower * self.COLOR_SENSITIVITY, upper * self.COLOR_SENSITIVITY)
         self.canvas.redraw()
 
-    def getAnnotation(self, window):
-        currentPoint = self.uiState.currentPoint()
-        if currentPoint is None:
-            return
-        text, okPressed = QInputDialog.getText(window,
-            "Annotate point", "Enter annotation:", QLineEdit.Normal, currentPoint.annotation)
-        if okPressed:
-            currentPoint.annotation = text
-
     def showHotkeys(self):
         showHelpDialog()
 

@@ -120,7 +120,11 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.dendrites.uiState.showIDs = False
                 self.redraw()
             elif (key == ord('Q')):
-                self.actionHandler.getAnnotation(self)
+                self.fullActions.getAnnotation(self.windowIndex, self, shftPressed)
+                if shftPressed:
+                    self.parent().redrawAllStacks()
+                else:
+                    self.redraw()
             elif (key == QtCore.Qt.Key_Delete):
                 toDelete = self.uiState.currentPoint()
                 if toDelete is None:
