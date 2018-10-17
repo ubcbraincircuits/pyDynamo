@@ -54,12 +54,16 @@ class Branch():
         """Whether the branch has no points other than the branch point."""
         return len(self.points) == 0
 
+    def hasPointWithAnnotation(self, annotation):
+        """Whether any point directly on this branch has a given annotation."""
+        return util.lastPointWithLabelIdx([self.parentPoint] + self.points, annotation) >= 0
+
     def isAxon(self, axonLabel='axon'):
         """Whether the branch is labelled as the axon."""
-        return util.lastPointWithLabelIdx([self.parentPoint] + self.points, axonLabel) >= 0
+        return self.hasPointWithAnnotation(axonLabel)
 
     def isBasal(self, basalLabel='basal'):
-        return util.lastPointWithLabelIdx([self.parentPoint] + self.points, basalLabel) >= 0
+        return self.hasPointWithAnnotation(basalLabel)
 
     def hasChildren(self):
         """True if any point on the branch has child branches coming off it."""
