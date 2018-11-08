@@ -46,16 +46,36 @@ class Point():
 
     def nextPointInBranch(self, delta=1):
         """Walks a distance along the branch and returns the sibling."""
+        if delta == 0:
+            return self
+
         if self.parentBranch is None:
-            return None # Root point alone in branch.
+            if delta < 0:
+                # Root point has none before
+                return None
+            else:
+                # Walk down to first branch.
+                if len(self.children) > 0 and len(self.children[0].points) > 0:
+                    return self.children[0].points[0].nextPointInBranch(delta - 1)
+
         idx = self.indexInParent()
         nextIdx = idx + delta
         if nextIdx == -1:
             return self.parentBranch.parentPoint
         elif nextIdx >= 0 and nextIdx < len(self.parentBranch.points):
             return self.parentBranch.points[nextIdx]
+        elif nextIdx < 0:
+            # Underflow, so walk up parent.
+            return self.parentBranch.parentPoint.nextPointInBranch(nextIdx + 1)
         else:
-            return None
+            assert nextIdx >= len(self.parentBranch.points)
+            at = self.parentBranch.points[-1]
+            # Overflow, so go down first branch.
+            if at is not None and len(at.children) > 0 and len(at.children[0].points) > 0:
+                childBranchFirstPoint = at.children[0].points[0]
+                return childBranchFirstPoint.nextPointInBranch(nextIdx - len(self.parentBranch.points))
+
+
 
     def flattenSubtreePoints(self):
         """Return all points downstream from this point."""
