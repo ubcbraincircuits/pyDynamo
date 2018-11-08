@@ -110,7 +110,6 @@ class Tree():
             newBranch.setParentPoint(newParent)
             return newID
 
-
     def movePoint(self, pointID, newLocation, downstream=False):
         """Moves a point to a new loction, optionally also moving all downstream points by the same.
 
@@ -138,6 +137,33 @@ class Tree():
         for b in self.branches:
             points.extend(b.points)
         return points
+
+    def continueParentBranchIfFirst(self, point):
+        """If point is first in its branch, change it to extend its parent."""
+        if point is None or point.indexInParent() > 0 or point.isRoot():
+            return # Moving right along, nothing to see here...
+
+        parentBranch = point.parentBranch
+        parent = parentBranch.parentPoint
+        assert parent is not None
+        if parent.isRoot():
+            return # All branches are children of the root...
+
+        parentIdx = parent.indexInParent()
+        grandparentBranch = parent.parentBranch
+        afterParentPoints = grandparentBranch.points[parentIdx+1:]
+        grandparentBranch.points = grandparentBranch.points[:parentIdx+1]
+        for sibling in parentBranch.points:
+            grandparentBranch.addPoint(sibling)
+
+        parentBranch.points = []
+        if len(afterParentPoints) > 0:
+            # Move after parent to new branch:
+            for afterParentPoint in afterParentPoints:
+                parentBranch.addPoint(afterParentPoint)
+        else:
+            # Otherwise, remove from tree completely
+            tree.removeBranch(parentBranch)
 
     def closestPointTo(self, targetLocation, zFilter=False):
         """Given a position in the volume, find the point closest to it in image space.

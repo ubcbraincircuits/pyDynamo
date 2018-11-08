@@ -32,6 +32,7 @@ class TopMenu():
         editMenu.addSeparator()
         editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R)
         editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R)
+        editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B)
         menuBar.addMenu(editMenu)
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -119,6 +120,10 @@ class TopMenu():
     def reparent(self):
         self._local().startReplaceParent()
 
+    def primaryBranch(self):
+        self._global().fullActions.setSelectedAsPrimaryBranch(self.stackWindow.windowIndex)
+        self._global().redrawAllStacks()
+
     # View menu callbacks:
     def zoomIn(self):
         self._local().zoom(-0.2) # ~= ln(0.8) as used in matlab
@@ -169,7 +174,6 @@ class TopMenu():
     def tileFigs(self):
         self._global().focusFirstOpenStackWindow()
         tileFigs(self._global().stackWindows)
-
 
     # Help menu callbacks:
     def showHotkeys(self):
