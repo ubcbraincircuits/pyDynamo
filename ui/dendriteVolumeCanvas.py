@@ -68,14 +68,14 @@ class DendriteVolumeCanvas(QWidget):
             zAt = zStackForUiState(self.uiState) * 1.0
             location = (pos.x(), pos.y(), zAt)
 
+            # Shortcut out if the stack's tree is hidden:
+            if self.uiState.hideAll:
+                return
+
             # Shortcut out landmark mode:
             if self.uiState.parent().inLandmarkMode():
                 self.fullActions.setLandmark(self.windowIndex, location)
                 self.dynamoWindow.redrawAllStacks()
-                return
-
-            # Shortcut out if the stack's tree is hidden:
-            if self.uiState.hideAll:
                 return
 
             modifiers = int(QApplication.keyboardModifiers())
@@ -91,12 +91,23 @@ class DendriteVolumeCanvas(QWidget):
             if closestDist is None or closestDist >= nearDistWorldSize:
                 pointClicked = None
 
-            # Handle reparent first: either reparent, or cancel reparenting.
-            if self.uiState.isReparenting:
+            # Handle manual registration first: select or deselect the point
+            if self.uiState.parent().inManualRegistrationMode():
+                if pointClicked:
+                    if shiftPressed:
+                        # select all points with this ID in all stacks:
+                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                    else:
+                        # select just this point in this stack:
+                        self.uiState.selectOrDeselectPointID(pointClicked.id)
+
+            # Next, reparent; either reparent, or cancel reparenting.
+            elif self.uiState.isReparenting:
                 if pointClicked:
                     self.fullActions.reparent(self.windowIndex, pointClicked)
                 else:
                     self.uiState.isReparenting = False # Nothing clicked, cancel reparent action
+
             # Next, moving; either switch moving point, cancel move, or move selected point to new spot.
             elif self.uiState.isMoving:
                 if pointClicked:

@@ -16,9 +16,10 @@ class FullStateActions():
             self.history.pushState()
         for state in self.state.uiStates:
             state.selectPointByID(None if point is None else point.id)
-            selected = state.currentPoint()
-            if selected is not None:
-                state.zAxisAt = int(round(selected.location[2]))
+
+    def selectNextPoints(self, delta=1):
+        for state in self.state.uiStates:
+            state.selectNextPoint(delta)
 
     def findPointOrBranch(self, pointOrBranchID):
         selectedPoint = None
@@ -197,6 +198,25 @@ class FullStateActions():
             self.state.trees[i].transform.rotation = R.tolist()
             self.state.trees[i].transform.translation = T.tolist()
 
+    def toggleManualRegistration(self):
+        return self.state.toggleManualRegistrationMode()
+
+    def alignIDs(self):
+        idToAlign = None
+        remaps = {}
+        for i, state in enumerate(self.state.uiStates):
+            currentPoint = state.currentPoint()
+            if currentPoint is not None:
+                if idToAlign is None:
+                    idToAlign = currentPoint.id
+                elif idToAlign != currentPoint.id:
+                    if i not in remaps:
+                        remaps[i] = []
+                    remaps[i].extend(
+                        self._safelySetPointID(self.state, self.state.trees[i], currentPoint, idToAlign)
+                    )
+        self.state.appendIDRemap(remaps)
+
     def getAnnotation(self, localIdx, window, copyToAllPoints):
         self.history.pushState()
         localState = self.state.uiStates[localIdx]
@@ -220,3 +240,21 @@ class FullStateActions():
                             selectedPoint.annotation += " " + text
             else:
                 currentPoint.annotation = text
+
+    # POIUY - move into somewhere common with recursiveAdjust
+    def _safelySetPointID(self, fullState, tree, point, newID):
+        if point.id == newID:
+            return
+        existingWithID = tree.getPointByID(newID)
+        if existingWithID == point:
+            return
+        remaps = []
+        if existingWithID is not None:
+            # There's already a point with this ID - change it to a new ID.
+            # (alternative: don't set the ID of newPoint?)
+            fixedID = fullState.nextPointID()
+            remaps.append((existingWithID.id, fixedID))
+            existingWithID.id = fixedID
+        remaps.append((point.id, newID))
+        point.id = newID
+        return remaps

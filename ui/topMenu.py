@@ -36,6 +36,7 @@ class TopMenu():
         editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B)
         editMenu.addAction('Clean up all primary &branches',
             self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B)
+        editMenu.addAction('Manual registration', self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
         menuBar.addMenu(editMenu)
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -70,7 +71,7 @@ class TopMenu():
         return self.stackWindow.parent()
 
     # File menu callbacks:
-    def appendStack(self):
+    def appendStack(self, *args):
         self._global().openFilesAndAppendStacks()
 
     def save(self):
@@ -123,6 +124,7 @@ class TopMenu():
     def reparent(self):
         self._local().startReplaceParent()
 
+<<<<<<< HEAD
     def primaryBranch(self):
         self._global().fullActions.setSelectedAsPrimaryBranch(self.stackWindow.windowIndex)
         self._global().redrawAllStacks()
@@ -130,6 +132,10 @@ class TopMenu():
     def allPrimaryBranches(self):
         self._global().updateAllPrimaryBranches(self.stackWindow)
         self._global().redrawAllStacks()
+=======
+    def manualRegister(self):
+        self._global().toggleManualRegistration()
+>>>>>>> Initial ID changing and remap collection working
 
     # View menu callbacks:
     def zoomIn(self):
