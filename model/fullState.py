@@ -48,6 +48,9 @@ class FullState:
     # Shared UI Option for diameter of point circles
     dotSize = attr.ib(default=5)
 
+    # ID remap for manual registration mode, or none if not in manual registration.
+    manualRegistrationIDRemap = attr.ib(default=None)
+
     # Keep track of the ID for the next point created, used for making more unique identifiers.
     _nextPointID = 0
 
@@ -120,6 +123,27 @@ class FullState:
 
     def inLandmarkMode(self):
         return self.landmarkPointAt >= 0
+
+    def inManualRegistrationMode(self):
+        return self.manualRegistrationIDRemap is not None
+
+    def toggleManualRegistrationMode(self):
+        isInMode = self.inManualRegistrationMode()
+        if isInMode:
+            idRemap = self.manualRegistrationIDRemap
+            self.manualRegistrationIDRemap = None
+            return idRemap
+        else:
+            if self.inLandmarkMode():
+                self.landmarkPointAt = -1
+            self.manualRegistrationIDRemap = []
+            return None
+
+    def appendIDRemap(self, idRemaps):
+        for stepID, idRemapList in idRemaps.items():
+            while len(self.manualRegistrationIDRemap) <= stepID:
+                self.manualRegistrationIDRemap.append([])
+            self.manualRegistrationIDRemap[stepID].extend(idRemapList)
 
     def toggleLandmarkMode(self):
         self.landmarkPointAt = -1 if self.inLandmarkMode() else 0

@@ -100,6 +100,27 @@ class UIState():
                 self.currentPointID = None
                 self.isMoving = False
         self.isReparenting = False
+        # Move z to show point:
+        selected = self.currentPoint()
+        if selected is not None:
+            self.zAxisAt = int(round(selected.location[2]))
+
+
+    def selectOrDeselectPointID(self, selectedID):
+        assert selectedID is not None
+        currentPoint = self.currentPoint()
+        currentID = None if currentPoint is None else currentPoint.id
+        if selectedID != currentID:
+            self.selectPointByID(selectedID)
+        else:
+            self.selectPointByID(None)
+
+    def selectNextPoint(self, delta=1):
+        currentPoint = self.currentPoint()
+        if currentPoint is None:
+            return
+        nextPoint = currentPoint.nextPointInBranch(delta)
+        self.selectPointByID(nextPoint.id if nextPoint is not None else None)
 
     def addPointToCurrentBranchAndSelect(self, location, newPointID=None, newBranchID=None):
         newPoint = Point(self.maybeCreateNewID(newPointID), location)

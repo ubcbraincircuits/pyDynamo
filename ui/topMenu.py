@@ -32,6 +32,7 @@ class TopMenu():
         editMenu.addSeparator()
         editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R)
         editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R)
+        editMenu.addAction('Manual registration', self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
         menuBar.addMenu(editMenu)
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -66,7 +67,7 @@ class TopMenu():
         return self.stackWindow.parent()
 
     # File menu callbacks:
-    def appendStack(self):
+    def appendStack(self, *args):
         self._global().openFilesAndAppendStacks()
 
     def save(self):
@@ -118,6 +119,9 @@ class TopMenu():
 
     def reparent(self):
         self._local().startReplaceParent()
+
+    def manualRegister(self):
+        self._global().toggleManualRegistration()
 
     # View menu callbacks:
     def zoomIn(self):

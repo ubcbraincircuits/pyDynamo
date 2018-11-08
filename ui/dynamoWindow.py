@@ -210,6 +210,21 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
         self.maybeAutoSave()
 
+    # Either start manual registration, or stop (and maybe save)
+    def toggleManualRegistration(self):
+        if not self.fullState.inManualRegistrationMode():
+            for window in self.stackWindows:
+                window.statusBar().showMessage("Manual ID registration active...")
+        else:
+            for window in self.stackWindows:
+                window.statusBar().clearMessage()
+
+        idMap = self.fullActions.toggleManualRegistration()
+        if idMap is not None and len(idMap) > 0:
+            print ("TODO: Need to support save")
+            print (idMap)
+        self.redrawAllStacks()
+
     # Find a point or branch by ID:
     def findByID(self, pointOrBranchID):
         self.fullActions.findPointOrBranch(pointOrBranchID)
