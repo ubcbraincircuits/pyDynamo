@@ -19,7 +19,8 @@ class TopMenu():
         fileMenu.addAction('Import from SWC...', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
         fileMenu.addAction('Export to SWC...', self.exportToSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_E)
         fileMenu.addSeparator()
-        fileMenu.addAction('&Project Settings...', self.openSettings, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_P)
+        fileMenu.addAction('&Project Settings...',
+            self.openSettings, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_P)
         fileMenu.addAction('Close &Window', self.closeWindow, QtCore.Qt.CTRL + QtCore.Qt.Key_W)
         fileMenu.addAction('Close Dynamo', self.closeDynamo, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_W)
         menuBar.addMenu(fileMenu)
@@ -33,6 +34,8 @@ class TopMenu():
         editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R)
         editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R)
         editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B)
+        editMenu.addAction('Clean up all primary &branches',
+            self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B)
         menuBar.addMenu(editMenu)
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -122,6 +125,10 @@ class TopMenu():
 
     def primaryBranch(self):
         self._global().fullActions.setSelectedAsPrimaryBranch(self.stackWindow.windowIndex)
+        self._global().redrawAllStacks()
+
+    def allPrimaryBranches(self):
+        self._global().updateAllPrimaryBranches(self.stackWindow)
         self._global().redrawAllStacks()
 
     # View menu callbacks:

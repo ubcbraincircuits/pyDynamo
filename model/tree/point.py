@@ -44,7 +44,7 @@ class Point():
         """Return whether this point is the terminal point in the branch."""
         return self.nextPointInBranch() is None
 
-    def nextPointInBranch(self, delta=1):
+    def nextPointInBranch(self, delta=1, noWrap=False):
         """Walks a distance along the branch and returns the sibling."""
         if self.parentBranch is None:
             return None # Root point alone in branch.
@@ -55,6 +55,7 @@ class Point():
         elif nextIdx >= 0 and nextIdx < len(self.parentBranch.points):
             return self.parentBranch.points[nextIdx]
         else:
+            # TODO: use noWrap to wrap
             return None
 
     def flattenSubtreePoints(self):
@@ -79,3 +80,18 @@ class Point():
             points.append(pointAt)
             pointAt = pointAt.nextPointInBranch(delta=-1)
         return list(reversed(points))
+
+    def longestDistanceToLeaf(self):
+        tree = self.parentBranch._parentTree
+
+        longestDist = 0.0
+        sibling = self.nextPointInBranch(noWrap=True)
+        if sibling is not None:
+            siblingDist = tree.spatialDist(self, sibling) + sibling.longestDistanceToLeaf()
+            longestDist = max(longestDist, siblingDist)
+        for child in self.children:
+            if len(child.points) > 0:
+                cPoint = child.points[0]
+                childDist = tree.spatialDist(self, cPoint) + cPoint.longestDistanceToLeaf()
+                longestDist = max(longestDist, childDist)
+        return longestDist
