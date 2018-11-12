@@ -108,12 +108,15 @@ class StackWindow(QtWidgets.QMainWindow):
                 return
             # Actions only apply if the stack's tree is visible start below.
 
-
-
             # Actions that apply in manual registration mode (and others)
             if key == ord('<') or key == ord('>'):
+                # Prev / Next in branch selector
                 delta = -1 if key == ord('<') else 1
                 self.fullActions.selectNextPoints(delta)
+                self.parent().redrawAllStacks()
+            elif key == ord('?'):
+                # First child of current point selector
+                self.fullActions.selectFirstChildren()
                 self.parent().redrawAllStacks()
             elif key == QtCore.Qt.Key_Return and shftPressed:
                 # Align IDs in registration mode, and save updates
