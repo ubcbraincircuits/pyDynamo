@@ -125,6 +125,7 @@ class TopMenu():
         self._local().startReplaceParent()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     def primaryBranch(self):
         self._global().fullActions.setSelectedAsPrimaryBranch(self.stackWindow.windowIndex)
         self._global().redrawAllStacks()
@@ -136,6 +137,10 @@ class TopMenu():
     def manualRegister(self):
         self._global().toggleManualRegistration()
 >>>>>>> Initial ID changing and remap collection working
+=======
+    def manualRegister(self):
+        self._global().toggleManualRegistration()
+>>>>>>> b62db8c4b4b16bd463024563034cd631a049a844
 
     # View menu callbacks:
     def zoomIn(self):
