@@ -122,6 +122,15 @@ class UIState():
         nextPoint = currentPoint.nextPointInBranch(delta)
         self.selectPointByID(nextPoint.id if nextPoint is not None else None)
 
+    def selectFirstChild(self):
+        currentPoint = self.currentPoint()
+        if currentPoint is None:
+            return
+        if len(currentPoint.children) == 0 or len(currentPoint.children[0].points) == 0:
+            return
+        nextPoint = currentPoint.children[0].points[0]
+        self.selectPointByID(nextPoint.id if nextPoint is not None else None)
+
     def addPointToCurrentBranchAndSelect(self, location, newPointID=None, newBranchID=None):
         newPoint = Point(self.maybeCreateNewID(newPointID), location)
         if self._tree.rootPoint is None:

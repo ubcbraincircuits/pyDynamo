@@ -21,6 +21,10 @@ class FullStateActions():
         for state in self.state.uiStates:
             state.selectNextPoint(delta)
 
+    def selectFirstChildren(self):
+        for state in self.state.uiStates:
+            state.selectFirstChild()
+
     def findPointOrBranch(self, pointOrBranchID):
         selectedPoint = None
         for tree in self.state.trees:
