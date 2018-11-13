@@ -2,3 +2,4 @@ from .autosaver import AutoSaver
 from .files import loadState, saveState
 from .matlab import importFromMatlab
 from .swc import exportToSWC, importFromSWC
+from .idremap import saveRemapWithMerge

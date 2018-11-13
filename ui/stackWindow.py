@@ -106,8 +106,24 @@ class StackWindow(QtWidgets.QMainWindow):
 
             if self.uiState.hideAll:
                 return
+            # Actions only apply if the stack's tree is visible start below.
 
-            # Actions only apply if the stack's tree is visible:
+            # Actions that apply in manual registration mode (and others)
+            if key == ord('<') or key == ord('>'):
+                # Prev / Next in branch selector
+                delta = -1 if key == ord('<') else 1
+                self.fullActions.selectNextPoints(delta)
+                self.parent().redrawAllStacks()
+            elif key == ord('?'):
+                # First child of current point selector
+                self.fullActions.selectFirstChildren()
+                self.parent().redrawAllStacks()
+            elif key == QtCore.Qt.Key_Return and shftPressed:
+                # Align IDs in registration mode, and save updates
+                if self.uiState._parent.inManualRegistrationMode():
+                    self.fullActions.alignIDs()
+                self.parent().redrawAllStacks()
+
             if (key == ord('F')):
                 if self.dendrites.uiState.showAnnotations:
                     self.dendrites.uiState.showAnnotations = False
@@ -119,7 +135,11 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.dendrites.uiState.showAnnotations = True
                     self.dendrites.uiState.showIDs = False
                 self.redraw()
-            elif (key == ord('Q')):
+
+            if self.uiState._parent.inManualRegistrationMode():
+                return
+
+            if (key == ord('Q')):
                 self.fullActions.getAnnotation(self.windowIndex, self, shftPressed)
                 if shftPressed:
                     self.parent().redrawAllStacks()
@@ -132,6 +152,7 @@ class StackWindow(QtWidgets.QMainWindow):
                 else:
                     self.fullActions.deletePoint(self.windowIndex, toDelete, laterStacks=shftPressed)
                     self.parent().redrawAllStacks() # HACK - auto redraw on change
+
         except Exception as e:
             print ("Whoops - error on keypress: " + str(e))
             traceback.print_exc()
