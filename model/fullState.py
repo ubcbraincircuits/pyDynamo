@@ -193,16 +193,6 @@ class FullState:
             return sourceBranch
         return self.uiStates[targetID]._tree.getBranchByID(sourceBranch.id)
 
-    def nextPointID(self):
-        newID = '%08x' % self._nextPointID
-        self._nextPointID += 1
-        return newID
-
-    def nextBranchID(self):
-        newID = '%04x' % self._nextBranchID
-        self._nextBranchID += 1
-        return newID
-
     def removeStack(self, index):
         self.filePaths.pop(index)
         self.trees.pop(index)
@@ -224,3 +214,44 @@ class FullState:
     def closeToCirclePx(self):
         """Scales a circle size by a buffer around it to allow clicking near."""
         return self.dotSize * 1.2
+
+    def setPointIDWithoutCollision(self, tree, point, newID):
+        """Change the ID of a point in a tree, making sure it doesn't collide with an existing point."""
+        if point.id == newID:
+            return
+        existingWithID = tree.getPointByID(newID)
+        if existingWithID == point:
+            return
+        remaps = []
+        if existingWithID is not None:
+            # There's already a point with this ID - change it to a new ID.
+            fixedID = self.nextPointID()
+            remaps.append((existingWithID.id, fixedID))
+            existingWithID.id = fixedID
+        remaps.append((point.id, newID))
+        point.id = newID
+        # Return a list of ID remaps: (oldID, newID). Will either be one, or two if collision.
+        return remaps
+
+    def setBranchIDWithoutCollision(self, tree, branch, newID):
+        """Same as setPointIDWithoutCollision, but with branches instead of points."""
+        if branch.id == newID:
+            return
+        existingWithID = tree.getBranchByID(newID)
+        if existingWithID == branch:
+            return
+        if existingWithID is not None:
+            # There's already a branch with this ID - change it to a new ID.
+            existingWithID.id = self.nextBranchID()
+        branch.id = newID
+        # No return for this one, can be added if needed.
+
+    def nextPointID(self):
+        newID = '%08x' % self._nextPointID
+        self._nextPointID += 1
+        return newID
+
+    def nextBranchID(self):
+        newID = '%04x' % self._nextBranchID
+        self._nextBranchID += 1
+        return newID

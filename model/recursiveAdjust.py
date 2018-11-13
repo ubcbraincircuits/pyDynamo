@@ -112,10 +112,12 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     print ("moving by (%.3f, %.3f, %.3f)" % (shiftX, shiftY, shiftZ))
 
     # Point successfully registered to Pointref!
-    _safelySetPointID(fullState, newTree, point, pointref.id)
+    fullState.setPointIDWithoutCollision(newTree, point, pointref.id)
     callback(1)
     if point.indexInParent() == 0 and point.parentBranch is not None and pointref.parentBranch is not None:
-        _safelySetBranchID(fullState, newTree, point.parentBranch, pointref.parentBranch.id)
+        fullState.setBranchIDWithoutCollision(
+            newTree, point.parentBranch, pointref.parentBranch.id
+        )
     _recursiveMoveBranch(newTree, branch, shift, fromPointIdx=point.indexInParent())
 
     nextPoint = point.nextPointInBranch()
@@ -307,28 +309,3 @@ def _movePixels(oldVolume, dX, dY, dZ):
                     newVolume[i, j, k] = oldVolume[x, y, z]
 
     return newVolume
-
-# We want to set newPoint.id to newID, but need to avoid duplicating an existing ID.
-def _safelySetPointID(fullState, newTree, newPoint, newID):
-    if newPoint.id == newID:
-        return
-    newPointNewID = newTree.getPointByID(newID)
-    if newPointNewID == newPoint:
-        return
-    if newPointNewID is not None:
-        # There's already a point with this ID - change it to a new ID.
-        # (alternative: don't set the ID of newPoint?)
-        newPointNewID.id = fullState.nextPointID()
-    newPoint.id = newID
-
-def _safelySetBranchID(fullState, newTree, newBranch, newID):
-    if newBranch.id == newID:
-        return
-    newBranchNewID = newTree.getBranchByID(newID)
-    if newBranchNewID == newBranch:
-        return
-    if newBranchNewID is not None:
-        # There's already a branch with this ID - change it to a new ID.
-        # (alternative: don't set the ID of newBranch?)
-        newBranchNewID.id = fullState.nextBranchID()
-    newBranch.id = newID

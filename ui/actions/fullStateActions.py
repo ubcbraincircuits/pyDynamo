@@ -217,7 +217,7 @@ class FullStateActions():
                     if i not in remaps:
                         remaps[i] = []
                     remaps[i].extend(
-                        self._safelySetPointID(self.state, self.state.trees[i], currentPoint, idToAlign)
+                        self.state.setPointIDWithoutCollision(self.state.trees[i], currentPoint, idToAlign)
                     )
         self.state.appendIDRemap(remaps)
 
@@ -244,21 +244,3 @@ class FullStateActions():
                             selectedPoint.annotation += " " + text
             else:
                 currentPoint.annotation = text
-
-    # POIUY - move into somewhere common with recursiveAdjust
-    def _safelySetPointID(self, fullState, tree, point, newID):
-        if point.id == newID:
-            return
-        existingWithID = tree.getPointByID(newID)
-        if existingWithID == point:
-            return
-        remaps = []
-        if existingWithID is not None:
-            # There's already a point with this ID - change it to a new ID.
-            # (alternative: don't set the ID of newPoint?)
-            fixedID = fullState.nextPointID()
-            remaps.append((existingWithID.id, fixedID))
-            existingWithID.id = fixedID
-        remaps.append((point.id, newID))
-        point.id = newID
-        return remaps

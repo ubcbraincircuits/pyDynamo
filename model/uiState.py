@@ -105,7 +105,6 @@ class UIState():
         if selected is not None:
             self.zAxisAt = int(round(selected.location[2]))
 
-
     def selectOrDeselectPointID(self, selectedID):
         assert selectedID is not None
         currentPoint = self.currentPoint()
