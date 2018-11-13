@@ -125,12 +125,16 @@ class DendriteVolumeCanvas(QWidget):
                 if pointClicked:
                     self.fullActions.deletePoint(self.windowIndex, pointClicked, laterStacks=shiftPressed)
                 else:
-                    self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
+                    if ctrlPressed and shiftPressed and not rightClick:
+                        self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location, backwards=True)
+                    else:
+                        self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
             # Next. Middle-click / shift; either start move, or add mid-branch point
             elif middleClick or shiftPressed:
                 if pointClicked:
                     self.fullActions.beginMove(self.windowIndex, pointClicked)
                 else:
+                    assert not (ctrlPressed and not rightClick) # Ctrl-shift-left handled above
                     self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location)
             # Otherwise - handle no modifier; either select point, or add to end of current branch.
             else:

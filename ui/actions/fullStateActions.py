@@ -70,7 +70,7 @@ class FullStateActions():
             state.selectPointByID(currentSource.id)
             state.addPointToNewBranchAndSelect(newLocation, newPoint.id, newBranch.id)
 
-    def addPointMidBranchAndSelect(self, localIdx, location):
+    def addPointMidBranchAndSelect(self, localIdx, location, backwards=False):
         self.history.pushState()
 
         localState = self.state.uiStates[localIdx]
@@ -78,8 +78,13 @@ class FullStateActions():
         currentBranch = localState.currentBranch()
 
         newPoint, isAfter = localState.addPointMidBranchAndSelect(location)
+        initialState = 0 if backwards else localIdx + 1
 
-        for i in range(localIdx + 1, len(self.state.uiStates)):
+        stacks = list(range(localIdx + 1, len(self.state.uiStates)))
+        if backwards:
+            stacks.extend(list(range(localIdx - 1, -1, -1)))
+
+        for i in stacks:
             state = self.state.uiStates[i]
             newLocation = self.state.convertLocation(localIdx, i, location, currentSource)
             newBranch = self.state.analogousBranch(currentBranch, localIdx, i)
