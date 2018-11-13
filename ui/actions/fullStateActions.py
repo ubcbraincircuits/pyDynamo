@@ -131,8 +131,7 @@ class FullStateActions():
         sourcePoint = self.state.uiStates[localIdx].currentPoint()
         newBranchID = None
 
-        for i in range(len(self.state.uiStates)):
-            state = self.state.uiStates[i]
+        for i, state in enumerate(self.state.uiStates):
             # Find the next down the branch to use as the reparented child...
             childPoint = None
             localSourcePoint = sourcePoint
@@ -155,6 +154,26 @@ class FullStateActions():
             newBranchID = state._tree.reparentPoint(childPoint, newParent, newBranchID)
 
         self.state.uiStates[localIdx].isReparenting = False
+
+    def setSelectedAsPrimaryBranch(self, localIdx):
+        """
+        For the selected point, and corresponding points in other stacks,
+            make it continue its parent's main branch if it's the first in a branch.
+        """
+        self.history.pushState()
+        sourcePoint = self.state.uiStates[localIdx].currentPoint()
+        if sourcePoint is None:
+            return
+        for i, state in enumerate(self.state.uiStates):
+            statePoint = state._tree.getPointByID(sourcePoint.id)
+            if statePoint is not None:
+                state._tree.continueParentBranchIfFirst(statePoint)
+
+    def updateAllPrimaryBranches(self):
+        """For each branch point, make the 'primary' branch the longest at that point."""
+        self.history.pushState()
+        for i, state in enumerate(self.state.uiStates):
+            state._tree.updateAllPrimaryBranches()
 
     def calculateBestOrientation(self):
         X0, Y0, Z0 = self.state.trees[0].worldCoordPoints(self.state.landmarks[0])

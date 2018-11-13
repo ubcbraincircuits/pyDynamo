@@ -315,6 +315,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
         time.sleep(5)
         msg.hide()
 
+    def updateAllPrimaryBranches(self, originWindow):
+        """Update all primary branches, and show a status message while happening (as it's slow)"""
+        originWindow.statusBar().showMessage("Updating all primary branches...")
+        self.fullActions.updateAllPrimaryBranches()
+        originWindow.statusBar().clearMessage()
+
     # TODO - listen to full state changes.
     def maybeAutoSave(self):
         if self.autoSaver is not None:

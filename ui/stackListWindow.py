@@ -27,8 +27,15 @@ class StackListWindow(QtWidgets.QMainWindow):
 
         self.list = _SizedListWidget()
         self.root = QtWidgets.QWidget(self)
+
+        # Bring-to-front button
+        self.toFrontButton = QtWidgets.QPushButton("Bring visible to front", self)
+        self.toFrontButton.setToolTip("Make all shown windows visible")
+        self.toFrontButton.clicked.connect(self.bringToFront)
+
         l = QtWidgets.QVBoxLayout(self.root)
         l.setContentsMargins(0, 0, 0, 0)
+        l.addWidget(self.toFrontButton)
         l.addWidget(self.list)
         self.setCentralWidget(self.root)
         self.updateListFromStacks()
@@ -43,8 +50,21 @@ class StackListWindow(QtWidgets.QMainWindow):
         self.list.clear()
         for i in range(n):
             self._addItem(i, p.fullState.filePaths[i], p.fullState.uiStates[i].isHidden)
-        self.list.resize(self.list.sizeHint())
-        self.resize(self.list.sizeHint())
+        listSize = self.list.sizeHint()
+        buttonSize = self.toFrontButton.sizeHint()
+        combined = QtCore.QSize()
+        combined.setWidth(max(listSize.width(), buttonSize.width()))
+        combined.setHeight(listSize.height() + buttonSize.height() + 20) # 20 extra for padding
+        self.list.resize(listSize)
+        self.resize(combined)
+
+    def bringToFront(self):
+        """Goes through each visible stack window, and if not hidden, bring to front."""
+        p = self.parent()
+        for i, stackWindow in enumerate(p.stackWindows):
+            if not p.fullState.uiStates[i].isHidden:
+                stackWindow.show()
+                stackWindow.raise_()
 
     def _addItem(self, idx, filePath, stackHidden):
         """Adds a single row into the list, and attaches events."""

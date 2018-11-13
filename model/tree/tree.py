@@ -110,7 +110,6 @@ class Tree():
             newBranch.setParentPoint(newParent)
             return newID
 
-
     def movePoint(self, pointID, newLocation, downstream=False):
         """Moves a point to a new loction, optionally also moving all downstream points by the same.
 
@@ -138,6 +137,68 @@ class Tree():
         for b in self.branches:
             points.extend(b.points)
         return points
+
+    def continueParentBranchIfFirst(self, point):
+        """If point is first in its branch, change it to extend its parent."""
+        if point is None or point.indexInParent() > 0 or point.isRoot():
+            return # Moving right along, nothing to see here...
+
+        branch = point.parentBranch
+        parent = branch.parentPoint
+        assert parent is not None
+        if parent.isRoot():
+            return # All branches are children of the root...
+
+        parentIdx = parent.indexInParent()
+        parentsBranch = parent.parentBranch
+        afterParentPoints = parentsBranch.points[parentIdx+1:]
+        parentsBranch.points = parentsBranch.points[:parentIdx+1]
+        for sibling in branch.points:
+            parentsBranch.addPoint(sibling)
+
+        branch.points = []
+        if len(afterParentPoints) > 0:
+            # Move after parent to new branch:
+            for afterParentPoint in afterParentPoints:
+                branch.addPoint(afterParentPoint)
+        else:
+            # Otherwise, remove from tree completely
+            self.removeBranch(branch)
+            parent.children.remove(branch)
+
+    def updateAllPrimaryBranches(self, point=None):
+        """For all branching points, make the longest branch continue the parent branch."""
+        if point is None:
+            point = self.rootPoint
+
+        # Step 1: find the longest child, see if it's longer than the continuation
+        nextPoint = point.nextPointInBranch(noWrap=True)
+        nextDist = None if nextPoint is None else nextPoint.longestDistanceToLeaf()
+        longestContinuation = (None, nextDist)
+        for i, childBranch in enumerate(point.children):
+            if len(childBranch.points) > 0:
+                childPoint = childBranch.points[0]
+                childDist = childPoint.longestDistanceToLeaf()
+                if nextDist is None or nextDist < childDist:
+                    nextPoint, nextDist = childPoint, childDist
+        if nextDist is not None:
+            self.continueParentBranchIfFirst(nextPoint)
+
+        # Step 2: Normalize by sorting branches by remaining length:
+        def _branchDistRemaining(branch):
+            if len(branch.points) > 0:
+                return -branch.points[0].longestDistanceToLeaf()
+            return 0
+        point.children.sort(key=_branchDistRemaining)
+
+        # Step 3: Recurse down tree:
+        nextPoint = point.nextPointInBranch(noWrap=True)
+        if nextPoint is not None:
+            self.updateAllPrimaryBranches(nextPoint)
+        for childBranch in point.children:
+            if len(childBranch.points) > 0:
+                self.updateAllPrimaryBranches(childBranch.points[0])
+
 
     def closestPointTo(self, targetLocation, zFilter=False):
         """Given a position in the volume, find the point closest to it in image space.
@@ -183,14 +244,16 @@ class Tree():
             x.append(pAt[0]), y.append(pAt[1]), z.append(pAt[2])
         return x, y, z
 
-    def spatialAndTreeDist(self, p1, p2):
-        """Given two points in the tree, return both the 3D spatial distance,
-        as well as how far to travel along the tree."""
+    def spatialDist(self, p1, p2):
+        """Given two points in the tree, return the 3D spatial distance"""
         x, y, z = self.worldCoordPoints([p1, p2])
         p1Location = (x[0], y[0], z[0])
         p2Location = (x[1], y[1], z[1])
-        spatialDist = util.deltaSz(p1Location, p2Location)
+        return util.deltaSz(p1Location, p2Location)
 
+    def spatialAndTreeDist(self, p1, p2):
+        """Given two points in the tree, return both the 3D spatial distance,
+        as well as how far to travel along the tree."""
         path1, path2 = p1.pathFromRoot(), p2.pathFromRoot()
         lastMatch = 0
         while lastMatch < len(path1) and lastMatch < len(path2) and path1[lastMatch].id == path2[lastMatch].id:
@@ -207,7 +270,7 @@ class Tree():
             p1 = (path2X[ i ], path2Y[ i ], path2Z[ i ])
             p2 = (path2X[i+1], path2Y[i+1], path2Z[i+1])
             treeDist += util.deltaSz(p1, p2)
-        return spatialDist, treeDist
+        return self.spatialDist(p1, p2), treeDist
 
     def _recursiveMovePointDelta(self, point, delta):
         """Recursively move a point, plus all its children and later neighbours."""
