@@ -19,7 +19,16 @@ def tiffRead(path):
     print ("TIF shape: %s" % str(shape))
 
     if len(shape) == 3:
-        stack = np.expand_dims(stack, axis=0)
+        # HACK - colours have been merged?
+        if stack.shape[0] % 2 == 0 and stack.shape[0] > 100:
+            sz = stack.shape[0] // 2
+            stack = np.array([
+                stack[:sz, :, :],
+                stack[sz:, :, :]
+            ])
+        else:
+            stack = np.expand_dims(stack, axis=0)
+
     # stack = np.swapaxes(stack, 1, 2)
     return stack
 

@@ -16,9 +16,14 @@ class FullStateActions():
             self.history.pushState()
         for state in self.state.uiStates:
             state.selectPointByID(None if point is None else point.id)
-            selected = state.currentPoint()
-            if selected is not None:
-                state.zAxisAt = int(round(selected.location[2]))
+
+    def selectNextPoints(self, delta=1):
+        for state in self.state.uiStates:
+            state.selectNextPoint(delta)
+
+    def selectFirstChildren(self):
+        for state in self.state.uiStates:
+            state.selectFirstChild()
 
     def findPointOrBranch(self, pointOrBranchID):
         selectedPoint = None
@@ -65,7 +70,7 @@ class FullStateActions():
             state.selectPointByID(currentSource.id)
             state.addPointToNewBranchAndSelect(newLocation, newPoint.id, newBranch.id)
 
-    def addPointMidBranchAndSelect(self, localIdx, location):
+    def addPointMidBranchAndSelect(self, localIdx, location, backwards=False):
         self.history.pushState()
 
         localState = self.state.uiStates[localIdx]
@@ -73,8 +78,13 @@ class FullStateActions():
         currentBranch = localState.currentBranch()
 
         newPoint, isAfter = localState.addPointMidBranchAndSelect(location)
+        initialState = 0 if backwards else localIdx + 1
 
-        for i in range(localIdx + 1, len(self.state.uiStates)):
+        stacks = list(range(localIdx + 1, len(self.state.uiStates)))
+        if backwards:
+            stacks.extend(list(range(localIdx - 1, -1, -1)))
+
+        for i in stacks:
             state = self.state.uiStates[i]
             newLocation = self.state.convertLocation(localIdx, i, location, currentSource)
             newBranch = self.state.analogousBranch(currentBranch, localIdx, i)
@@ -196,6 +206,25 @@ class FullStateActions():
             # tolist() as state should not have (unsavable) numpy data
             self.state.trees[i].transform.rotation = R.tolist()
             self.state.trees[i].transform.translation = T.tolist()
+
+    def toggleManualRegistration(self):
+        return self.state.toggleManualRegistrationMode()
+
+    def alignIDs(self):
+        idToAlign = None
+        remaps = {}
+        for i, state in enumerate(self.state.uiStates):
+            currentPoint = state.currentPoint()
+            if currentPoint is not None:
+                if idToAlign is None:
+                    idToAlign = currentPoint.id
+                elif idToAlign != currentPoint.id:
+                    if i not in remaps:
+                        remaps[i] = []
+                    remaps[i].extend(
+                        self.state.setPointIDWithoutCollision(self.state.trees[i], currentPoint, idToAlign)
+                    )
+        self.state.appendIDRemap(remaps)
 
     def getAnnotation(self, localIdx, window, copyToAllPoints):
         self.history.pushState()
