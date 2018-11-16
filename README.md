@@ -13,6 +13,7 @@ Until then:
     * attrs
     * matplotlib
     * numpy
+    * pandas
     * pyqt (version 5)
     * scikit-image
     * scipy
