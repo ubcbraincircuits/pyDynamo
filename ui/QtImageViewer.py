@@ -267,3 +267,9 @@ class QtImageViewer(QGraphicsView):
         mappedB = self.mapToScene(pixelDist, 0)
         dX, dY = mappedA.x() - mappedB.x(), mappedA.y() - mappedB.y()
         return math.sqrt(dX * dX + dY * dY)
+
+    def sceneDimension(self):
+        viewRect = self.getViewportRect()
+        h = self.toSceneDist(viewRect.height())
+        w = self.toSceneDist(viewRect.width())
+        return h, w
