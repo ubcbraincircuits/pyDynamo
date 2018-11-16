@@ -37,6 +37,7 @@ HELP_MSG = """
 <ul>
   <li><b>Q</b> to annotate a point</li>
   <li><b>Ctrl-R</b> to replace the parent of a point (click next on the new parent)</li>
+  <li><b>Ctrl-B</b> on a branch start will make that branch continue its parent's branch</li>
   <li><b>L</b> to set landmarks that allow for aligning volumes</li>
 </ul>
 <h3>Analysis</h3>
@@ -44,11 +45,23 @@ HELP_MSG = """
   <li><b>3</b> to open a 3d wire model of the current volume</li>
   <li><b>M</b> to show motility plots for all volumes</li>
 </ul>
+<h3>Registration</h3>
+<ul>
+<li><b>R</b> for automatic registration: adjust point locations based the previous stack</li>
+<li><b>Ctrl-Shift-R</b> to enter/leave manual registration mode.
+  <ul>
+    <li>Click on points, and <b>Shift-Enter</b> to set all to the same ID</li>
+    <li>Optionally save the ID changes on exit</li>
+  </ul>
+</li>
+</ul>
 <h3>Navigation</h3>
 <ul>
   <li><b>1</b> and <b>2</b> to move through the Z stacks</li>
   <li><b>W, A, S</b> and <b>D</b> to pan around the image</li>
   <li><b>X</b> and <b>Z</b> to zoom in and out respectively</li>
+  <li><b>&lt;</b> and <b>&gt;</b> to move to next/previous point in branch</li>
+  <li><b>?</b> to move to the child of the first branch off the current point</li>
 </ul>
 <h3>Contrast</h3>
 <ul>
@@ -80,7 +93,6 @@ HELP_MSG = """
   <li><b>N</b> to add a new image stack</li>
   <li><b>I</b> to import tree structure and locations from the previous stack to the current one</li>
   <li><b>Ctrl-I</b> to import tree structure and locations from an .SWC file</li>
-  <li><b>R</b> to adjust the current branch locations based off the branch in the previous stack</li>
   <li><b>Ctrl-W</b> to close the current stack window</li>
   <li><b>Ctrl-Shift-W</b> to close all of dynamo.</li>
 </ul>
@@ -101,24 +113,19 @@ class HelpDialog(QDialog):
     vLayout.addWidget(label, 0, QtCore.Qt.AlignHCenter)
     self.setLayout(vLayout)
 
+    #app = QtWidgets.QApplication.instance()
+    #geom = app.desktop().screenGeometry()
+    self.showMaximized()
+
 def showHelpDialog():
     HelpDialog().exec_()
 
 """
-TODO: Keep these?
-Reassign the parent of a branch by shift-clicking a point and clicking the new parent point
-*Backspace*: Undo
-
 
 TODO: Dynomito keys?
-'*C*: Change the channel of the image being shown; GREEN/RED';
 'Hold *SPACE* while clicking to place the start of a MITO';
 '  Continue to hold *SPACE* while adding points to the MITO';
 '  To extend an existing MITO, hold space and click on it, ...';
 '  then click to add new points. Release space when done.';
 '*Y*: SHOW/HIDE mitos';
-'*U*: SHOW/HIDE dendritic tree';
-'';
-'To quickly end a session, you can type ''close all'' into';
-'the matlab prompt and hit the enter key to close windows';
 """
