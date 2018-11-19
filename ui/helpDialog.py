@@ -15,6 +15,9 @@ HELP_MSG = """
       <li>Shift-click to move that point and all points later in the tree</li>
       <li>Ctrl-click to move that point in the current and all later stacks</li>
       <li>Ctrl-Shift-click to move all points down the tree in all later stacks</li>
+      <li>W/A/S/D to move the selected point</li>
+      <li>Shift-W/A/S/D to move the selected point and all points later in the tree</li>
+      <li>Alt-W/A/S/D to move that point in the current and all later stacks</li>
     </ul>
   </li>
 </ul>

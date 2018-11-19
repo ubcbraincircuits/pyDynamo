@@ -76,10 +76,23 @@ class StackWindow(QtWidgets.QMainWindow):
     def redraw(self):
         self.dendrites.redraw()
 
+    def doMove(self, dX, dY, downstream, laterStacks):
+        MOVE_FACTOR = 0.05 # 1/20 of screen per button press
+        xScale, yScale = self.dendrites.imgView.sceneDimension()
+        scale = min(xScale, yScale)
+        dX = dX * scale * MOVE_FACTOR
+        dY = dY * scale * MOVE_FACTOR
+        self.fullActions.doMove(self.windowIndex, dX, dY, downstream, laterStacks)
+        if laterStacks:
+            self.parent().redrawAllStacks()
+        else:
+            self.dendrites.redraw()
+
     def keyPressEvent(self, event):
         try:
             if self.parent().childKeyPress(event, self):
                 return
+            altsPressed = (event.modifiers() & QtCore.Qt.AltModifier)
             ctrlPressed = (event.modifiers() & QtCore.Qt.ControlModifier)
             shftPressed = (event.modifiers() & QtCore.Qt.ShiftModifier)
 
@@ -96,13 +109,25 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('8')):
                 self.actionHandler.changeBrightness(0, 1)
             elif (key == ord('W')):
-                self.actionHandler.pan(0, -1)
+                if self.uiState.isMoving:
+                    self.doMove(0, -1, shftPressed, altsPressed)
+                else:
+                    self.actionHandler.pan(0, -1)
             elif (key == ord('A')):
-                self.actionHandler.pan(-1, 0)
+                if self.uiState.isMoving:
+                    self.doMove(-1, 0, shftPressed, altsPressed)
+                else:
+                    self.actionHandler.pan(-1, 0)
             elif (key == ord('S')):
-                self.actionHandler.pan(0, 1)
+                if self.uiState.isMoving:
+                    self.doMove(0, 1, shftPressed, altsPressed)
+                else:
+                    self.actionHandler.pan(0, 1)
             elif (key == ord('D')):
-                self.actionHandler.pan(1, 0)
+                if self.uiState.isMoving:
+                    self.doMove(1, 0, shftPressed, altsPressed)
+                else:
+                    self.actionHandler.pan(1, 0)
 
             if self.uiState.hideAll:
                 return

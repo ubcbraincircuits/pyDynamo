@@ -116,6 +116,18 @@ class FullStateActions():
         for i in range(len(self.state.uiStates)):
             self.state.uiStates[i].selectPointByID(point.id, isMove=(i >= localIdx))
 
+    def doMove(self, localIdx, dX, dY, downstream, laterStacks):
+        for i in range(localIdx, len(self.state.uiStates) if laterStacks else localIdx + 1):
+            state = self.state.uiStates[i]
+            point = state.currentPoint()
+            if point is not None:
+                newLocation = (
+                    point.location[0] + dX,
+                    point.location[1] + dY,
+                    point.location[2]
+                )
+                state.endMove(newLocation, downstream)
+
     def endMove(self, localIdx, location, downstream, laterStacks):
         self.history.pushState()
         localState = self.state.uiStates[localIdx]
