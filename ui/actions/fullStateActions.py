@@ -140,6 +140,10 @@ class FullStateActions():
             newLocation = self.state.convertLocation(localIdx, i, location, unmovedPoint)
             state.endMove(newLocation, downstream)
 
+    def cancelMove(self):
+        for uiState in self.state.uiStates:
+            uiState.cancelMove()
+
     def setLandmark(self, localIdx, location):
         self.history.pushState()
         self.state.setLandmark(localIdx, location)

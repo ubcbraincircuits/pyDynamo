@@ -37,7 +37,9 @@ class StackWindow(QtWidgets.QMainWindow):
         self.dendrites = DendriteVolumeCanvas(
             windowIndex, fullActions, uiState, parent, self, self.root
         )
-        self.actionHandler = DendriteCanvasActions(self.dendrites, imagePath, uiState)
+        self.actionHandler = DendriteCanvasActions(
+            windowIndex, fullActions, uiState, self.dendrites, imagePath
+        )
         self.fullActions = fullActions
         self.uiState = uiState
         self.ignoreUndoCloseEvent = False
@@ -68,6 +70,8 @@ class StackWindow(QtWidgets.QMainWindow):
 
     def updateWindowIndex(self, windowIndex):
         self.windowIndex = windowIndex
+        self.dendrites.updateWindowIndex(windowIndex)
+        self.actionHandler.updateWindowIndex(windowIndex)
         self.updateTitle()
 
     def updateTitle(self):
@@ -150,27 +154,27 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.parent().redrawAllStacks()
 
             if (key == ord('F')):
-                if self.dendrites.uiState.showAnnotations:
-                    self.dendrites.uiState.showAnnotations = False
-                    self.dendrites.uiState.showIDs = True
-                elif self.dendrites.uiState.showIDs:
-                    self.dendrites.uiState.showAnnotations = False
-                    self.dendrites.uiState.showIDs = False
+                if self.uiState.showAnnotations:
+                    self.uiState.showAnnotations = False
+                    self.uiState.showIDs = True
+                elif self.uiState.showIDs:
+                    self.uiState.showAnnotations = False
+                    self.uiState.showIDs = False
                 else:
-                    self.dendrites.uiState.showAnnotations = True
-                    self.dendrites.uiState.showIDs = False
+                    self.uiState.showAnnotations = True
+                    self.uiState.showIDs = False
                 self.redraw()
 
             if self.uiState._parent.inManualRegistrationMode():
                 return
 
-            if (key == ord('Q')):
+            elif key == ord('Q'):
                 self.fullActions.getAnnotation(self.windowIndex, self, shftPressed)
                 if shftPressed:
                     self.parent().redrawAllStacks()
                 else:
                     self.redraw()
-            elif (key == QtCore.Qt.Key_Delete):
+            elif key == QtCore.Qt.Key_Delete:
                 toDelete = self.uiState.currentPoint()
                 if toDelete is None:
                     print ("Need to select a point before you can delete...")

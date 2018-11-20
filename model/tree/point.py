@@ -42,7 +42,7 @@ class Point():
 
     def isLastInBranch(self):
         """Return whether this point is the terminal point in the branch."""
-        return self.nextPointInBranch() is None
+        return self.nextPointInBranch(noWrap=True) is None
 
     def nextPointInBranch(self, delta=1, noWrap=False):
         """Walks a distance along the branch and returns the sibling."""
@@ -54,6 +54,8 @@ class Point():
                 # Root point has none before
                 return None
             else:
+                if noWrap:
+                    return None
                 # Walk down to first branch.
                 if len(self.children) > 0 and len(self.children[0].points) > 0:
                     return self.children[0].points[0].nextPointInBranch(delta - 1)

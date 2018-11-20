@@ -214,10 +214,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def toggleManualRegistration(self):
         if not self.fullState.inManualRegistrationMode():
             for window in self.stackWindows:
-                window.statusBar().showMessage("Manual ID registration active...")
+                if window is not None:
+                    window.statusBar().showMessage("Manual ID registration active...")
         else:
             for window in self.stackWindows:
-                window.statusBar().clearMessage()
+                if window is not None:
+                    window.statusBar().clearMessage()
 
         idMap = self.fullActions.toggleManualRegistration()
         if idMap is not None and len(idMap) > 0:

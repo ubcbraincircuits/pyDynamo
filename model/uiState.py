@@ -234,6 +234,9 @@ class UIState():
         if self.isMoving and self.currentPointID is not None:
             self._tree.movePoint(self.currentPointID, newLocation, downstream)
 
+    def cancelMove(self):
+        self.isMoving = False
+
     def maybeCreateNewID(self, newPointID):
         return newPointID if newPointID is not None else self._parent.nextPointID()
 

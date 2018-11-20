@@ -11,13 +11,18 @@ from model import recursiveAdjust
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
 
-    def __init__(self, dendriteCanvas, imagePath, uiState):
+    def __init__(self, windowIndex, fullActions, uiState, dendriteCanvas, imagePath):
+        self.windowIndex = windowIndex
+        self.fullActions = fullActions
+        self.uiState = uiState
         self.canvas = dendriteCanvas
         self.imagePath = imagePath
-        self.uiState = uiState
 
     def updateUIState(self, newUiState):
         self.uiState = newUiState
+
+    def updateWindowIndex(self, windowIndex):
+        self.windowIndex = windowIndex
 
     def zoom(self, logAmount):
         self.canvas.imgView.zoom(logAmount)
@@ -115,6 +120,24 @@ class DendriteCanvasActions():
         self.canvas.stackWindow.statusBar().clearMessage()
 
     def startReplaceParent(self):
-        self.uiState.isMove = False
         self.uiState.isReparenting = True
         self.canvas.redraw()
+
+    def stopReplaceParent(self):
+        self.uiState.isReparenting = False
+        self.canvas.redraw()
+
+    # Cycle selection -> Moving -> Reparenting -> back
+    def cyclePointModes(self):
+        currentPoint = self.uiState.currentPoint()
+        if currentPoint is not None:
+            if self.uiState.isMoving:
+                # Moving -> Reparenting
+                self.fullActions.cancelMove()
+                self.startReplaceParent()
+            elif self.uiState.isReparenting:
+                # Reparenting -> Selection
+                self.stopReplaceParent()
+            else:
+                # Selection -> Moving
+                self.fullActions.beginMove(self.windowIndex, currentPoint)
