@@ -164,13 +164,16 @@ class StackWindow(QtWidgets.QMainWindow):
             if self.uiState._parent.inManualRegistrationMode():
                 return
 
-            if (key == ord('Q')):
+            if key == QtCore.Qt.Key_Tab:
+                print ("TODO: TAB")
+
+            elif key == ord('Q'):
                 self.fullActions.getAnnotation(self.windowIndex, self, shftPressed)
                 if shftPressed:
                     self.parent().redrawAllStacks()
                 else:
                     self.redraw()
-            elif (key == QtCore.Qt.Key_Delete):
+            elif key == QtCore.Qt.Key_Delete:
                 toDelete = self.uiState.currentPoint()
                 if toDelete is None:
                     print ("Need to select a point before you can delete...")
