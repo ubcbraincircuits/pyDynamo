@@ -37,6 +37,7 @@ class TopMenu():
         editMenu.addAction('Clean up all primary &branches',
             self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B)
         editMenu.addAction('Manual registration', self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
+        editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab)
         menuBar.addMenu(editMenu)
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -134,6 +135,10 @@ class TopMenu():
 
     def manualRegister(self):
         self._global().toggleManualRegistration()
+
+    def cyclePointModes(self):
+        self._local().cyclePointModes()
+        self._global().redrawAllStacks()
 
     # View menu callbacks:
     def zoomIn(self):
