@@ -120,8 +120,8 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
         )
     _recursiveMoveBranch(newTree, branch, shift, fromPointIdx=point.indexInParent())
 
-    nextPoint = point.nextPointInBranch()
-    nextPointRef = pointref.nextPointInBranch()
+    nextPoint = point.nextPointInBranch(noWrap=True)
+    nextPointRef = pointref.nextPointInBranch(noWrap=True)
     if nextPoint is not None and nextPointRef is not None:
         deltaXYZ = np.abs(util.locationMinus(nextPoint.location, point.location))
         dXY = int(round(util.snapToRange(np.max(deltaXYZ[0:1]), 20, 30)))
