@@ -99,7 +99,9 @@ class DendriteVolumeCanvas(QWidget):
                 if pointClicked:
                     if shiftPressed:
                         # select all points with this ID in all stacks:
-                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                        self.fullActions.selectPoint(
+                            self.windowIndex, pointClicked, avoidPush=True, deselectHidden=True
+                        )
                     else:
                         # select just this point in this stack:
                         self.uiState.selectOrDeselectPointID(pointClicked.id)

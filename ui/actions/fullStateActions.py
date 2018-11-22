@@ -11,11 +11,14 @@ class FullStateActions():
         self.state = fullState
         self.history = history
 
-    def selectPoint(self, localIdx, point, avoidPush=False):
+    def selectPoint(self, localIdx, point, avoidPush=False, deselectHidden=False):
         if not avoidPush:
             self.history.pushState()
         for state in self.state.uiStates:
-            state.selectPointByID(None if point is None else point.id)
+            if state.isHidden and deselectHidden:
+                state.selectPointByID(None)
+            else:
+                state.selectPointByID(None if point is None else point.id)
 
     def selectNextPoints(self, delta=1):
         for state in self.state.uiStates:
@@ -226,10 +229,12 @@ class FullStateActions():
     def toggleManualRegistration(self):
         return self.state.toggleManualRegistrationMode()
 
-    def alignIDs(self):
+    def alignVisibleIDs(self):
         idToAlign = None
         remaps = {}
         for i, state in enumerate(self.state.uiStates):
+            if state.isHidden:
+                continue # Only register what we can see.
             currentPoint = state.currentPoint()
             if currentPoint is not None:
                 if idToAlign is None:

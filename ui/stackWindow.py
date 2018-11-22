@@ -150,7 +150,7 @@ class StackWindow(QtWidgets.QMainWindow):
             elif key == QtCore.Qt.Key_Return and shftPressed:
                 # Align IDs in registration mode, and save updates
                 if self.uiState._parent.inManualRegistrationMode():
-                    self.fullActions.alignIDs()
+                    self.fullActions.alignVisibleIDs()
                 self.parent().redrawAllStacks()
 
             if (key == ord('F')):
