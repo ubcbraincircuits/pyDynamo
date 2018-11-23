@@ -21,10 +21,13 @@ def npInt64Fix(o):
     print ("ERROR - Can't save type: ", type(o))
     raise TypeError
 
+def fullStateToString(fullState, filter=attrFilter):
+    asDict = attr.asdict(fullState, filter=filter)
+    return json.dumps(asDict, indent=2, sort_keys=True, default=npInt64Fix).encode('utf-8')
+
 def saveState(fullState, path):
-    asDict = attr.asdict(fullState, filter=attrFilter)
     with gzip.GzipFile(path, 'w') as outfile:
-        outfile.write(json.dumps(asDict, indent=2, sort_keys=True, default=npInt64Fix).encode('utf-8'))
+        outfile.write(fullStateToString(fullState))
 
 ### HACK - use cattrs?
 def convert(asDict, key, conversion, isArray=False):
@@ -128,3 +131,10 @@ def loadState(path):
     with gzip.GzipFile(path, 'r') as infile:
         asDict = json.loads(infile.read().decode('utf-8'))
     return indexFullState(convertToFullState(asDict), path)
+
+def checkIfChanged(fullState, path):
+    if path is None:
+        return True
+    oldString = fullStateToString(loadState(path))
+    newString = fullStateToString(fullState)
+    return oldString != newString

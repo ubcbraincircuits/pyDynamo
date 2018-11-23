@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.Qt import Qt
 
 from model import FullState, Tree, UIState, History
-from files import AutoSaver, loadState, saveState, importFromMatlab, exportToSWC, saveRemapWithMerge
+from files import AutoSaver, loadState, saveState, checkIfChanged, importFromMatlab, exportToSWC, saveRemapWithMerge
 from util.testableFilePicker import getOpenFileName
 
 import os
@@ -66,7 +66,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         # Close button
         buttonQ = QtWidgets.QPushButton("&Close Dynamo", self)
         buttonQ.setToolTip("Close all Dynamo windows and exit")
-        buttonQ.clicked.connect(self.quit)
+        buttonQ.clicked.connect(self.quitAndMaybeSave)
         cursorPointer(buttonQ)
 
         root = QtWidgets.QWidget(self)
@@ -78,7 +78,17 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(root)
         return root
 
-    def quit(self):
+    def hasUnsavedData(self):
+        return checkIfChanged(self.fullState, self.fullState._rootPath)
+
+    def quitAndMaybeSave(self):
+        if self.hasUnsavedData():
+            msg = "Unsaved data, are you sure you want to quit?"
+            reply = QtWidgets.QMessageBox.question(
+                self, 'Are you sure?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
+            )
+            if reply == QtWidgets.QMessageBox.No:
+                return # Don't quit!
         if self.app is not None:
             self.app.quit()
 
@@ -271,8 +281,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 )
                 if path == "":
                     print ("Loading cancelled, quitting...")
-                    QtWidgets.QApplication.quit()
-                    sys.exit(0)
+                    self.quitAndMaybeSave()
                 self.fullState.filePaths[i] = path
                 self.fullState.uiStates[i].imagePath = path
 
@@ -428,3 +437,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 break
         if firstStackWindow is not None:
             firstStackWindow.setFocus(True)
+
+    # Force user to confirm close if they have unsaved stuff
+    def closeEvent(self, e):
+        print ("Preventing close")
+        e.ignore()

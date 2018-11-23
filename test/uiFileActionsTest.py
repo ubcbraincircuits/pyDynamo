@@ -87,5 +87,5 @@ def run(qtbot):
     hilighted = [p.id for p in dW.fullState.trees[1].flattenPoints() if p.hilighted]
     assert ['0000006c', '0000002b'] == hilighted
 
-    dW.quit()
+    dW.close()
     return True

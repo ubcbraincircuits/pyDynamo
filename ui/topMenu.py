@@ -103,7 +103,7 @@ class TopMenu():
         self.stackWindow.close()
 
     def closeDynamo(self):
-        self._global().quit()
+        self._global().quitAndMaybeSave()
 
     # Edit menu callbacks:
     def undo(self):
