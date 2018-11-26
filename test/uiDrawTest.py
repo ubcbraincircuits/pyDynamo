@@ -103,5 +103,5 @@ def run(qtbot):
     assert (dW.fullState.uiStates[0].currentPoint().id == currentPoint.id)
     assert dW.fullState.uiStates[0].currentPoint().parentBranch.parentPoint.id == points[2].id
 
-    dW.quit()
+    dW.close()
     return True
