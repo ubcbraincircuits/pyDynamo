@@ -130,10 +130,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                             if self.dendrogram:
                                 x = [denX[branch.points[-1].id]]
                                 y = [denY[branch.points[-1].id]]
-                                ax.scatter(x, y, c=color, s=sz)
+                                ax.scatter(x, y, c=[color], s=sz)
                             else:
                                 x, y, z = treeModel.worldCoordPoints([branch.points[-1]])
-                                ax.scatter(x, y, z, c=color, s=sz)
+                                ax.scatter(x, y, z, c=[color], s=sz)
 
                     # Show removed branches from last point:
                     branchInLast = self.treeModels[treeIdx - 1].getBranchByID(branch.id)
@@ -159,7 +159,7 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                     childPointInNew = treeModel.getPointByID(childPoint.id)
                                     if childPointInNew is not None:
                                         x, y, z = treeModel.worldCoordPoints([childPointInNew])
-                                    ax.scatter(x, y, z, c=RETRACT_COLOR, s=(retracted * SZ_FACTOR))
+                                    ax.scatter(x, y, z, c=[RETRACT_COLOR], s=(retracted * SZ_FACTOR))
                         if self.subtracted[treeIdx - 1][branchIdx]:
                             # Draw at the parent of the subtracted branch, not the end point.
                             drawAt = branchInLast.parentPoint
@@ -169,27 +169,27 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                 if self.dendrogram:
                                     x = [denX[drawAt.id]]
                                     y = [denY[drawAt.id]]
-                                    ax.scatter(x, y, c=GONE_COLOR, s=sz)
+                                    ax.scatter(x, y, c=[GONE_COLOR], s=sz)
                                 else:
                                     x, y, z = oldTreeModel.worldCoordPoints([drawAt])
                                     drawAtInNew = treeModel.getPointByID(drawAt.id)
                                     if drawAtInNew is not None:
                                         x, y, z = treeModel.worldCoordPoints([drawAtInNew])
-                                    ax.scatter(x, y, z, c=GONE_COLOR, s=sz)
+                                    ax.scatter(x, y, z, c=[GONE_COLOR], s=sz)
 
                 # For debugging puposes, maybe remove?
                 print ("Stack #%d -> #%d" % (treeIdx, treeIdx + 1))
                 print ("  - #Added        = %d" % np.sum(self.added[treeIdx-1]))
                 print ("  - #Subtracted   = %d" % np.sum(self.subtracted[treeIdx-1]))
                 print ("  - #Transitioned = %d" % np.sum(self.transitioned[treeIdx-1]))
-                print ("  - #Extensions        = %d" % growCount)
-                print ("  - #Retractions       = %d" % shrinkCount)
+                print ("  - #Extensions   = %d" % growCount)
+                print ("  - #Retractions  = %d" % shrinkCount)
 
             # And finally draw the soma as a big sphere (if present):
             if treeModel.rootPoint is not None:
                 if not self.dendrogram:
                     x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
-                    ax.scatter(x, y, z, c=GREY_COLOUR, s=350)
+                    ax.scatter(x, y, z, c=[GREY_COLOUR], s=350)
 
             # Make equal aspect ratio:
             if not self.dendrogram:
