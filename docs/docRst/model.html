@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -22,26 +24,21 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-
-  
-    <link rel="top" title="PyDynamo 0.1 documentation" href="../index.html"/>
-        <link rel="prev" title="Analysis methods" href="analysis.html"/> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Analysis methods" href="analysis.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -82,15 +79,19 @@
           
             
             
-                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stacks.html">Stacks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="drawing.html">Drawing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html">Registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis methods</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Model objects</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Model objects</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#tree">Tree</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#filotype">FiloType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-filoT">FiloType</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#history">History</a></li>
 </ul>
 </li>
@@ -105,34 +106,54 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">PyDynamo</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyDynamo</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-    <li>Model objects</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Model objects</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/docRst/model.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/docRst/model.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -143,23 +164,110 @@
 <div class="section" id="tree">
 <h2>Tree<a class="headerlink" href="#tree" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="filotype">
-<h2>FiloType<a class="headerlink" href="#filotype" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-filoT">
+<span id="filotype"></span><h2>FiloType<a class="headerlink" href="#module-filoT" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">model.filoType.</code><code class="descname">FiloType</code></dt>
+<dd><p>Categorization for a point/branch based of Filo present.
+Note that order matters, 1-&gt;4 are counted as Filo.</p>
+<dl class="attribute">
+<dt>
+<code class="descname">ABSENT</code><em class="property"> = 0</em></dt>
+<dd><p>Filo is not there.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">BRANCH_ONLY</code><em class="property"> = 5</em></dt>
+<dd><p>Branch with no Filo.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">BRANCH_WITH_INTERSTITIAL</code><em class="property"> = 3</em></dt>
+<dd><p>Branch with downstream interstitial Filo.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">BRANCH_WITH_TERMINAL</code><em class="property"> = 4</em></dt>
+<dd><p>Branch with downstream terminal Filo.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">INTERSTITIAL</code><em class="property"> = 1</em></dt>
+<dd><p>Filo in the middle of a branch.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">TERMINAL</code><em class="property"> = 2</em></dt>
+<dd><p>Filo at the end of a branch</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="history">
 <h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">model.history.</code><code class="descname">History</code><span class="sig-paren">(</span><em>liveState</em><span class="sig-paren">)</span></dt>
+<dd><p>Respresents the current live active state of the app, as well as a history of changes.
+After snapshotting with pushState(), the app can walk through history with undo/redo.</p>
+<dl class="attribute">
+<dt>
+<code class="descname">liveState</code><em class="property"> = None</em></dt>
+<dd><p>State singleton that is being modified by the app.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">pushState</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Remember the current live state so we can go back to it later if needed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">redo</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Undo an undo by reverting the live stack to a recently undone state.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">redoStack</code><em class="property"> = []</em></dt>
+<dd><p>After undo, keep previous state in redo stack so undo can be redo’d.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">undo</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Revert live state back to the most recent pushed state.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">undoStack</code><em class="property"> = []</em></dt>
+<dd><p>List of previous state snapshots that can be undo’d to.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="analysis.html" class="btn btn-neutral" title="Analysis methods" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="analysis.html" class="btn btn-neutral" title="Analysis methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -168,11 +276,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Patrick Coleman.
+        &copy; Copyright 2018, Patrick Coleman
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -187,35 +295,23 @@
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

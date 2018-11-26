@@ -10,6 +10,7 @@ Contents
    docRst/install
    docRst/stacks
    docRst/drawing
+   docRst/registration
    docRst/analysis
    docRst/model
 

@@ -54,6 +54,8 @@ on the new location to move it to. If you want to move all downstream points, ho
 
     ...then click to move, optionally holding shift to move others.
 
+While moving points, 'w'/'a'/'s'/'d' keys can also be used to move the selected point a small amount in the appropriate direction.
+
 Reparenting
 -----------
 
@@ -70,11 +72,22 @@ Ctrl-R to start the reparenting, which will turn it blue. Next, click the new pa
 
     ...then click to move, optionally holding shift to move others.
 
-Landmarking
------------
+Fixing Branches
+---------------
 
-TODO: Ignore this feature for now.
+If a branch continues the wrong way at a branch point, this can also be fixed.
+First, select the first point along the child (which should actually be a continuation of the branch),
+then press Ctrl-B to change it to continue its parent. The old continuation (if it exists) will become a new branch.
 
+.. container:: img-inline
+
+  .. figure:: ../img/branchcontinue1.png
+
+    Before the continuation fix, with the first point on the child selected...
+
+  .. figure:: ../img/branchcontinue2.png
+
+    ...and after pressing Ctrl-B.
 
 Other
 -------
