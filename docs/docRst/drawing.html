@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -22,27 +24,22 @@
 
   
 
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-
-  
-    <link rel="top" title="PyDynamo 0.1 documentation" href="../index.html"/>
-        <link rel="next" title="Analysis methods" href="analysis.html"/>
-        <link rel="prev" title="Stacks" href="stacks.html"/> 
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Registration" href="registration.html" />
+    <link rel="prev" title="Stacks" href="stacks.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -83,17 +80,21 @@
           
             
             
-                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stacks.html">Stacks</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Drawing</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Drawing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#moving">Moving</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reparenting">Reparenting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#landmarking">Landmarking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fixing-branches">Fixing Branches</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#other">Other</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="registration.html">Registration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Model objects</a></li>
 </ul>
@@ -107,34 +108,54 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">PyDynamo</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyDynamo</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-    <li>Drawing</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Drawing</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/docRst/drawing.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/docRst/drawing.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -153,61 +174,74 @@ Make sure to also change Z-stack (scroll-wheel, or buttons 1 &amp; 2) to place i
 </div>
 <p>New branches can be made by selecting the branch point, then right-clicking the new position,
 or clicking while holding Ctrl:</p>
-<div class="img-inline container">
+<div class="img-inline docutils container">
 <div class="figure" id="id1">
 <img alt="../_images/selectPoint.png" src="../_images/selectPoint.png" />
-<p class="caption"><span class="caption-text">First select a point...</span></p>
+<p class="caption"><span class="caption-text">First select a point…</span></p>
 </div>
 <div class="figure" id="id2">
 <img alt="../_images/newBranch.png" src="../_images/newBranch.png" />
-<p class="caption"><span class="caption-text">...then Right/Ctrl-click to create a point on a new branch</span></p>
+<p class="caption"><span class="caption-text">…then Right/Ctrl-click to create a point on a new branch</span></p>
 </div>
 </div>
 <p>Similarly, new points can be added mid-branch by first selecting a neighboring point on that branch,
 then middle-clicking the new position, or clicking while holding Shift:</p>
-<div class="img-inline container">
+<div class="img-inline docutils container">
 <div class="figure" id="id3">
 <img alt="../_images/selectPoint.png" src="../_images/selectPoint.png" />
-<p class="caption"><span class="caption-text">First select a point...</span></p>
+<p class="caption"><span class="caption-text">First select a point…</span></p>
 </div>
 <div class="figure" id="id4">
 <img alt="../_images/midBranch.png" src="../_images/midBranch.png" />
-<p class="caption"><span class="caption-text">...then Middle/Shift-click to create a point mid-branch</span></p>
+<p class="caption"><span class="caption-text">…then Middle/Shift-click to create a point mid-branch</span></p>
 </div>
 </div>
 <div class="section" id="moving">
 <h2>Moving<a class="headerlink" href="#moving" title="Permalink to this headline">¶</a></h2>
 <p>To move a point, first middle-click (or shift-click) a point, which will turn it red. Next, click
 on the new location to move it to. If you want to move all downstream points, hold shift at the same time.</p>
-<div class="img-inline container">
+<div class="img-inline docutils container">
 <div class="figure" id="id5">
 <img alt="../_images/movePoint1.png" src="../_images/movePoint1.png" />
-<p class="caption"><span class="caption-text">Shift-click to begin moving...</span></p>
+<p class="caption"><span class="caption-text">Shift-click to begin moving…</span></p>
 </div>
 <div class="figure" id="id6">
 <img alt="../_images/movePoint2.png" src="../_images/movePoint2.png" />
-<p class="caption"><span class="caption-text">...then click to move, optionally holding shift to move others.</span></p>
+<p class="caption"><span class="caption-text">…then click to move, optionally holding shift to move others.</span></p>
 </div>
 </div>
+<p>While moving points, ‘w’/’a’/’s’/’d’ keys can also be used to move the selected point a small amount in the appropriate direction.</p>
 </div>
 <div class="section" id="reparenting">
 <h2>Reparenting<a class="headerlink" href="#reparenting" title="Permalink to this headline">¶</a></h2>
 <p>If a point is attached to the wrong parent, this can be fixed. First, select the point, then press
 Ctrl-R to start the reparenting, which will turn it blue. Next, click the new parent.</p>
-<div class="img-inline container">
+<div class="img-inline docutils container">
 <div class="figure" id="id7">
 <img alt="../_images/reparent1.png" src="../_images/reparent1.png" />
-<p class="caption"><span class="caption-text">Shift-click to begin moving...</span></p>
+<p class="caption"><span class="caption-text">Shift-click to begin moving…</span></p>
 </div>
 <div class="figure" id="id8">
 <img alt="../_images/reparent2.png" src="../_images/reparent2.png" />
-<p class="caption"><span class="caption-text">...then click to move, optionally holding shift to move others.</span></p>
+<p class="caption"><span class="caption-text">…then click to move, optionally holding shift to move others.</span></p>
 </div>
 </div>
 </div>
-<div class="section" id="landmarking">
-<h2>Landmarking<a class="headerlink" href="#landmarking" title="Permalink to this headline">¶</a></h2>
-<p>TODO: Ignore this feature for now.</p>
+<div class="section" id="fixing-branches">
+<h2>Fixing Branches<a class="headerlink" href="#fixing-branches" title="Permalink to this headline">¶</a></h2>
+<p>If a branch continues the wrong way at a branch point, this can also be fixed.
+First, select the first point along the child (which should actually be a continuation of the branch),
+then press Ctrl-B to change it to continue its parent. The old continuation (if it exists) will become a new branch.</p>
+<div class="img-inline docutils container">
+<div class="figure" id="id9">
+<img alt="../_images/branchcontinue1.png" src="../_images/branchcontinue1.png" />
+<p class="caption"><span class="caption-text">Before the continuation fix, with the first point on the child selected…</span></p>
+</div>
+<div class="figure" id="id10">
+<img alt="../_images/branchcontinue2.png" src="../_images/branchcontinue2.png" />
+<p class="caption"><span class="caption-text">…and after pressing Ctrl-B.</span></p>
+</div>
+</div>
 </div>
 <div class="section" id="other">
 <h2>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h2>
@@ -229,15 +263,16 @@ These are all listed in a help dialog (shortcut F1), and includes:</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="analysis.html" class="btn btn-neutral float-right" title="Analysis methods" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="registration.html" class="btn btn-neutral float-right" title="Registration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="stacks.html" class="btn btn-neutral" title="Stacks" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="stacks.html" class="btn btn-neutral" title="Stacks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -246,11 +281,11 @@ These are all listed in a help dialog (shortcut F1), and includes:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Patrick Coleman.
+        &copy; Copyright 2018, Patrick Coleman
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -265,35 +300,23 @@ These are all listed in a help dialog (shortcut F1), and includes:</p>
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>

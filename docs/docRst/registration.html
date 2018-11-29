@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Registration &mdash; PyDynamo 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Analysis methods" href="analysis.html" />
+    <link rel="prev" title="Drawing" href="drawing.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyDynamo
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stacks.html">Stacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="drawing.html">Drawing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Registration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-registration">Automatic registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-registration">Manual registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#location-based-registration">Location-based registration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Model objects</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyDynamo</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Registration</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/docRst/registration.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="registration">
+<h1>Registration<a class="headerlink" href="#registration" title="Permalink to this headline">¶</a></h1>
+<p>Registration is the act of making sure that points and branches through time
+will have the  same ID in each stack of drawing. This is required for correctly
+tracking the dynamic changes.</p>
+<div class="section" id="automatic-registration">
+<h2>Automatic registration<a class="headerlink" href="#automatic-registration" title="Permalink to this headline">¶</a></h2>
+<p>This is the most powerful form of registration. By selecting a point on one stack,
+and pressing ‘R’, this will attempt to automatically register that point and all points later in the tree.</p>
+<dl class="docutils">
+<dt>Registration does the following:</dt>
+<dd><ul class="first last simple">
+<li>Find the 3D x/y/z position in the new stack that looks the most like the position in the old stack.</li>
+<li>If the position is similar enough, move the new point there and continue down the tree.</li>
+<li>Otherwise, mark the new point and everything along the tree as unregistered (green).</li>
+</ul>
+</dd>
+</dl>
+<p>If there are any green points after automatic registration, these can be registered manually,
+and automatic registration can be performed futher down the tree by selecting those
+points and pressing ‘R’.</p>
+</div>
+<div class="section" id="manual-registration">
+<h2>Manual registration<a class="headerlink" href="#manual-registration" title="Permalink to this headline">¶</a></h2>
+<p>The manual form of registration can be used to select multiple points across stacks
+and force them to have the same ID. To perform manual registration:</p>
+<ol class="arabic simple">
+<li>Enter manual registration, either by the top menu or Ctrl-Shift-R</li>
+<li>Click on a point to select it in just one stack (shift-click to select in all)</li>
+<li>Once the correct point is selected in all stacks, Shift-Enter will force them all to have the same ID.</li>
+</ol>
+<p>When registration is complete, it can be exited by again using Ctrl-Shift-R.
+If changes had been made, this will also provide a way to save the changed IDs to a file.</p>
+<dl class="docutils">
+<dt>To assist in the process, the following are available:</dt>
+<dd><ul class="first last simple">
+<li>Shortcut ‘f’ can be used to show the IDs of all points.</li>
+<li>Shortcuts ‘&lt;’/’&gt;’/’?’ will move to the next / previous points, or down the first child branch respectively.</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="location-based-registration">
+<h2>Location-based registration<a class="headerlink" href="#location-based-registration" title="Permalink to this headline">¶</a></h2>
+<p>This is not in dynamo currently, but python code exists that matches points purely by location,
+not by image content around the location. If this registration would be useful, let me know and
+it can be shared and/or worked into dynamo itself.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="analysis.html" class="btn btn-neutral float-right" title="Analysis methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="drawing.html" class="btn btn-neutral" title="Drawing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Patrick Coleman
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
