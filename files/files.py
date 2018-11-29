@@ -64,6 +64,9 @@ def convertToTree(asDict):
 
 def convertToUIState(asDict):
     convert(asDict, 'colorLimits', tuple)
+    # Remove unused property:
+    if 'drawAllBranches' in asDict:
+        asDict.pop('drawAllBranches')
     return UIState(**asDict)
 
 def convertToMotilityOptions(asDict):

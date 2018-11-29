@@ -115,11 +115,14 @@ class DendritePainter():
     def getLinePen(self, z1, z2):
         inZ1, inZ2 = round(z1) == self.zAt, round(z2) == self.zAt
         near1, near2 = self.isNearZ(z1), self.isNearZ(z2)
+
+        drawAll = (self.uiState.branchDisplayMode == 1)
+        drawNear = not (self.uiState.branchDisplayMode == 2)
         if inZ1 or inZ2:
             color = colorForBranch(self.branchAt)
             color = QColor.fromRgbF(color[0], color[1], color[2])
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.SolidLine)
-        elif near1 or near2 or self.uiState.drawAllBranches:
+        elif drawNear and (near1 or near2 or drawAll):
             color = colorForBranch(self.branchAt)
             color = QColor.fromRgbF(color[0], color[1], color[2])
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.DotLine)

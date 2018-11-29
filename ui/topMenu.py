@@ -51,7 +51,8 @@ class TopMenu():
         viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J)
         viewMenu.addAction('Change channel', self.changeChannel, QtCore.Qt.Key_C)
         viewMenu.addAction('Turn on/off colours', self.toggleColor, QtCore.Qt.SHIFT + QtCore.Qt.Key_C)
-        viewMenu.addAction('Show/Hide all branches', self.toggleAllBranches, QtCore.Qt.Key_V)
+        viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
+            self.cycleBranchDisplayMode, QtCore.Qt.Key_V)
         viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H)
         viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
         viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
@@ -172,8 +173,8 @@ class TopMenu():
         self._global().fullState.useColor = not self._global().fullState.useColor
         self._global().redrawAllStacks()
 
-    def toggleAllBranches(self):
-        self.stackWindow.uiState.drawAllBranches = not self.stackWindow.uiState.drawAllBranches
+    def cycleBranchDisplayMode(self):
+        self.stackWindow.uiState.cycleBranchDisplayMode()
         self.redraw()
 
     def toggleHilight(self):

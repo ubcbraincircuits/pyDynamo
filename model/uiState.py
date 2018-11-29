@@ -43,8 +43,9 @@ class UIState():
     # UI Option for whether or not to show IDs (drawn like annotations).
     showIDs = attr.ib(default=False, metadata=SAVE_META)
 
-    # UI Option for whether or not to show all branches, or just the nearby ones.
-    drawAllBranches = attr.ib(default=False, metadata=SAVE_META)
+    # UI Option for which branches to show.
+    # 0 = nearby, 1 = all, 2 = only on this Z plane
+    branchDisplayMode = attr.ib(default=0)
 
     # UI Option for whether to flatten all z planes into one image.
     zProject = attr.ib(default=False)
@@ -236,6 +237,10 @@ class UIState():
 
     def cancelMove(self):
         self.isMoving = False
+
+    def cycleBranchDisplayMode(self):
+        N_BRANCH_DISPLAY_MODES = 3 # Local, All Z, Only this Z
+        self.branchDisplayMode = (self.branchDisplayMode + 1) % N_BRANCH_DISPLAY_MODES
 
     def maybeCreateNewID(self, newPointID):
         return newPointID if newPointID is not None else self._parent.nextPointID()
