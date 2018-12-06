@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 import sys
 
@@ -54,6 +55,8 @@ def runBranchAnalysis(path=None):
     }
 
     result = allBranches(usePathOrPick(path), toRun, **arguments)
+    result2 = pd.DataFrame(result)
+    result2.to_csv("result_control.csv")
     print (result)
 
 # Example novel analysis: get filopodia tips, plot in 3D, and compare spatial vs tree distance.
