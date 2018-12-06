@@ -10,6 +10,7 @@ from .QtImageViewer import QtImageViewer
 from .dendritePainter import DendritePainter
 from .dendriteOverlay import DendriteOverlay
 
+from model import Point
 from util import ImageCache, deltaSz, snapToRange, zStackForUiState
 
 _IMGCACHE = ImageCache()
@@ -51,6 +52,7 @@ class DendriteVolumeCanvas(QWidget):
 
     def updateWindowIndex(self, windowIndex):
         self.windowIndex = windowIndex
+        self.imgOverlay.updateWindowIndex(windowIndex)
 
     def redraw(self):
         self.drawImage()
@@ -87,12 +89,13 @@ class DendriteVolumeCanvas(QWidget):
             rightClick = event.button() == Qt.RightButton
             middleClick = event.button() == Qt.MidButton
 
-            pointClicked = self.pointNearPixel(location)
-            closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
+            # Shortcut out in puncta mode:
+            if self.uiState.parent().inPunctaMode:
+                if self.handlePunctaClick(location, shiftPressed, ctrlPressed, rightClick, middleClick):
+                    self.dynamoWindow.redrawAllStacks()
+                return
 
-            nearDistWorldSize = self.imgView.toSceneDist(self.uiState.parent().closeToCirclePx())
-            if closestDist is None or closestDist >= nearDistWorldSize:
-                pointClicked = None
+            pointClicked = self.pointOnPixel(location)
 
             # Handle manual registration first: select or deselect the point
             if self.uiState.parent().inManualRegistrationMode():
@@ -153,6 +156,26 @@ class DendriteVolumeCanvas(QWidget):
             print ("Whoops - error on click: " + str(e))
             raise
 
+    # Click actions handled specifically for when drawing puncta
+    def handlePunctaClick(self, location, shiftPressed, ctrlPressed, rightClick, middleClick):
+        pointClicked = self.punctaOnPixel(location)
+
+        punctaActions = self.fullActions.punctaActions
+        if rightClick:
+            punctaActions.movePointBoundary(self.windowIndex, location)
+        elif shiftPressed and not ctrlPressed:
+            punctaActions.movePointCenter(self.windowIndex, location)
+        elif pointClicked:
+            if ctrlPressed:
+                punctaActions.removePoint(
+                    self.windowIndex, pointClicked, laterStacks=shiftPressed
+                )
+            else:
+                punctaActions.selectPoint(self.windowIndex, pointClicked)
+        else:
+            punctaActions.createPuncta(self.windowIndex, location)
+        return True
+
     def wheelEvent(self, event):
         try:
             scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
@@ -163,5 +186,38 @@ class DendriteVolumeCanvas(QWidget):
         except Exception as e:
             print ("Whoops - error on scroll: " + str(e))
 
-    def pointNearPixel(self, location, zFilter=True):
-        return self.uiState._tree.closestPointTo(location, zFilter)
+    def pointOnPixel(self, location, zFilter=True):
+        dotSize = self.uiState.parent().dotSize
+
+        # POIUY - share with below
+        closestDist, closestPoint = None, None
+        allPoints = self.uiState._tree.flattenPoints()
+        for point in allPoints:
+            if zFilter and round(point.location[2]) != round(location[2]):
+                continue
+            dist = deltaSz(location, point.location)
+            cmpRadius = dotSize
+            if dotSize is None:
+                cmpRadius = point.radius
+            if cmpRadius is None:
+                cmpRadius = 5 # POIUY - NODE_CIRCLE_DEFAULT_RADIUS
+            if dist > cmpRadius:
+                continue
+            if closestDist is None or dist < closestDist:
+                closestDist, closestPoint = dist, point
+        return closestPoint
+
+    def punctaOnPixel(self, location, zFilter=True):
+        # POIUY - share with above
+        closestDist, closestPoint = None, None
+        if self.windowIndex < len(self.uiState._parent.puncta):
+            allPoints = self.uiState._parent.puncta[self.windowIndex]
+            for point in allPoints:
+                if zFilter and round(point.location[2]) != round(location[2]):
+                    continue
+                dist = deltaSz(location, point.location)
+                if dist > point.radius:
+                    continue
+                if closestDist is None or dist < closestDist:
+                    closestDist, closestPoint = dist, point
+        return closestPoint

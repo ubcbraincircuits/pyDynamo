@@ -224,9 +224,9 @@ class Tree():
         allPoints = self.flattenPoints()
         allX, allY, allZ = self.worldCoordPoints(allPoints)
         for point, loc in zip(allPoints, zip(allX, allY, allZ)):
-            dist = util.deltaSz(targetWorldLocation, loc) # (allX[i], allY[i], allZ[i]))
+            dist = util.deltaSz(targetWorldLocation, loc)
             if closestDist is None or dist < closestDist:
-                closestDist, closestPoint = dist, point #allPoints[i]
+                closestDist, closestPoint = dist, point
         return closestPoint
 
     def worldCoordPoints(self, points):
@@ -306,7 +306,7 @@ def _clonePoint(point, idMaker, pointMap):
     assert point.id not in pointMap
     newID = point.id if idMaker is None else idMaker.nextPointID()
     # NOTE: SWC point ID can be stored here too if needed.
-    newPoint = Point(id=newID, location=point.location)
+    newPoint = Point(id=newID, location=point.location, radius=point.radius)
     pointMap[point.id] = newPoint
     return newPoint
 

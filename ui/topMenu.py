@@ -10,14 +10,17 @@ class TopMenu():
         self.stackWindow = stackWindow
         menuBar = stackWindow.menuBar()
 
+        self.drawModeOnly = []
+        dmo = lambda x: self.drawModeOnly.append(x)
+
         fileMenu = QtWidgets.QMenu('&File', stackWindow)
         fileMenu.addAction('&New stack...', self.appendStack, QtCore.Qt.Key_N)
         fileMenu.addAction('&Save', self.save, QtCore.Qt.CTRL + QtCore.Qt.Key_S)
         fileMenu.addAction('Save As...', self.saveAs, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_S)
         fileMenu.addSeparator()
-        fileMenu.addAction('Import from previous stack', self.importFromPreviousStack, QtCore.Qt.Key_I)
-        fileMenu.addAction('Import from SWC...', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I)
-        fileMenu.addAction('Export to SWC...', self.exportToSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_E)
+        dmo(fileMenu.addAction('Import from previous stack', self.importFromPreviousStack, QtCore.Qt.Key_I))
+        dmo(fileMenu.addAction('Import from SWC...', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I))
+        dmo(fileMenu.addAction('Export to SWC...', self.exportToSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_E))
         fileMenu.addSeparator()
         fileMenu.addAction('&Project Settings...',
             self.openSettings, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_P)
@@ -31,13 +34,14 @@ class TopMenu():
         editMenu.addSeparator()
         editMenu.addAction('Find', self.find, QtCore.Qt.CTRL + QtCore.Qt.Key_F)
         editMenu.addSeparator()
-        editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R)
-        editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R)
-        editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B)
-        editMenu.addAction('Clean up all primary &branches',
-            self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B)
+        dmo(editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R))
+        dmo(editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R))
+        dmo(editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B))
+        dmo(editMenu.addAction('Clean up all primary &branches',
+            self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B))
+        editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
         editMenu.addAction('Manual registration', self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
-        editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab)
+        dmo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
         menuBar.addMenu(editMenu)
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -47,14 +51,14 @@ class TopMenu():
         viewMenu.addAction('View 3D Neuron', self.view3D, QtCore.Qt.Key_3)
         viewMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
         viewMenu.addSeparator()
-        viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J)
-        viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J)
+        dmo(viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J))
+        dmo(viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J))
         viewMenu.addAction('Change channel', self.changeChannel, QtCore.Qt.Key_C)
         viewMenu.addAction('Turn on/off colours', self.toggleColor, QtCore.Qt.SHIFT + QtCore.Qt.Key_C)
         viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
             self.cycleBranchDisplayMode, QtCore.Qt.Key_V)
-        viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H)
-        viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
+        dmo(viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H))
+        dmo(viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H))
         viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
         viewMenu.addAction('Tile windows on screen', self.tileFigs, QtCore.Qt.Key_T)
         menuBar.addMenu(viewMenu)
@@ -71,6 +75,11 @@ class TopMenu():
     def _global(self):
         """Access to the dynamo window, for global operations that affect all stacks."""
         return self.stackWindow.parent()
+
+    def _updateForDrawMode(self):
+        inDrawMode = self._global().fullState.inDrawMode()
+        for action in self.drawModeOnly:
+            action.setEnabled(inDrawMode)
 
     # File menu callbacks:
     def appendStack(self, *args):
@@ -134,8 +143,13 @@ class TopMenu():
         self._global().updateAllPrimaryBranches(self.stackWindow)
         self._global().redrawAllStacks()
 
+    def punctaMode(self):
+        self._global().togglePunctaMode()
+        self._updateForDrawMode()
+
     def manualRegister(self):
         self._global().toggleManualRegistration()
+        self._updateForDrawMode()
 
     def cyclePointModes(self):
         self._local().cyclePointModes()

@@ -32,7 +32,14 @@ HELP_MSG = """
   <li><b>Scroll</b> to move through the Z stacks</li>
   <li><b>Shift-Scroll</b> to zoom in and out.</li>
 </ul>
-
+<h3>Drawing puncta</h3>
+<ul>
+  <li>Click on empty space to create a new puncta in that and later stacks.</li>
+  <li>Click on a point to select it in all stacks.</li>
+  <li>Shift-Click to move the centre of the selected point.</li>
+  <li>Right-Click to move the outer circumference of the selected point.</li>
+  <li>Ctrl-Click to delete the clicked point. Holding shift will delete later stacks too.</li>
+</ul>
 </td><td>
 
 <h1>Shortcuts</h1>
@@ -41,7 +48,7 @@ HELP_MSG = """
   <li><b>Q</b> to annotate a point</li>
   <li><b>Ctrl-R</b> to replace the parent of a point (click next on the new parent)</li>
   <li><b>Ctrl-B</b> on a branch start will make that branch continue its parent's branch</li>
-  <li><b>L</b> to set landmarks that allow for aligning volumes</li>
+  <li><b>P</b> to enter or leave puncta drawing mode.</li>
 </ul>
 <h3>Analysis</h3>
 <ul>

@@ -25,6 +25,7 @@ class DendritePainter():
     NODE_CIRCLE_SELECTED_BRUSH = QBrush(Qt.cyan)
     NODE_CIRCLE_MOVING_BRUSH = QBrush(Qt.red)
     NODE_CIRCLE_REPARENTING_BRUSH = QBrush(Qt.blue)
+    NODE_CIRCLE_DEFAULT_RADIUS = 5
     HILIGHTED_CIRCLE_BRUSH = QBrush(Qt.green)
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
@@ -33,11 +34,12 @@ class DendritePainter():
     ANNOTATION_HEIGHT = 40
     ANNOTATION_MAX_WIDTH = 512
 
-    def __init__(self, painter, uiState, zoomMapFunc):
+    def __init__(self, painter, uiState, zoomMapFunc, zoomDistFunc):
         self.p = painter
-        self.zAt = util.zStackForUiState(uiState)
         self.uiState = uiState
+        self.zAt = self.uiState.zAxisAt
         self.zoomMapFunc = zoomMapFunc
+        self.zoomDistFunc = zoomDistFunc
         self.branchAt = 0
 
     def drawTree(self, tree):
@@ -74,10 +76,21 @@ class DendritePainter():
     def drawPoint(self, point, selectedPointID):
         x, y, z = self.zoomedLocation(point.location)
         if round(z) == self.zAt:
-            self.drawCircleThisZ(x, y, point.id == selectedPointID, point.hilighted)
+            self.drawCircleThisZ(x, y,
+                point.id == selectedPointID, point.hilighted,
+                self.uiState.parent().dotSize, point.radius
+            )
             self.maybeDrawText(x, y, point)
 
-    def drawCircleThisZ(self, x, y, isSelected, isHilighted):
+    def drawCircleThisZ(self, x, y, isSelected, isHilighted, fakeRadius, realRadius):
+        radius = fakeRadius
+        resizeRadius = False
+        if radius is None:
+            radius = realRadius
+            resizeRadius = (realRadius is not None)
+        if radius is None:
+            radius = self.NODE_CIRCLE_DEFAULT_RADIUS
+
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
             brushColor = self.NODE_CIRCLE_SELECTED_BRUSH
@@ -89,8 +102,11 @@ class DendritePainter():
             brushColor = self.HILIGHTED_CIRCLE_BRUSH
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
-        dotSize = self.uiState.parent().dotSize
-        self.p.drawEllipse(QPointF(x, y), dotSize, dotSize)
+        if resizeRadius:
+            radiusX, radiusY = self.zoomDistFunc(radius, radius)
+        else:
+            radiusX, radiusY = radius, radius
+        self.p.drawEllipse(QPointF(x, y), radiusX, radiusY)
 
     def maybeDrawText(self, x, y, point):
         if not self.uiState.showAnnotations and not self.uiState.showIDs:
@@ -113,12 +129,12 @@ class DendritePainter():
         self.p.drawText(textRect, Qt.AlignVCenter, text)
 
     def getLinePen(self, z1, z2):
-        inZ1, inZ2 = round(z1) == self.zAt, round(z2) == self.zAt
+        same1, same2 = round(z1) == self.zAt, round(z2) == self.zAt
         near1, near2 = self.isNearZ(z1), self.isNearZ(z2)
 
         drawAll = (self.uiState.branchDisplayMode == 1)
         drawNear = not (self.uiState.branchDisplayMode == 2)
-        if inZ1 or inZ2:
+        if same1 or same2:
             color = colorForBranch(self.branchAt)
             color = QColor.fromRgbF(color[0], color[1], color[2])
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.SolidLine)
@@ -133,7 +149,6 @@ class DendritePainter():
         x, y, z = xyz
         zoomedXY = self.zoomMapFunc(x, y)
         return (zoomedXY.x(), zoomedXY.y(), z)
-
 
     # HACK - utilities
     def isNearZ(self, z):

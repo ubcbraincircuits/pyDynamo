@@ -10,8 +10,32 @@ from model import *
 def attrFilter(attrData, value):
     return (SAVE_KEY in attrData.metadata) and attrData.metadata[SAVE_KEY]
 
+# WORKAROUND: attr.asdict does not support lists of lists
+#   see https://github.com/python-attrs/attrs/issues/469
+# until that is fixed, manually work around this:
+def _hackUpdateChildDicts(v):
+    result, changed = v, False
+    if isinstance(v, list):
+        result = []
+        for childI, childV in enumerate(v):
+            newV, childChanged = _hackUpdateChildDicts(childV)
+            result.append(newV)
+            changed = changed or childChanged
+    elif isinstance(v, Point):
+        # We have a list of list of Points:
+        result, _ = _hackUpdateChildDicts(attr.asdict(v, filter=attrFilter))
+        changed = True
+    elif isinstance(v, dict):
+        result = {}
+        for childK, childV in v.items():
+            newV, childChanged = _hackUpdateChildDicts(childV)
+            result[childK] = newV
+            changed = changed or childChanged
+    return result, changed
+
+
 # https://stackoverflow.com/questions/11942364/typeerror-integer-is-not-json-serializable-when-serializing-json-in-python
-def npInt64Fix(o):
+def typeFix(o):
     if isinstance(o, np.int64):
         print ("WARNING: Wrong data type (i64) for ", o, " - converting to int")
         return int(o)
@@ -21,9 +45,11 @@ def npInt64Fix(o):
     print ("ERROR - Can't save type: ", type(o))
     raise TypeError
 
-def fullStateToString(fullState, filter=attrFilter):
-    asDict = attr.asdict(fullState, filter=filter)
-    return json.dumps(asDict, indent=2, sort_keys=True, default=npInt64Fix).encode('utf-8')
+def fullStateToString(fullState):
+    asDict, changed = attr.asdict(fullState, filter=attrFilter), True
+    while changed:
+        asDict, changed = _hackUpdateChildDicts(asDict)
+    return json.dumps(asDict, indent=2, sort_keys=True, default=typeFix).encode('utf-8')
 
 def saveState(fullState, path):
     with gzip.GzipFile(path, 'w') as outfile:
@@ -69,6 +95,9 @@ def convertToUIState(asDict):
         asDict.pop('drawAllBranches')
     return UIState(**asDict)
 
+def convertToPunctaList(asList):
+    return [convertToPoint(value) for value in asList]
+
 def convertToMotilityOptions(asDict):
     return MotilityOptions(**asDict)
 
@@ -79,6 +108,7 @@ def convertToProjectOptions(asDict):
 def convertToFullState(asDict):
     convert(asDict, 'trees', convertToTree, isArray=True)
     convert(asDict, 'uiStates', convertToUIState, isArray=True)
+    convert(asDict, 'puncta', convertToPunctaList, isArray=True)
     convert(asDict, 'landmarks', convertToListOfTuples, isArray=True)
     convert(asDict, 'projectOptions', convertToProjectOptions)
     return FullState(**asDict)
@@ -107,6 +137,9 @@ def findNextPointID(fullState):
     for tree in fullState.trees:
         for point in tree.flattenPoints():
             nextID = max(nextID, 1 + int(point.id, 16))
+    for puncta in fullState.puncta:
+        for point in puncta:
+            nextID = max(nextID, 1 + int(point.id, 16))
     return nextID
 
 def findNextBranchID(fullState):
@@ -129,11 +162,14 @@ def indexFullState(fullState, path):
     fullState._rootPath = path
     return fullState
 
+def stringToFullState(text, path):
+    return indexFullState(convertToFullState(json.loads(text)), path)
+
 def loadState(path):
-    asDict = None
+    fileText = ""
     with gzip.GzipFile(path, 'r') as infile:
-        asDict = json.loads(infile.read().decode('utf-8'))
-    return indexFullState(convertToFullState(asDict), path)
+        fileText = infile.read().decode('utf-8')
+    return stringToFullState(fileText, path)
 
 def checkIfChanged(fullState, path):
     if path is None:
