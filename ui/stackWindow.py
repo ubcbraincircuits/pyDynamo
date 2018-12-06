@@ -92,6 +92,25 @@ class StackWindow(QtWidgets.QMainWindow):
         else:
             self.dendrites.redraw()
 
+    def doPunctaMove(self, dX, dY, laterStacks):
+        MOVE_FACTOR = 0.05 # 1/20 of screen per button press
+        xScale, yScale = self.dendrites.imgView.sceneDimension()
+        scale = min(xScale, yScale)
+        dX = dX * scale * MOVE_FACTOR
+        dY = dY * scale * MOVE_FACTOR
+        self.fullActions.punctaActions.relativeMove(self.windowIndex, dX, dY, laterStacks)
+        if laterStacks:
+            self.parent().redrawAllStacks()
+        else:
+            self.dendrites.redraw()
+
+    def doPunctaGrow(self, dR, laterStacks):
+        self.fullActions.punctaActions.relativeGrow(self.windowIndex, dR, laterStacks)
+        if laterStacks:
+            self.parent().redrawAllStacks()
+        else:
+            self.dendrites.redraw()
+
     def keyPressEvent(self, event):
         try:
             if self.parent().childKeyPress(event, self):
@@ -115,23 +134,37 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('W')):
                 if self.uiState.isMoving:
                     self.doMove(0, -1, shftPressed, altsPressed)
+                elif self.uiState._parent.inPunctaMode:
+                    self.doPunctaMove(0, -1, altsPressed)
                 else:
                     self.actionHandler.pan(0, -1)
             elif (key == ord('A')):
                 if self.uiState.isMoving:
                     self.doMove(-1, 0, shftPressed, altsPressed)
+                elif self.uiState._parent.inPunctaMode:
+                    self.doPunctaMove(-1, 0, altsPressed)
                 else:
                     self.actionHandler.pan(-1, 0)
             elif (key == ord('S')):
                 if self.uiState.isMoving:
                     self.doMove(0, 1, shftPressed, altsPressed)
+                elif self.uiState._parent.inPunctaMode:
+                    self.doPunctaMove(0, 1, altsPressed)
                 else:
                     self.actionHandler.pan(0, 1)
             elif (key == ord('D')):
                 if self.uiState.isMoving:
                     self.doMove(1, 0, shftPressed, altsPressed)
+                elif self.uiState._parent.inPunctaMode:
+                    self.doPunctaMove(1, 0, altsPressed)
                 else:
                     self.actionHandler.pan(1, 0)
+            elif (key == ord('Q')):
+                if self.uiState._parent.inPunctaMode:
+                    self.doPunctaGrow(1.0 / 0.9, altsPressed)
+            elif (key == ord('E')):
+                if self.uiState._parent.inPunctaMode:
+                    self.doPunctaGrow(0.9, altsPressed)
 
             if self.uiState.hideAll:
                 return
@@ -141,17 +174,21 @@ class StackWindow(QtWidgets.QMainWindow):
             if key == ord('<') or key == ord('>'):
                 # Prev / Next in branch selector
                 delta = -1 if key == ord('<') else 1
-                self.fullActions.selectNextPoints(delta)
+                if self.uiState._parent.inPunctaMode:
+                    self.fullActions.punctaActions.selectNextPoint(self.windowIndex, delta)
+                else:
+                    self.fullActions.selectNextPoints(delta)
                 self.parent().redrawAllStacks()
             elif key == ord('?'):
                 # First child of current point selector
-                self.fullActions.selectFirstChildren()
-                self.parent().redrawAllStacks()
+                if not self.uiState._parent.inPunctaMode:
+                    self.fullActions.selectFirstChildren()
+                    self.parent().redrawAllStacks()
             elif key == QtCore.Qt.Key_Return and shftPressed:
                 # Align IDs in registration mode, and save updates
                 if self.uiState._parent.inManualRegistrationMode():
                     self.fullActions.alignVisibleIDs()
-                self.parent().redrawAllStacks()
+                    self.parent().redrawAllStacks()
 
             if (key == ord('F')):
                 if self.uiState.showAnnotations:
@@ -166,6 +203,8 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.redraw()
 
             if self.uiState._parent.inManualRegistrationMode():
+                return
+            if self.uiState._parent.inPunctaMode:
                 return
 
             elif key == ord('Q'):

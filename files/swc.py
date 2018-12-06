@@ -30,10 +30,10 @@ def importFromSWC(path):
             print ("Unsupported SWC file format. All node lines must be n,type,x,y,z,radius,parent")
             return None
         nodeID, nodeType, x, y, z, radius, parent = tuple(parts)
-        x, y, z = float(x), float(y), float(z) # TODO: Scale?
+        x, y, z, radius = float(x), float(y), float(z), float(radius) # TODO: Scale?
         if parent not in childMap:
             childMap[parent] = []
-        childMap[parent].append((nodeID, (x, y, z))) # TODO: Use nodeType / radius later
+        childMap[parent].append((nodeID, (x, y, z), radius)) # TODO: Use nodeType later?
 
     return _convertChildMapToTree(childMap)
 
@@ -42,10 +42,10 @@ def _convertChildMapToTree(childMap):
     if '-1' not in childMap or len(childMap['-1']) != 1:
         print ("Can't parse SWC file: Has more than one Soma (parent -1)")
         return None
-    somaID, somaLocation = childMap['-1'][0]
+    somaID, somaLocation, somaRadius = childMap['-1'][0]
 
     tree = Tree()
-    tree.rootPoint = Point(somaID, somaLocation)
+    tree.rootPoint = Point(somaID, somaLocation, somaRadius)
 
     # Keep track of where branches have come off that still need processing
     toProcess = deque()
@@ -62,7 +62,7 @@ def _convertChildMapToTree(childMap):
         assert parentPoint is not None
 
         # Start this branch, but remember parent if it has more coming off...
-        branchPointID, branchPointLocation = childMap[nextParentID][0]
+        branchPointID, branchPointLocation, branchPointRadius = childMap[nextParentID][0]
         childMap[nextParentID].pop(0)
         if len(childMap[nextParentID]) > 0:
             toProcess.append(nextParentID)
@@ -73,12 +73,12 @@ def _convertChildMapToTree(childMap):
 
         while True:
             # Walk along the branch, adding points as we go
-            newBranch.addPoint(Point(branchPointID, branchPointLocation))
+            newBranch.addPoint(Point(branchPointID, branchPointLocation, branchPointRadius))
             oldBranchPointID = branchPointID
             if branchPointID not in childMap or len(childMap[branchPointID]) == 0:
                 break
             # Remember any intermediate points that have more children coming off them
-            branchPointID, branchPointLocation = childMap[oldBranchPointID][0]
+            branchPointID, branchPointLocation, branchPointRadius = childMap[oldBranchPointID][0]
             childMap[oldBranchPointID].pop(0)
             if len(childMap[oldBranchPointID]) > 0:
                 toProcess.append(oldBranchPointID)
@@ -135,7 +135,7 @@ def _exportNodes(file, tree):
         # Note: Vaa3D appears to encode branch ID in this property?
         type = int(point.parentBranch.id, 16) if point.parentBranch is not None else -1
         x, y, z = point.location
-        radius = 1 # Dynamo doesn't track this, so for now make all the same small size.
+        radius = point.radius
         nextPoint = point.nextPointInBranch(delta=-1)
         parent = -1 if nextPoint is None else idToSWCIndex[nextPoint.id]
         file.write("%d %d %.4f %.4f %.4f %.5f %d\n" % (n,type,x,y,z,radius,parent))

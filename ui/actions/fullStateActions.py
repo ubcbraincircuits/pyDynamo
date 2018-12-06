@@ -2,14 +2,16 @@ import attr
 
 from PyQt5 import QtWidgets
 
-from analysis import absOrient
+from .punctaActions import PunctaActions
 
+from analysis import absOrient
 from model.tree import *
 
 class FullStateActions():
     def __init__(self, fullState, history):
         self.state = fullState
         self.history = history
+        self.punctaActions = PunctaActions(fullState, history)
 
     def selectPoint(self, localIdx, point, avoidPush=False, deselectHidden=False):
         if not avoidPush:
@@ -225,6 +227,9 @@ class FullStateActions():
             # tolist() as state should not have (unsavable) numpy data
             self.state.trees[i].transform.rotation = R.tolist()
             self.state.trees[i].transform.translation = T.tolist()
+
+    def togglePunctaMode(self):
+        return self.state.togglePunctaMode()
 
     def toggleManualRegistration(self):
         return self.state.toggleManualRegistrationMode()

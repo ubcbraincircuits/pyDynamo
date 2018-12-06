@@ -12,6 +12,7 @@ import util
 from analysis import allTrees, allBranches, addedSubtractedTransitioned
 from analysis.functions.tree import *
 from analysis.functions.branch import *
+from analysis.functions.puncta import *
 from model import FiloType
 
 # Either use a provided path, or open a filepicker to select one.
@@ -54,6 +55,21 @@ def runBranchAnalysis(path=None):
     }
 
     result = allBranches(usePathOrPick(path), toRun, **arguments)
+    print (result)
+
+# Example of running puncta-based analysis
+def runPunctaAnalysis(path=None):
+    # List of analysis functions to produce answers across each tree:
+    toRun = [
+        punctaCount,
+        totalPunctaSize
+    ]
+    # Named arguments passed in to the functions
+    arguments = {
+        'excludeAxon': False
+    }
+
+    result = allTrees(usePathOrPick(path), toRun, **arguments)
     print (result)
 
 # Example novel analysis: get filopodia tips, plot in 3D, and compare spatial vs tree distance.
@@ -112,5 +128,6 @@ if __name__ == '__main__':
     # Path is first command-line argument, if provided.
     path = sys.argv[1] if len(sys.argv) > 1 else None
     # runTreeAnalysis(path)
-    runBranchAnalysis(path)
+    runPunctaAnalysis(path)
+    # runBranchAnalysis(path)
     # runFiloTipCluster(path)

@@ -16,7 +16,10 @@ class Point():
     """Identifier of point, can be shared across stacks."""
 
     location = attr.ib(metadata=SAVE_META)
-    """Node position as an (x, y, z) tuple."""
+    """Node position as an (x, y, z) tuple, in pixels."""
+
+    radius = attr.ib(default=None, metadata=SAVE_META)
+    """(optional) radius of the point, in pixels."""
 
     parentBranch = attr.ib(default=None, repr=False, cmp=False)
     """Branch this point belongs to."""

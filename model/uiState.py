@@ -31,6 +31,12 @@ class UIState():
     # Cache of the current point
     _currentPointCache = attr.ib(default=None)
 
+    # ID of currently active puncta
+    currentPunctaID = attr.ib(default=None)
+
+    # Cache of the current puncta
+    _currentPunctaCache = attr.ib(default=None)
+
     # Whether the current point is being moved (True) or just selected (False)
     isMoving = attr.ib(default=False)
 
@@ -75,6 +81,9 @@ class UIState():
     def currentPoint(self):
         return self._currentPointCache
 
+    def currentPuncta(self):
+        return self._currentPunctaCache
+
     def deleteBranch(self, branch):
         # Need to remove backwards, as we're removing while we're iterating
         reverseIndex = list(reversed(range(len(branch.points))))
@@ -105,6 +114,24 @@ class UIState():
         selected = self.currentPoint()
         if selected is not None:
             self.zAxisAt = int(round(selected.location[2]))
+
+    def selectPunctaByID(self, selectedID):
+        self._currentPunctaCache = None
+        if selectedID is not None:
+            stackIdx = self._parent.uiStates.index(self)
+            stackPuncta = None
+            if stackIdx < len(self._parent.puncta):
+                stackPuncta = self._parent.puncta[stackIdx]
+            for point in stackPuncta:
+                if point.id == selectedID:
+                    self._currentPunctaCache = point
+                    break
+
+        if self._currentPunctaCache is not None:
+            self.currentPunctaID = self._currentPunctaCache.id
+            self.zAxisAt = int(round(self._currentPunctaCache.location[2]))
+        else:
+            self.currentPunctaID = None
 
     def selectOrDeselectPointID(self, selectedID):
         assert selectedID is not None
