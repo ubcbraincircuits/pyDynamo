@@ -58,7 +58,7 @@ class TopMenu():
         viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
             self.cycleBranchDisplayMode, QtCore.Qt.Key_V)
         dmo(viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H))
-        dmo(viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H))
+        viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
         viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
         viewMenu.addAction('Tile windows on screen', self.tileFigs, QtCore.Qt.Key_T)
         menuBar.addMenu(viewMenu)
