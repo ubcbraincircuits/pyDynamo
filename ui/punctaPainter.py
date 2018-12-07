@@ -8,8 +8,8 @@ import numpy as np
 """
 class PunctaPainter():
     NODE_CIRCLE_PEN = QPen(QBrush(Qt.black), 1, Qt.SolidLine)
-    NODE_CIRCLE_BRUSH = QBrush(QColor.fromRgbF(1.0, 1.0, 1.0, 0.6))
-    NODE_CIRCLE_SELECTED_BRUSH = QBrush(QColor.fromRgbF(0.0, 1.0, 1.0, 0.6))
+    NODE_CIRCLE_BRUSH = QBrush(QColor.fromRgbF(1.0, 1.0, 1.0, 0.3))
+    NODE_CIRCLE_SELECTED_BRUSH = QBrush(QColor.fromRgbF(0.0, 1.0, 1.0, 0.3))
     NODE_CIRCLE_SELECTED_WRONGZ_PEN = QPen(QBrush(Qt.black), 1, Qt.DashLine)
     NODE_CIRCLE_WRONGZ_PEN = QPen(QBrush(QColor.fromRgbF(0.7, 0.7, 0.0, 0.9)), 2, Qt.DashLine)
     NODE_CIRCLE_WRONGZ_BRUSH = QBrush(QColor.fromRgbF(1.0, 1.0, 0.0, 0.5))
@@ -34,6 +34,9 @@ class PunctaPainter():
         self.windowIndex = windowIndex
 
     def drawPuncta(self, punctaMap):
+        if self.uiState.hideAll:
+            return # Hidden, no paint for you.
+
         selectedPuncta = self.uiState.currentPuncta()
         selectedID = None if selectedPuncta is None else selectedPuncta.id
         if self.windowIndex < len(self.uiState._parent.puncta):
