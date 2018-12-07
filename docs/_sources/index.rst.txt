@@ -11,6 +11,7 @@ Contents
    docRst/stacks
    docRst/drawing
    docRst/registration
+   docRst/puncta
    docRst/analysis
    docRst/model
 
