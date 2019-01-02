@@ -189,26 +189,36 @@ class DendriteVolumeCanvas(QWidget):
     def pointOnPixel(self, location, zFilter=True):
         dotSize = self.uiState.parent().dotSize
 
-        # POIUY - share with below
+        # TODO - share with below
         closestDist, closestPoint = None, None
         allPoints = self.uiState._tree.flattenPoints()
         for point in allPoints:
             if zFilter and round(point.location[2]) != round(location[2]):
                 continue
-            dist = deltaSz(location, point.location)
-            cmpRadius = dotSize
-            if dotSize is None:
-                cmpRadius = point.radius
-            if cmpRadius is None:
-                cmpRadius = 5 # POIUY - NODE_CIRCLE_DEFAULT_RADIUS
-            if dist > cmpRadius:
+
+            radius = dotSize
+            resizeRadius = False
+            if radius is None:
+                radius = point.radius
+                resizeRadius = (point.radius is not None)
+            if radius is None:
+                radius = DendritePainter.NODE_CIRCLE_DEFAULT_RADIUS
+            if resizeRadius:
+                radius, _ = self.imgView.fromSceneDist(radius, radius)
+
+            # TODO - verify this always needs to happen, but not below?
+            zLoc = self.zoomedLocation(location)
+            zPLoc = self.zoomedLocation(point.location)
+            dist = deltaSz(zLoc, zPLoc)
+            if dist > radius:
                 continue
             if closestDist is None or dist < closestDist:
                 closestDist, closestPoint = dist, point
+
         return closestPoint
 
     def punctaOnPixel(self, location, zFilter=True):
-        # POIUY - share with above
+        # TODO - share with above
         closestDist, closestPoint = None, None
         if self.windowIndex < len(self.uiState._parent.puncta):
             allPoints = self.uiState._parent.puncta[self.windowIndex]
@@ -221,3 +231,9 @@ class DendriteVolumeCanvas(QWidget):
                 if closestDist is None or dist < closestDist:
                     closestDist, closestPoint = dist, point
         return closestPoint
+
+    # TODO - share with dendrite painter.
+    def zoomedLocation(self, xyz):
+        x, y, z = xyz
+        zoomedXY = self.imgView.mapFromScene(x, y)
+        return (zoomedXY.x(), zoomedXY.y(), z)
