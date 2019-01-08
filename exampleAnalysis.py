@@ -75,6 +75,21 @@ def runPunctaAnalysis(path=None):
     result = allTrees(usePathOrPick(path), toRun, **arguments)
     print (result)
 
+# Example of running puncta-based analysis
+def runPunctaAnalysis(path=None):
+    # List of analysis functions to produce answers across each tree:
+    toRun = [
+        punctaCount,
+        totalPunctaSize
+    ]
+    # Named arguments passed in to the functions
+    arguments = {
+        'excludeAxon': False
+    }
+
+    result = allTrees(usePathOrPick(path), toRun, **arguments)
+    print (result)
+
 # Example novel analysis: get filopodia tips, plot in 3D, and compare spatial vs tree distance.
 def runFiloTipCluster(path):
     fullState = files.loadState(usePathOrPick(path))
