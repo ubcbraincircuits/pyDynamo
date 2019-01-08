@@ -12,7 +12,7 @@ def _pointNear(locA, locB):
     return util.deltaSz(locA, locB) < 1e-9
 
 def _init(qtbot):
-    dynamoWindow = DynamoWindow(None, ["dynamo.py"])
+    dynamoWindow = DynamoWindow(None, [])
     dynamoWindow.show()
     qtbot.addWidget(dynamoWindow)
     return dynamoWindow

@@ -220,16 +220,21 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
         self.maybeAutoSave()
 
+    # Either start puncta drawing, or stop
+    def togglePunctaMode(self):
+        if not self.fullState.inPunctaMode:
+            self.updateStatusMessage("Drawing puncta...")
+        else:
+            self.updateStatusMessage(None)
+        self.fullActions.togglePunctaMode()
+        self.redrawAllStacks()
+
     # Either start manual registration, or stop (and maybe save)
     def toggleManualRegistration(self):
         if not self.fullState.inManualRegistrationMode():
-            for window in self.stackWindows:
-                if window is not None:
-                    window.statusBar().showMessage("Manual ID registration active...")
+            self.updateStatusMessage("Manual ID registration active...")
         else:
-            for window in self.stackWindows:
-                if window is not None:
-                    window.statusBar().clearMessage()
+            self.updateStatusMessage(None)
 
         idMap = self.fullActions.toggleManualRegistration()
         if idMap is not None and len(idMap) > 0:
@@ -442,3 +447,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def closeEvent(self, e):
         print ("Preventing close")
         e.ignore()
+
+    # Update all open windows with the same status message:
+    def updateStatusMessage(self, msg):
+        for window in self.stackWindows:
+            if window is not None:
+                if msg is None:
+                    window.statusBar().clearMessage()
+                else:
+                    window.statusBar().showMessage(msg)

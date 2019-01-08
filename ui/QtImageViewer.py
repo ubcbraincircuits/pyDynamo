@@ -157,11 +157,13 @@ class QtImageViewer(QGraphicsView):
         scenePos = self.mapToScene(event.pos())
         zAt = zStackForUiState(self.parentView.uiState) * 1.0
         location = (scenePos.x(), scenePos.y(), zAt)
-        pointClicked = self.parentView.pointNearPixel(location)
-        closestDist = None if pointClicked is None else deltaSz(location, pointClicked.location)
-        nearDistWorldSize = self.toSceneDist(fullState.closeToCirclePx())
-        mouseOverPoint = (closestDist is not None and closestDist <= nearDistWorldSize)
-        self.viewport().setCursor(Qt.OpenHandCursor if mouseOverPoint else Qt.ArrowCursor)
+
+        circleOver = None
+        if self.parentView.uiState.parent().inPunctaMode:
+            circleOver = self.parentView.punctaOnPixel(location)
+        else:
+            circleOver = self.parentView.pointOnPixel(location)
+        self.viewport().setCursor(Qt.OpenHandCursor if circleOver is not None else Qt.ArrowCursor)
 
     def mousePressEvent(self, event):
         """ Start mouse pan or zoom mode.
@@ -262,14 +264,20 @@ class QtImageViewer(QGraphicsView):
     def getViewportRect(self):
         return self.mapToScene(self.viewport().geometry()).boundingRect()
 
-    def toSceneDist(self, pixelDist):
+    def toSceneDist(self, pixelDistX, pixelDistY):
         mappedA = self.mapToScene(0, 0)
-        mappedB = self.mapToScene(pixelDist, 0)
-        dX, dY = mappedA.x() - mappedB.x(), mappedA.y() - mappedB.y()
-        return math.sqrt(dX * dX + dY * dY)
+        mappedB = self.mapToScene(pixelDistX, pixelDistY)
+        dX, dY = mappedB.x() - mappedA.x(), mappedB.y() - mappedA.y()
+        return dX, dY
+
+    # invert toSceneDist
+    def fromSceneDist(self, sceneDistX, sceneDistY):
+        # toSceneDist(1, 1) = x, y
+        # => toSceneDist(sdX, sdY) = sdX * x, sdY * y
+        # => toSceneDist(sdX/x, sdY/y) = sdX, sdY
+        x, y = self.toSceneDist(1, 1)
+        return sceneDistX / x, sceneDistY / y
 
     def sceneDimension(self):
         viewRect = self.getViewportRect()
-        h = self.toSceneDist(viewRect.height())
-        w = self.toSceneDist(viewRect.width())
-        return h, w
+        return self.toSceneDist(viewRect.width(), viewRect.height())

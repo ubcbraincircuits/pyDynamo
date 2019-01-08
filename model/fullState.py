@@ -21,8 +21,11 @@ class FullState:
     # Image-specific tree data, one for each of the files above
     trees = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
-    # Landmark points for each tree.
+    # Landmark points for each stack.
     landmarks = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+
+    # Puncta points (mapping id -> Point) for each stack.
+    puncta = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Image-specific options, one for each of the files above
     uiStates = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
@@ -35,6 +38,9 @@ class FullState:
 
     # Shared color channel information
     channel = attr.ib(default=0)
+
+    # Whether we're currently drawing puncta
+    inPunctaMode = attr.ib(default=False)
 
     # Which landmark point we're editing, -1 when not in landmark mode.
     landmarkPointAt = attr.ib(default=-1)
@@ -92,8 +98,10 @@ class FullState:
             self.lineWidth += 1
 
     def toggleDotSize(self):
-        if self.dotSize == 9:
+        if self.dotSize is None:
             self.dotSize = 3
+        elif self.dotSize == 9:
+            self.dotSize = None
         else:
             self.dotSize += 2
 
@@ -121,11 +129,27 @@ class FullState:
     def changeChannel(self, delta):
         self.channel = (self.channel + delta) % self.volumeSize[0]
 
+    def inDrawMode(self):
+        return not self.inLandmarkMode() \
+            and not self.inManualRegistrationMode() \
+            and not self.inPunctaMode
+
     def inLandmarkMode(self):
         return self.landmarkPointAt >= 0
 
     def inManualRegistrationMode(self):
         return self.manualRegistrationIDRemap is not None
+
+    def togglePunctaMode(self):
+        isInMode = self.inPunctaMode
+        if isInMode:
+            self.inPunctaMode = False
+        else:
+            if self.inLandmarkMode():
+                self.landmarkPointAt = -1
+            elif self.inManualRegistrationMode():
+                self.toggleManualRegistrationMode()
+            self.inPunctaMode = True
 
     def toggleManualRegistrationMode(self):
         isInMode = self.inManualRegistrationMode()
@@ -210,10 +234,6 @@ class FullState:
         while len(self.landmarks[treeIndex]) <= self.landmarkPointAt:
             self.landmarks[treeIndex].append(None)
         self.landmarks[treeIndex][self.landmarkPointAt] = location
-
-    def closeToCirclePx(self):
-        """Scales a circle size by a buffer around it to allow clicking near."""
-        return self.dotSize * 1.2
 
     def setPointIDWithoutCollision(self, tree, point, newID):
         """Change the ID of a point in a tree, making sure it doesn't collide with an existing point."""
