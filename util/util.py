@@ -75,6 +75,13 @@ def sortedBranchIDList(trees):
         ids |= set([b.id for b in tree.branches])
     return sorted(list(ids))
 
+# Sorted list of all puncta IDs found in the given list of trees.
+def sortedPunctaIDList(punctaLists):
+    ids = set()
+    for punctaList in punctaLists:
+        ids |= set([p.id for p in punctaList])
+    return sorted(list(ids))
+
 # Utility for nicer formatting of the window, using index and just image file name.
 def createTitle(index, path):
     return "[%d] - %s" % (index + 1, os.path.basename(path))

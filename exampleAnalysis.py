@@ -10,7 +10,7 @@ import sys
 import files
 import util
 
-from analysis import allTrees, allBranches, addedSubtractedTransitioned
+from analysis import allTrees, allBranches, addedSubtractedTransitioned, allPuncta
 from analysis.functions.tree import *
 from analysis.functions.branch import *
 from analysis.functions.puncta import *
@@ -40,6 +40,7 @@ def runTreeAnalysis(path=None):
     }
 
     result = allTrees(usePathOrPick(path), toRun, **arguments)
+    pd.DataFrame(result).to_csv("tree_analysis.csv")
     print (result)
 
 # Example of running branch-based runTr
@@ -56,38 +57,25 @@ def runBranchAnalysis(path=None):
     }
 
     result = allBranches(usePathOrPick(path), toRun, **arguments)
-    result2 = pd.DataFrame(result)
-    result2.to_csv("result_control.csv")
+    pd.DataFrame(result).to_csv("branch_analysis.csv")
     print (result)
 
 # Example of running puncta-based analysis
 def runPunctaAnalysis(path=None):
     # List of analysis functions to produce answers across each tree:
     toRun = [
-        punctaCount,
-        totalPunctaSize
+        # punctaCount,
+        # totalPunctaSize,
+        perPunctaSize,
+        perPunctaIntensity
     ]
     # Named arguments passed in to the functions
     arguments = {
         'excludeAxon': False
     }
 
-    result = allTrees(usePathOrPick(path), toRun, **arguments)
-    print (result)
-
-# Example of running puncta-based analysis
-def runPunctaAnalysis(path=None):
-    # List of analysis functions to produce answers across each tree:
-    toRun = [
-        punctaCount,
-        totalPunctaSize
-    ]
-    # Named arguments passed in to the functions
-    arguments = {
-        'excludeAxon': False
-    }
-
-    result = allTrees(usePathOrPick(path), toRun, **arguments)
+    result = allPuncta(usePathOrPick(path), toRun, **arguments)
+    pd.DataFrame(result).to_csv("puncta_analysis.csv")
     print (result)
 
 # Example novel analysis: get filopodia tips, plot in 3D, and compare spatial vs tree distance.

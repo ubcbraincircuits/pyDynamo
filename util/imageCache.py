@@ -9,14 +9,15 @@ import util
 
 # libtiff.libtiff_ctypes.suppress_warnings()
 
-def tiffRead(path):
+def tiffRead(path, verbose=True):
     # First use tifffile to get channel data (not supported by libtiff?)
     shape, stack = None, None
     with TiffFile(path) as tif:
         shape = tif.asarray().shape
         stack = tif.asarray()
     nChannels = shape[0] if len(shape) == 4 else 1
-    print ("TIF shape: %s" % str(shape))
+    if verbose:
+        print ("Loaded TIF, shape: %s" % str(shape))
 
     if len(shape) == 3:
         # HACK - colours have been merged?
@@ -67,9 +68,9 @@ class ImageCache:
             return channelImage[zAt]
 
     # Returns volume for a tif path, possibly loading it first if not yet cached.
-    def getVolume(self, path):
+    def getVolume(self, path, verbose=True):
         if path not in self._images:
-            imgRaw = tiffRead(path)
+            imgRaw = tiffRead(path, verbose)
             imgClean = self._postProcess(imgRaw)
             self._images[path] = imgClean
         return self._images[path]

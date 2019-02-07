@@ -4,4 +4,5 @@ _build/
 data/
 
 *.pyc
+*.csv
 tmpSurvival.py

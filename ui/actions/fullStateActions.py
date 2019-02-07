@@ -203,8 +203,8 @@ class FullStateActions():
     def updateAllPrimaryBranches(self):
         """For each branch point, make the 'primary' branch the longest at that point."""
         self.history.pushState()
-        for i, state in enumerate(self.state.uiStates):
-            state._tree.updateAllPrimaryBranches()
+        for i, tree in enumerate(self.state.trees):
+            tree.updateAllPrimaryBranches()
 
     def calculateBestOrientation(self):
         X0, Y0, Z0 = self.state.trees[0].worldCoordPoints(self.state.landmarks[0])
