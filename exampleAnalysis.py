@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+import os
 import sys
 
 import files
@@ -47,6 +48,7 @@ def runTreeAnalysis(path=None):
 def runBranchAnalysis(path=None):
     # List of analysis functions to produce answers across each tree:
     toRun = [
+        branchParentIDs,
         branchLengths,
         branchType,
         branchHasAnnotationFunc('axon'),
@@ -56,9 +58,13 @@ def runBranchAnalysis(path=None):
         'excludeAxon': False
     }
 
-    result = allBranches(usePathOrPick(path), toRun, **arguments)
-    pd.DataFrame(result).to_csv("branch_analysis.csv")
+    path = usePathOrPick(path)
+    result = allBranches(path, toRun, **arguments)
+    outName = os.path.basename(path).replace(".dyn.gz", "_branchAnalysis.csv")
+    outPath = os.path.join(os.path.dirname(path), outName)
+    pd.DataFrame(result).to_csv(outPath)
     print (result)
+    print ("Result saved to %s" % outPath)
 
 # Example of running puncta-based analysis
 def runPunctaAnalysis(path=None):
@@ -134,6 +140,6 @@ if __name__ == '__main__':
     # Path is first command-line argument, if provided.
     path = sys.argv[1] if len(sys.argv) > 1 else None
     # runTreeAnalysis(path)
-    runPunctaAnalysis(path)
-    # runBranchAnalysis(path)
+    runBranchAnalysis(path)
+    # runPunctaAnalysis(path)
     # runFiloTipCluster(path)

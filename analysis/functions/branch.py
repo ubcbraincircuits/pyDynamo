@@ -55,3 +55,24 @@ def branchHasAnnotationFunc(annotation):
     def funcWrapper(fullState, branchIDList, **kwargs):
         return branchHasAnnotation(fullState, branchIDList, annotation, **kwargs)
     return funcWrapper
+
+# For each branch, find the ID of the parent branch
+def branchParentIDs(fullState, branchIDList, **kwargs):
+    result = {}
+    for treeIdx, tree in enumerate(fullState.trees):
+        parentPointIDs = []
+        parentBranchIDs = []
+        for branchID in branchIDList:
+            branch = tree.getBranchByID(branchID)
+            if branch is None or branch.parentPoint is None:
+                parentPointIDs.append('')
+                parentBranchIDs.append('')
+            else:
+                parentPointIDs.append(branch.parentPoint.id)
+                if branch.parentPoint.parentBranch is None:
+                    parentBranchIDs.append('')
+                else:
+                    parentBranchIDs.append(branch.parentPoint.parentBranch.id)
+        result['parentPointID_%02d' % (treeIdx + 1)] = parentPointIDs
+        result['parentBranchID_%02d' % (treeIdx + 1)] = parentBranchIDs
+    return pd.DataFrame(data=result, index=branchIDList).sort_index(axis=1)
