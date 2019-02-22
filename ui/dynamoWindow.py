@@ -10,6 +10,7 @@ import sys
 import time
 
 from .actions import FullStateActions
+from .analysisWindow import AnalysisWindow
 from .common import cursorPointer
 from .initialMenu import InitialMenu
 from .settingsWindow import SettingsWindow
@@ -30,6 +31,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.initialMenu = InitialMenu(self)
         self.settingsWindow = SettingsWindow(self)
         self.stackList = StackListWindow(self)
+        self.analysisPopup = AnalysisWindow(self)
 
         self.root = self._setupUI()
         self.centerWindow()
@@ -257,6 +259,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def findByID(self, pointOrBranchID):
         self.fullActions.findPointOrBranch(pointOrBranchID)
         self.redrawAllStacks()
+
+    # Show analysis popup
+    def openAnalysisPopup(self):
+        self.analysisPopup.show()
 
     # Make the settings dialog visible:
     def openSettings(self):

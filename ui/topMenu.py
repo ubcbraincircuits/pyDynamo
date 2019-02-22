@@ -209,7 +209,7 @@ class TopMenu():
 
     # Analysis menu callbacks:
     def launchAnalysis(self):
-        print ("COMING SOON")
+        self._global().openAnalysisPopup()
 
     def viewMorphometrics(self):
         parent = self._global()
