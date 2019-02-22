@@ -275,20 +275,35 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.makeNewWindows(offset)
 
     def makeNewWindows(self, startFrom=0):
+        previousPath = None
+
         for i in range(startFrom, len(self.fullState.filePaths)):
-            path = self.fullState.filePaths[i]
+            path = self.fullState.filePaths[i].replace('\\', os.sep)
+
             if not os.path.isfile(path):
-                msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,
-                    "Image not found...", "Could not locate volume " + path + "\nPlease specify the new location.", parent=self)
-                msg.exec()
-                path, _ = QtWidgets.QFileDialog.getOpenFileName(self,
-                    "New volume file location", "", "TIFF image (*.tif)"
-                )
-                if path == "":
+                fixedPath = None
+                if previousPath is not None:
+                    # try reusing the last directory, but the old file name.
+                    fixedPath = os.path.join(os.path.dirname(previousPath), os.path.basename(path))
+
+                if fixedPath is None or not os.path.isfile(fixedPath):
+                    msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,
+                        "Image not found...", "Could not locate volume " + path + "\nPlease specify the new location.", parent=self)
+                    msg.exec()
+                    fixedPath, _ = QtWidgets.QFileDialog.getOpenFileName(self,
+                        "New volume file location", "", "TIFF image (*.tif)"
+                    )
+                    print ("\tLoading volume from %s..." % fixedPath)
+                else:
+                    print ("\tLoading volume from %s..." % fixedPath)
+
+                if fixedPath is None or fixedPath == "":
                     print ("Loading cancelled, quitting...")
                     self.quitAndMaybeSave()
-                self.fullState.filePaths[i] = path
-                self.fullState.uiStates[i].imagePath = path
+
+                self.fullState.filePaths[i] = fixedPath
+                self.fullState.uiStates[i].imagePath = fixedPath
+                previousPath = fixedPath
 
             if self.fullState.uiStates[i].isHidden:
                 self.stackWindows.append(None)
