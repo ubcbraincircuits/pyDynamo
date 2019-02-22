@@ -1,5 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 
+import webbrowser
+
 from util.testableFilePicker import getOpenFileName
 
 from .motility3DViewWindow import Motility3DViewWindow
@@ -47,9 +49,7 @@ class TopMenu():
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
         viewMenu.addAction('Zoom In', self.zoomIn, QtCore.Qt.Key_X)
         viewMenu.addAction('Zoom Out', self.zoomOut, QtCore.Qt.Key_Z)
-        viewMenu.addSeparator()
         viewMenu.addAction('View 3D Neuron', self.view3D, QtCore.Qt.Key_3)
-        viewMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
         viewMenu.addSeparator()
         dmo(viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J))
         dmo(viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J))
@@ -63,10 +63,17 @@ class TopMenu():
         viewMenu.addAction('Tile windows on screen', self.tileFigs, QtCore.Qt.Key_T)
         menuBar.addMenu(viewMenu)
 
+        analysisMenu = QtWidgets.QMenu('&Analysis', stackWindow)
+        analysisMenu.addAction('Launch analysis window', self.launchAnalysis, QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
+        analysisMenu.addSeparator()
+        analysisMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
+        menuBar.addMenu(analysisMenu)
+
         helpMenu = QtWidgets.QMenu('&Help', stackWindow)
+        helpMenu.addAction('&Shortcuts', self.showHotkeys, QtCore.Qt.Key_F1)
+        helpMenu.addAction('View online documentation', self.openDocumentation)
         menuBar.addSeparator()
         menuBar.addMenu(helpMenu)
-        helpMenu.addAction('&Shortcuts', self.showHotkeys, QtCore.Qt.Key_F1)
 
     def _local(self):
         """Access to the stack window, for local operations that affect just this stack."""
@@ -165,12 +172,6 @@ class TopMenu():
     def view3D(self):
         self._local().launch3DView()
 
-    def viewMorphometrics(self):
-        parent = self._global()
-        opt = parent.fullState.projectOptions.motilityOptions
-        Motility3DViewWindow(parent, self.stackWindow.windowIndex,
-            parent.fullState.trees, parent.fullState.filePaths, opt).show()
-
     def toggleLineSize(self):
         self._global().fullState.toggleLineWidth()
         self._global().redrawAllStacks()
@@ -206,9 +207,22 @@ class TopMenu():
         self._global().focusFirstOpenStackWindow()
         tileFigs(self._global().stackWindows)
 
+    # Analysis menu callbacks:
+    def launchAnalysis(self):
+        print ("COMING SOON")
+
+    def viewMorphometrics(self):
+        parent = self._global()
+        opt = parent.fullState.projectOptions.motilityOptions
+        Motility3DViewWindow(parent, self.stackWindow.windowIndex,
+            parent.fullState.trees, parent.fullState.filePaths, opt).show()
+
     # Help menu callbacks:
     def showHotkeys(self):
         self._local().showHotkeys()
+
+    def openDocumentation(self):
+        webbrowser.open('http://padster.github.io/pyDynamo')
 
     # Misc:
     def redraw(self):
