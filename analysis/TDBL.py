@@ -5,7 +5,8 @@ def TDBL(tree,
     excludeAxon=True,
     excludeBasal=True,
     includeFilo=True,
-    filoDist=10
+    filoDist=10,
+    **kwargs
 ):
     """Calculate TDBL for a given tree.
 

@@ -8,7 +8,8 @@ def addedSubtractedTransitioned(
     excludeAxon=True,
     excludeBasal=True,
     terminalDist=10,
-    filoDist=10
+    filoDist=10,
+    **kwargs
 ):
     """Calculate added/subtracted/transitioned status of all branches across time.
 
