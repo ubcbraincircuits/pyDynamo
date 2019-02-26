@@ -15,15 +15,14 @@ class AnalysisWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.root = QtWidgets.QWidget(self)
         self.layout = QtWidgets.QVBoxLayout(self.root)
+        self.lastOption = None
 
         self.analysisOptions = {}
+        # TODO - load options from fullState
         self.analysisMethods = self._buildMethods()
         for methodsPerType in self.analysisMethods.values():
             for method in methodsPerType:
                 self.analysisOptions.update(method.defaultValues())
-        print (self.analysisOptions)
-
-        self.lastOption = None
 
         # TODO - clean up this section
 
@@ -82,6 +81,7 @@ class AnalysisWindow(QtWidgets.QMainWindow):
         self.tabs.addTab(self.tabTree, "Tree analysis")
         self.tabs.addTab(self.tabBranch, "Branch analysis")
         self.tabs.addTab(self.tabPuncta, "Puncta analysis")
+        self.tabs.currentChanged.connect(self.tabChanged)
         self.layout.addWidget(self.tabs)
 
         # Button to actually run the analysis
@@ -127,44 +127,31 @@ class AnalysisWindow(QtWidgets.QMainWindow):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    def treeItemClicked(self, item):
+    def _updateOnChange(self):
         if self.lastOption is not None:
             self.analysisOptions.update(self.lastOption.readOptions())
+        selected = self.tabs.currentIndex()
+        if selected == 0:
+            item = self.listTree.currentItem()
+            optLayout = self.optTreeLayout
+        elif selected == 1:
+            item = self.listBranch.currentItem()
+            optLayout = self.optBranchLayout
+        else:
+            item = self.listPuncta.currentItem()
+            optLayout = self.optPunctaLayout
 
-        method = item.data(Qt.UserRole)
-        optLayout = self.optTreeLayout
-        self._clearChildWidgets(optLayout)
-        method.fillOptions(optLayout, self.analysisOptions)
-        optLayout.addStretch(1)
-        self.lastOption = method
-
-    def branchItemClicked(self, item):
-        if self.lastOption is not None:
-            self.analysisOptions.update(self.lastOption.readOptions())
-
-        method = item.data(Qt.UserRole)
-        optLayout = self.optBranchLayout
-        print ("Size: ", optLayout.count())
-        self._clearChildWidgets(optLayout)
-        method.fillOptions(optLayout, self.analysisOptions)
-        optLayout.addStretch(1)
-        self.lastOption = method
-
-    def punctaItemClicked(self, item):
-        if self.lastOption is not None:
-            self.analysisOptions.update(self.lastOption.readOptions())
-
-        method = item.data(Qt.UserRole)
-        optLayout = self.optPunctaLayout
-        print ("Size: ", optLayout.count())
-        self._clearChildWidgets(optLayout)
-        method.fillOptions(optLayout, self.analysisOptions)
-        optLayout.addStretch(1)
-        self.lastOption = method
+        if item is not None:
+            self._clearChildWidgets(optLayout)
+            method = item.data(Qt.UserRole)
+            method.fillOptions(optLayout, self.analysisOptions)
+            optLayout.addStretch(1)
+            self.lastOption = method
 
     def runAnalysis(self):
         if self.lastOption is not None:
             self.analysisOptions.update(self.lastOption.readOptions())
+        self.lastOption = None
 
         selected = self.tabs.currentIndex()
         methods, runner = [], None
@@ -189,12 +176,12 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             if "_do " not in k:
                 filteredOptions[k] = v
 
+        print (filteredOptions)
         fullState = self.parent().fullState
         result = runner(fullState, selectedFunctions, **filteredOptions)
         print ("TODO: Save results...")
         print (result)
         self.close()
-
 
     def _buildMethods(self):
         return {
@@ -223,3 +210,20 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             layout.removeItem(item)
         layout.update()
         layout.parentWidget().repaint()
+
+    # All events where the selected tab changes, so force options to be updated. 
+
+    def showEvent(self, ev):
+        self._updateOnChange()
+
+    def tabChanged(self, ev):
+        self._updateOnChange()
+
+    def treeItemClicked(self, item):
+        self._updateOnChange()
+
+    def branchItemClicked(self, item):
+        self._updateOnChange()
+
+    def punctaItemClicked(self, item):
+        self._updateOnChange()

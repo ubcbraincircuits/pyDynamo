@@ -10,17 +10,26 @@ class BaseOptions(ABC):
         self.inclusionCheck = None
 
     def fillOptions(self, frameLayout, currentState):
-        # TODO - include/exclude option
         frameLayout.addWidget(QtWidgets.QLabel("Options for " + self.name))
-        self.inclusionCheck = QtWidgets.QCheckBox("Include in analysis?")
+        self.formParent = QtWidgets.QWidget(frameLayout.parentWidget())
+        self.formLayout = QtWidgets.QFormLayout(self.formParent)
 
+        # One forced widget on all - whether or not to include in analysis.
+        self.inclusionCheck = QtWidgets.QCheckBox(self.formParent)
         k = self._includeKey()
-        initialState = currentState[k] if k in currentState else True
-        self.inclusionCheck.setChecked(initialState)
+        self.inclusionCheck.setChecked(currentState[k] if k in currentState else True)
+        self._addFormRow("Include in analysis?", self.inclusionCheck)
 
-        frameLayout.addWidget(self.inclusionCheck)
+        self.fillOptionsInner(currentState, self.formParent)
+        frameLayout.addWidget(self.formParent)
+
+    def fillOptionsInner(self, currentState, formParent):
+        pass
 
     def readOptions(self):
+        # Hasn't been installed yet, skip
+        if self.inclusionCheck is None:
+            return {}
         return {self._includeKey(): self.inclusionCheck.isChecked()}
 
     def defaultValues(self):
@@ -29,6 +38,9 @@ class BaseOptions(ABC):
     def shouldRun(self, currentState):
         k = self._includeKey()
         return (k not in currentState) or (currentState[k] == True)
+
+    def _addFormRow(self, caption, inputWidget):
+        self.formLayout.addRow(caption, inputWidget)
 
     def _includeKey(self):
         return '_do ' + self.name
