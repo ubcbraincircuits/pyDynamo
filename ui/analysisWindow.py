@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import pandas as pd
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
@@ -171,9 +172,15 @@ class AnalysisWindow(QtWidgets.QMainWindow):
                 filteredOptions[k] = v
 
         fullState = self.parent().fullState
-        result = runner(fullState, selectedFunctions, **filteredOptions)
-        print ("TODO: Save results...")
-        print (result)
+        resultDF = runner(fullState, selectedFunctions, **filteredOptions)
+        filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+            "Output for results", "", "CSV (*.csv)"
+        )
+        if filePath != "":
+            if not filePath.endswith(".csv"):
+                filePath = filePath + ".csv"
+            resultDF.to_csv(filePath)
+            QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + filePath)
         self.close()
 
     # Short-hand for getting the options dictionary
