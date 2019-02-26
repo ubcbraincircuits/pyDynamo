@@ -3,6 +3,7 @@ from .baseOptions import BaseOptions
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
+from ui.common import floatOrDefault
 from ..functions import branch
 
 # Methods without custom options
@@ -22,6 +23,7 @@ class BranchParentIDOptions(BaseOptions):
 # Methods with custom options
 
 class BranchTypeOptions(BaseOptions):
+    # Parameters supported are passed to addedSubtractedTransitioned
     def __init__(self, name):
         super().__init__(name, branch.branchType)
 
@@ -48,8 +50,8 @@ class BranchTypeOptions(BaseOptions):
 
     def readOptions(self):
         localOptions = {
-            'filoDist': float(self.filoDist.text()),
-            'terminalDist': float(self.terminalDist.text()),
+            'filoDist': floatOrDefault(self.filoDist, 10.0),
+            'terminalDist': floatOrDefault(self.terminalDist, 10.0),
             'excludeAxon': self.excludeAxon.isChecked(),
             'excludeBasal': self.excludeBasal.isChecked()
         }
@@ -58,8 +60,8 @@ class BranchTypeOptions(BaseOptions):
 
     def defaultValues(self):
         return {
-            'filoDist': 10,
-            'terminalDist': 10,
+            'filoDist': 10.0,
+            'terminalDist': 10.0,
             'excludeAxon': True,
             'excludeBasal': True
         }

@@ -4,7 +4,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt
 
-from .common import cursorPointer
+from .common import centerWindow, cursorPointer
 
 class InitialMenu(QtWidgets.QMainWindow):
     def __init__(self, parent):
@@ -13,7 +13,8 @@ class InitialMenu(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Dynamo")
         self.statusBar().showMessage("Select option to begin...",)
-        self.centerWindow()
+        self.setFixedSize(480, 320)
+        centerWindow(self)
 
         # Options #1 - Start New
         buttonN = QtWidgets.QPushButton("&New from Stack(s)", self)
@@ -51,13 +52,6 @@ class InitialMenu(QtWidgets.QMainWindow):
 
         # (Expose for testing)
         self.buttonN, self.buttonL, self.buttonI = buttonN, buttonL, buttonI
-
-    def centerWindow(self):
-        self.setFixedSize(480, 320)
-        frameGm = self.frameGeometry()
-        centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
 
     def keyPressEvent(self, event):
         self.parent().keyPressEvent(event)

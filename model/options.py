@@ -26,3 +26,6 @@ class ProjectOptions():
 
     motilityOptions = attr.ib(default=attr.Factory(MotilityOptions), metadata=SAVE_META)
     """ What options to use when calculating and displaying motility details. """
+
+    analysisOptions = attr.ib(default=attr.Factory(dict), metadata=SAVE_META)
+    """ What options to use when running the analysis pipeline, may be different to motilityOptions. """

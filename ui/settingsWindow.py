@@ -6,14 +6,14 @@ from PyQt5.Qt import Qt
 
 from model import MotilityOptions, ProjectOptions
 
-from .common import cursorPointer, floatOrDefault
+from .common import centerWindow, cursorPointer, floatOrDefault
 
 class SettingsWindow(QtWidgets.QMainWindow):
     def __init__(self, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
 
         self.setWindowTitle("Project settings")
-        self.centerWindow()
+        centerWindow(self)
 
         # Fields for Pixel x/y/z
         self.xValue = QtWidgets.QLineEdit()
@@ -91,12 +91,6 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.excludeBasal.setChecked(motOpt.excludeBasal)
         self.includeAS.setChecked(motOpt.includeAS)
         self.show()
-
-    def centerWindow(self):
-        frameGm = self.frameGeometry()
-        centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
 
     def saveOptions(self):
         self.fullState.projectOptions = self.buildProjectOptions()

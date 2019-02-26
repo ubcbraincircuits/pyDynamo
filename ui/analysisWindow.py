@@ -8,8 +8,12 @@ from analysis import allTrees, allBranches, allPuncta
 from analysis.ui import branchOptions, punctaOptions, treeOptions
 from model import MotilityOptions, ProjectOptions
 
-from .common import cursorPointer, floatOrDefault
+from .common import centerWindow, clearChildWidgets, cursorPointer, floatOrDefault
 
+"""
+Window containing all parameters required for performing analysis,
+as well as allowing selection of what to run, and saving the results to file.
+"""
 class AnalysisWindow(QtWidgets.QMainWindow):
     def __init__(self, parent):
         QtWidgets.QMainWindow.__init__(self, parent)
@@ -17,70 +21,23 @@ class AnalysisWindow(QtWidgets.QMainWindow):
         self.layout = QtWidgets.QVBoxLayout(self.root)
         self.lastOption = None
 
-        self.analysisOptions = {}
-        # TODO - load options from fullState
+        # Load options from state, and insert any missing values:
         self.analysisMethods = self._buildMethods()
         for methodsPerType in self.analysisMethods.values():
             for method in methodsPerType:
-                self.analysisOptions.update(method.defaultValues())
+                for k, v in method.defaultValues().items():
+                    if k not in self.getOpt():
+                        self.getOpt()[k] = v
 
-        # TODO - clean up this section
-
-        # Per-tree
-        self.tabTree = QtWidgets.QWidget(self.root)
-        self.layTree = QtWidgets.QHBoxLayout(self.tabTree)
-
-        self.listTree = QtWidgets.QListWidget(self.tabTree)
-        for treeMethod in self.analysisMethods['tree']:
-            self._addItem(self.listTree, treeMethod)
-        self.listTree.currentItemChanged.connect(self.treeItemClicked)
-
-        self.optTree = QtWidgets.QFrame()
-        self.optTreeLayout = QtWidgets.QVBoxLayout(self.optTree)
-        self.optTree.setFrameStyle(QtWidgets.QFrame.Box | QtWidgets.QFrame.Raised)
-        self.optTree.setLineWidth(2)
-        self.optTree.setFixedSize(400, 500)
-        self.layTree.addWidget(self.listTree)
-        self.layTree.addWidget(self.optTree)
-
-        # Per-branch
-        self.tabBranch = QtWidgets.QWidget(self.root)
-        self.layBranch = QtWidgets.QHBoxLayout(self.tabBranch)
-
-        self.listBranch = QtWidgets.QListWidget(self.tabBranch)
-        for branchMethod in self.analysisMethods['branch']:
-            self._addItem(self.listBranch, branchMethod)
-        self.listBranch.currentItemChanged.connect(self.branchItemClicked)
-
-        self.optBranch = QtWidgets.QFrame()
-        self.optBranchLayout = QtWidgets.QVBoxLayout(self.optBranch)
-        self.optBranch.setFrameStyle(QtWidgets.QFrame.Box | QtWidgets.QFrame.Raised)
-        self.optBranch.setLineWidth(2)
-        self.optBranch.setFixedSize(400, 500)
-        self.layBranch.addWidget(self.listBranch)
-        self.layBranch.addWidget(self.optBranch)
-
-        # Per-puncta
-        self.tabPuncta = QtWidgets.QWidget(self.root)
-        self.layPuncta = QtWidgets.QHBoxLayout(self.tabPuncta)
-
-        self.listPuncta = QtWidgets.QListWidget(self.tabPuncta)
-        for branchMethod in self.analysisMethods['puncta']:
-            self._addItem(self.listPuncta, branchMethod)
-        self.listPuncta.currentItemChanged.connect(self.punctaItemClicked)
-
-        self.optPuncta = QtWidgets.QFrame()
-        self.optPunctaLayout = QtWidgets.QVBoxLayout(self.optPuncta)
-        self.optPuncta.setFrameStyle(QtWidgets.QFrame.Box | QtWidgets.QFrame.Raised)
-        self.optPuncta.setLineWidth(2)
-        self.optPuncta.setFixedSize(400, 500)
-        self.layPuncta.addWidget(self.listPuncta)
-        self.layPuncta.addWidget(self.optPuncta)
+        # Build up tabs per analysis type:
+        tabTree, self.listTree, self.optTreeLayout = self._buildTab('tree')
+        tabBranch, self.listBranch, self.optBranchLayout = self._buildTab('branch')
+        tabPuncta, self.listPuncta, self.optPunctaLayout = self._buildTab('puncta')
 
         self.tabs = QtWidgets.QTabWidget()
-        self.tabs.addTab(self.tabTree, "Tree analysis")
-        self.tabs.addTab(self.tabBranch, "Branch analysis")
-        self.tabs.addTab(self.tabPuncta, "Puncta analysis")
+        self.tabs.addTab(tabTree, "Tree analysis")
+        self.tabs.addTab(tabBranch, "Branch analysis")
+        self.tabs.addTab(tabPuncta, "Puncta analysis")
         self.tabs.currentChanged.connect(self.tabChanged)
         self.layout.addWidget(self.tabs)
 
@@ -93,96 +50,11 @@ class AnalysisWindow(QtWidgets.QMainWindow):
         self.root.setFocus()
         self.setCentralWidget(self.root)
 
-        combined = QtCore.QSize()
-        combined.setWidth(800)
-        combined.setHeight(600)
-        self.resize(combined)
-
+        self.resize(800, 600)
         self.setWindowTitle("Analysis")
-        self._centerWindow()
+        centerWindow(self)
 
-    def _addItem(self, listWidget, method):
-        # Build the widget itself.
-        container = QtWidgets.QWidget()
-        wText = cursorPointer(QtWidgets.QLabel(method.name))
-        wText.setMinimumSize(300, 1)
-        l = QtWidgets.QHBoxLayout()
-        l.addWidget(wText)
-        l.addStretch()
-        l.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
-        container.setLayout(l)
-
-        # Build the list item, and add the widget:
-        itemN = QtWidgets.QListWidgetItem()
-        itemN.setSizeHint(container.sizeHint())
-        listWidget.addItem(itemN)
-        listWidget.setItemWidget(itemN, container)
-
-        itemN.setData(Qt.UserRole, method)
-
-    # TODO - share with others who use the same.
-    def _centerWindow(self):
-        frameGm = self.frameGeometry()
-        centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
-
-    def _updateOnChange(self):
-        if self.lastOption is not None:
-            self.analysisOptions.update(self.lastOption.readOptions())
-        selected = self.tabs.currentIndex()
-        if selected == 0:
-            item = self.listTree.currentItem()
-            optLayout = self.optTreeLayout
-        elif selected == 1:
-            item = self.listBranch.currentItem()
-            optLayout = self.optBranchLayout
-        else:
-            item = self.listPuncta.currentItem()
-            optLayout = self.optPunctaLayout
-
-        if item is not None:
-            self._clearChildWidgets(optLayout)
-            method = item.data(Qt.UserRole)
-            method.fillOptions(optLayout, self.analysisOptions)
-            optLayout.addStretch(1)
-            self.lastOption = method
-
-    def runAnalysis(self):
-        if self.lastOption is not None:
-            self.analysisOptions.update(self.lastOption.readOptions())
-        self.lastOption = None
-
-        selected = self.tabs.currentIndex()
-        methods, runner = [], None
-        if selected == 0:
-            methods = self.analysisMethods['tree']
-            runner = allTrees
-        elif selected == 1:
-            methods = self.analysisMethods['branch']
-            runner = allBranches
-        else:
-            methods = self.analysisMethods['puncta']
-            runner = allPuncta
-
-        selectedFunctions = []
-        for method in methods:
-            if method.shouldRun(self.analysisOptions):
-                selectedFunctions.append(method.methodToCall)
-
-        # Filter out internal (de)selection markers
-        filteredOptions = {}
-        for k, v in self.analysisOptions.items():
-            if "_do " not in k:
-                filteredOptions[k] = v
-
-        print (filteredOptions)
-        fullState = self.parent().fullState
-        result = runner(fullState, selectedFunctions, **filteredOptions)
-        print ("TODO: Save results...")
-        print (result)
-        self.close()
-
+    # Maps the analysis types, to the methods available for that type.
     def _buildMethods(self):
         return {
             'tree': [
@@ -202,28 +74,114 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             ]
         }
 
-    def _clearChildWidgets(self, layout):
-        while layout.count() > 0:
-            item = layout.itemAt(0)
-            if item.widget() is not None:
-                item.widget().deleteLater()
-            layout.removeItem(item)
-        layout.update()
-        layout.parentWidget().repaint()
+    # Utility for building a tab given a list of analysis methods.
+    def _buildTab(self, tabType):
+        tabRoot = QtWidgets.QWidget(self.root)
+        tabLayout = QtWidgets.QHBoxLayout(tabRoot)
 
-    # All events where the selected tab changes, so force options to be updated. 
+        tabList = QtWidgets.QListWidget(tabRoot)
+        for method in self.analysisMethods[tabType]:
+            self._addItem(tabList, method)
+        tabList.currentItemChanged.connect(self._updateOnChange)
 
+        tabOptions = QtWidgets.QFrame(tabRoot)
+        tabOptions.setFrameStyle(QtWidgets.QFrame.Box | QtWidgets.QFrame.Raised)
+        tabOptions.setLineWidth(2)
+        tabOptions.setFixedSize(400, 500)
+        tabOptionsLayout = QtWidgets.QVBoxLayout(tabOptions)
+
+        tabLayout.addWidget(tabList)
+        tabLayout.addWidget(tabOptions)
+        return tabRoot, tabList, tabOptionsLayout
+
+    # Utility for adding an analysis method to a ListWidget.
+    def _addItem(self, listWidget, method):
+        # Build the widget itself.
+        container = QtWidgets.QWidget()
+        wText = cursorPointer(QtWidgets.QLabel(method.name))
+        wText.setMinimumSize(300, 1)
+        l = QtWidgets.QHBoxLayout()
+        l.addWidget(wText)
+        l.addStretch()
+        l.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        container.setLayout(l)
+
+        # Build the list item, and add the widget:
+        itemN = QtWidgets.QListWidgetItem()
+        itemN.setSizeHint(container.sizeHint())
+        itemN.setData(Qt.UserRole, method)
+        listWidget.addItem(itemN)
+        listWidget.setItemWidget(itemN, container)
+
+    # Whenever the selected method changes, update the options based of the UI
+    def _updateOnChange(self):
+        if self.lastOption is not None:
+            self.getOpt().update(self.lastOption.readOptions())
+
+        selected = self.tabs.currentIndex()
+        if selected == 0:
+            item = self.listTree.currentItem()
+            optLayout = self.optTreeLayout
+        elif selected == 1:
+            item = self.listBranch.currentItem()
+            optLayout = self.optBranchLayout
+        else:
+            item = self.listPuncta.currentItem()
+            optLayout = self.optPunctaLayout
+
+        if item is not None:
+            # Clear out the old UI options, and re-fill with the new method.
+            clearChildWidgets(optLayout)
+            method = item.data(Qt.UserRole)
+            method.fillOptions(optLayout, self.getOpt())
+            optLayout.addStretch(1)
+            self.lastOption = method
+        else:
+            self.lastOption = method
+
+    # Performs the analysis, based on the current selected tab.
+    def runAnalysis(self):
+        # Save recent changes first...
+        if self.lastOption is not None:
+            self.getOpt().update(self.lastOption.readOptions())
+        self.lastOption = None
+
+        selected = self.tabs.currentIndex()
+        methods, runner = [], None
+        if selected == 0:
+            methods = self.analysisMethods['tree']
+            runner = allTrees
+        elif selected == 1:
+            methods = self.analysisMethods['branch']
+            runner = allBranches
+        else:
+            methods = self.analysisMethods['puncta']
+            runner = allPuncta
+
+        # Only keep methods that the user wants to run.
+        selectedFunctions = []
+        for method in methods:
+            if method.shouldRun(self.getOpt()):
+                selectedFunctions.append(method.methodToCall)
+
+        # Filter out internal (de)selection markers
+        filteredOptions = {}
+        for k, v in self.getOpt().items():
+            if "_do " not in k:
+                filteredOptions[k] = v
+
+        fullState = self.parent().fullState
+        result = runner(fullState, selectedFunctions, **filteredOptions)
+        print ("TODO: Save results...")
+        print (result)
+        self.close()
+
+    # Short-hand for getting the options dictionary
+    def getOpt(self):
+        return self.parent().fullState.projectOptions.analysisOptions
+
+    # All events where the selected tab changes, so force options to be updated.
     def showEvent(self, ev):
         self._updateOnChange()
-
     def tabChanged(self, ev):
-        self._updateOnChange()
-
-    def treeItemClicked(self, item):
-        self._updateOnChange()
-
-    def branchItemClicked(self, item):
-        self._updateOnChange()
-
-    def punctaItemClicked(self, item):
         self._updateOnChange()

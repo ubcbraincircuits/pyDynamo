@@ -14,6 +14,7 @@ class PunctaSizeOptions(BaseOptions):
 # Methods with custom options
 
 class PunctaIntensityOptions(BaseOptions):
+    # One parameter supported: The channel used for puncta intensity.
     def __init__(self, name):
         super().__init__(name, puncta.perPunctaIntensity)
 

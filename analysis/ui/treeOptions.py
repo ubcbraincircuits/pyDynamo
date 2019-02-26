@@ -3,6 +3,7 @@ from .baseOptions import BaseOptions
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
+from ui.common import floatOrDefault
 from ..functions import tree
 
 # Methods without custom options
@@ -18,6 +19,7 @@ class BranchCountOptions(BaseOptions):
 # Methods with custom options
 
 class TDBLOptions(BaseOptions):
+    # Parameters supported are passed to TDBL
     def __init__(self, name):
         super().__init__(name, tree.tdbl)
 
@@ -45,7 +47,7 @@ class TDBLOptions(BaseOptions):
 
     def readOptions(self):
         localOptions = {
-            'filoDist': float(self.filoDist.text()),
+            'filoDist': floatOrDefault(self.filoDist, 10.0),
             'includeFilo': self.includeFilo.isChecked(),
             'excludeAxon': self.excludeAxon.isChecked(),
             'excludeBasal': self.excludeBasal.isChecked()
@@ -55,7 +57,7 @@ class TDBLOptions(BaseOptions):
 
     def defaultValues(self):
         return {
-            'filoDist': 10,
+            'filoDist': 10.0,
             'includeFilo': True,
             'excludeAxon': True,
             'excludeBasal': True

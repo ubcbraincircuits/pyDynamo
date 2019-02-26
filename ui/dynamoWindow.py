@@ -11,7 +11,7 @@ import time
 
 from .actions import FullStateActions
 from .analysisWindow import AnalysisWindow
-from .common import cursorPointer
+from .common import centerWindow, cursorPointer
 from .initialMenu import InitialMenu
 from .settingsWindow import SettingsWindow
 from .stackListWindow import StackListWindow
@@ -34,7 +34,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.analysisPopup = AnalysisWindow(self)
 
         self.root = self._setupUI()
-        self.centerWindow()
+        centerWindow(self)
         self.show()
 
         if len(argv) == 1:
@@ -93,13 +93,6 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 return # Don't quit!
         if self.app is not None:
             self.app.quit()
-
-    def centerWindow(self):
-        # self.resize(320, 240)
-        frameGm = self.frameGeometry()
-        centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
 
     def newFromStacks(self, filePaths=None):
         self.openFilesAndAppendStacks(filePaths)
