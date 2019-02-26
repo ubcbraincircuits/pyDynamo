@@ -133,11 +133,11 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             # Clear out the old UI options, and re-fill with the new method.
             clearChildWidgets(optLayout)
             method = item.data(Qt.UserRole)
-            method.fillOptions(optLayout, self.getOpt())
+            method.fillOptions(optLayout, self.parent().fullState)
             optLayout.addStretch(1)
             self.lastOption = method
         else:
-            self.lastOption = method
+            self.lastOption = None
 
     # Performs the analysis, based on the current selected tab.
     def runAnalysis(self):

@@ -23,7 +23,7 @@ class TDBLOptions(BaseOptions):
     def __init__(self, name):
         super().__init__(name, tree.tdbl)
 
-    def fillOptionsInner(self, currentState, formParent):
+    def fillOptionsInner(self, currentState, fullState, formParent):
         self.filoDist = QtWidgets.QLineEdit(formParent)
         self.filoDist.setValidator(QtGui.QDoubleValidator())
         k = 'filoDist'

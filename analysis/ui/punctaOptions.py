@@ -3,7 +3,10 @@ from .baseOptions import BaseOptions
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
+import util
 from ..functions import puncta
+
+_IMG_CACHE = util.ImageCache()
 
 # Methods without custom options
 
@@ -18,10 +21,10 @@ class PunctaIntensityOptions(BaseOptions):
     def __init__(self, name):
         super().__init__(name, puncta.perPunctaIntensity)
 
-    def fillOptionsInner(self, currentState, formParent):
+    def fillOptionsInner(self, currentState, fullState, formParent):
         self.channel = QtWidgets.QComboBox(formParent)
 
-        nChannels = 2 # TODO
+        nChannels = _IMG_CACHE.estimateChannelCount(fullState)
         for i in range(nChannels):
             self.channel.addItem("%d" % (i + 1))
 

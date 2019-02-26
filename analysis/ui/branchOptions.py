@@ -27,7 +27,7 @@ class BranchTypeOptions(BaseOptions):
     def __init__(self, name):
         super().__init__(name, branch.branchType)
 
-    def fillOptionsInner(self, currentState, formParent):
+    def fillOptionsInner(self, currentState, fullState, formParent):
         self.filoDist = QtWidgets.QLineEdit(formParent)
         k = 'filoDist'
         self.filoDist.setText(str(currentState[k]) if k in currentState else '10')

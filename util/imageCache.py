@@ -85,3 +85,13 @@ class ImageCache:
                 mx = np.max(d)
                 image[c, i] = 255 * (d - mn) / (mx - mn)
         return np.round(image.clip(min=0)).astype(np.uint8)
+
+    # Estimate the channel count by using the first loaded image,
+    #   or loading a new one if there is none.
+    def estimateChannelCount(self, fullState):
+        for imgPath in fullState.filePaths:
+            if imgPath in self._images:
+                return self._images[imgPath].shape[0]
+        if len(fullState.filePaths) == 0:
+            return 1
+        return self.getVolume(fullState.filePaths[0]).shape[0]
