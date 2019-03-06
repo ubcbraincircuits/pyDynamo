@@ -64,7 +64,7 @@ class TopMenu():
         menuBar.addMenu(viewMenu)
 
         analysisMenu = QtWidgets.QMenu('&Analysis', stackWindow)
-        analysisMenu.addAction('Launch analysis window', self.launchAnalysis, QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
+        analysisMenu.addAction('Launch analysis window', self.launchAnalysis, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
         analysisMenu.addSeparator()
         analysisMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
         menuBar.addMenu(analysisMenu)
