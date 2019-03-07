@@ -12,10 +12,13 @@ import files
 import util
 
 from analysis import allTrees, allBranches, addedSubtractedTransitioned, allPuncta
+from analysis.neurom import neuroMAnalysisForNeurons
 from analysis.functions.tree import *
 from analysis.functions.branch import *
 from analysis.functions.puncta import *
 from model import FiloType
+
+_IMG_CACHE = util.ImageCache()
 
 # Either use a provided path, or open a filepicker to select one.
 def usePathOrPick(path):
@@ -84,6 +87,15 @@ def runPunctaAnalysis(path=None):
     pd.DataFrame(result).to_csv("puncta_analysis.csv")
     print (result)
 
+# Example of running NeuroM analysis methods against Dynamo trees
+def runNeuroMAnalysis(path):
+    fullState = files.loadState(usePathOrPick(path))
+    # NOTE: need to load one image, so set up volume size
+    _IMG_CACHE.handleNewUIState(fullState.uiStates[0])
+    print ("Loaded %d trees" % len(fullState.trees))
+    result = neuroMAnalysisForNeurons(fullState)
+    print (result)
+
 # Example novel analysis: get filopodia tips, plot in 3D, and compare spatial vs tree distance.
 def runFiloTipCluster(path):
     fullState = files.loadState(usePathOrPick(path))
@@ -140,6 +152,7 @@ if __name__ == '__main__':
     # Path is first command-line argument, if provided.
     path = sys.argv[1] if len(sys.argv) > 1 else None
     # runTreeAnalysis(path)
-    runBranchAnalysis(path)
+    # runBranchAnalysis(path)
     # runPunctaAnalysis(path)
     # runFiloTipCluster(path)
+    runNeuroMAnalysis(path)

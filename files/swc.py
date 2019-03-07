@@ -99,11 +99,11 @@ def _parseMeta(line):
 ###
 
 # Write tree back out to SWC
-def exportToSWC(dirPath, filePath, tree, fullState):
+def exportToSWC(dirPath, filePath, tree, fullState, forNeuroM=False):
     totalPath = os.path.join(dirPath, filePath)
     with open(totalPath, 'w') as file:
         _exportHeader(file, tree, filePath, fullState)
-        _exportNodes(file, tree)
+        _exportNodes(file, tree, forNeuroM)
 
 # Writes the SWC header, a bunch of key=value pairs in SWC comments
 def _exportHeader(file, tree, filePath, fullState):
@@ -118,7 +118,7 @@ def _exportHeader(file, tree, filePath, fullState):
     file.write("#zc0 = 0\n#zc1 = %d\n" % zSz)
 
 # Writes out each point's data in the standard format.
-def _exportNodes(file, tree):
+def _exportNodes(file, tree, forNeuroM=False):
     allPoints = tree.flattenPoints()
 
     # Maps node IDs (strings of base-16 numbers) to SWC indexes (1-based ints)
@@ -132,10 +132,25 @@ def _exportNodes(file, tree):
     file.write("##n,type,x,y,z,radius,parent\n")
     for point in tree.flattenPoints():
         n = idToSWCIndex[point.id]
-        # Note: Vaa3D appears to encode branch ID in this property?
-        type = int(point.parentBranch.id, 16) if point.parentBranch is not None else -1
-        x, y, z = point.location
-        radius = point.radius
+        if forNeuroM:
+            #      0        1     2         3                4              5          6         7
+            # (UNDEFINED, SOMA, AXON, BASAL_DENDRITE, APICAL_DENDRITE, FORK_POINT, END_POINT, CUSTOM)
+            type = 0
+            if point.isRoot():
+                type = 1 # Soma
+            else:
+                type = 3 # Force everything else to be BASAL for now...
+
+            x, y, z = tree.worldCoordPoints([point])
+            x, y, z = x[0], y[0], z[0]
+            radius = point.radius if point.radius is not None else 1
+            radius = tree.worldCoordPoints([(radius, radius, radius)])[0][0]
+
+        else: # For Vaa 3D
+            # Note: Vaa3D appears to encode branch ID in this property?
+            type = int(point.parentBranch.id, 16) if point.parentBranch is not None else -1
+            x, y, z = point.location
+            radius = point.radius if point.radius is not None else 1
         nextPoint = point.nextPointInBranch(delta=-1)
         parent = -1 if nextPoint is None else idToSWCIndex[nextPoint.id]
         file.write("%d %d %.4f %.4f %.4f %.5f %d\n" % (n,type,x,y,z,radius,parent))
