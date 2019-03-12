@@ -61,7 +61,7 @@ HELP_MSG = """
 <li><b>Ctrl-Shift-R</b> to enter/leave manual registration mode.
   <ul>
     <li>Click on points, and <b>Shift-Enter</b> to set all to the same ID</li>
-    <li>Optionally save the ID changes on exit</li>
+    <li>Shift-' to set all selected points to a new ID</li>
   </ul>
 </li>
 </ul>
