@@ -269,6 +269,18 @@ class UIState():
         N_BRANCH_DISPLAY_MODES = 3 # Local, All Z, Only this Z
         self.branchDisplayMode = (self.branchDisplayMode + 1) % N_BRANCH_DISPLAY_MODES
 
+    def cyclePointInfo(self):
+        # show annotations -> showIDs -> show neither -> ...
+        if self.showAnnotations:
+            self.showAnnotations = False
+            self.showIDs = True
+        elif self.showIDs:
+            self.showAnnotations = False
+            self.showIDs = False
+        else:
+            self.showAnnotations = True
+            self.showIDs = False
+
     def maybeCreateNewID(self, newPointID):
         return newPointID if newPointID is not None else self._parent.nextPointID()
 

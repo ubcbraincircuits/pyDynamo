@@ -57,6 +57,7 @@ class TopMenu():
         viewMenu.addAction('Turn on/off colours', self.toggleColor, QtCore.Qt.SHIFT + QtCore.Qt.Key_C)
         viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
             self.cycleBranchDisplayMode, QtCore.Qt.Key_V)
+        viewMenu.addAction('Cycle showing annotations -> IDs -> nothing per point', self.cyclePointInfo, QtCore.Qt.Key_F)
         dmo(viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H))
         viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
         viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
@@ -190,6 +191,10 @@ class TopMenu():
 
     def cycleBranchDisplayMode(self):
         self.stackWindow.uiState.cycleBranchDisplayMode()
+        self.redraw()
+
+    def cyclePointInfo(self):
+        self.stackWindow.uiState.cyclePointInfo()
         self.redraw()
 
     def toggleHilight(self):

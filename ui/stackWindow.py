@@ -190,18 +190,6 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.fullActions.alignVisibleIDs()
                     self.parent().redrawAllStacks()
 
-            if (key == ord('F')):
-                if self.uiState.showAnnotations:
-                    self.uiState.showAnnotations = False
-                    self.uiState.showIDs = True
-                elif self.uiState.showIDs:
-                    self.uiState.showAnnotations = False
-                    self.uiState.showIDs = False
-                else:
-                    self.uiState.showAnnotations = True
-                    self.uiState.showIDs = False
-                self.redraw()
-
             if self.uiState._parent.inManualRegistrationMode():
                 return
             if self.uiState._parent.inPunctaMode:
