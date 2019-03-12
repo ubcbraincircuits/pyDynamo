@@ -195,12 +195,6 @@ class StackWindow(QtWidgets.QMainWindow):
             if self.uiState._parent.inPunctaMode:
                 return
 
-            elif key == ord('Q'):
-                self.fullActions.getAnnotation(self.windowIndex, self, shftPressed)
-                if shftPressed:
-                    self.parent().redrawAllStacks()
-                else:
-                    self.redraw()
             elif key == QtCore.Qt.Key_Delete:
                 toDelete = self.uiState.currentPoint()
                 if toDelete is None:

@@ -36,6 +36,13 @@ class TopMenu():
         editMenu.addSeparator()
         editMenu.addAction('Find', self.find, QtCore.Qt.CTRL + QtCore.Qt.Key_F)
         editMenu.addSeparator()
+
+        annotationSubmenu = editMenu.addMenu("Annotate")
+        dmo(annotationSubmenu.addAction('Selected point on current stack',
+            self.annotateThis, QtCore.Qt.Key_Q))
+        dmo(annotationSubmenu.addAction('Selected point on all later stacks',
+            self.annotateAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_Q))
+
         dmo(editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R))
         dmo(editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R))
         dmo(editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B))
@@ -135,6 +142,18 @@ class TopMenu():
             "Find by ID", "Point or Branch ID:", QtWidgets.QLineEdit.Normal, "")
         if okPressed:
             self._global().findByID(pointOrBranchID)
+
+    def annotateThis(self):
+        self._global().fullActions.getAnnotation(
+            self.stackWindow.windowIndex, self.stackWindow, False
+        )
+        self.redraw()
+
+    def annotateAll(self):
+        self._global().fullActions.getAnnotation(
+            self.stackWindow.windowIndex, self.stackWindow, True
+        )
+        self._global().redrawAllStacks()
 
     def register(self):
         self._local().registerImages(self.stackWindow.windowIndex)
