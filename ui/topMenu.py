@@ -14,6 +14,8 @@ class TopMenu():
 
         self.drawModeOnly = []
         dmo = lambda x: self.drawModeOnly.append(x)
+        self.registerModeOnly = []
+        rmo = lambda x: self.registerModeOnly.append(x)
 
         fileMenu = QtWidgets.QMenu('&File', stackWindow)
         fileMenu.addAction('&New stack...', self.appendStack, QtCore.Qt.Key_N)
@@ -49,8 +51,15 @@ class TopMenu():
         dmo(editMenu.addAction('Clean up all primary &branches',
             self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B))
         editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
-        editMenu.addAction('Manual registration', self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
         dmo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
+
+        manualRegisterSubmenu = editMenu.addMenu("Manual registration")
+        manualRegisterSubmenu.addAction('Start/end',
+            self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
+        rmo(manualRegisterSubmenu.addAction('Align IDs all selected points',
+            self.alignIDsToFirst, QtCore.Qt.SHIFT + QtCore.Qt.Key_Return))
+        rmo(manualRegisterSubmenu.addAction('Assign a new ID to all selected points',
+            self.alignIDsToNew, QtCore.Qt.SHIFT + QtCore.Qt.Key_Apostrophe))
         menuBar.addMenu(editMenu)
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -83,6 +92,8 @@ class TopMenu():
         menuBar.addSeparator()
         menuBar.addMenu(helpMenu)
 
+        self._updateForDrawMode()
+
     def _local(self):
         """Access to the stack window, for local operations that affect just this stack."""
         return self.stackWindow.actionHandler
@@ -95,6 +106,9 @@ class TopMenu():
         inDrawMode = self._global().fullState.inDrawMode()
         for action in self.drawModeOnly:
             action.setEnabled(inDrawMode)
+        inRegMode = self._global().fullState.inManualRegistrationMode()
+        for action in self.registerModeOnly:
+            action.setEnabled(inRegMode)
 
     # File menu callbacks:
     def appendStack(self, *args):
@@ -177,6 +191,16 @@ class TopMenu():
     def manualRegister(self):
         self._global().toggleManualRegistration()
         self._updateForDrawMode()
+
+    def alignIDsToFirst(self):
+        assert self._global().fullState.inManualRegistrationMode()
+        self._global().fullActions.alignVisibleIDs(toNewID=False)
+        self._global().redrawAllStacks()
+
+    def alignIDsToNew(self):
+        assert self._global().fullState.inManualRegistrationMode()
+        self._global().fullActions.alignVisibleIDs(toNewID=True)
+        self._global().redrawAllStacks()
 
     def cyclePointModes(self):
         self._local().cyclePointModes()

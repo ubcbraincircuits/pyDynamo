@@ -184,11 +184,6 @@ class StackWindow(QtWidgets.QMainWindow):
                 if not self.uiState._parent.inPunctaMode:
                     self.fullActions.selectFirstChildren()
                     self.parent().redrawAllStacks()
-            elif key == QtCore.Qt.Key_Return and shftPressed:
-                # Align IDs in registration mode, and save updates
-                if self.uiState._parent.inManualRegistrationMode():
-                    self.fullActions.alignVisibleIDs()
-                    self.parent().redrawAllStacks()
 
             if self.uiState._parent.inManualRegistrationMode():
                 return

@@ -234,8 +234,9 @@ class FullStateActions():
     def toggleManualRegistration(self):
         return self.state.toggleManualRegistrationMode()
 
-    def alignVisibleIDs(self):
-        idToAlign = None
+    def alignVisibleIDs(self, toNewID=False):
+        idToAlign = self.state.nextPointID() if toNewID else None
+
         remaps = {}
         for i, state in enumerate(self.state.uiStates):
             if state.isHidden:
