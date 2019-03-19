@@ -157,7 +157,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         if dirPath is not None and dirPath is not '':
             for path, tree in zip(self.fullState.filePaths, self.fullState.trees):
                 childPath = os.path.basename(path)
-                childPath = childPath.replace(".tif", "").replace(".tiff", "")
+                childPath = childPath.replace(".tif", "").replace(".tiff", "").replace(".mat", "")
                 childPath = childPath + ".swc"
                 exportToSWC(dirPath, childPath, tree, self.fullState)
         QtWidgets.QMessageBox.information(self, "Save complete", "SWC files saved!")
@@ -265,7 +265,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def openFilesAndAppendStacks(self, filePaths=None):
         if filePaths is None:
             filePaths = getOpenFileName(self,
-                "Open image stacks", "", "Image files (*.tif)", multiFile=True
+                "Open image stacks", "", "Image files (*.tif *.tiff *.mat)", multiFile=True
             )
         if len(filePaths) == 0:
             return

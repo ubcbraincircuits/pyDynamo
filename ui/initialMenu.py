@@ -17,7 +17,7 @@ class InitialMenu(QtWidgets.QMainWindow):
         centerWindow(self)
 
         # Options #1 - Start New
-        buttonN = QtWidgets.QPushButton("&New from Stack(s)", self)
+        buttonN = QtWidgets.QPushButton("&New from Image stack(s)", self)
         buttonN.setToolTip("Start new labelling from one or more images")
         buttonN.clicked.connect(self.newFromStacks)
         cursorPointer(buttonN)

@@ -3,6 +3,7 @@
 """
 
 import numpy as np
+import scipy.io as sio
 from tifffile import TiffFile
 
 import util
@@ -15,9 +16,8 @@ def tiffRead(path, verbose=True):
     with TiffFile(path) as tif:
         shape = tif.asarray().shape
         stack = tif.asarray()
-    nChannels = shape[0] if len(shape) == 4 else 1
     if verbose:
-        print ("Loaded TIF, shape: %s" % str(shape))
+        print ("Loaded TIFF, shape: %s" % str(shape))
 
     if len(shape) == 3:
         # HACK - colours have been merged?
@@ -29,9 +29,33 @@ def tiffRead(path, verbose=True):
             ])
         else:
             stack = np.expand_dims(stack, axis=0)
-
-    # stack = np.swapaxes(stack, 1, 2)
     return stack
+
+def matlabRead(path, verbose=True, key='image'):
+    stack = sio.loadmat(path)[key]
+    shape = stack.shape
+    if verbose:
+        print ("Loaded MATLAB, shape: %s" % str(shape))
+
+    if len(shape) == 3:
+        # HACK - colours have been merged?
+        if stack.shape[0] % 2 == 0 and stack.shape[0] > 100:
+            sz = stack.shape[0] // 2
+            stack = np.array([
+                stack[:sz, :, :],
+                stack[sz:, :, :]
+            ])
+        else:
+            stack = np.expand_dims(stack, axis=0)
+    return stack
+
+def pathRead(path, verbose=True):
+    if path.endswith(".tif") or path.endswith(".tiff"):
+        return tiffRead(path, verbose)
+    elif path.endswith(".mat"):
+        return matlabRead(path, verbose)
+    else:
+        print ("Unsupported image type: " + path)
 
 
 class ImageCache:
@@ -70,7 +94,7 @@ class ImageCache:
     # Returns volume for a tif path, possibly loading it first if not yet cached.
     def getVolume(self, path, verbose=True):
         if path not in self._images:
-            imgRaw = tiffRead(path, verbose)
+            imgRaw = pathRead(path, verbose)
             imgClean = self._postProcess(imgRaw)
             self._images[path] = imgClean
         return self._images[path]
