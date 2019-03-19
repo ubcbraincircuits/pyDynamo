@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QMes
 
 import util
 from ..dendrite3DViewWindow import Dendrite3DViewWindow
+from ..volume3DWindow import Volume3DWindow
 from ..helpDialog import showHelpDialog
 
 from files import importFromSWC
@@ -58,8 +59,12 @@ class DendriteCanvasActions():
         self.uiState.zProject = not self.uiState.zProject
         self.canvas.redraw()
 
-    def launch3DView(self):
+    def launch3DArbor(self):
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
+        viewWindow.show()
+
+    def launch3DVolume(self):
+        viewWindow = Volume3DWindow(self.canvas.parent(), self.uiState)
         viewWindow.show()
 
     def importPointsFromLastStack(self, windowIndex):

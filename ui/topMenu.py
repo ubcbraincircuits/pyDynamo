@@ -65,7 +65,9 @@ class TopMenu():
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
         viewMenu.addAction('Zoom In', self.zoomIn, QtCore.Qt.Key_X)
         viewMenu.addAction('Zoom Out', self.zoomOut, QtCore.Qt.Key_Z)
-        viewMenu.addAction('View 3D Neuron', self.view3D, QtCore.Qt.Key_3)
+        viewMenu.addAction('View 3D Arbor', self.view3DArbor, QtCore.Qt.Key_3)
+        viewMenu.addAction('View 3D Image Volume', self.view3DVolume, QtCore.Qt.SHIFT + QtCore.Qt.Key_3)
+
         viewMenu.addSeparator()
         dmo(viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J))
         dmo(viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J))
@@ -213,8 +215,11 @@ class TopMenu():
     def zoomOut(self):
         self._local().zoom(0.2)
 
-    def view3D(self):
-        self._local().launch3DView()
+    def view3DArbor(self):
+        self._local().launch3DArbor()
+
+    def view3DVolume(self):
+        self._local().launch3DVolume()
 
     def toggleLineSize(self):
         self._global().fullState.toggleLineWidth()
