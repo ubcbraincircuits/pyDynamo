@@ -64,7 +64,7 @@ class DendriteCanvasActions():
         viewWindow.show()
 
     def launch3DVolume(self):
-        viewWindow = Volume3DWindow(self.canvas.parent(), self.uiState)
+        viewWindow = Volume3DWindow(self.canvas.parent(), self.uiState, applyColorLimits=True)
         viewWindow.show()
 
     def importPointsFromLastStack(self, windowIndex):
