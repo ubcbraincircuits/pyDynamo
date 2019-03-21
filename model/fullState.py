@@ -212,11 +212,6 @@ class FullState:
             return sourcePoint
         return self.uiStates[targetID]._tree.getPointByID(sourcePoint.id)
 
-    def analogousBranch(self, sourceBranch, sourceID, targetID):
-        if sourceBranch == None or sourceID == targetID:
-            return sourceBranch
-        return self.uiStates[targetID]._tree.getBranchByID(sourceBranch.id)
-
     def removeStack(self, index):
         self.filePaths.pop(index)
         self.trees.pop(index)

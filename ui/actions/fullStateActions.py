@@ -92,8 +92,8 @@ class FullStateActions():
         for i in stacks:
             state = self.state.uiStates[i]
             newLocation = self.state.convertLocation(localIdx, i, location, currentSource)
-            newBranch = self.state.analogousBranch(currentBranch, localIdx, i)
             newSource = self.state.analogousPoint(currentSource, localIdx, i)
+            newBranch = None if newSource is None else newSource.parentBranch
             # Only add to later ones if the points exist in the tree:
             if newBranch is not None and newSource is not None:
                 state.addKnownPointMidBranchAndSelect(
