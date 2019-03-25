@@ -14,10 +14,13 @@ Until then:
     * matplotlib
     * numpy
     * pandas
+    * pyopengl
     * pyqt (version 5)
+    * pyqtgraph
     * scikit-image
     * scipy
     * tifffile (from conda-forge, if using conda. will require a conda update --all after)
+ 
 3) Once the repository is obtained locally (either checked out, or files downloaded), navigate to the root directory and run:
 ```
 $> python dynamo.py
