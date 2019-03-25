@@ -42,6 +42,9 @@ class FullState:
     # Whether we're currently drawing puncta
     inPunctaMode = attr.ib(default=False)
 
+    # Whether we're currently manually registering points
+    inManualRegistrationMode = attr.ib(default=False)
+
     # Which landmark point we're editing, -1 when not in landmark mode.
     landmarkPointAt = attr.ib(default=-1)
 
@@ -53,9 +56,6 @@ class FullState:
 
     # Shared UI Option for diameter of point circles
     dotSize = attr.ib(default=5)
-
-    # ID remap for manual registration mode, or none if not in manual registration.
-    manualRegistrationIDRemap = attr.ib(default=None)
 
     # Keep track of the ID for the next point created, used for making more unique identifiers.
     _nextPointID = 0
@@ -131,14 +131,11 @@ class FullState:
 
     def inDrawMode(self):
         return not self.inLandmarkMode() \
-            and not self.inManualRegistrationMode() \
+            and not self.inManualRegistrationMode \
             and not self.inPunctaMode
 
     def inLandmarkMode(self):
         return self.landmarkPointAt >= 0
-
-    def inManualRegistrationMode(self):
-        return self.manualRegistrationIDRemap is not None
 
     def togglePunctaMode(self):
         isInMode = self.inPunctaMode
@@ -147,21 +144,20 @@ class FullState:
         else:
             if self.inLandmarkMode():
                 self.landmarkPointAt = -1
-            elif self.inManualRegistrationMode():
+            elif self.inManualRegistrationMode:
                 self.toggleManualRegistrationMode()
             self.inPunctaMode = True
 
     def toggleManualRegistrationMode(self):
-        isInMode = self.inManualRegistrationMode()
+        isInMode = self.inManualRegistrationMode
         if isInMode:
-            idRemap = self.manualRegistrationIDRemap
-            self.manualRegistrationIDRemap = None
-            return idRemap
+            self.inManualRegistrationMode = False
         else:
             if self.inLandmarkMode():
                 self.landmarkPointAt = -1
-            self.manualRegistrationIDRemap = []
-            return None
+            elif self.inPunctaMode:
+                self.togglePunctaMode()
+            self.inManualRegistrationMode = True
 
     def appendIDRemap(self, idRemaps):
         for stepID, idRemapList in idRemaps.items():

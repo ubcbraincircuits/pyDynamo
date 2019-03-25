@@ -108,7 +108,7 @@ class TopMenu():
         inDrawMode = self._global().fullState.inDrawMode()
         for action in self.drawModeOnly:
             action.setEnabled(inDrawMode)
-        inRegMode = self._global().fullState.inManualRegistrationMode()
+        inRegMode = self._global().fullState.inManualRegistrationMode
         for action in self.registerModeOnly:
             action.setEnabled(inRegMode)
 
@@ -195,14 +195,14 @@ class TopMenu():
         self._updateForDrawMode()
 
     def alignIDsToFirst(self):
-        assert self._global().fullState.inManualRegistrationMode()
-        self._global().fullActions.alignVisibleIDs(toNewID=False)
-        self._global().redrawAllStacks()
+        if self._global().fullState.inManualRegistrationMode:
+            self._global().fullActions.alignVisibleIDs(toNewID=False)
+            self._global().redrawAllStacks()
 
     def alignIDsToNew(self):
-        assert self._global().fullState.inManualRegistrationMode()
-        self._global().fullActions.alignVisibleIDs(toNewID=True)
-        self._global().redrawAllStacks()
+        if self._global().fullState.inManualRegistrationMode:
+            self._global().fullActions.alignVisibleIDs(toNewID=True)
+            self._global().redrawAllStacks()
 
     def cyclePointModes(self):
         self._local().cyclePointModes()

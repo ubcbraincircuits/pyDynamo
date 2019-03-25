@@ -237,7 +237,6 @@ class FullStateActions():
     def alignVisibleIDs(self, toNewID=False):
         idToAlign = self.state.nextPointID() if toNewID else None
 
-        remaps = {}
         for i, state in enumerate(self.state.uiStates):
             if state.isHidden:
                 continue # Only register what we can see.
@@ -246,12 +245,7 @@ class FullStateActions():
                 if idToAlign is None:
                     idToAlign = currentPoint.id
                 elif idToAlign != currentPoint.id:
-                    if i not in remaps:
-                        remaps[i] = []
-                    remaps[i].extend(
-                        self.state.setPointIDWithoutCollision(self.state.trees[i], currentPoint, idToAlign)
-                    )
-        self.state.appendIDRemap(remaps)
+                    self.state.setPointIDWithoutCollision(self.state.trees[i], currentPoint, idToAlign)
 
     def getAnnotation(self, localIdx, window, copyToAllPoints):
         self.history.pushState()

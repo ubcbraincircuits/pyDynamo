@@ -185,7 +185,7 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.fullActions.selectFirstChildren()
                     self.parent().redrawAllStacks()
 
-            if self.uiState._parent.inManualRegistrationMode():
+            if self.uiState._parent.inManualRegistrationMode:
                 return
             if self.uiState._parent.inPunctaMode:
                 return

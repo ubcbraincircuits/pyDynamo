@@ -32,6 +32,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.settingsWindow = SettingsWindow(self)
         self.stackList = StackListWindow(self)
         self.analysisPopup = AnalysisWindow(self)
+        self.currentStatusMessage = None
 
         self.root = self._setupUI()
         centerWindow(self)
@@ -226,26 +227,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     # Either start manual registration, or stop (and maybe save)
     def toggleManualRegistration(self):
-        if not self.fullState.inManualRegistrationMode():
+        if not self.fullState.inManualRegistrationMode:
             self.updateStatusMessage("Manual ID registration active...")
         else:
             self.updateStatusMessage(None)
 
-        idMap = self.fullActions.toggleManualRegistration()
-        if idMap is not None and len(idMap) > 0:
-            reply = QtWidgets.QMessageBox.question(
-                self, 'Save?', 'Save ID changes?', QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
-            )
-            if reply == QtWidgets.QMessageBox.Yes:
-                filePath = getOpenFileName(self,
-                    "Open remap file", "", "TSV files (*.tsv)", saveFile=True
-                )
-                if filePath is not None and filePath != "":
-                    if not filePath.endswith(".tsv"):
-                        filePath = filePath + ".tsv"
-                    saveRemapWithMerge(filePath, idMap)
-                    # Also save to make sure saved dynamo matches saved ID remap
-                    self.saveToFile()
+        self.fullActions.toggleManualRegistration()
         self.redrawAllStacks()
 
     # Find a point or branch by ID:
@@ -315,6 +302,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     self
                 )
                 childWindow.show()
+                self.updateWindowMessage(childWindow)
                 self.stackWindows.append(childWindow)
 
         QtWidgets.QApplication.processEvents()
@@ -354,6 +342,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 self
             )
             self.stackWindows[windowIndex].show()
+            self.updateWindowMessage(self.stackWindows[windowIndex])
         # Or hide it if not:
         else:
             self.fullState.uiStates[windowIndex].isHidden = True
@@ -428,6 +417,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                             self.fullState.uiStates[i],
                             self
                         )
+                        self.updateWindowMessage(childWindow)
                         childWindow.show()
                         self.stackWindows[i] = childWindow
             else:
@@ -442,6 +432,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                         self
                     )
                     childWindow.show()
+                    self.updateWindowMessage(childWindow)
                     self.stackWindows.append(childWindow)
 
         closeStatus()
@@ -464,9 +455,14 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     # Update all open windows with the same status message:
     def updateStatusMessage(self, msg):
+        self.currentStatusMessage = msg
         for window in self.stackWindows:
-            if window is not None:
-                if msg is None:
-                    window.statusBar().clearMessage()
-                else:
-                    window.statusBar().showMessage(msg)
+            self.updateWindowMessage(window)
+
+    # Update a single open window with the current status message:
+    def updateWindowMessage(self, window):
+        if window is not None:
+            if self.currentStatusMessage is None:
+                window.statusBar().clearMessage()
+            else:
+                window.statusBar().showMessage(self.currentStatusMessage)

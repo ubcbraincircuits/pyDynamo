@@ -98,7 +98,7 @@ class DendriteVolumeCanvas(QWidget):
             pointClicked = self.pointOnPixel(location)
 
             # Handle manual registration first: select or deselect the point
-            if self.uiState.parent().inManualRegistrationMode():
+            if self.uiState.parent().inManualRegistrationMode:
                 if pointClicked:
                     if shiftPressed:
                         # select all points with this ID in all stacks:
