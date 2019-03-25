@@ -88,6 +88,7 @@ def run(qtbot):
     assert len(points) == 5
     assert len(tree.branches) == 2
     assert currentPoint.parentBranch.parentPoint.id == points[1].id
+    assert len(tree.branches[0].points[0].children) == 1
 
     # Reparent that from off B, to off C
     # TODO: Renable using the shortcut. For some reason this fails...
@@ -102,6 +103,17 @@ def run(qtbot):
     assert len(tree.branches) == 2
     assert (dW.fullState.uiStates[0].currentPoint().id == currentPoint.id)
     assert dW.fullState.uiStates[0].currentPoint().parentBranch.parentPoint.id == points[2].id
+    assert len(tree.branches[0].points[0].children) == 0
+    assert len(tree.branches[0].points[1].children) == 1
+
+    # Delete point E, make sure C's children becomes empty and the branch is removed
+    qtbot.mouseClick(view, Qt.RightButton, pos=E)
+    points = tree.flattenPoints()
+    assert len(points) == 4
+    assert len(tree.branches) == 1
+    assert dW.fullState.uiStates[0].currentPoint().id == tree.branches[0].points[1].id
+    assert len(tree.branches[0].points[0].children) == 0
+    assert len(tree.branches[0].points[1].children) == 0
 
     dW.close()
     return True

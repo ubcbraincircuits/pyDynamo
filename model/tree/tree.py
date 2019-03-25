@@ -59,6 +59,8 @@ class Tree():
         if len(branch.points) > 0:
             print ("Removing a branch that still has stuff on it? use uiState.removeBranch.")
             return
+        if branch.parentPoint is not None:
+            branch.parentPoint.removeChildrenByID(branch.id)
         self.branches.remove(branch)
 
     def removePointByID(self, pointID):
@@ -73,7 +75,11 @@ class Tree():
                     print ("You can't remove the soma if other points exist - please remove those first!")
                     return None
             else:
-                return pointToRemove.parentBranch.removePointLocally(pointToRemove)
+                result = pointToRemove.parentBranch.removePointLocally(pointToRemove)
+                # Clean up branch if its only point was removed
+                if pointToRemove.parentBranch.isEmpty():
+                    self.removeBranch(pointToRemove.parentBranch)
+                return result
         else:
             return None
 

@@ -47,6 +47,10 @@ class Point():
         """Return whether this point is the terminal point in the branch."""
         return self.nextPointInBranch(noWrap=True) is None
 
+    def removeChildrenByID(self, branchID):
+        """Removes a branch from the list of branches coming off this point."""
+        self.children = [b for b in self.children if b.id != branchID]
+
     def nextPointInBranch(self, delta=1, noWrap=False):
         """Walks a distance along the branch and returns the sibling."""
         if delta == 0:
