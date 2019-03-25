@@ -289,15 +289,22 @@ class Tree():
     def clearAndCopyFrom(self, otherTree, idMaker):
         pointMap = {}
         self.rootPoint = _clonePoint(otherTree.rootPoint, idMaker, pointMap)
-        for branch in otherTree.branches:
+
+        nonEmptyBranches = [branch for branch in otherTree.branches if len(branch.points) > 0]
+        for branch in nonEmptyBranches:
             self.addBranch(_cloneBranch(branch, idMaker, pointMap))
-        for newBranch, oldBranch in zip(self.branches, otherTree.branches):
+
+        for newBranch, oldBranch in zip(self.branches, nonEmptyBranches):
             if oldBranch.parentPoint is not None:
-                assert oldBranch.parentPoint.id in pointMap
-                newBranch.setParentPoint(pointMap[oldBranch.parentPoint.id])
+                if oldBranch.parentPoint.id not in pointMap:
+                    print ("Disconnected branch exists? Skipping")
+                else:
+                    newBranch.setParentPoint(pointMap[oldBranch.parentPoint.id])
             if oldBranch.reparentTo is not None:
-                assert oldBranch.reparentTo.id in pointMap
-                newBranch.reparentTo = pointMap[oldBranch.reparentTo.id]
+                if oldBranch.reparentTo.id not in pointMap:
+                    print ("Disconnected reparented branch exists? Skipping")
+                else:
+                    newBranch.reparentTo = pointMap[oldBranch.reparentTo.id]
 
 
 ### Cloning utilities
