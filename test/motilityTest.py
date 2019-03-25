@@ -124,6 +124,12 @@ def testImportNoChange(path='data/localFirst.dyn.gz'):
     assert len(fullState.trees) == 1
 
     treeA = fullState.trees[0]
+
+    # NOTE: old trees sometimes have empty branches:
+    emptyBranches = [b for b in treeA.branches if len(b.points) == 0]
+    for emptyBranch in emptyBranches:
+        treeA.removeBranch(emptyBranch)
+
     treeB = Tree()
     treeB.clearAndCopyFrom(treeA, fullState)
     treeB._parentState = treeA._parentState
