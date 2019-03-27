@@ -15,6 +15,9 @@ class DendriteOverlay(QWidget):
         self.windowIndex = windowIndex
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
 
+    def updateWindowIndex(self, newIndex):
+        self.windowIndex = newIndex
+
     def paintEvent(self, event):
         super().paintEvent(event)
         fullState = self.dendriteCanvas.uiState.parent()
