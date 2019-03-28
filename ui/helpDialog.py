@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QDialog, QLabel, QMessageBox, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QLabel, QScrollArea, QGridLayout
 
 HELP_MSG = """
 <table><tr><td>
@@ -45,19 +45,27 @@ HELP_MSG = """
 <h1>Shortcuts</h1>
 <h3>Drawing</h3>
 <ul>
-  <li><b>Q</b> to annotate a point</li>
+  <li><b>Q</b> to annotate a point (shift to annotate later too)</li>
   <li><b>Ctrl-R</b> to replace the parent of a point (click next on the new parent)</li>
   <li><b>Ctrl-B</b> on a branch start will make that branch continue its parent's branch</li>
   <li><b>P</b> to enter or leave puncta drawing mode.</li>
 </ul>
 <h3>Analysis</h3>
 <ul>
-  <li><b>3</b> to open a 3d wire model of the current volume</li>
-  <li><b>M</b> to show motility plots for all volumes</li>
+  <li><b>3</b> to open a 3d wire model of the current volume's arbor.</li>
+  <li><b>Shift-3</b> to open a 3d volume plot for the current volume, based on images.</li>
+  <li><b>M</b> to show motility plots for all volumes.
+    <ul>
+        <li><b>2</b> to show 2D dendrograms for motility.</li>
+        <li><b>3</b> to show 3D arbor trees for motility.</li>
+    </ul>
+  </li>
 </ul>
 <h3>Registration</h3>
 <ul>
-<li><b>R</b> for automatic registration: adjust point locations based the previous stack</li>
+<li><b>Shift-R</b> to see all pairwise point registrations between stacks in 3D</li>
+<li><b>R</b> for 'smart' registration: Adjust point IDs and locations based the previous stack images.</li>
+<li><b>Shift-F</b> for 'simple' registration: Adjust point IDs based of the previous stack locations.</li>
 <li><b>Ctrl-Shift-R</b> to enter/leave manual registration mode.
   <ul>
     <li>Click on points, and <b>Shift-Enter</b> to set all to the same ID</li>
@@ -83,6 +91,11 @@ HELP_MSG = """
 </td><td>
 
 <h1>Shortcuts</h1>
+<h3>Clean ups</h3>
+<ul>
+<li><b>Ctrl-Shift-B</b> to update all primary branches to be the longest at each branch point.</li>
+<li><b>Ctrl-Shift-I</b> to change all branch IDs to the ID of their first point.</li>
+</ul>
 <h3>View options</h3>
 <ul>
   <li><b>J</b> to cycle different line thicknesses</li>
@@ -115,17 +128,18 @@ class HelpDialog(QDialog):
     QDialog.__init__(self, parent, QtCore.Qt.WindowCloseButtonHint);
     self.setWindowTitle("Dynamo help")
     self.setModal(True)
-    self.setMinimumWidth(480)
 
-    vLayout = QVBoxLayout()
     label = QLabel(HELP_MSG, self)
     label.setTextFormat(QtCore.Qt.RichText)
-    vLayout.addWidget(label, 0, QtCore.Qt.AlignHCenter)
-    self.setLayout(vLayout)
 
-    #app = QtWidgets.QApplication.instance()
-    #geom = app.desktop().screenGeometry()
+    self.scroll = QScrollArea()
+    self.scroll.setWidget(label)
+
+    layout = QGridLayout()
+    layout.addWidget(self.scroll, 0, 0)
+    self.setLayout(layout)
     self.showMaximized()
+
 
 def showHelpDialog():
     HelpDialog().exec_()
