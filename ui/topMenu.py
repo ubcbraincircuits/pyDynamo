@@ -285,12 +285,18 @@ class TopMenu():
 
     def viewMorphometrics(self):
         parent = self._global()
+        if len(parent.fullState.trees) <= 1:
+            print ("Need >= 2 trees for morphometrics display")
+            return
         opt = parent.fullState.projectOptions.motilityOptions
         Motility3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths, opt).show()
 
     def viewRegistration(self):
         parent = self._global()
+        if len(parent.fullState.trees) <= 1:
+            print ("Need >= 2 trees for registration display")
+            return
         Registration3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
 

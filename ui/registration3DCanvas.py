@@ -17,12 +17,11 @@ KEPT_COLOR    = (0.00, 0.00, 1.00)
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Registration3DCanvas(BaseMatplotlibCanvas):
     def __init__(self, parent, firstTreeIdx, treeModels, filePaths, *args, **kwargs):
-        self.firstTree = firstTreeIdx
+        self.firstTree = max(0, min(len(treeModels) - 2, firstTreeIdx))
         self.treeModels = treeModels
         self.filePaths = filePaths
 
-        nPlots = 3 # min(len(treeModels), MAX_TREE_COUNT)
-        super(Registration3DCanvas, self).__init__(*args, in3D=True, subplots=nPlots, **kwargs)
+        super(Registration3DCanvas, self).__init__(*args, in3D=True, subplots=3, **kwargs)
         self.fig.canvas.mpl_connect('motion_notify_event', self.handleMove)
         self.fig.subplots_adjust(top=0.95, bottom=0.05, right=0.95, left=0.05, wspace=0.05, hspace=0.05)
 
@@ -32,10 +31,10 @@ class Registration3DCanvas(BaseMatplotlibCanvas):
         # Update colors to be white on black:
         print ("")
         for offset, ax in enumerate(self.axes):
-            ax.set_facecolor("white")
-            ax.w_xaxis.set_pane_color((1.0,1.0,1.0,1.0))
-            ax.w_yaxis.set_pane_color((1.0,1.0,1.0,1.0))
-            ax.w_zaxis.set_pane_color((1.0,1.0,1.0,1.0))
+            ax.set_facecolor("black")
+            ax.w_xaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.w_yaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.w_zaxis.set_pane_color((0.0,0.0,0.0,1.0))
             ax.w_xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
             ax.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
             ax.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
@@ -55,7 +54,7 @@ class Registration3DCanvas(BaseMatplotlibCanvas):
         treeModel = self.treeModels[treeIdx]
         otherTreeModel = self.treeModels[otherTreeIdx]
 
-        ax.set_title(util.createTitle(treeIdx, self.filePaths[treeIdx]))
+        ax.set_title(util.createTitle(treeIdx, self.filePaths[treeIdx]), color='w')
 
         # Draw lines for each branch:
         for branch in treeModel.branches:
@@ -95,7 +94,7 @@ class Registration3DCanvas(BaseMatplotlibCanvas):
 
     # For each point, draw the old and new position, connected
     def drawPointMapping(self, ax):
-        ax.set_title("Point mapping")
+        ax.set_title("Point mapping", color='w')
 
         treeA, treeB = self.treeModels[self.firstTree], self.treeModels[self.firstTree + 1]
         treeAPoints, treeBPoints = {}, {}
