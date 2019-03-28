@@ -50,6 +50,8 @@ class TopMenu():
         dmo(editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B))
         dmo(editMenu.addAction('Clean up all primary &branches',
             self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B))
+        dmo(editMenu.addAction('Clean branch IDs from first point',
+            self.cleanBranchIDs, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_I))
         editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
         dmo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
 
@@ -197,6 +199,10 @@ class TopMenu():
 
     def allPrimaryBranches(self):
         self._global().updateAllPrimaryBranches(self.stackWindow)
+        self._global().redrawAllStacks()
+
+    def cleanBranchIDs(self):
+        self._global().fullActions.cleanBranchIDs()
         self._global().redrawAllStacks()
 
     def punctaMode(self):

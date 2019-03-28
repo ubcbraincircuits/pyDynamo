@@ -89,6 +89,7 @@ class DendriteCanvasActions():
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
+        self.fullActions.history.pushState()
 
         pointNew = self.uiState.currentPoint()
         pointOld = self.uiState.parent().uiStates[windowIndex-1].currentPoint()
@@ -128,6 +129,7 @@ class DendriteCanvasActions():
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
+        self.fullActions.history.pushState()
 
         fullState = self.uiState.parent()
         oldTree = fullState.trees[windowIndex - 1]

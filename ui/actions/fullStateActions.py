@@ -206,6 +206,12 @@ class FullStateActions():
         for i, tree in enumerate(self.state.trees):
             tree.updateAllPrimaryBranches()
 
+    def cleanBranchIDs(self):
+        """For each branch, set the branch ID to the ID of the first point along it."""
+        self.history.pushState()
+        for i, tree in enumerate(self.state.trees):
+            tree.cleanBranchIDs()
+
     def calculateBestOrientation(self):
         X0, Y0, Z0 = self.state.trees[0].worldCoordPoints(self.state.landmarks[0])
 

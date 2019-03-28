@@ -205,6 +205,16 @@ class Tree():
             if len(childBranch.points) > 0:
                 self.updateAllPrimaryBranches(childBranch.points[0])
 
+    def cleanBranchIDs(self):
+        """For all branches, set the ID of the branch to its first point's ID.
+
+        Note: Branch IDs should be removed overall and this be the default behaviour.
+        """
+        for branch in self.branches:
+            if len(branch.points) > 0:
+                branch.id = branch.points[0].id
+            else:
+                branch.id = self._parentState._parent.nextBranchID()
 
     def closestPointTo(self, targetLocation, zFilter=False):
         """Given a position in the volume, find the point closest to it in image space.
