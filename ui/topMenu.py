@@ -46,7 +46,6 @@ class TopMenu():
         dmo(annotationSubmenu.addAction('Selected point on all later stacks',
             self.annotateAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_Q))
 
-        dmo(editMenu.addAction('Register from previous stack', self.register, QtCore.Qt.Key_R))
         dmo(editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R))
         dmo(editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B))
         dmo(editMenu.addAction('Clean up all primary &branches',
@@ -54,12 +53,17 @@ class TopMenu():
         editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
         dmo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
 
-        manualRegisterSubmenu = editMenu.addMenu("Manual registration")
-        manualRegisterSubmenu.addAction('Start/end',
+        manualRegisterSubmenu = editMenu.addMenu("Registration")
+        manualRegisterSubmenu.addAction('View point registration', self.viewRegistration, QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
+        dmo(manualRegisterSubmenu.addAction('Smart register from previous stack images', self.registerSmart, QtCore.Qt.Key_R))
+        dmo(manualRegisterSubmenu.addAction('Simple register from previous stack locations',
+            self.registerSimple, QtCore.Qt.SHIFT + QtCore.Qt.Key_F))
+        manualRegisterSubmenu.addSeparator()
+        manualRegisterSubmenu.addAction('Start/end manual registration',
             self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
-        rmo(manualRegisterSubmenu.addAction('Align IDs all selected points',
+        rmo(manualRegisterSubmenu.addAction(' -> Manual: Align IDs all selected points',
             self.alignIDsToFirst, QtCore.Qt.SHIFT + QtCore.Qt.Key_Return))
-        rmo(manualRegisterSubmenu.addAction('Assign a new ID to all selected points',
+        rmo(manualRegisterSubmenu.addAction(' -> Manual: Assign a new ID to all selected points',
             self.alignIDsToNew, QtCore.Qt.SHIFT + QtCore.Qt.Key_Apostrophe))
         menuBar.addMenu(editMenu)
 
@@ -86,7 +90,6 @@ class TopMenu():
         analysisMenu = QtWidgets.QMenu('&Analysis', stackWindow)
         analysisMenu.addAction('Launch analysis window', self.launchAnalysis, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
         analysisMenu.addSeparator()
-        analysisMenu.addAction('View point registration', self.viewRegistration, QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
         analysisMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
         menuBar.addMenu(analysisMenu)
 
@@ -173,8 +176,16 @@ class TopMenu():
         )
         self._global().redrawAllStacks()
 
-    def register(self):
-        self._local().registerImages(self.stackWindow.windowIndex)
+    def registerSmart(self):
+        if self._global().fullState.inManualRegistrationMode:
+            return
+        self._local().smartRegisterImages(self.stackWindow.windowIndex)
+        self.redraw()
+
+    def registerSimple(self):
+        if self._global().fullState.inManualRegistrationMode:
+            return
+        self._local().simpleRegisterImages(self.stackWindow.windowIndex)
         self.redraw()
 
     def reparent(self):

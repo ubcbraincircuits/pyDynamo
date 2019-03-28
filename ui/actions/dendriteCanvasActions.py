@@ -85,7 +85,7 @@ class DendriteCanvasActions():
         if newTree is not None:
             thisTree.clearAndCopyFrom(newTree, self.uiState.parent())
 
-    def registerImages(self, windowIndex):
+    def smartRegisterImages(self, windowIndex):
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
@@ -123,6 +123,64 @@ class DendriteCanvasActions():
             "Registration complete! Unregistered points shown in green, press 'h' to toggle hilight.", parent=self.canvas)
         msg.show()
         self.canvas.stackWindow.statusBar().clearMessage()
+
+    def simpleRegisterImages(self, windowIndex, somaScale=1.01):
+        if windowIndex == 0:
+            print ("Can't register the first image, nothing to register it against...")
+            return
+
+        fullState = self.uiState.parent()
+        oldTree = fullState.trees[windowIndex - 1]
+        newTree = fullState.trees[windowIndex]
+        oldPoints = oldTree.flattenPoints(includeDisconnected=True)
+        newPoints = newTree.flattenPoints(includeDisconnected=True)
+
+        # Step 1: Fully change all the IDs of the second scan
+        fullNewRemap = {}
+        for p in newPoints:
+            newID = fullState.nextPointID()
+            fullNewRemap[p.id] = newID
+            p.id = newID
+
+        # Step 2: Normalize by shifting new tree to match soma location
+        oldSomaXYZ = oldTree.rootPoint.location
+        newSomaXYZ = newTree.rootPoint.location
+        somaShiftDist = util.deltaSz(oldSomaXYZ, newSomaXYZ)
+        shift = util.locationMinus(oldSomaXYZ, newSomaXYZ)
+        shiftCutoff = max(somaShiftDist * somaScale, 0.001)
+
+        # Step 3: Sort all close pairs (old point, new point) by distance
+        shortDistPairs, closestDists = [], []
+        for newPoint in newPoints:
+            newLoc = newPoint.location
+            shiftedNewLoc = util.locationPlus(newLoc, shift)
+
+            closestDist = None
+            for oldPoint in oldPoints:
+                oldLoc = oldPoint.location
+                dist = util.deltaSz(oldLoc, shiftedNewLoc)
+                if dist < shiftCutoff:
+                    shortDistPairs.append((dist, oldPoint, newPoint))
+                if closestDist is None or dist < closestDist:
+                    closestDist = dist
+                closestDists.append(closestDist)
+        shortDistPairs = sorted(shortDistPairs, key=lambda x: x[0])
+
+        # Step 4: Walk through, mapping closest first
+        oldToNewMap, newToOldMap, madeUnique = {}, {}, {}
+        for (dist, oldPoint, newPoint) in shortDistPairs:
+            if dist > shiftCutoff:
+                break # shouldn't happen, but just in case
+
+            oldID, newID = oldPoint.id, newPoint.id
+            newAlreadyMapped = (newID in newToOldMap) and (not newID in madeUnique)
+            oldAlreadyMapped = (oldID in oldToNewMap)
+            if (not newAlreadyMapped) and (not oldAlreadyMapped):
+                newToOldMap[newID] = oldID
+                oldToNewMap[oldID] = newID
+                # new point is unmapped and close to old unmapped point, copy ID
+                newPoint.id = oldID
+
 
     def startReplaceParent(self):
         self.uiState.isReparenting = True

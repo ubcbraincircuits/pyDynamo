@@ -10,9 +10,9 @@ from .dendrogram import calculateAllPositions
 
 MIN_MOTILITY  = 0.1
 GREY_COLOUR   = (0.75, 0.75, 0.75, 0.75)
-ADDED_COLOR   = (0.00, 1.00, 0.00, 1.00)
-GONE_COLOR    = (1.00, 0.00, 0.00, 1.00)
-KEPT_COLOR    = (0.00, 0.00, 1.00, 1.00)
+ADDED_COLOR   = (0.00, 1.00, 0.00)
+GONE_COLOR    = (1.00, 0.00, 0.00)
+KEPT_COLOR    = (0.00, 0.00, 1.00)
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Registration3DCanvas(BaseMatplotlibCanvas):
