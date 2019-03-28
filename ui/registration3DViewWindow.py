@@ -4,16 +4,16 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
 from .common import cursorPointer
-from .motility3DCanvas import Motility3DCanvas, MAX_TREE_COUNT
+from .registration3DCanvas import Registration3DCanvas
 
-class Motility3DViewWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent, middleIdx, treeModels, filePaths, opt):
-        QtWidgets.QMainWindow.__init__(self, parent)
+class Registration3DViewWindow(QtWidgets.QMainWindow):
+    def __init__(self, parent, firstTreeIdx, treeModels, filePaths):
+        super(Registration3DViewWindow, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle('Motility')
+        self.setWindowTitle('Point Registration')
 
         root = QtWidgets.QWidget(self)
-        self.view3D = Motility3DCanvas(parent, middleIdx, treeModels, filePaths, opt)
+        self.view3D = Registration3DCanvas(parent, firstTreeIdx, treeModels, filePaths)
         self.nTrees = len(treeModels)
 
         self.buttonL = QtWidgets.QPushButton("◀ Previous", self)
@@ -35,7 +35,7 @@ class Motility3DViewWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(root)
         screenWidth = QtWidgets.QDesktopWidget().availableGeometry().width()
         scaleFactor = 1.0 # Compensate for title/padding to plots
-        treesShown = min(len(treeModels), MAX_TREE_COUNT)
+        treesShown = 2
         self.resize(screenWidth, screenWidth / treesShown * scaleFactor)
         self.updateButtons()
 
@@ -45,9 +45,6 @@ class Motility3DViewWindow(QtWidgets.QMainWindow):
         self.menuBar().addMenu(fileMenu)
 
         viewMenu = QtWidgets.QMenu('View', self)
-        viewMenu.addAction('Show 3D', self.show3D, QtCore.Qt.Key_3)
-        viewMenu.addAction('Show 2D Dendrograms', self.show2D, QtCore.Qt.Key_2)
-        viewMenu.addSeparator()
         viewMenu.addAction('First Stack', self.firstStack, QtCore.Qt.CTRL + QtCore.Qt.Key_Left)
         viewMenu.addAction('Previous Stack', self.previous, QtCore.Qt.Key_Left)
         viewMenu.addAction('Next Stack', self.next, QtCore.Qt.Key_Right)
@@ -56,12 +53,6 @@ class Motility3DViewWindow(QtWidgets.QMainWindow):
 
     def saveImagesAsPng(self):
         self.view3D.saveAxesAsPng()
-
-    def show3D(self):
-        self.view3D.set3D(True)
-
-    def show2D(self):
-        self.view3D.set3D(False)
 
     def firstStack(self):
         self.previous(True)
@@ -77,7 +68,7 @@ class Motility3DViewWindow(QtWidgets.QMainWindow):
             self.setFocus(True)
 
     def next(self, toEnd=False):
-        canNext = self.view3D.firstTree < self.nTrees - MAX_TREE_COUNT
+        canNext = self.view3D.firstTree < self.nTrees - 1
         if canNext:
             self.view3D.next(toEnd)
             self.updateButtons()
@@ -85,6 +76,6 @@ class Motility3DViewWindow(QtWidgets.QMainWindow):
 
     def updateButtons(self):
         canPrev = self.view3D.firstTree > 0
-        canNext = self.view3D.firstTree < self.nTrees - MAX_TREE_COUNT
+        canNext = self.view3D.firstTree < self.nTrees - 1
         self.buttonL.setEnabled(canPrev)
         self.buttonR.setEnabled(canNext)

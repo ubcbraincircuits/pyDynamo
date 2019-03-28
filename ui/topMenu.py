@@ -5,6 +5,7 @@ import webbrowser
 from util.testableFilePicker import getOpenFileName
 
 from .motility3DViewWindow import Motility3DViewWindow
+from .registration3DViewWindow import Registration3DViewWindow
 from .tilefigs import tileFigs
 
 class TopMenu():
@@ -85,6 +86,7 @@ class TopMenu():
         analysisMenu = QtWidgets.QMenu('&Analysis', stackWindow)
         analysisMenu.addAction('Launch analysis window', self.launchAnalysis, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
         analysisMenu.addSeparator()
+        analysisMenu.addAction('View point registration', self.viewRegistration, QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
         analysisMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
         menuBar.addMenu(analysisMenu)
 
@@ -269,6 +271,11 @@ class TopMenu():
         opt = parent.fullState.projectOptions.motilityOptions
         Motility3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths, opt).show()
+
+    def viewRegistration(self):
+        parent = self._global()
+        Registration3DViewWindow(parent, self.stackWindow.windowIndex,
+            parent.fullState.trees, parent.fullState.filePaths).show()
 
     # Help menu callbacks:
     def showHotkeys(self):
