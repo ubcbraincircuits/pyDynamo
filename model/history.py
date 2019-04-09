@@ -9,7 +9,7 @@ class History:
     """Respresents the current live active state of the app, as well as a history of changes.
     After snapshotting with pushState(), the app can walk through history with undo/redo."""
 
-    MAX_HISTORY_LENGTH = 30
+    MAX_HISTORY_LENGTH = 200
     """Only this number of recent actions can be undone, to save memory."""
 
     liveState = None
