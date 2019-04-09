@@ -8,6 +8,7 @@ from model import *
 def deepClone(obj):
     return copy.deepcopy(obj)
 
+# Tests that a bunch of basic operations can be undone properly
 def testTree():
     data = Tree()
     h = History(data)
@@ -77,6 +78,7 @@ def testTree():
     assert data == s1
     print ("Tree history passed! 🙌")
 
+# Tests that full states match for all the child UI states after undo
 def testParents():
     fullState = files.loadState("test/files/example2.dyn.gz")
     fullID = id(fullState)
@@ -89,13 +91,36 @@ def testParents():
 
     for uiState in fullState.uiStates:
         assert id(uiState.parent()) == fullID
-
-
     print ("Full State history passed! 🙌")
+
+# Tests that if you keep pushing state, you start dropping old ones.
+def testMaxDepth():
+    data = Tree()
+    h = History(data)
+    assert len(h.undoStack) == 0
+
+    h.pushState()
+
+    pR = Point(id='root', location=(0,0,0))
+    data.rootPoint = pR
+    assert len(h.undoStack) == 1
+
+    for i in range(2 * History.MAX_HISTORY_LENGTH):
+        h.pushState()
+
+    numUndoes = 0
+    while h.undo():
+        # Returns False once undo stack is empty
+        numUndoes += 1
+    assert numUndoes == History.MAX_HISTORY_LENGTH
+    assert h.liveState.rootPoint is not None
+    print ("History length test passed! 🙌")
+
 
 def run():
     testTree()
     testParents()
+    testMaxDepth()
     return True
 
 if __name__ == '__main__':
