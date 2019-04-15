@@ -137,6 +137,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def saveToFile(self):
         if self.fullState._rootPath is not None:
             saveState(self.fullState, self.fullState._rootPath)
+            QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + self.fullState._rootPath)
         else:
             self.saveToNewFile()
 
@@ -150,6 +151,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.fullState._rootPath = filePath
             saveState(self.fullState, filePath)
             QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + filePath)
+
 
     def exportToSWC(self):
         dirPath = QtWidgets.QFileDialog.getExistingDirectory(self,
