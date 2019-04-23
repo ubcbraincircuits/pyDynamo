@@ -126,6 +126,9 @@ class FullStateActions():
             state = self.state.uiStates[i]
             point = state.currentPoint()
             if point is not None:
+                if i == localIdx:
+                    point.manuallyMarked = False
+                    point.hilighted = False
                 newLocation = (
                     point.location[0] + dX,
                     point.location[1] + dY,
