@@ -80,6 +80,24 @@ class StackWindow(QtWidgets.QMainWindow):
     def redraw(self):
         self.dendrites.redraw()
 
+    # Get the current x,y position of the selected point
+    def getSelectionLocation(self):
+        pointAt = self.uiState.currentPoint()
+        return None if pointAt is None else pointAt.location
+
+    # Move the current viewport so the selected point is at the given x, y
+    def updateSelectionLocation(self, oldLocation):
+        pointAt = self.uiState.currentPoint()
+        if pointAt is None:
+            return None
+        dX = pointAt.location[0] - oldLocation[0]
+        dY = pointAt.location[1] - oldLocation[1]
+        # Translate it locally to fix the selected point
+        self.dendrites.imgView.onlyPerformLocalViewRect = True
+        self.dendrites.imgView.moveViewRect(
+            self.dendrites.imgView.getViewportRect().translated(dX, dY))
+        self.dendrites.imgView.onlyPerformLocalViewRect = False
+
     def doMove(self, dX, dY, downstream, laterStacks):
         MOVE_FACTOR = 0.05 # 1/20 of screen per button press
         xScale, yScale = self.dendrites.imgView.sceneDimension()
@@ -177,12 +195,17 @@ class StackWindow(QtWidgets.QMainWindow):
                 if self.uiState._parent.inPunctaMode:
                     self.fullActions.punctaActions.selectNextPoint(self.windowIndex, delta)
                 else:
+                    locationSnapshot = self.parent().snapshotSelectionLocation()
                     self.fullActions.selectNextPoints(delta)
+                    self.parent().updateSelectionLocation(locationSnapshot)
+
                 self.parent().redrawAllStacks()
             elif key == ord('?'):
                 # First child of current point selector
                 if not self.uiState._parent.inPunctaMode:
+                    locationSnapshot = self.parent().snapshotSelectionLocation()
                     self.fullActions.selectFirstChildren()
+                    self.parent().updateSelectionLocation(locationSnapshot)
                     self.parent().redrawAllStacks()
 
             if self.uiState._parent.inManualRegistrationMode:

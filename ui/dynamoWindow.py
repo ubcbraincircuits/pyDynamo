@@ -262,6 +262,19 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.fullState.addFiles(filePaths)
         self.makeNewWindows(offset)
 
+    # Keep track of where the selected point is
+    def snapshotSelectionLocation(self):
+        return [
+            (None if sw is None else sw.getSelectionLocation()) for sw in self.stackWindows
+        ]
+
+    def updateSelectionLocation(self, snapshot):
+        if len(self.stackWindows) != len(snapshot):
+            return
+        for sw, location in zip(self.stackWindows, snapshot):
+            if sw is not None and location is not None:
+                sw.updateSelectionLocation(location)
+
     def makeNewWindows(self, startFrom=0):
         previousPath = None
 
