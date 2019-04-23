@@ -29,11 +29,13 @@ class BranchTypeOptions(BaseOptions):
 
     def fillOptionsInner(self, currentState, fullState, formParent):
         self.filoDist = QtWidgets.QLineEdit(formParent)
+        self.filoDist.setValidator(QtGui.QDoubleValidator())
         k = 'filoDist'
         self.filoDist.setText(str(currentState[k]) if k in currentState else '10')
         self._addFormRow("Filopodia dist (uM)", self.filoDist)
 
         self.terminalDist = QtWidgets.QLineEdit(formParent)
+        self.terminalDist.setValidator(QtGui.QDoubleValidator())
         k = 'terminalDist'
         self.terminalDist.setText(str(currentState[k]) if k in currentState else '10')
         self._addFormRow("Terminal filo dist (uM)", self.terminalDist)

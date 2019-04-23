@@ -11,7 +11,8 @@ def motility(trees,
     excludeBasal=True,
     includeAS=False,
     terminalDist=10,
-    filoDist=10
+    filoDist=10,
+    **kwargs
 ):
     """Calculate motility of all branches across time.
 

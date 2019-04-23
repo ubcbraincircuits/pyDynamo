@@ -4,10 +4,10 @@ from util import SAVE_META
 
 @attr.s
 class MotilityOptions():
-    filoDist = attr.ib(default=5, metadata=SAVE_META)
+    filoDist = attr.ib(default=10, metadata=SAVE_META)
     """ How short (in microns) branch needs to be to be considered a filopodia. """
 
-    terminalDist = attr.ib(default=5, metadata=SAVE_META)
+    terminalDist = attr.ib(default=10, metadata=SAVE_META)
     """ Distance (in microns) between the final branch point and end of branch to be considered a filopodia. """
 
     excludeAxon = attr.ib(default=True, metadata=SAVE_META)

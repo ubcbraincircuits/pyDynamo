@@ -61,17 +61,18 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             'tree': [
                 treeOptions.PointCountOptions('Point Count'),
                 treeOptions.BranchCountOptions('Branch Count'),
-                treeOptions.TDBLOptions('TDBL')
+                treeOptions.TDBLOptions('TDBL'),
+                treeOptions.MotilityOptions('Motility'),
             ],
             'branch': [
                 branchOptions.BranchLengthOptions('Branch Length'),
                 branchOptions.BranchTypeOptions('Branch Type'),
                 branchOptions.IsAxonOptions('Is axon?'),
-                branchOptions.BranchParentIDOptions('Branch Parent IDs')
+                branchOptions.BranchParentIDOptions('Branch Parent IDs'),
             ],
             'puncta': [
                 punctaOptions.PunctaSizeOptions('Puncta Size'),
-                punctaOptions.PunctaIntensityOptions('Puncta intensity')
+                punctaOptions.PunctaIntensityOptions('Puncta intensity'),
             ]
         }
 
