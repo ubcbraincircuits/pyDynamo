@@ -33,6 +33,9 @@ class Point():
     hilighted = attr.ib(default=None, cmp=False)
     """Indicates which points could not be registered."""
 
+    manuallyMarked = attr.ib(default=None, cmp=False, metadata=SAVE_META)
+    """Indicates which points have been marked to be revisited."""
+
     def isRoot(self):
         """Whether this point represents the root of the whole tree."""
         return self.parentBranch is None

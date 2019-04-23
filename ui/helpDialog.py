@@ -69,7 +69,7 @@ HELP_MSG = """
 <li><b>Ctrl-Shift-R</b> to enter/leave manual registration mode.
   <ul>
     <li>Click on points, and <b>Shift-Enter</b> to set all to the same ID</li>
-    <li>Shift-' to set all selected points to a new ID</li>
+    <li><b>Shift-'</b> to set all selected points to a new ID</li>
   </ul>
 </li>
 </ul>
@@ -107,6 +107,11 @@ HELP_MSG = """
   <li><b>Shift-H</b> to show/hide hide the entire tree</li>
   <li><b>= (equals)</b> to toggle the Z-stack being relative to selected point.</li>
   <li><b>_ (underscore)</b> to flatten all Z-stacks to one image.</li>
+  <li><b>Shift-M</b> to mark all downstream points on the current window (turn pink).
+    <ul>
+      <li><b>Ctrl-Shift-M</b> to unmark, or click on points individually</li>
+    </ul>
+  </li>
   <li><b>T</b> to tile all the open images on screen</li>
 </ul>
 <h3>Project</h3>

@@ -86,6 +86,8 @@ class TopMenu():
         dmo(viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H))
         viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
         viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
+        viewMenu.addAction('Mark downstream points on selected window', self.markPoints, QtCore.Qt.SHIFT + QtCore.Qt.Key_M)
+        viewMenu.addAction('Clear all marking of points', self.unmarkPoints, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_M)
         viewMenu.addAction('Tile windows on screen', self.tileFigs, QtCore.Qt.Key_T)
         menuBar.addMenu(viewMenu)
 
@@ -274,6 +276,12 @@ class TopMenu():
 
     def zProject(self):
         self._local().toggleZProjection()
+
+    def markPoints(self):
+        self._local().markPoints()
+
+    def unmarkPoints(self):
+        self._local().unmarkPoints()
 
     def tileFigs(self):
         self._global().focusFirstOpenStackWindow()

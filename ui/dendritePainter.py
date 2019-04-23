@@ -26,6 +26,7 @@ class DendritePainter():
     NODE_CIRCLE_MOVING_BRUSH = QBrush(Qt.red)
     NODE_CIRCLE_REPARENTING_BRUSH = QBrush(Qt.blue)
     NODE_CIRCLE_DEFAULT_RADIUS = 5
+    MARKED_CIRCLE_BRUSH = QBrush(QColor(255, 108, 180))
     HILIGHTED_CIRCLE_BRUSH = QBrush(Qt.green)
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
@@ -77,12 +78,12 @@ class DendritePainter():
         x, y, z = self.zoomedLocation(point.location)
         if round(z) == self.zAt:
             self.drawCircleThisZ(x, y,
-                point.id == selectedPointID, point.hilighted,
+                point.id == selectedPointID, point.manuallyMarked, point.hilighted,
                 self.uiState.parent().dotSize, point.radius
             )
             self.maybeDrawText(x, y, point)
 
-    def drawCircleThisZ(self, x, y, isSelected, isHilighted, fakeRadius, realRadius):
+    def drawCircleThisZ(self, x, y, isSelected, isMarked, isHilighted, fakeRadius, realRadius):
         radius = fakeRadius
         resizeRadius = False
         if radius is None:
@@ -98,6 +99,8 @@ class DendritePainter():
                 brushColor = self.NODE_CIRCLE_MOVING_BRUSH
             elif self.uiState.isReparenting:
                 brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH
+        elif isMarked:
+            brushColor = self.MARKED_CIRCLE_BRUSH
         elif isHilighted and self.uiState.showHilighted:
             brushColor = self.HILIGHTED_CIRCLE_BRUSH
         self.p.setPen(self.NODE_CIRCLE_PEN)

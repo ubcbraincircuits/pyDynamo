@@ -281,6 +281,15 @@ class UIState():
             self.showAnnotations = True
             self.showIDs = False
 
+    def setAllDownstreamPointsMarked(self, marked=True):
+        selected = self.currentPoint()
+        if selected is None:
+            selected = self._tree.rootPoint
+        if selected is None:
+            return
+        for point in selected.flattenSubtreePoints():
+            point.manuallyMarked = marked
+
     def maybeCreateNewID(self, newPointID):
         return newPointID if newPointID is not None else self._parent.nextPointID()
 

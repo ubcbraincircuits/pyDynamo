@@ -59,6 +59,14 @@ class DendriteCanvasActions():
         self.uiState.zProject = not self.uiState.zProject
         self.canvas.redraw()
 
+    def markPoints(self):
+        self.uiState.setAllDownstreamPointsMarked(marked=True)
+        self.canvas.redraw()
+
+    def unmarkPoints(self):
+        self.uiState.setAllDownstreamPointsMarked(marked=False)
+        self.canvas.redraw()
+
     def launch3DArbor(self):
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
         viewWindow.show()
