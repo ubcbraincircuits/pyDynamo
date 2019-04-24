@@ -171,17 +171,22 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                     # Draw at the parent of the subtracted branch, not the end point.
                     drawAt = branchInLast.parentPoint
                     if drawAt is not None:
-                        # print ("extra subtraction: " + str(retracted))
+                        # Walk up the old tree until a point exists in the new
+                        # tree to connect the removal to.
+                        drawAtInNew = treeModel.getPointByID(drawAt.id)
+                        while drawAtInNew is None and drawAt is not None:
+                            drawAt = drawAt.nextPointInBranch(delta=-1)
+                            drawAtInNew = treeModel.getPointByID(drawAt.id)
+                        if drawAt is None or drawAtInNew is None:
+                            continue
+
                         sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
                         if self.dendrogram:
-                            x = [denX[drawAt.id]]
-                            y = [denY[drawAt.id]]
+                            x = [denX[drawAtInNew.id]]
+                            y = [denY[drawAtInNew.id]]
                             ax.scatter(x, y, c=[GONE_COLOR], s=sz)
                         else:
-                            x, y, z = oldTreeModel.worldCoordPoints([drawAt])
-                            drawAtInNew = treeModel.getPointByID(drawAt.id)
-                            if drawAtInNew is not None:
-                                x, y, z = treeModel.worldCoordPoints([drawAtInNew])
+                            x, y, z = treeModel.worldCoordPoints([drawAtInNew])
                             ax.scatter(x, y, z, c=[GONE_COLOR], s=sz)
 
                 # For debugging puposes, maybe remove?
