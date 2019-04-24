@@ -169,8 +169,7 @@ class Tree():
                 branch.addPoint(afterParentPoint)
         else:
             # Otherwise, remove from tree completely
-            self.removeBranch(branch)
-            parent.children.remove(branch)
+            self.removeBranch(branch) # Also removes branch from parent point
 
     def updateAllPrimaryBranches(self, point=None):
         """For all branching points, make the longest branch continue the parent branch."""
