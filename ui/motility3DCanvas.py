@@ -160,22 +160,29 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                                     if childPointInNew is not None:
                                         x, y, z = treeModel.worldCoordPoints([childPointInNew])
                                     ax.scatter(x, y, z, c=[RETRACT_COLOR], s=(retracted * SZ_FACTOR))
-                        if self.subtracted[treeIdx - 1][branchIdx]:
-                            # Draw at the parent of the subtracted branch, not the end point.
-                            drawAt = branchInLast.parentPoint
-                            if drawAt is not None:
-                                # print ("extra subtraction: " + str(retracted))
-                                sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
-                                if self.dendrogram:
-                                    x = [denX[drawAt.id]]
-                                    y = [denY[drawAt.id]]
-                                    ax.scatter(x, y, c=[GONE_COLOR], s=sz)
-                                else:
-                                    x, y, z = oldTreeModel.worldCoordPoints([drawAt])
-                                    drawAtInNew = treeModel.getPointByID(drawAt.id)
-                                    if drawAtInNew is not None:
-                                        x, y, z = treeModel.worldCoordPoints([drawAtInNew])
-                                    ax.scatter(x, y, z, c=[GONE_COLOR], s=sz)
+
+                # Subtractions do not appear in tree, so find by looking at last tree
+                for branchIdx, branchId in enumerate(self.branchIDList):
+                    if not self.subtracted[treeIdx - 1][branchIdx]:
+                        continue
+                    branchInLast = self.treeModels[treeIdx - 1].getBranchByID(branchId)
+                    if branchInLast is None:
+                        continue
+                    # Draw at the parent of the subtracted branch, not the end point.
+                    drawAt = branchInLast.parentPoint
+                    if drawAt is not None:
+                        # print ("extra subtraction: " + str(retracted))
+                        sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
+                        if self.dendrogram:
+                            x = [denX[drawAt.id]]
+                            y = [denY[drawAt.id]]
+                            ax.scatter(x, y, c=[GONE_COLOR], s=sz)
+                        else:
+                            x, y, z = oldTreeModel.worldCoordPoints([drawAt])
+                            drawAtInNew = treeModel.getPointByID(drawAt.id)
+                            if drawAtInNew is not None:
+                                x, y, z = treeModel.worldCoordPoints([drawAtInNew])
+                            ax.scatter(x, y, z, c=[GONE_COLOR], s=sz)
 
                 # For debugging puposes, maybe remove?
                 print ("Stack #%d -> #%d" % (treeIdx, treeIdx + 1))
