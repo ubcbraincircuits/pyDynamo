@@ -215,6 +215,14 @@ class FullStateActions():
         for i, tree in enumerate(self.state.trees):
             tree.cleanBranchIDs()
 
+    def cleanEmptyBranches(self):
+        """For each branch, if it has no points, remove it completely."""
+        self.history.pushState()
+        totalRemoved = 0
+        for i, tree in enumerate(self.state.trees):
+            totalRemoved += tree.cleanEmptyBranches()
+        return totalRemoved
+
     def calculateBestOrientation(self):
         X0, Y0, Z0 = self.state.trees[0].worldCoordPoints(self.state.landmarks[0])
 

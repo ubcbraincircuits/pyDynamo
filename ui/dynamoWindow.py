@@ -250,6 +250,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def openSettings(self):
         self.settingsWindow.openFromState(self.fullState)
 
+    # Clean empty branches, show popup for changes
+    def cleanEmptyBranches(self):
+        nRemoved = self.fullActions.cleanEmptyBranches()
+        QtWidgets.QMessageBox.information(
+            self, "Branches removed!", "%d empty branches removed." % nRemoved)
+
     # TODO - document
     def openFilesAndAppendStacks(self, filePaths=None):
         if filePaths is None:

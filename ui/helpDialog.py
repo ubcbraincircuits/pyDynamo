@@ -95,6 +95,7 @@ HELP_MSG = """
 <ul>
 <li><b>Ctrl-Shift-B</b> to update all primary branches to be the longest at each branch point.</li>
 <li><b>Ctrl-Shift-I</b> to change all branch IDs to the ID of their first point.</li>
+<li><b>Shift-E</b> to remove all empty branches (ones with no points, but still attached to the tree). </li> 
 </ul>
 <h3>View options</h3>
 <ul>

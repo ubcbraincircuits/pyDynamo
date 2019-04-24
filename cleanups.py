@@ -21,9 +21,8 @@ def usePathOrPick(path=None):
 def cleanupEmptyBranches(fullState):
     print ("Processing trees...")
     for i, tree in enumerate(fullState.trees):
-        nBefore = len(tree.branches)
-        tree.branches = [b for b in tree.branches if len(b.points) > 0]
-        print ("  Tree %d: %d -> %d branches" % (i, nBefore, len(tree.branches)))
+        removed = tree.cleanEmptyBranches()
+        print ("  Tree %d: %d branches removed" % (i, removed))
     print ()
 
 # Load the state, and perform the cleanups

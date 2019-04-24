@@ -215,6 +215,17 @@ class Tree():
             else:
                 branch.id = self._parentState._parent.nextBranchID()
 
+    def cleanEmptyBranches(self):
+        """For all branches, if it has no points just remove it completely.
+
+        :returns: Number of branches removed.
+        """
+        emptyBranches = [b for b in self.branches if len(b.points) == 0]
+        for emptyBranch in emptyBranches:
+            self.removeBranch(emptyBranch)
+        return len(emptyBranches)
+
+
     def closestPointTo(self, targetLocation, zFilter=False):
         """Given a position in the volume, find the point closest to it in image space.
 
