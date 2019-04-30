@@ -128,10 +128,10 @@ class TopMenu():
         self._global().openFilesAndAppendStacks()
 
     def save(self):
-        self._global().saveToFile()
+        self._global().saveToFile(parentWindow=self.stackWindow)
 
     def saveAs(self):
-        self._global().saveToNewFile()
+        self._global().saveToNewFile(parentWindow=self.stackWindow)
 
     def importFromPreviousStack(self):
         self._local().importPointsFromLastStack(self.stackWindow.windowIndex)
@@ -146,7 +146,7 @@ class TopMenu():
             self.redraw()
 
     def exportToSWC(self):
-        self._global().exportToSWC()
+        self._global().exportToSWC(parentWindow=self.stackWindow)
 
     def openSettings(self):
         self._global().openSettings()
@@ -155,7 +155,7 @@ class TopMenu():
         self.stackWindow.close()
 
     def closeDynamo(self):
-        self._global().quitAndMaybeSave()
+        self._global().quitAndMaybeSave(parentWindow=self.stackWindow)
 
     # Edit menu callbacks:
     def undo(self):
@@ -210,7 +210,7 @@ class TopMenu():
         self._global().redrawAllStacks()
 
     def cleanEmptyBranches(self):
-        self._global().cleanEmptyBranches()
+        self._global().cleanEmptyBranches(self.stackWindow)
         self._global().redrawAllStacks()
 
     def punctaMode(self):

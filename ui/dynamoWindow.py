@@ -84,11 +84,13 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def hasUnsavedData(self):
         return checkIfChanged(self.fullState, self.fullState._rootPath)
 
-    def quitAndMaybeSave(self):
+    def quitAndMaybeSave(self, parentWindow=None):
+        if parentWindow is None:
+            parentWindow = self
         if self.hasUnsavedData():
             msg = "Unsaved data, are you sure you want to quit?"
             reply = QtWidgets.QMessageBox.question(
-                self, 'Are you sure?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
+                parentWindow, 'Are you sure?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
             )
             if reply == QtWidgets.QMessageBox.No:
                 return # Don't quit!
@@ -134,15 +136,19 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.initialMenu.hide()
             self.makeNewWindows()
 
-    def saveToFile(self):
+    def saveToFile(self, parentWindow=None):
+        if parentWindow is None:
+            parentWindow = self
         if self.fullState._rootPath is not None:
             saveState(self.fullState, self.fullState._rootPath)
-            QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + self.fullState._rootPath)
+            QtWidgets.QMessageBox.information(parentWindow, "Saved", "Data saved to " + self.fullState._rootPath)
         else:
-            self.saveToNewFile()
+            self.saveToNewFile(parentWindow)
 
-    def saveToNewFile(self):
-        filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+    def saveToNewFile(self, parentWindow=None):
+        if parentWindow is None:
+            parentWindow = self
+        filePath, _ = QtWidgets.QFileDialog.getSaveFileName(parentWindow,
             "New dynamo save file", "", "Dynamo files (*.dyn.gz)"
         )
         if filePath != "":
@@ -150,10 +156,11 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 filePath = filePath + ".dyn.gz"
             self.fullState._rootPath = filePath
             saveState(self.fullState, filePath)
-            QtWidgets.QMessageBox.information(self, "Saved", "Data saved to " + filePath)
+            QtWidgets.QMessageBox.information(parentWindow, "Saved", "Data saved to " + filePath)
 
-
-    def exportToSWC(self):
+    def exportToSWC(self, parentWindow=None):
+        if parentWindow is None:
+            parentWindow = self
         dirPath = QtWidgets.QFileDialog.getExistingDirectory(self,
             "Folder for SWC files", ""
         )
@@ -163,7 +170,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 childPath = childPath.replace(".tif", "").replace(".tiff", "").replace(".mat", "")
                 childPath = childPath + ".swc"
                 exportToSWC(dirPath, childPath, tree, self.fullState)
-        QtWidgets.QMessageBox.information(self, "Save complete", "SWC files saved!")
+        QtWidgets.QMessageBox.information(parentWindow, "Save complete", "SWC files saved!")
 
     # Global key handler for actions shared between all stack windows
     def childKeyPress(self, event, childWindow):
@@ -179,12 +186,13 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.fullActions.changeAllZAxis(-1)
             self.redrawAllStacks()
             return True
-        elif (key == ord('L')):
-            if self.fullState.inLandmarkMode():
-                self.calcLandmarkRotation()
-            self.fullState.toggleLandmarkMode()
-            self.redrawAllStacks()
-            return True
+        # TODO: Delete landmark mode permanently
+        # elif (key == ord('L')):
+        #     if self.fullState.inLandmarkMode():
+        #         self.calcLandmarkRotation()
+        #     self.fullState.toggleLandmarkMode()
+        #     self.redrawAllStacks()
+        #     return True
 
         # Handle these only while doing landmarks:
         if self.fullState.inLandmarkMode():
@@ -251,10 +259,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.settingsWindow.openFromState(self.fullState)
 
     # Clean empty branches, show popup for changes
-    def cleanEmptyBranches(self):
+    def cleanEmptyBranches(self, parentWindow=None):
+        if parentWindow is None:
+            parentWindow = self
         nRemoved = self.fullActions.cleanEmptyBranches()
         QtWidgets.QMessageBox.information(
-            self, "Branches removed!", "%d empty branches removed." % nRemoved)
+            parentWindow, "Branches removed!", "%d empty branches removed." % nRemoved)
 
     # TODO - document
     def openFilesAndAppendStacks(self, filePaths=None):
