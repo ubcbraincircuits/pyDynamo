@@ -289,13 +289,13 @@ class Tree():
         path2X, path2Y, path2Z = self.worldCoordPoints(path2[lastMatch:])
         treeDist = 0.0
         for i in range(len(path1X) - 1):
-            p1 = (path1X[ i ], path1Y[ i ], path1Z[ i ])
-            p2 = (path1X[i+1], path1Y[i+1], path1Z[i+1])
-            treeDist += util.deltaSz(p1, p2)
+            pA = (path1X[ i ], path1Y[ i ], path1Z[ i ])
+            pB = (path1X[i+1], path1Y[i+1], path1Z[i+1])
+            treeDist += util.deltaSz(pA, pB)
         for i in range(len(path2X) - 1):
-            p1 = (path2X[ i ], path2Y[ i ], path2Z[ i ])
-            p2 = (path2X[i+1], path2Y[i+1], path2Z[i+1])
-            treeDist += util.deltaSz(p1, p2)
+            pA = (path2X[ i ], path2Y[ i ], path2Z[ i ])
+            pB = (path2X[i+1], path2Y[i+1], path2Z[i+1])
+            treeDist += util.deltaSz(pA, pB)
         return self.spatialDist(p1, p2), treeDist
 
     def _recursiveMovePointDelta(self, point, delta):
