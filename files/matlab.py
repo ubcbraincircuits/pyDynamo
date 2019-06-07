@@ -21,6 +21,8 @@ def parseMatlabBranch(fullState, pointsXYZ, annotations):
 # Read transform definition from the stack info
 def parseTransform(infoState):
     t = Transform()
+    if infoState.shape == (1,):
+        infoState = infoState[0]
     t.rotation = infoState['R'][0][0].tolist()
     t.translation = infoState['offset'][0][0].T[0].tolist()
     t.scale = (infoState['xres'][0][0][0][0], infoState['yres'][0][0][0][0], infoState['zres'][0][0][0][0])
@@ -30,6 +32,8 @@ def parseTransform(infoState):
 def parseMatlabTree(fullState, saveState):
     tree = Tree()
     branchList = saveState['tree'][0]
+    if branchList.shape == (1,):
+        branchList = branchList[0]
 
     for i in range(branchList.shape[1]):
         # HACK: Matlab uses branch index as ID:
@@ -49,6 +53,7 @@ def parseMatlabTree(fullState, saveState):
             branch.setParentPoint(rootPoint)
             if i == 0: # First branch is special, as first node is tree root
                 tree.rootPoint = rootPoint
+                tree.rootPoint.parentBranch = None
         else:
             # No branch data? Not sure what caused this in matlab...
             branch = Branch(fullState.nextBranchID())
@@ -100,7 +105,6 @@ def importFromMatlab(matlabPath):
         tree = parseMatlabTree(fullState, saveState)
         # Note: Pull out scale from transform, move it to global scale:
         fullState.projectOptions.pixelSizes = tree.transform.scale
-        tree.transform.scale = [1, 1, 1]
         treeData.append(tree)
         landmarkData.append(parseLandmarks(saveState))
     fullState.addFiles(filePaths, treeData, landmarkData)
