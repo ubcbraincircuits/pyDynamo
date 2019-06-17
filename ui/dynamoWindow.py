@@ -69,7 +69,8 @@ class DynamoWindow(QtWidgets.QMainWindow):
         # Close button
         buttonQ = QtWidgets.QPushButton("&Close Dynamo", self)
         buttonQ.setToolTip("Close all Dynamo windows and exit")
-        buttonQ.clicked.connect(self.quitAndMaybeSave)
+        # Note: need to rebind to avoid parentWindow being set by the event handler            
+        buttonQ.clicked.connect(lambda: self.quitAndMaybeSave(parentWindow=self))
         cursorPointer(buttonQ)
 
         root = QtWidgets.QWidget(self)
