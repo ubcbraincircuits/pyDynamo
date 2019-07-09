@@ -5,29 +5,22 @@ Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics
 ...todo, write stuff
 
 ## Installation
-Once this repo is public, installation will be via pip.
-Until then:
 
-1) Have python 3.6+ available (if you don't have it yet, see e.g. [Miniconda](https://conda.io/miniconda.html))
-2) Requires recent versions of the following packages:
-    * attrs
-    * matplotlib
-    * numpy
-    * pandas
-    * pyopengl
-    * pyqt (version 5)
-    * pyqtgraph
-    * scikit-image
-    * scipy
-    * tifffile (from conda-forge, if using conda. will require a conda update --all after)
- 
-3) Once the repository is obtained locally (either checked out, or files downloaded), navigate to the root directory and run:
+Providing you have a version of python 3+, this library can be installed directly from github using pip:
 ```
-$> python dynamo.py
+pip install --upgrade "git+https://github.com/padster/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
+```
+Once installed, it can be run by the following command, and optionally given a file to open:
+```
+pydynamo_brain
+```
+or
+```
+pydynamo_brain path/to/my/file.dyn.gz
 ```
 
 ## Usage
-Documentation coming eventually to https://padster.github.io/pyDynamo/ - until then:
+Documentation is available at https://padster.github.io/pyDynamo/ . For an overview:
 
 After opening Dynamo, two windows will show.
 1)  One will contain the dynamo logo (see above), and a close button. This window should always stay open until you want to stop - then pressing the button will close dynamo completely.
