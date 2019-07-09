@@ -1,0 +1,9 @@
+attrs
+matplotlib
+neurom
+numpy
+pandas
+PyQt5
+scipy
+tifffile
+tqdm

@@ -220,6 +220,12 @@ Note that order matters, 1-&gt;4 are counted as Filo.</p>
 After snapshotting with pushState(), the app can walk through history with undo/redo.</p>
 <dl class="attribute">
 <dt>
+<code class="descname">MAX_HISTORY_LENGTH</code><em class="property"> = 200</em></dt>
+<dd><p>Only this number of recent actions can be undone, to save memory.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
 <code class="descname">liveState</code><em class="property"> = None</em></dt>
 <dd><p>State singleton that is being modified by the app.</p>
 </dd></dl>
@@ -238,7 +244,7 @@ After snapshotting with pushState(), the app can walk through history with undo/
 
 <dl class="attribute">
 <dt>
-<code class="descname">redoStack</code><em class="property"> = []</em></dt>
+<code class="descname">redoStack</code><em class="property"> = None</em></dt>
 <dd><p>After undo, keep previous state in redo stack so undo can be redo’d.</p>
 </dd></dl>
 
@@ -250,7 +256,7 @@ After snapshotting with pushState(), the app can walk through history with undo/
 
 <dl class="attribute">
 <dt>
-<code class="descname">undoStack</code><em class="property"> = []</em></dt>
+<code class="descname">undoStack</code><em class="property"> = None</em></dt>
 <dd><p>List of previous state snapshots that can be undo’d to.</p>
 </dd></dl>
 
