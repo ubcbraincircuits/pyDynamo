@@ -3,5 +3,8 @@ __pycache__/
 _build/
 data/
 tmp/
+pydynamo_brain/.eggs/
+pydynamo_brain/dist/
+pydynamo_brain/pydynamo_brain.egg-info/
 
 *.pyc
