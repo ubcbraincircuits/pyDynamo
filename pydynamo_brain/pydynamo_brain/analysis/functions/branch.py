@@ -3,7 +3,7 @@ import pandas as pd
 
 import math
 
-from ..addedSubtractedTransitioned import addedSubtractedTransitioned
+from pydynamo_brain.analysis import addedSubtractedTransitioned
 
 # Provide the length of the branch, and the length to the last branch.
 def branchLengths(fullState, branchIDList, **kwargs):

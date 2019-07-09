@@ -3,8 +3,8 @@ from .baseOptions import BaseOptions
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
-from ui.common import floatOrDefault
-from ..functions import tree
+from pydynamo_brain.ui.common import floatOrDefault
+from pydynamo_brain.analysis.functions import tree
 
 # Methods without custom options
 

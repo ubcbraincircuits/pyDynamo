@@ -4,8 +4,8 @@ import traceback
 
 from PyQt5 import QtCore, QtWidgets
 
-import files
-import util
+import pydynamo_brain.files as files
+import pydynamo_brain.util as util
 
 from .actions.dendriteCanvasActions import DendriteCanvasActions
 from .dendriteVolumeCanvas import DendriteVolumeCanvas

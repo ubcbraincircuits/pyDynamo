@@ -3,9 +3,8 @@ import json
 import gzip
 import numpy as np
 
-from util import SAVE_KEY
-
-from model import *
+from pydynamo_brain.util import SAVE_KEY
+from pydynamo_brain.model import *
 
 def attrFilter(attrData, value):
     return (SAVE_KEY in attrData.metadata) and attrData.metadata[SAVE_KEY]

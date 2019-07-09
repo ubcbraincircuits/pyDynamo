@@ -2,11 +2,11 @@ import numpy as np
 import scipy.io
 import tempfile
 
-from analysis import addedSubtractedTransitioned, motility, TDBL
-from util import emptyArrayMatrix
-from model import *
+from pydynamo_brain.analysis import addedSubtractedTransitioned, motility, TDBL
+from pydynamo_brain.util import emptyArrayMatrix
+from pydynamo_brain.model import *
 
-import files
+import pydynamo_brain.files as files
 
 PROPERTIES = ['added', 'filolengths', 'tdbl', 'masterChanged', 'transitioned', 'masterNodes', 'subtracted', 'filotypes']
 

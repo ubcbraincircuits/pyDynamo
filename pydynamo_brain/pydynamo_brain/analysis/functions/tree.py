@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 
-import util
+import pydynamo_brain.util as util
 
-from ..addedSubtractedTransitioned import addedSubtractedTransitioned
-from ..motility import motility as motilityFunc
-from ..TDBL import TDBL
+from pydynamo_brain.analysis import addedSubtractedTransitioned, TDBL
+from pydynamo_brain.analysis import motility as motilityFunc
+
 
 MIN_MOTILITY  = 0.1
 
@@ -40,7 +40,7 @@ def motility(fullState, **kwargs):
         addedSubtractedTransitioned(trees, **kwargs)
     motilityValues, _ = motilityFunc(trees, **kwargs)
     rawMotility = motilityValues['raw'] # Use raw motility
-    
+
     for treeIdx, treeModel in enumerate(trees):
         if treeIdx == 0:
             # First tree has no changes by definition:

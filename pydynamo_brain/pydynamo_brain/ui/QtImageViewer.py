@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
 from PyQt5.QtGui import QImage, QPixmap, QPainterPath
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog, QApplication
 
-from util import deltaSz, zStackForUiState
+from pydynamo_brain.util import deltaSz, zStackForUiState
 from .dendritePainter import DendritePainter
 
 __author__ = "Marcel Goldschen-Ohm <marcel.goldschen@gmail.com>"

@@ -1,9 +1,9 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.Qt import Qt
 
-from model import FullState, Tree, UIState, History
-from files import AutoSaver, loadState, saveState, checkIfChanged, importFromMatlab, exportToSWC, saveRemapWithMerge
-from util.testableFilePicker import getOpenFileName
+from pydynamo_brain.model import FullState, Tree, UIState, History
+from pydynamo_brain.files import AutoSaver, loadState, saveState, checkIfChanged, importFromMatlab, exportToSWC, saveRemapWithMerge
+from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
 import os
 import sys
@@ -69,7 +69,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         # Close button
         buttonQ = QtWidgets.QPushButton("&Close Dynamo", self)
         buttonQ.setToolTip("Close all Dynamo windows and exit")
-        # Note: need to rebind to avoid parentWindow being set by the event handler            
+        # Note: need to rebind to avoid parentWindow being set by the event handler
         buttonQ.clicked.connect(lambda: self.quitAndMaybeSave(parentWindow=self))
         cursorPointer(buttonQ)
 

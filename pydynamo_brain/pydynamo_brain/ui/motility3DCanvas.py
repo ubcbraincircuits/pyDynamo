@@ -1,8 +1,8 @@
 import numpy as np
 
-import util
+import pydynamo_brain.util as util
 
-from analysis import addedSubtractedTransitioned, motility
+from pydynamo_brain.analysis import addedSubtractedTransitioned, motility
 
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
 from .dendritePainter import colorForBranch

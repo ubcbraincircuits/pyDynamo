@@ -1,9 +1,8 @@
 import attr
 import copy
 
-import files
-
-from model import *
+import pydynamo_brain.files as files
+from pydynamo_brain.model import *
 
 def deepClone(obj):
     return copy.deepcopy(obj)

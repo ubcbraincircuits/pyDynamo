@@ -3,8 +3,8 @@ import numpy as np
 from .addedSubtractedTransitioned import addedSubtractedTransitioned
 from .TDBL import TDBL
 
-from model import FiloType
-import util
+from pydynamo_brain.model import FiloType
+import pydynamo_brain.util as util
 
 def motility(trees,
     excludeAxon=True,

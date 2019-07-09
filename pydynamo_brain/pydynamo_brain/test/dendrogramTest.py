@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 
-import files
+import pydynamo_brain.files as files
 
-from ui.dendritePainter import colorForBranch
-from ui.dendrogram import calculatePositions
+from pydynamo_brain.ui.dendritePainter import colorForBranch
+from pydynamo_brain.ui.dendrogram import calculatePositions
 
 def run(path='pydynamo_brain/pydynamo_brain/test/files/example2.dyn.gz'):
     tree = files.loadState(path).trees[0]

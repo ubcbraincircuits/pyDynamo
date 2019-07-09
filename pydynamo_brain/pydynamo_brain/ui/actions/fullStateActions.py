@@ -4,8 +4,8 @@ from PyQt5 import QtWidgets
 
 from .punctaActions import PunctaActions
 
-from analysis import absOrient
-from model.tree import *
+from pydynamo_brain.analysis import absOrient
+from pydynamo_brain.model.tree import *
 
 class FullStateActions():
     def __init__(self, fullState, history):

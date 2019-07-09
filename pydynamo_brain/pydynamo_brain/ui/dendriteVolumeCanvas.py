@@ -10,8 +10,8 @@ from .QtImageViewer import QtImageViewer
 from .dendritePainter import DendritePainter
 from .dendriteOverlay import DendriteOverlay
 
-from model import Point
-from util import ImageCache, deltaSz, snapToRange, zStackForUiState
+from pydynamo_brain.model import Point
+from pydynamo_brain.util import ImageCache, deltaSz, snapToRange, zStackForUiState
 
 _IMGCACHE = ImageCache()
 

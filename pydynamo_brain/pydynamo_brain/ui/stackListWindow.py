@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-import util
+import pydynamo_brain.util as util
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import Qt

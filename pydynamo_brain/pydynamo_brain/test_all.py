@@ -1,7 +1,7 @@
 # Run all of these by running 'pytest' in this directory.
 # e.g. pytest -sk 'ui' will run the tests containing 'ui' in the name. (or e.g. -sk 'not ui')
 
-from test import (
+from pydynamo_brain.test import (
     absOrientTest,
     dendrogramTest,
     historyTest,

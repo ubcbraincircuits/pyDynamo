@@ -4,6 +4,7 @@ neurom
 numpy
 pandas
 PyQt5
+scikit-image
 scipy
 tifffile
 tqdm

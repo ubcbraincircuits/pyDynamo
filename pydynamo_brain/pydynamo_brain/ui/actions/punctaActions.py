@@ -1,7 +1,7 @@
 import attr
 
-from model import Point
-from util import deltaSz
+from pydynamo_brain.model import Point
+from pydynamo_brain.util import deltaSz
 
 class PunctaActions():
     DEFAULT_RADIUS_PX = 3 # default size in zoomed out pixels

@@ -4,7 +4,7 @@ import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
-from model import MotilityOptions, ProjectOptions
+from pydynamo_brain.model import MotilityOptions, ProjectOptions
 
 from .common import centerWindow, cursorPointer, floatOrDefault
 

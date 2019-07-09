@@ -3,8 +3,8 @@ from .baseOptions import BaseOptions
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
-import util
-from ..functions import puncta
+import pydynamo_brain.util as util
+from pydynamo_brain.analysis.functions import puncta
 
 _IMG_CACHE = util.ImageCache()
 

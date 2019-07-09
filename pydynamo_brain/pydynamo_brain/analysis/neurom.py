@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import tempfile
 
-import files
+import pydynamo_brain.files as files
 
 # Convert a fullState tree model object into a NeuroM neuron, via SWC
 def treeToNeuroM(fullState, tree):

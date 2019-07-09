@@ -3,12 +3,12 @@ import time
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt, QPoint
 
-from ui import DynamoWindow
+from pydynamo_brain.ui import DynamoWindow
 
-import util
-from util.testableFilePicker import setNextTestPaths
+import pydynamo_brain.util as util
+from pydynamo_brain.util.testableFilePicker import setNextTestPaths
 
-from files import fullStateToString, stringToFullState
+from pydynamo_brain.files import fullStateToString, stringToFullState
 
 def _near(a, b):
     return abs(a - b) < 1e-6

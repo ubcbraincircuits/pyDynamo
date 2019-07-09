@@ -6,7 +6,7 @@ import numpy as np
 import scipy.io as sio
 from tifffile import TiffFile
 
-import util
+from .util import zStackForUiState
 
 # libtiff.libtiff_ctypes.suppress_warnings()
 
@@ -86,7 +86,7 @@ class ImageCache:
         if uiState.zProject:
             return np.amax(channelImage, axis=0)
         else:
-            zAt = util.zStackForUiState(uiState)
+            zAt = zStackForUiState(uiState)
             if zAt < 0 or zAt >= channelImage.shape[0]:
                 return np.zeros(channelImage[0].shape)
             return channelImage[zAt]

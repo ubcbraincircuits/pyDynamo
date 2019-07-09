@@ -1,9 +1,9 @@
 import pandas as pd
 
-import files
-import util
+import pydynamo_brain.files as files
+import pydynamo_brain.util as util
 
-from model import FullState
+from pydynamo_brain.model import FullState
 
 # Run analysis for all puncta, by running each desired function and combining into one dataframe.
 def allPuncta(stateOrPath, funcs, **kwargs):

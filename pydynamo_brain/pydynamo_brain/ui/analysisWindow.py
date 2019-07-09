@@ -5,9 +5,9 @@ import pandas as pd
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
-from analysis import allTrees, allBranches, allPuncta
-from analysis.ui import branchOptions, punctaOptions, treeOptions
-from model import MotilityOptions, ProjectOptions
+from pydynamo_brain.analysis import allTrees, allBranches, allPuncta
+from pydynamo_brain.analysis.ui import branchOptions, punctaOptions, treeOptions
+from pydynamo_brain.model import MotilityOptions, ProjectOptions
 
 from .common import centerWindow, clearChildWidgets, cursorPointer, floatOrDefault
 

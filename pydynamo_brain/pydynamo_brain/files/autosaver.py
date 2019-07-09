@@ -1,8 +1,8 @@
 import os
 import os.path
 import time
-import util
 
+import pydynamo_brain.util as util
 from .files import saveState
 
 # Save every 3 minutes

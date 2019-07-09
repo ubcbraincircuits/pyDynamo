@@ -7,7 +7,7 @@ from tqdm import tqdm
 # hack
 import matplotlib.pyplot as plt
 
-import util
+import pydynamo_brain.util as util
 
 _IMG_CACHE = util.ImageCache()
 

@@ -1,13 +1,13 @@
 from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QMessageBox
 
-import util
-from ..dendrite3DViewWindow import Dendrite3DViewWindow
-from ..volume3DWindow import Volume3DWindow
-from ..helpDialog import showHelpDialog
+import pydynamo_brain.util as util
+from pydynamo_brain.ui.dendrite3DViewWindow import Dendrite3DViewWindow
+from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
+from pydynamo_brain.ui.helpDialog import showHelpDialog
 
-from files import importFromSWC
-from model import recursiveAdjust
+from pydynamo_brain.files import importFromSWC
+from pydynamo_brain.model import recursiveAdjust
 
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0

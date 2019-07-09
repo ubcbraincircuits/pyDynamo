@@ -3,9 +3,9 @@
 """
 import attr
 import numpy as np
-import util
 
-from util import SAVE_META
+import pydynamo_brain.util as util
+from pydynamo_brain.util import SAVE_META
 
 
 @attr.s

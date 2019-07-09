@@ -1,8 +1,8 @@
 import numpy as np
 import scipy.io as sio
 
-from model import *
-from util import deltaSz
+from pydynamo_brain.model import *
+from pydynamo_brain.util import deltaSz
 
 # Read a single branch from the matlab arrays containing per-point data
 def parseMatlabBranch(fullState, pointsXYZ, annotations):

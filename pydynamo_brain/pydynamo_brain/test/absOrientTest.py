@@ -1,6 +1,6 @@
 import numpy as np
 
-from analysis import absOrient
+from pydynamo_brain.analysis import absOrient
 
 def matchPoints(A, B):
     if len(A) != len(B):

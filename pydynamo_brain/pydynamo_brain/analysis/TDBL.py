@@ -1,4 +1,4 @@
-import util
+import pydynamo_brain.util as util
 
 # Calculate total dendritic branch length for a dendritic arbor.
 def TDBL(tree,

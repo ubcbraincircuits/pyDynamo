@@ -1,7 +1,7 @@
 import pandas as pd
 
-import files
-from model import FullState
+import pydynamo_brain.files as files
+from pydynamo_brain.model import FullState
 
 # Run analysis for all trees, by running each desired function and combining into one dataframe.
 def allTrees(stateOrPath, funcs, **kwargs):

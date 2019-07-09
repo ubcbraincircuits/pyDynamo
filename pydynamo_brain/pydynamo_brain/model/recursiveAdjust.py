@@ -4,7 +4,7 @@ import scipy.optimize
 from scipy.ndimage.filters import gaussian_filter
 from skimage import transform as tf
 
-import util
+import pydynamo_brain.util as util
 
 WARP_MODE = 'edge'
 

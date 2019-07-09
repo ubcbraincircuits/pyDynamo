@@ -1,7 +1,7 @@
 import numpy as np
 
-import util
-from model import FiloType
+import pydynamo_brain.util as util
+from pydynamo_brain.model import FiloType
 
 def addedSubtractedTransitioned(
     trees,

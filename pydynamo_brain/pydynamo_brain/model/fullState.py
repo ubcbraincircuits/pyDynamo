@@ -6,7 +6,7 @@ from .tree.point import Point
 from .tree.tree import Tree
 from .uiState import *
 
-from util import SAVE_META, ImageCache, locationMinus, locationPlus
+from pydynamo_brain.util import SAVE_META, ImageCache, locationMinus, locationPlus
 
 _IMG_CACHE = ImageCache()
 

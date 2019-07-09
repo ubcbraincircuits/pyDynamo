@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 
 import webbrowser
 
-from util.testableFilePicker import getOpenFileName
+from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
 from .motility3DViewWindow import Motility3DViewWindow
 from .registration3DViewWindow import Registration3DViewWindow

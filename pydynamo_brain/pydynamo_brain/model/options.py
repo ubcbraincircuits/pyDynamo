@@ -1,6 +1,6 @@
 import attr
 
-from util import SAVE_META
+from pydynamo_brain.util import SAVE_META
 
 @attr.s
 class MotilityOptions():

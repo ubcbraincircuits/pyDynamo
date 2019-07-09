@@ -1,8 +1,7 @@
 import numpy as np
 
-from util import ImageCache, tiffRead
-
-from model.recursiveAdjust import _imgGaussian, _affineError, _registerImages
+from pydynamo_brain.util import ImageCache, tiffRead
+from pydynamo_brain.model.recursiveAdjust import _imgGaussian, _affineError, _registerImages
 
 _IMAGE_CACHE = ImageCache()
 

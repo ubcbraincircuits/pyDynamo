@@ -1,9 +1,9 @@
 import math
 import numpy as np
 
-from analysis import addedSubtractedTransitioned
-from model import FiloType
-import util
+from pydynamo_brain.analysis import addedSubtractedTransitioned
+from pydynamo_brain.model import FiloType
+import pydynamo_brain.util as util
 
 FILO_WIDTH_SCALE = 0.8 # Max visual width of a filo, where 1.0 = full column width
 

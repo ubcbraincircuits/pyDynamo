@@ -1,7 +1,7 @@
 from collections import deque
 import os
 
-from model import *
+from pydynamo_brain.model import *
 
 ###
 ### IMPORT
