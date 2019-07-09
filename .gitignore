@@ -2,7 +2,6 @@ __pycache__/
 .pytest_cache/
 _build/
 data/
+tmp/
 
 *.pyc
-*.csv
-tmpSurvival.py

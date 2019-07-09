@@ -80,7 +80,7 @@ def testTree():
 
 # Tests that full states match for all the child UI states after undo
 def testParents():
-    fullState = files.loadState("test/files/example2.dyn.gz")
+    fullState = files.loadState("pydynamo-brain/test/files/example2.dyn.gz")
     fullID = id(fullState)
     for uiState in fullState.uiStates:
         assert id(uiState.parent()) == fullID

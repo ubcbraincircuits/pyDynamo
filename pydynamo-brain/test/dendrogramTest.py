@@ -1,12 +1,11 @@
 import matplotlib.pyplot as plt
 
-
 import files
 
 from ui.dendritePainter import colorForBranch
 from ui.dendrogram import calculatePositions
 
-def run(path='test/files/example2.dyn.gz'):
+def run(path='pydynamo-brain/test/files/example2.dyn.gz'):
     tree = files.loadState(path).trees[0]
     pointX, pointY = calculatePositions(tree)
 
