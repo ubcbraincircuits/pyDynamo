@@ -178,11 +178,11 @@ setup(
     #
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
-    # entry_points={  # Optional
-    #     'console_scripts': [
-    #         'sample=sample:main',
-    #     ],
-    # },
+    entry_points={  # Optional
+         'console_scripts': [
+             'pydynamo_brain=pyDynamo_brain:runDynamo',
+         ],
+    },
 
     # List additional URLs that are relevant to your project as a dict.
     #
