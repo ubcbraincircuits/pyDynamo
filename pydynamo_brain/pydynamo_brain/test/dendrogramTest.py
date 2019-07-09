@@ -5,7 +5,7 @@ import files
 from ui.dendritePainter import colorForBranch
 from ui.dendrogram import calculatePositions
 
-def run(path='pydynamo_brain/test/files/example2.dyn.gz'):
+def run(path='pydynamo_brain/pydynamo_brain/test/files/example2.dyn.gz'):
     tree = files.loadState(path).trees[0]
     pointX, pointY = calculatePositions(tree)
 
