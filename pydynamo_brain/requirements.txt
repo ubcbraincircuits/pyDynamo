@@ -4,7 +4,6 @@ neurom
 numpy
 pandas
 PyOpenGL
-PyOpenGL_accelerate
 pyqtgraph
 PyQt5
 scikit-image
