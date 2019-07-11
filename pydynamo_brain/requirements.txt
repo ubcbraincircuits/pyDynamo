@@ -3,6 +3,8 @@ matplotlib
 neurom
 numpy
 pandas
+PyOpenGL
+pyqtgraph
 PyQt5
 scikit-image
 scipy
