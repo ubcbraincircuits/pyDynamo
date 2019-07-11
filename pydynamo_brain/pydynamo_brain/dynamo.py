@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtWidgets
 
 matplotlib.use('Qt5Agg')
 from mpl_toolkits.mplot3d import Axes3D
-from pydynamo_brain.ui import DynamoWindow
+from .ui import DynamoWindow
 
 def runDynamo():
     qtApp = QtWidgets.QApplication(sys.argv)
