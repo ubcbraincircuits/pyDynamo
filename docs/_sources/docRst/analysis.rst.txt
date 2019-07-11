@@ -4,20 +4,20 @@ Analysis methods
 TDBL (Total Dendritic Branch length)
 ------------------------------------
 
-.. automodule:: analysis.TDBL
+.. automodule:: pydynamo_brain.analysis.TDBL
   :members:
   :noindex:
 
 Motility
 --------
 
-.. automodule:: analysis.motility
+.. automodule:: pydynamo_brain.analysis.motility
   :members:
   :noindex:
 
 Added/Subtracted/Transitioned
 -----------------------------
 
-.. automodule:: analysis.addedSubtractedTransitioned
+.. automodule:: pydynamo_brain.analysis.addedSubtractedTransitioned
   :members:
   :noindex:

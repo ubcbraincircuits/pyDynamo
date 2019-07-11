@@ -4,20 +4,20 @@ Model objects
 Tree
 ----
 
-.. automodule:: model.tree
+.. automodule:: pydynamo_brain.model.tree
   :members:
   :noindex:
 
 FiloType
 --------
 
-.. automodule:: model.filoType
+.. automodule:: pydynamo_brain.model.filoType
   :members:
   :noindex:
 
 History
 -------
 
-.. automodule:: model.history
+.. automodule:: pydynamo_brain.model.history
   :members:
   :noindex:
