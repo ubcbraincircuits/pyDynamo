@@ -31,7 +31,6 @@ def run(qtbot):
     tree = dW.fullState.trees[0]
 
     assert len(dW.fullState.filePaths) == 1
-    assert len(dW.fullState.landmarks) == 1
     assert len(dW.fullState.uiStates) == 1
     assert tree.rootPoint is None
     assert len(tree.branches) == 0

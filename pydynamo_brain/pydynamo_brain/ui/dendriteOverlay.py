@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QApplication
 import numpy as np
 
 from .dendritePainter import DendritePainter
-from .landmarkPainter import LandmarkPainter
 from .punctaPainter import PunctaPainter
 
 class DendriteOverlay(QWidget):
@@ -35,14 +34,6 @@ class DendriteOverlay(QWidget):
                 self.dendriteCanvas.imgView.mapFromScene,
                 self.dendriteCanvas.imgView.fromSceneDist
             ).drawPuncta(puncta)
-        elif fullState.inLandmarkMode():
-            landmarks = []
-            if (self.windowIndex < len(fullState.landmarks)):
-                landmarks = fullState.landmarks[self.windowIndex]
-            LandmarkPainter(p,
-                self.dendriteCanvas.uiState,
-                self.dendriteCanvas.imgView.mapFromScene
-            ).drawLandmarks(landmarks, fullState.landmarkPointAt)
         else:
             DendritePainter(p,
                 self.dendriteCanvas.uiState,

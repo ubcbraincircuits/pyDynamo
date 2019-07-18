@@ -108,8 +108,11 @@ def convertToFullState(asDict):
     convert(asDict, 'trees', convertToTree, isArray=True)
     convert(asDict, 'uiStates', convertToUIState, isArray=True)
     convert(asDict, 'puncta', convertToPunctaList, isArray=True)
-    convert(asDict, 'landmarks', convertToListOfTuples, isArray=True)
     convert(asDict, 'projectOptions', convertToProjectOptions)
+
+    # Note: Removed.
+    if 'landmarks' in asDict:
+        del asDict['landmarks']
     return FullState(**asDict)
 
 def indexTree(tree):

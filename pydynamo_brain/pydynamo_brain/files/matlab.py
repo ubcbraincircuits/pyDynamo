@@ -84,17 +84,10 @@ def parseMatlabTree(fullState, saveState):
     tree.transform = parseTransform(saveState['info'][0])
     return tree
 
-# Given save information, pull out saved landmark XYZs
-def parseLandmarks(saveState):
-    landmarks = saveState['info'][0]['landmarks'][0][0]
-    if landmarks.shape[0] != 3:
-        return []
-    return [tuple(landmarks[:, i] - 1) for i in range(landmarks.shape[1])] # 1-based indices
-
 # Load an existing dynamo matlab file, and convert it into the python dynamo format.
 def importFromMatlab(matlabPath):
     fullState = FullState()
-    filePaths, treeData, landmarkData = [], [], []
+    filePaths, treeData = [], []
 
     mat = sio.loadmat(matlabPath)
     saveStates = mat['savedata'][0]['state'][0]
@@ -106,6 +99,5 @@ def importFromMatlab(matlabPath):
         # Note: Pull out scale from transform, move it to global scale:
         fullState.projectOptions.pixelSizes = tree.transform.scale
         treeData.append(tree)
-        landmarkData.append(parseLandmarks(saveState))
-    fullState.addFiles(filePaths, treeData, landmarkData)
+    fullState.addFiles(filePaths, treeData)
     return fullState

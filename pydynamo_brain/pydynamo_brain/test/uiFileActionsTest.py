@@ -32,7 +32,6 @@ def run(qtbot):
 
     assert len(dW.fullState.filePaths) == 1
     assert len(dW.fullState.trees) == 1
-    assert len(dW.fullState.landmarks) == 1
     assert len(dW.fullState.uiStates) == 1
     assert dW.fullState.trees[0].rootPoint is None
     assert len(dW.fullState.trees[0].branches) == 0
@@ -57,7 +56,6 @@ def run(qtbot):
 
     assert len(dW.fullState.filePaths) == 2
     assert len(dW.fullState.trees) == 2
-    assert len(dW.fullState.landmarks) == 2
     assert len(dW.fullState.uiStates) == 2
     assert dW.fullState.trees[1].rootPoint is None
     assert 0 == len(dW.fullState.trees[1].branches)

@@ -52,7 +52,6 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
         super(Motility3DCanvas, self).__init__(*args, in3D=(not self.dendrogram), subplots=nPlots, **kwargs)
         self.fig.canvas.mpl_connect('motion_notify_event', self.handleMove)
         self.fig.subplots_adjust(top=0.95, bottom=0.05, right=0.95, left=0.05, wspace=0.05, hspace=0.05)
-        # TODO: Use landmarks for mean shifting
 
     def compute_initial_figure(self):
         SZ_FACTOR = self.sizeFactor

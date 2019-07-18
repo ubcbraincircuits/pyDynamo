@@ -152,14 +152,6 @@ class FullStateActions():
         for uiState in self.state.uiStates:
             uiState.cancelMove()
 
-    def setLandmark(self, localIdx, location):
-        self.history.pushState()
-        self.state.setLandmark(localIdx, location)
-
-    def deleteCurrentLandmark(self):
-        self.history.pushState()
-        self.state.deleteLandmark(self.state.landmarkPointAt)
-
     def reparent(self, localIdx, sourceParent):
         self.history.pushState()
         sourcePoint = self.state.uiStates[localIdx].currentPoint()
@@ -222,28 +214,6 @@ class FullStateActions():
         for i, tree in enumerate(self.state.trees):
             totalRemoved += tree.cleanEmptyBranches()
         return totalRemoved
-
-    def calculateBestOrientation(self):
-        X0, Y0, Z0 = self.state.trees[0].worldCoordPoints(self.state.landmarks[0])
-
-        for i in range(0, len(self.state.landmarks)):
-            Xi, Yi, Zi = self.state.trees[i].worldCoordPoints(self.state.landmarks[i])
-            matchIdx = []
-            for j in range(len(Xi)):
-                if Xi[j] is not None and j < len(X0) and X0[j] is not None:
-                    matchIdx.append(j)
-            if (len(matchIdx) < 3):
-                # TODO - pull out of here, pass in callback for error skips instead
-                msg = "Scan [%d] skipped: %d landmarks match initial, need 3." % (i+1, len(matchIdx))
-                msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information, msg, msg)
-                msg.show()
-                continue
-            pointsFrom = [(Xi[j], Yi[j], Zi[j]) for j in matchIdx]
-            pointsTo = [(X0[j], Y0[j], Z0[j]) for j in matchIdx]
-            fit, R, T = absOrient(pointsFrom, pointsTo)
-            # tolist() as state should not have (unsavable) numpy data
-            self.state.trees[i].transform.rotation = R.tolist()
-            self.state.trees[i].transform.translation = T.tolist()
 
     def togglePunctaMode(self):
         return self.state.togglePunctaMode()

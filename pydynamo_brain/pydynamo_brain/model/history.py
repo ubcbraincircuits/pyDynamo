@@ -74,7 +74,6 @@ class History:
             for idx, uiState in enumerate(liveState.uiStates):
                 uiState._parent = liveState
                 uiState._tree = liveState.trees[idx]
-                uiState._landmarks = liveState.landmarks[idx]
             for tree in liveState.trees:
                 self._fixTreeParents(tree)
         elif hasattr(liveState, 'branches'): # State is a tree

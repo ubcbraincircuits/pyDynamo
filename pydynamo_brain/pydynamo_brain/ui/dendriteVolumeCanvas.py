@@ -77,12 +77,6 @@ class DendriteVolumeCanvas(QWidget):
             if self.uiState.hideAll:
                 return
 
-            # Shortcut out landmark mode:
-            if self.uiState.parent().inLandmarkMode():
-                self.fullActions.setLandmark(self.windowIndex, location)
-                self.dynamoWindow.redrawAllStacks()
-                return
-
             modifiers = int(QApplication.keyboardModifiers())
             shiftPressed = (modifiers & Qt.ShiftModifier) > 0
             ctrlPressed = (modifiers & Qt.ControlModifier) > 0

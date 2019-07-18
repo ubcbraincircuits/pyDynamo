@@ -187,30 +187,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.fullActions.changeAllZAxis(-1)
             self.redrawAllStacks()
             return True
-        # TODO: Delete landmark mode permanently
-        # elif (key == ord('L')):
-        #     if self.fullState.inLandmarkMode():
-        #         self.calcLandmarkRotation()
-        #     self.fullState.toggleLandmarkMode()
-        #     self.redrawAllStacks()
-        #     return True
 
-        # Handle these only while doing landmarks:
-        if self.fullState.inLandmarkMode():
-            if (key == Qt.Key_Return):
-                self.fullState.nextLandmarkPoint(shftPressed)
-                self.redrawAllStacks()
-                return True
-            elif (key == Qt.Key_Delete):
-                msg = "Delete this landmark?"
-                reply = QtWidgets.QMessageBox.question(
-                    self, 'Delete?', msg, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No
-                )
-                if reply == QtWidgets.QMessageBox.Yes:
-                    self.history.pushState()
-                    self.fullActions.deleteCurrentLandmark()
-                    self.redrawAllStacks()
-                    return True
         return False
 
     # For all stacks, redraw those who have a window open:
@@ -382,14 +359,6 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.stackWindows[windowIndex].close()
             self.stackWindows[windowIndex] = None
         self.stackList.updateListFromStacks()
-
-    def calcLandmarkRotation(self):
-        msg = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,
-            "Calculating rotation from landmarks...", "Calculating rotation from landmarks.", parent=self)
-        msg.show()
-        self.fullActions.calculateBestOrientation()
-        time.sleep(5)
-        msg.hide()
 
     def updateAllPrimaryBranches(self, originWindow):
         """Update all primary branches, and show a status message while happening (as it's slow)"""
