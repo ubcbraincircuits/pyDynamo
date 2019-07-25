@@ -60,6 +60,9 @@ class Branch():
             return True
         # Optionally go upwards, e.g. you're an axon branch if you come off the main axon.
         if recurseUp and self.parentPoint.parentBranch is not None:
+            if self.parentPoint.parentBranch == self:
+                # Hmm... not sure how this happened?
+                return False
             # NOTE: this will also apply even if the parent's point is after
             # the point I have branched off at. This could be edited if needed,
             # to only match if I'm after the annotation.
