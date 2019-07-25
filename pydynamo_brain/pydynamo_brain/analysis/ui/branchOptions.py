@@ -14,7 +14,11 @@ class BranchLengthOptions(BaseOptions):
 
 class IsAxonOptions(BaseOptions):
     def __init__(self, name):
-        super().__init__(name, branch.branchHasAnnotationFunc('axon'))
+        super().__init__(name, branch.branchHasAnnotationFunc('axon', recurseUp=True))
+
+class IsBasalOptions(BaseOptions):
+    def __init__(self, name):
+        super().__init__(name, branch.branchHasAnnotationFunc('basal', recurseUp=True))
 
 class BranchParentIDOptions(BaseOptions):
     def __init__(self, name):

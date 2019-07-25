@@ -54,16 +54,25 @@ class Branch():
         """Whether the branch has no points other than the branch point."""
         return len(self.points) == 0
 
-    def hasPointWithAnnotation(self, annotation):
+    def hasPointWithAnnotation(self, annotation, recurseUp=False):
         """Whether any point directly on this branch has a given annotation."""
-        return util.lastPointWithLabelIdx([self.parentPoint] + self.points, annotation) >= 0
+        if util.lastPointWithLabelIdx([self.parentPoint] + self.points, annotation) >= 0:
+            return True
+        # Optionally go upwards, e.g. you're an axon branch if you come off the main axon.
+        if recurseUp and self.parentPoint.parentBranch is not None:
+            # NOTE: this will also apply even if the parent's point is after
+            # the point I have branched off at. This could be edited if needed,
+            # to only match if I'm after the annotation.
+            return self.parentPoint.parentBranch.hasPointWithAnnotation(annotation, recurseUp)
+        else:
+            return False
 
-    def isAxon(self, axonLabel='axon'):
+    def isAxon(self, axonLabel='axon', recurseUp=True):
         """Whether the branch is labelled as the axon."""
-        return self.hasPointWithAnnotation(axonLabel)
+        return self.hasPointWithAnnotation(axonLabel, recurseUp)
 
-    def isBasal(self, basalLabel='basal'):
-        return self.hasPointWithAnnotation(basalLabel)
+    def isBasal(self, basalLabel='basal', recurseUp=True):
+        return self.hasPointWithAnnotation(basalLabel, recurseUp)
 
     def hasChildren(self):
         """True if any point on the branch has child branches coming off it."""

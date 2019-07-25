@@ -35,7 +35,7 @@ def branchType(fullState, branchIDList, **kwargs):
     return pd.DataFrame(data=intFiloTypes.T, index=branchIDList, columns=colNames)
 
 # For each branch, return whether any point on the branch contains a given annotation
-def branchHasAnnotation(fullState, branchIDList, annotation, **kwargs):
+def branchHasAnnotation(fullState, branchIDList, annotation, recurseUp=False, **kwargs):
     result = {}
     for treeIdx, tree in enumerate(fullState.trees):
         haveAnnotations = []
@@ -44,16 +44,14 @@ def branchHasAnnotation(fullState, branchIDList, annotation, **kwargs):
             if branch is None:
                 haveAnnotations.append(False)
             else:
-                haveAnnotations.append(branch.hasPointWithAnnotation(annotation))
-                if branch.hasPointWithAnnotation(annotation):
-                    print (branchID)
+                haveAnnotations.append(branch.hasPointWithAnnotation(annotation, recurseUp))
         result['annotated_%s_%02d' % (annotation, treeIdx + 1)] = haveAnnotations
     return pd.DataFrame(data=result, index=branchIDList).sort_index(axis=1)
 
 # Given an annotation, wrap it up into an analysis function run over branches.
-def branchHasAnnotationFunc(annotation):
+def branchHasAnnotationFunc(annotation, recurseUp=False):
     def funcWrapper(fullState, branchIDList, **kwargs):
-        return branchHasAnnotation(fullState, branchIDList, annotation, **kwargs)
+        return branchHasAnnotation(fullState, branchIDList, annotation, recurseUp, **kwargs)
     return funcWrapper
 
 # For each branch, find the ID of the parent branch

@@ -40,7 +40,8 @@ def runTreeAnalysis(path=None):
     ]
     # Named arguments passed in to the functions
     arguments = {
-        'excludeAxon': False
+        'excludeAxon': False,
+        'excludeBasal': False
     }
 
     result = allTrees(usePathOrPick(path), toRun, **arguments)
@@ -54,11 +55,13 @@ def runBranchAnalysis(path=None):
         branchParentIDs,
         branchLengths,
         branchType,
-        branchHasAnnotationFunc('axon'),
+        branchHasAnnotationFunc('axon', recurseUp=True),
+        branchHasAnnotationFunc('basal', recurseUp=True)
     ]
     # Named arguments passed in to the functions
     arguments = {
-        'excludeAxon': False
+        'excludeAxon': False,
+        'excludeBasal': False
     }
 
     path = usePathOrPick(path)
@@ -80,7 +83,8 @@ def runPunctaAnalysis(path=None):
     ]
     # Named arguments passed in to the functions
     arguments = {
-        'excludeAxon': False
+        'excludeAxon': False,
+        'excludeBasal': False
     }
 
     result = allPuncta(usePathOrPick(path), toRun, **arguments)

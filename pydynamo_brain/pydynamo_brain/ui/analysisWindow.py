@@ -68,6 +68,7 @@ class AnalysisWindow(QtWidgets.QMainWindow):
                 branchOptions.BranchLengthOptions('Branch Length'),
                 branchOptions.BranchTypeOptions('Branch Type'),
                 branchOptions.IsAxonOptions('Is axon?'),
+                branchOptions.IsBasalOptions('Is basal?'),
                 branchOptions.BranchParentIDOptions('Branch Parent IDs'),
             ],
             'puncta': [
