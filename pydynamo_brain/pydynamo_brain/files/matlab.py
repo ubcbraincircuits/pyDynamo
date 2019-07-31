@@ -29,7 +29,7 @@ def parseTransform(infoState):
     return t
 
 # Read a single tree, by reading in all its branches and hooking them up
-def parseMatlabTree(fullState, saveState):
+def parseMatlabTree(fullState, saveState, removeOrphanBranches=True):
     tree = Tree()
     branchList = saveState['tree'][0]
     if branchList.shape == (1,):
@@ -80,6 +80,9 @@ def parseMatlabTree(fullState, saveState):
                             tree.branches[childIdx - 1].reparentTo = tree.branches[i].points[j - 1]
                             continue
                     tree.branches[childIdx - 1].setParentPoint(tree.branches[i].points[j - 1])
+
+    if removeOrphanBranches:
+        tree.branches = [b for b in tree.branches if b.parentPoint is not None]
 
     tree.transform = parseTransform(saveState['info'][0])
     return tree
