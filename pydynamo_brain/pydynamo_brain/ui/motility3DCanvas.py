@@ -175,7 +175,8 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                         drawAtInNew = treeModel.getPointByID(drawAt.id)
                         while drawAtInNew is None and drawAt is not None:
                             drawAt = drawAt.nextPointInBranch(delta=-1)
-                            drawAtInNew = treeModel.getPointByID(drawAt.id)
+                            if drawAt is not None:
+                                drawAtInNew = treeModel.getPointByID(drawAt.id)
                         if drawAt is None or drawAtInNew is None:
                             continue
 
