@@ -44,7 +44,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 self.openFromFile(fileToOpen)
             elif fileToOpen.endswith(".mat"):
                 self.importFromMatlab(fileToOpen)
-            elif fileToOpen.endswith(".tif") or fileToOpen.endswith(".tiff"):
+            elif fileToOpen.endswith(".tif") or fileToOpen.endswith(".tiff") or fileToOpen.endswith(".lsm"):
                 self.newFromStacks([fileToOpen])
             else:
                 print ("Unknown file format: " + fileToOpen)
@@ -248,7 +248,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
     def openFilesAndAppendStacks(self, filePaths=None):
         if filePaths is None:
             filePaths = getOpenFileName(self,
-                "Open image stacks", "", "Image files (*.tif *.tiff *.mat)", multiFile=True
+                "Open image stacks", "", "Image files (*.tif *.tiff *.mat *.lsm)", multiFile=True
             )
         if len(filePaths) == 0:
             return

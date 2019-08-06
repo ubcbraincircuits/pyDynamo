@@ -19,6 +19,13 @@ def tiffRead(path, verbose=True):
     if verbose:
         print ("Loaded TIFF, shape: %s" % str(shape))
 
+    if len(shape) == 5:
+        # Some LSM files have an initial single-size dimension
+        assert shape[0] == 1
+        stack = np.squeeze(stack)
+        shape = stack.shape
+        print ("Resized to: %s" % str(shape))
+
     if len(shape) == 3:
         # HACK - colours have been merged?
         if stack.shape[0] % 2 == 0 and stack.shape[0] > 100:
@@ -29,6 +36,10 @@ def tiffRead(path, verbose=True):
             ])
         else:
             stack = np.expand_dims(stack, axis=0)
+
+    # Should be color, Z, (XY), and # color < # Z
+    if stack.shape[0] > stack.shape[1]:
+        stack = np.swapaxes(stack, 0, 1)
     return stack
 
 def matlabRead(path, verbose=True, key='image'):
@@ -50,7 +61,7 @@ def matlabRead(path, verbose=True, key='image'):
     return stack
 
 def pathRead(path, verbose=True):
-    if path.endswith(".tif") or path.endswith(".tiff"):
+    if path.endswith(".tif") or path.endswith(".tiff") or path.endswith('.lsm'):
         return tiffRead(path, verbose)
     elif path.endswith(".mat"):
         return matlabRead(path, verbose)
