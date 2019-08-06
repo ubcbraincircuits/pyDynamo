@@ -88,7 +88,7 @@ def parseMatlabTree(fullState, saveState, removeOrphanBranches=True):
     return tree
 
 # Load an existing dynamo matlab file, and convert it into the python dynamo format.
-def importFromMatlab(matlabPath):
+def importFromMatlab(matlabPath, removeOrphanBranches=True):
     fullState = FullState()
     filePaths, treeData = [], []
 
@@ -98,9 +98,10 @@ def importFromMatlab(matlabPath):
         saveState = saveStates[0, i][0]
         filePath = saveState['info'][0]['filename'][0][0][0]
         filePaths.append(filePath)
-        tree = parseMatlabTree(fullState, saveState)
+        tree = parseMatlabTree(fullState, saveState, removeOrphanBranches)
         # Note: Pull out scale from transform, move it to global scale:
         fullState.projectOptions.pixelSizes = tree.transform.scale
+        tree.transform.scale = (1, 1, 1)
         treeData.append(tree)
     fullState.addFiles(filePaths, treeData)
     return fullState

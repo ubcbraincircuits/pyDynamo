@@ -21,7 +21,8 @@ def convertMasterNodesFromNumpy(masterNodesNp):
 def calculateResults(path='data/movie5local.mat'):
     results = {}
     if path.endswith('.mat'):
-        fullState = files.importFromMatlab(path)
+        # Keep orphans around, to match against old matlab analysis
+        fullState = files.importFromMatlab(path, removeOrphanBranches=False)
     else:
         assert path.endswith('.dyn.gz')
         fullState = files.loadState(path)
@@ -31,7 +32,7 @@ def calculateResults(path='data/movie5local.mat'):
     FILO_DIST = 5
 
     allTDBL = [TDBL(tree, excludeAxon=True, excludeBasal=False, includeFilo=False, filoDist=FILO_DIST) for tree in trees]
-    results['tdbl'] = np.array(allTDBL)
+    results['tdbl'] = np.array([allTDBL])
 
     filoTypes, added, subtracted, transitioned, masterChanged, masterNodes = \
         addedSubtractedTransitioned(trees, excludeAxon=True, excludeBasal=False, terminalDist=TERM_DIST, filoDist=FILO_DIST)
@@ -67,6 +68,8 @@ def nanCompare(a, b):
         return a == b
     if a.dtype.kind == 'b':
         a, b = a * 1, b * 1
+    if a.shape != b.shape:
+        return False
     with np.errstate(invalid='ignore'):
         return ((np.abs(a - b) < 1e-9) | (np.isnan(a) & np.isnan(b)))
 
