@@ -6,6 +6,7 @@ from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
 from .motility3DViewWindow import Motility3DViewWindow
 from .registration3DViewWindow import Registration3DViewWindow
+from .sholl.shollViewWindow import ShollViewWindow
 from .tilefigs import tileFigs
 
 class TopMenu():
@@ -100,6 +101,8 @@ class TopMenu():
         inAppAnalysisSubmenu = analysisMenu.addMenu("Visualization")
         inAppAnalysisSubmenu.addAction('3D Morphometrics', lambda: self.viewMorphometrics(False), QtCore.Qt.Key_M)
         inAppAnalysisSubmenu.addAction('2D Morphometrics dendrograms', lambda: self.viewMorphometrics(True))
+        inAppAnalysisSubmenu.addAction('Sholl graphs', self.viewSholl)
+
         menuBar.addMenu(analysisMenu)
 
         helpMenu = QtWidgets.QMenu('&Help', stackWindow)
@@ -316,6 +319,14 @@ class TopMenu():
             print ("Need >= 2 trees for registration display")
             return
         Registration3DViewWindow(parent, self.stackWindow.windowIndex,
+            parent.fullState.trees, parent.fullState.filePaths).show()
+
+    def viewSholl(self):
+        parent = self._global()
+        if len(parent.fullState.trees) == 0:
+            print ("Need at least one tree for Sholl display")
+            return
+        ShollViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
 
     # Help menu callbacks:
