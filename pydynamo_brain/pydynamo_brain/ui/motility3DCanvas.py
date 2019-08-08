@@ -241,6 +241,12 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                     ax.set_ylim3d(event.inaxes.get_ylim3d(), emit=False)
                     ax.set_zlim3d(event.inaxes.get_zlim3d(), emit=False)
 
+    def canPrev(self):
+        return self.firstTree > 0
+
+    def canNext(self):
+        return self.firstTree < len(self.treeModels) - MAX_TREE_COUNT
+
     def previous(self, toEnd):
         endIdx = 0
         nextIdx = endIdx if toEnd else max(self.firstTree - 1, endIdx)
