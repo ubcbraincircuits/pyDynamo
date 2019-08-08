@@ -21,12 +21,12 @@ MAX_TREE_COUNT = 3 # Only show this many trees, scroll to the others.
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Motility3DCanvas(BaseMatplotlibCanvas):
-    def __init__(self, parent, selectedTree, treeModels, filePaths, opt, sizeFactor=10, *args, **kwargs):
+    def __init__(self, parent, selectedTree, treeModels, is2D, filePaths, opt, sizeFactor=10, *args, **kwargs):
         self.firstTree = max(0, min(selectedTree - 1, len(treeModels) - MAX_TREE_COUNT))
         self.treeModels = treeModels
         self.filePaths = filePaths
         self.options = opt
-        self.dendrogram = False
+        self.dendrogram = is2D
         np.set_printoptions(precision=3)
 
         self.branchIDList = util.sortedBranchIDList(self.treeModels)

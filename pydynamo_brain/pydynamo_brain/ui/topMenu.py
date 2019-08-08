@@ -94,9 +94,12 @@ class TopMenu():
         menuBar.addMenu(viewMenu)
 
         analysisMenu = QtWidgets.QMenu('&Analysis', stackWindow)
-        analysisMenu.addAction('Launch analysis window', self.launchAnalysis, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
+        analysisMenu.addAction('Launch export window', self.launchAnalysis, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
         analysisMenu.addSeparator()
-        analysisMenu.addAction('View 3D Morphometrics', self.viewMorphometrics, QtCore.Qt.Key_M)
+
+        inAppAnalysisSubmenu = analysisMenu.addMenu("Visualization")
+        inAppAnalysisSubmenu.addAction('3D Morphometrics', lambda: self.viewMorphometrics(False), QtCore.Qt.Key_M)
+        inAppAnalysisSubmenu.addAction('2D Morphometrics dendrograms', lambda: self.viewMorphometrics(True))
         menuBar.addMenu(analysisMenu)
 
         helpMenu = QtWidgets.QMenu('&Help', stackWindow)
@@ -297,14 +300,15 @@ class TopMenu():
     def launchAnalysis(self):
         self._global().openAnalysisPopup()
 
-    def viewMorphometrics(self):
+    def viewMorphometrics(self, is2D):
         parent = self._global()
         if len(parent.fullState.trees) <= 1:
             print ("Need >= 2 trees for morphometrics display")
             return
+
         opt = parent.fullState.projectOptions.motilityOptions
         Motility3DViewWindow(parent, self.stackWindow.windowIndex,
-            parent.fullState.trees, parent.fullState.filePaths, opt).show()
+            parent.fullState.trees, is2D, parent.fullState.filePaths, opt).show()
 
     def viewRegistration(self):
         parent = self._global()

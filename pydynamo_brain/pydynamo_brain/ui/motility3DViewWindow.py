@@ -7,13 +7,13 @@ from .common import cursorPointer
 from .motility3DCanvas import Motility3DCanvas, MAX_TREE_COUNT
 
 class Motility3DViewWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent, middleIdx, treeModels, filePaths, opt):
+    def __init__(self, parent, middleIdx, treeModels, is2D, filePaths, opt):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle('Motility')
 
         root = QtWidgets.QWidget(self)
-        self.view3D = Motility3DCanvas(parent, middleIdx, treeModels, filePaths, opt)
+        self.view3D = Motility3DCanvas(parent, middleIdx, treeModels, is2D, filePaths, opt)
         self.nTrees = len(treeModels)
 
         self.buttonL = QtWidgets.QPushButton("◀ Previous", self)
