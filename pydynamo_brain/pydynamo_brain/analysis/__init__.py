@@ -4,5 +4,5 @@ from .allBranches import allBranches
 from .allPuncta import allPuncta
 from .allTrees import allTrees
 from .motility import motility
-from .sholl import shollCrossings
+from .sholl import shollCrossings, shollMetrics
 from .TDBL import TDBL

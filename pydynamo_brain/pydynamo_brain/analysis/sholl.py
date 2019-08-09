@@ -1,5 +1,10 @@
 import numpy as np
+import numpy.polynomial.polynomial as npPoly
+
 from numpy.linalg import det, norm
+
+# Smooth to a polynomial of degree 7:
+_DEFAULT_POLY_DEGREE = 7
 
 # from: https://gist.github.com/nim65s/5e9902cd67f094ce65b0
 def _distance(A, B, P):
@@ -37,3 +42,19 @@ def shollCrossings(tree, binSizeUm, maxRadius, in2D=False):
     radii = np.arange(0, maxRadius, binSizeUm)
     crossCounts = [_nCrossings(tree, r) for r in radii]
     return np.array(crossCounts), radii
+
+# Calculate metrics from fitting a curve to the crossings:
+def shollMetrics(crossCounts, radii, polyDegree=_DEFAULT_POLY_DEGREE):
+    bounds = [np.min(radii), np.max(radii)]
+
+    # Fit to polynomial...
+    pCoeff = npPoly.polyfit(radii, crossCounts, polyDegree)
+
+    # ...then find max value, happens at a critical point:
+    roots = npPoly.polyroots(npPoly.polyder(pCoeff))
+    critX = bounds + [r.real for r in roots if bounds[0] <= r.real <= bounds[1]]
+    critY = npPoly.polyval(critX, pCoeff)
+    maxYIdx = np.argmax(critY)
+    maxX, maxY = critX[maxYIdx], critY[maxYIdx]
+
+    return pCoeff, maxX, maxY
