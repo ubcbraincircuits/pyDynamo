@@ -13,7 +13,7 @@ BINS = 30
 class ShollCanvas(BaseMatplotlibCanvas):
     TREE_COUNT = 3
 
-    def __init__(self, parent, firstTreeIdx, treeModels, filePaths, *args, **kwargs):
+    def __init__(self, parent, fullState, firstTreeIdx, treeModels, filePaths, *args, **kwargs):
         self.treeModels = treeModels
         self.filePaths = filePaths
         self.vizTreeCount = min(len(treeModels), self.TREE_COUNT)
@@ -26,8 +26,10 @@ class ShollCanvas(BaseMatplotlibCanvas):
                 d = util.deltaSz((x[0], y[0], z[0]), (x[1], y[1], z[1]))
                 self.maxRadius = max(self.maxRadius, d)
         self.maxRadius += 1e-9 # exclusive -> inclusive(ish)
-        # TODO - load from config
-        self.binSizeUm = 5
+
+        analysisOpt = fullState.projectOptions.analysisOptions
+        self.binSizeUm = analysisOpt['shollBinSize'] if 'shollBinSize' in analysisOpt else 5.0
+        print ("BIN SIZE: ", self.binSizeUm)
 
         self.shollResults = []
         for tree in treeModels:

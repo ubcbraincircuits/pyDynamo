@@ -326,7 +326,7 @@ class TopMenu():
         if len(parent.fullState.trees) == 0:
             print ("Need at least one tree for Sholl display")
             return
-        ShollViewWindow(parent, self.stackWindow.windowIndex,
+        ShollViewWindow(parent, parent.fullState, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
 
     # Help menu callbacks:

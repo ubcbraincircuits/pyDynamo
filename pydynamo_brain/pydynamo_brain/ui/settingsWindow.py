@@ -17,11 +17,11 @@ class SettingsWindow(QtWidgets.QMainWindow):
 
         # Fields for Pixel x/y/z
         self.xValue = QtWidgets.QLineEdit()
-        self.xValue.setValidator(QtGui.QDoubleValidator(0, 10, 3))
+        self.xValue.setValidator(QtGui.QDoubleValidator(0, 10, 5))
         self.yValue = QtWidgets.QLineEdit()
-        self.yValue.setValidator(QtGui.QDoubleValidator(0, 10, 3))
+        self.yValue.setValidator(QtGui.QDoubleValidator(0, 10, 5))
         self.zValue = QtWidgets.QLineEdit()
-        self.zValue.setValidator(QtGui.QDoubleValidator(0, 30, 3))
+        self.zValue.setValidator(QtGui.QDoubleValidator(0, 30, 5))
 
         # Fields for motility options:
         self.filoDist = QtWidgets.QLineEdit()
@@ -31,6 +31,10 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.excludeAxon = QtWidgets.QCheckBox()
         self.excludeBasal = QtWidgets.QCheckBox()
         self.includeAS = QtWidgets.QCheckBox()
+
+        # Fields for misc options:
+        self.shollBinSize = QtWidgets.QLineEdit()
+        self.shollBinSize.setValidator(QtGui.QDoubleValidator(0, 20, 3))
 
         # Root = vertical layout
         self.root = QtWidgets.QWidget(self)
@@ -52,6 +56,11 @@ class SettingsWindow(QtWidgets.QMainWindow):
         l2.addRow("Exclude Basal dendrites?", self.excludeBasal)
         l2.addRow("Include Branch addition/subtraction?", self.includeAS)
 
+        # Next: Misc
+        otherOptions = QtWidgets.QWidget(self)
+        l3 = QtWidgets.QFormLayout(otherOptions)
+        l3.addRow("Sholl bin size (μM)", self.shollBinSize)
+
         # And finally, buttons:
         bCancel = QtWidgets.QPushButton("Cancel", self)
         bCancel.clicked.connect(self.cancelOptions)
@@ -61,17 +70,19 @@ class SettingsWindow(QtWidgets.QMainWindow):
         cursorPointer(bSave)
 
         buttons = QtWidgets.QWidget(self)
-        l3 = QtWidgets.QHBoxLayout(buttons)
-        l3.addStretch()
-        l3.addWidget(bSave)
-        l3.addStretch()
-        l3.addWidget(bCancel)
-        l3.addStretch()
+        lB = QtWidgets.QHBoxLayout(buttons)
+        lB.addStretch()
+        lB.addWidget(bSave)
+        lB.addStretch()
+        lB.addWidget(bCancel)
+        lB.addStretch()
 
         l.addWidget(QtWidgets.QLabel("Pixel sizes"))
         l.addWidget(pixelSizes)
         l.addWidget(QtWidgets.QLabel("Added/Subtracted/Transitioned options"))
         l.addWidget(motOptions)
+        l.addWidget(QtWidgets.QLabel("Other options"))
+        l.addWidget(otherOptions)
         l.addWidget(buttons)
 
         self.root.setFocus()
@@ -90,6 +101,11 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.excludeAxon.setChecked(motOpt.excludeAxon)
         self.excludeBasal.setChecked(motOpt.excludeBasal)
         self.includeAS.setChecked(motOpt.includeAS)
+
+        analysisOpt = fullState.projectOptions.analysisOptions
+        shollSize = analysisOpt['shollBinSize'] if 'shollBinSize' in analysisOpt else 5.0
+        self.shollBinSize.setText("%.3f" % shollSize)
+
         self.show()
 
     def saveOptions(self):
@@ -110,6 +126,8 @@ class SettingsWindow(QtWidgets.QMainWindow):
             floatOrDefault(self.zValue, 1.5)
         ]
         options.motilityOptions = self.buildMotilityOptions()
+        # TODO - split into buildAnalysisOptions if more get added here...
+        options.analysisOptions['shollBinSize'] = floatOrDefault(self.shollBinSize, 5.0)
         return options
 
     def buildMotilityOptions(self):
