@@ -2,6 +2,8 @@ from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QMessageBox
 
 import pydynamo_brain.util as util
+
+from pydynamo_brain.ui.common import createAndShowInfo
 from pydynamo_brain.ui.dendrite3DViewWindow import Dendrite3DViewWindow
 from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 from pydynamo_brain.ui.helpDialog import showHelpDialog
@@ -68,11 +70,15 @@ class DendriteCanvasActions():
         self.canvas.redraw()
 
     def launch3DArbor(self):
+        infoBox = createAndShowInfo("Drawing 3D Arbor")
         viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
+        infoBox.hide()
         viewWindow.show()
 
     def launch3DVolume(self):
+        infoBox = createAndShowInfo("Drawing 3D Volume")
         viewWindow = Volume3DWindow(self.canvas.parent(), self.uiState, applyColorLimits=True)
+        infoBox.hide()
         viewWindow.show()
 
     def importPointsFromLastStack(self, windowIndex):

@@ -4,6 +4,7 @@ import webbrowser
 
 from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
+from .common import createAndShowInfo
 from .motility3DViewWindow import Motility3DViewWindow
 from .registration3DViewWindow import Registration3DViewWindow
 from .sholl.shollViewWindow import ShollViewWindow
@@ -309,25 +310,32 @@ class TopMenu():
             print ("Need >= 2 trees for morphometrics display")
             return
 
+        infoBox = createAndShowInfo("Calculating Motility...")
         opt = parent.fullState.projectOptions.motilityOptions
         Motility3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, is2D, parent.fullState.filePaths, opt).show()
+        infoBox.hide()
 
     def viewRegistration(self):
         parent = self._global()
         if len(parent.fullState.trees) <= 1:
             print ("Need >= 2 trees for registration display")
             return
+        infoBox = createAndShowInfo("Calculating Registration...")
         Registration3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
+        infoBox.hide()
 
     def viewSholl(self):
         parent = self._global()
         if len(parent.fullState.trees) == 0:
             print ("Need at least one tree for Sholl display")
             return
+
+        infoBox = createAndShowInfo("Calculating Sholl...")
         ShollViewWindow(parent, parent.fullState, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
+        infoBox.hide()
 
     # Help menu callbacks:
     def showHotkeys(self):

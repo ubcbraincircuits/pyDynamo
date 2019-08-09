@@ -4,7 +4,7 @@ Common collection of methods that can be applied to style the UI in a user-frien
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.QtWidgets import QDesktopWidget, QMessageBox
 
 # Given a widget, make the cursor look like a hand over it.
 #   Same as CSS's cursor:pointer, should be used for clickable things.
@@ -34,3 +34,10 @@ def clearChildWidgets(layout):
         layout.removeItem(item)
     layout.update()
     layout.parentWidget().repaint()
+
+# Create and pop up a message window, to grab access while slow stuff is happening
+def createAndShowInfo(msg):
+    infoBox = QMessageBox(QMessageBox.Information, msg, "")
+    infoBox.setWindowModality(Qt.NonModal)
+    infoBox.show()
+    return infoBox
