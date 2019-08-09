@@ -25,9 +25,17 @@ class ShollCanvas(BaseMatplotlibCanvas):
                 x, y, z = tree.worldCoordPoints([tree.rootPoint, p])
                 d = util.deltaSz((x[0], y[0], z[0]), (x[1], y[1], z[1]))
                 self.maxRadius = max(self.maxRadius, d)
+        self.maxRadius += 1e-9 # exclusive -> inclusive(ish)
+        # TODO - load from config
+        self.binSizeUm = 5
+
+        self.shollResults = []
+        for tree in treeModels:
+            self.shollResults.append(shollCrossings(tree, self.binSizeUm, self.maxRadius))
 
         super(ShollCanvas, self).__init__(*args, subplots=self.vizTreeCount, **kwargs)
         self.fig.subplots_adjust(top=0.95, bottom=0.05, right=0.95, left=0.05, wspace=0.05, hspace=0.05)
+
 
     def compute_initial_figure(self):
         for offset, ax in enumerate(self.axes):
@@ -38,11 +46,8 @@ class ShollCanvas(BaseMatplotlibCanvas):
 
     # Given one tree, draw sholl data for that tree
     def drawSingleTreeSholl(self, ax, treeIdx):
-        # TODO - precalc
-        treeModel = self.treeModels[treeIdx]
-        barWidth = self.maxRadius / BINS * 0.8
-        counts, xs = shollCrossings(treeModel, self.maxRadius, BINS)
-        ax.bar(xs, counts, width=barWidth)
+        counts, xs = self.shollResults[treeIdx]
+        ax.bar(xs, counts, width=(self.binSizeUm * 0.8))
 
     def needToUpdate(self):
         for ax in self.axes:
@@ -54,7 +59,7 @@ class ShollCanvas(BaseMatplotlibCanvas):
         return self.firstTree > 0
 
     def canNext(self):
-        return self.firstTree < len(self.treeModels) - 1
+        return self.firstTree < len(self.treeModels) - self.TREE_COUNT
 
     def previous(self, toEnd):
         endIdx = 0
@@ -64,7 +69,7 @@ class ShollCanvas(BaseMatplotlibCanvas):
             self.needToUpdate()
 
     def next(self, toEnd):
-        endIdx = len(self.treeModels) - 2
+        endIdx = len(self.treeModels) - self.TREE_COUNT
         nextIdx = endIdx if toEnd else min(self.firstTree + 1, endIdx)
         if nextIdx != self.firstTree:
             self.firstTree = nextIdx

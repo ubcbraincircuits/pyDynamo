@@ -268,7 +268,3 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
         self.dendrogram = not is3D
         super(Motility3DCanvas, self).set3D(is3D)
         self.needToUpdate()
-
-    # def mousePressEvent(self, event):
-        # print ("Clicked: (%d %d)" % (event.globalX(), event.globalY()))
-        # super(Scatter3DCanvas, self).mousePressEvent(event)

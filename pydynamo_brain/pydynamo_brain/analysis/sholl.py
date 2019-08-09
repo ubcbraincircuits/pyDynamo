@@ -22,26 +22,18 @@ def _lineSegmentCrossRadius(tree, fr, to, soma, r):
     return minDist <= r <= maxDist
 
 # Number of times branches of the tree cross a given radius
-def _nCrossings(tree, r):
-    root = tree.rootPoint
-
+def _nCrossings(tree, rad):
     crosses = 0
     for point in tree.flattenPoints():
         if point.isRoot():
             continue
         pointBefore = point.nextPointInBranch(delta=-1, noWrap=False)
-        if _lineSegmentCrossRadius(tree, point, pointBefore, root, r):
+        if _lineSegmentCrossRadius(tree, point, pointBefore, tree.rootPoint, rad):
             crosses += 1
     return crosses
 
 # Calculate sholl properties for a tree
-def shollCrossings(tree, maxRadius, nBins, in2D=False):
-    # Note: linear sholl
-    binRadiusStep = maxRadius / nBins
-
-    crossings, rs = [], []
-    for bin in range(nBins):
-        crossRadius = (bin + 0.5) * binRadiusStep
-        crossings.append(_nCrossings(tree, crossRadius))
-        rs.append(crossRadius)
-    return np.array(crossings), np.array(rs)
+def shollCrossings(tree, binSizeUm, maxRadius, in2D=False):
+    radii = np.arange(0, maxRadius, binSizeUm)
+    crossCounts = [_nCrossings(tree, r) for r in radii]
+    return np.array(crossCounts), radii
