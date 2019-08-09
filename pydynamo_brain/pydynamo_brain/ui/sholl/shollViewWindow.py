@@ -5,7 +5,6 @@ from pydynamo_brain.ui.scrollableStacksWindow import ScrollableStacksWindow
 from .shollCanvas import ShollCanvas
 
 # TODO:
-# -) Popup window on load (also apply to 3D view, and motility)
 # -) Analysis code for export
 # -) Move motitility/registration to child folders
 # -) Extract common mot/reg/sholl view code

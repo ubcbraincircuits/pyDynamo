@@ -38,7 +38,7 @@ def _nCrossings(tree, rad):
     return crosses
 
 # Calculate sholl properties for a tree
-def shollCrossings(tree, binSizeUm, maxRadius, in2D=False):
+def shollCrossings(tree, binSizeUm, maxRadius):
     radii = np.arange(0, maxRadius, binSizeUm)
     crossCounts = [_nCrossings(tree, r) for r in radii]
     return np.array(crossCounts), radii

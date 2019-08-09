@@ -7,6 +7,7 @@ from pydynamo_brain.test import (
     historyTest,
     motilityTest,
     recursiveAdjustTest,
+    shollTest,
     swcTest,
     uiDrawTest,
     uiPunctaTest,
@@ -38,6 +39,11 @@ def test_recursiveAdjust():
     assert recursiveAdjustTest.run()
     print ("")
 
+def test_sholl():
+    print ("Sholl test...")
+    assert shollTest.run()
+    print ("")
+
 def test_SWC():
     print ("SWC test...")
     assert swcTest.run()
@@ -65,6 +71,7 @@ if __name__ == '__main__':
     test_history()
     test_motility()
     test_recursiveAdjust()
+    test_sholl()
     test_SWC()
     test_dendrogram()
     print ("\n 🙌🙌🙌 ALL NON-UI TESTS PASSED 🙌🙌🙌\n")
