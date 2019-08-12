@@ -21,7 +21,7 @@ class ShollCanvas(BaseMatplotlibCanvas):
 
         maxRadius = 0
         for tree in treeModels:
-            maxRadius = max(maxRadius, tree.spatialAndTreeRadius()[0])
+            maxRadius = max(maxRadius, tree.spatialRadius())
         maxRadius += 1e-9 # exclusive -> inclusive(ish)
 
         analysisOpt = fullState.projectOptions.analysisOptions

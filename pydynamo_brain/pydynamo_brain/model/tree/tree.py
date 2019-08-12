@@ -225,6 +225,13 @@ class Tree():
             self.removeBranch(emptyBranch)
         return len(emptyBranches)
 
+    def spatialRadius(self):
+        """External longest distance to points from soma."""
+        maxS = 0
+        for point in self.flattenPoints():
+            maxS = max(maxS, self.spatialDist(self.rootPoint, point))
+        return maxS
+
     def spatialAndTreeRadius(self):
         """External and internal longest distance to points from soma."""
         maxS, maxT = 0, 0

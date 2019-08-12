@@ -39,7 +39,7 @@ def shollStats(fullState, **kwargs):
 
     maxRadius = 0
     for tree in fullState.trees:
-        maxRadius = max(maxRadius, tree.spatialAndTreeRadius()[0])
+        maxRadius = max(maxRadius, tree.spatialRadius())
 
     criticalValues, dendriteMaxes = [], []
     for tree in fullState.trees:
