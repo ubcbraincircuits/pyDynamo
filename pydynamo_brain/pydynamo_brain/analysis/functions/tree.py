@@ -5,6 +5,7 @@ import pydynamo_brain.util as util
 
 from pydynamo_brain.analysis import addedSubtractedTransitioned, TDBL
 from pydynamo_brain.analysis import motility as motilityFunc
+from pydynamo_brain.analysis import sholl
 
 
 MIN_MOTILITY  = 0.1
@@ -29,6 +30,28 @@ def tdbl(fullState, **kwargs):
     for tree in fullState.trees:
         tdbls.append(TDBL(tree, **kwargs))
     return pd.DataFrame({'tdbl': tdbls})
+
+# X and Y point for the maximal Sholl crossings, fitted using a polynomial
+def shollStats(fullState, **kwargs):
+    if 'shollBinSize' not in kwargs:
+        raise Exception("Sholl requires shollBinSize to be set")
+    binSizeUm = kwargs['shollBinSize']
+
+    maxRadius = 0
+    for tree in fullState.trees:
+        maxRadius = max(maxRadius, tree.spatialAndTreeRadius()[0])
+
+    criticalValues, dendriteMaxes = [], []
+    for tree in fullState.trees:
+        crossCounts, radii = sholl.shollCrossings(tree, binSizeUm, maxRadius)
+        pCoeff, maxX, maxY = sholl.shollMetrics(crossCounts, radii)
+        criticalValues.append(maxX)
+        dendriteMaxes.append(maxY)
+
+    return pd.DataFrame({
+        'shollCriticalValue': criticalValues, # Radius for maximal crossings
+        'shollDendriteMax': dendriteMaxes     # Number of crossings there
+    })
 
 # Provide motility added/subtracted/transitioned/extended/retracted counts
 def motility(fullState, **kwargs):

@@ -36,12 +36,14 @@ def runTreeAnalysis(path=None):
     toRun = [
         pointCount,
         branchCount,
-        tdbl
+        tdbl,
+        shollStats
     ]
     # Named arguments passed in to the functions
     arguments = {
         'excludeAxon': False,
-        'excludeBasal': False
+        'excludeBasal': False,
+        'shollBinSize': 5.0,
     }
 
     result = allTrees(usePathOrPick(path), toRun, **arguments)
@@ -155,8 +157,8 @@ def runFiloTipCluster(path):
 if __name__ == '__main__':
     # Path is first command-line argument, if provided.
     path = sys.argv[1] if len(sys.argv) > 1 else None
-    # runTreeAnalysis(path)
+    runTreeAnalysis(path)
     # runBranchAnalysis(path)
     # runPunctaAnalysis(path)
     # runFiloTipCluster(path)
-    runNeuroMAnalysis(path)
+    # runNeuroMAnalysis(path)

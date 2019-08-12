@@ -19,13 +19,10 @@ class ShollCanvas(BaseMatplotlibCanvas):
         self.vizTreeCount = min(len(treeModels), self.TREE_COUNT)
         self.firstTree = max(0, min(len(treeModels) - self.vizTreeCount, firstTreeIdx))
 
-        self.maxRadius = 0
+        maxRadius = 0
         for tree in treeModels:
-            for p in tree.flattenPoints():
-                x, y, z = tree.worldCoordPoints([tree.rootPoint, p])
-                d = util.deltaSz((x[0], y[0], z[0]), (x[1], y[1], z[1]))
-                self.maxRadius = max(self.maxRadius, d)
-        self.maxRadius += 1e-9 # exclusive -> inclusive(ish)
+            maxRadius = max(maxRadius, tree.spatialAndTreeRadius()[0])
+        maxRadius += 1e-9 # exclusive -> inclusive(ish)
 
         analysisOpt = fullState.projectOptions.analysisOptions
         self.binSizeUm = analysisOpt['shollBinSize'] if 'shollBinSize' in analysisOpt else 5.0
@@ -33,7 +30,7 @@ class ShollCanvas(BaseMatplotlibCanvas):
         self.maxCount = 0
         self.shollResults = []
         for tree in treeModels:
-            crossCounts, radii = shollCrossings(tree, self.binSizeUm, self.maxRadius)
+            crossCounts, radii = shollCrossings(tree, self.binSizeUm, maxRadius)
             pCoeff, maxX, maxY = shollMetrics(crossCounts, radii)
             self.shollResults.append((crossCounts, radii, pCoeff, maxX, maxY))
             self.maxCount = max(self.maxCount, np.max(crossCounts))

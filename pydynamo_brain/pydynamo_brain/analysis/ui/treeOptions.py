@@ -18,8 +18,9 @@ class BranchCountOptions(BaseOptions):
 
 # Methods with custom options
 
+
+# Parameters supported are passed to TDBL
 class TDBLOptions(BaseOptions):
-    # Parameters supported are passed to TDBL
     def __init__(self, name):
         super().__init__(name, tree.tdbl)
 
@@ -63,9 +64,32 @@ class TDBLOptions(BaseOptions):
             'excludeBasal': True
         }
 
+# These parameters are passed to sholl analysis
+class ShollOptions(BaseOptions):
+    def __init__(self, name):
+        super().__init__(name, tree.shollStats)
 
+    def fillOptionsInner(self, currentState, fullState, formParent):
+        self.binSize = QtWidgets.QLineEdit(formParent)
+        self.binSize.setValidator(QtGui.QDoubleValidator())
+        k = 'shollBinSize'
+        self.binSize.setText(str(currentState[k]) if k in currentState else '5.0')
+        self._addFormRow("Sholl Bin Size (uM)", self.binSize)
+
+    def readOptions(self):
+        localOptions = {
+            'shollBinSize': floatOrDefault(self.binSize, 5.0),
+        }
+        localOptions.update(super().readOptions())
+        return localOptions
+
+    def defaultValues(self):
+        return {
+            'shollBinSize': 5.0,
+        }
+
+# Parameters supported are passed to motility
 class MotilityOptions(BaseOptions):
-    # Parameters supported are passed to motility
     def __init__(self, name):
         super().__init__(name, tree.motility)
 

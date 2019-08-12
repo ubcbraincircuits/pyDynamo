@@ -225,6 +225,13 @@ class Tree():
             self.removeBranch(emptyBranch)
         return len(emptyBranches)
 
+    def spatialAndTreeRadius(self):
+        """External and internal longest distance to points from soma."""
+        maxS, maxT = 0, 0
+        for point in self.flattenPoints():
+            pS, pT = self.spatialAndTreeDist(self.rootPoint, point)
+            maxS, maxT = max(maxS, pS), max(maxT, pT)
+        return maxS, maxT
 
     def closestPointTo(self, targetLocation, zFilter=False):
         """Given a position in the volume, find the point closest to it in image space.

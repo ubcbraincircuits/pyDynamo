@@ -63,6 +63,7 @@ class AnalysisWindow(QtWidgets.QMainWindow):
                 treeOptions.BranchCountOptions('Branch Count'),
                 treeOptions.TDBLOptions('TDBL'),
                 treeOptions.MotilityOptions('Motility'),
+                treeOptions.ShollOptions('Sholl'),
             ],
             'branch': [
                 branchOptions.BranchLengthOptions('Branch Length'),
