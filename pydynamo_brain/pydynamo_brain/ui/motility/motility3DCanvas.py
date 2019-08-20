@@ -1,12 +1,9 @@
 import numpy as np
 
-import pydynamo_brain.util as util
-
 from pydynamo_brain.analysis import addedSubtractedTransitioned, motility
-
-from .baseMatplotlibCanvas import BaseMatplotlibCanvas
-from .dendritePainter import colorForBranch
-from .dendrogram import calculateAllPositions
+from pydynamo_brain.ui.baseMatplotlibCanvas import BaseMatplotlibCanvas
+from pydynamo_brain.ui.dendrogram import calculateAllPositions
+import pydynamo_brain.util as util
 
 MIN_MOTILITY  = 0.1
 GREY_COLOUR   = (0.75, 0.75, 0.75, 1.00)

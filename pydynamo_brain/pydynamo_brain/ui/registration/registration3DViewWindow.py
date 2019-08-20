@@ -1,11 +1,8 @@
-import math
-import numpy as np
-
 from PyQt5 import QtCore, QtWidgets
 
-from .common import cursorPointer
+from pydynamo_brain.ui.scrollableStacksWindow import ScrollableStacksWindow
+
 from .registration3DCanvas import Registration3DCanvas
-from .scrollableStacksWindow import ScrollableStacksWindow
 
 # Scrollable list of stacks, showing registration between stack pairs.
 class Registration3DViewWindow(ScrollableStacksWindow):

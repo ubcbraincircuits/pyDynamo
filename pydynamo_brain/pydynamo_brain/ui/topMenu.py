@@ -5,8 +5,8 @@ import webbrowser
 from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
 from .common import createAndShowInfo
-from .motility3DViewWindow import Motility3DViewWindow
-from .registration3DViewWindow import Registration3DViewWindow
+from .motility.motility3DViewWindow import Motility3DViewWindow
+from .registration.registration3DViewWindow import Registration3DViewWindow
 from .sholl.shollViewWindow import ShollViewWindow
 from .tilefigs import tileFigs
 

@@ -1,11 +1,8 @@
-import math
-import numpy as np
-
 from PyQt5 import QtCore, QtWidgets
 
-from .common import cursorPointer
-from .motility3DCanvas import Motility3DCanvas, MAX_TREE_COUNT
-from .scrollableStacksWindow import ScrollableStacksWindow
+from pydynamo_brain.ui.scrollableStacksWindow import ScrollableStacksWindow
+
+from .motility3DCanvas import Motility3DCanvas
 
 # Scrollable list of stacks, showing motility in the stack, in 2D or 3D.
 class Motility3DViewWindow(ScrollableStacksWindow):

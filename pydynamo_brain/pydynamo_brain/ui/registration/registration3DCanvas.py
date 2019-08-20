@@ -2,11 +2,7 @@ import numpy as np
 
 import pydynamo_brain.util as util
 
-from pydynamo_brain.analysis import addedSubtractedTransitioned, motility
-
-from .baseMatplotlibCanvas import BaseMatplotlibCanvas
-from .dendritePainter import colorForBranch
-from .dendrogram import calculateAllPositions
+from pydynamo_brain.ui.baseMatplotlibCanvas import BaseMatplotlibCanvas
 
 GREY_COLOUR   = (0.75, 0.75, 0.75, 0.75)
 ADDED_COLOR   = (0.00, 1.00, 0.00)
