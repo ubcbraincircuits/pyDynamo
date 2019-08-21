@@ -73,12 +73,33 @@ class DendriteCanvasActions():
 
     # Perform basic checks and show the result:
     def performChecks(self):
+        # TODO: split these out elsewhere if it grows too big.
         thisTree = self.uiState.parent().trees[self.windowIndex]
         badBends = findTightAngles(thisTree)
+        print ("Tight angles:")
         for bend in badBends:
-            print ("%s -> %s -> %s has angle %.2f deg" % (bend[0].id, bend[1].id, bend[2].id, bend[3]))
+            print ("\t%s -> %s -> %s has angle %.2f deg" % (bend[0].id, bend[1].id, bend[2].id, bend[3]))
         if len(badBends) == 0:
-            print ("No tight angles found")
+            print ("\tNone found!")
+
+        if self.windowIndex > 0:
+            lastTree = self.uiState.parent().trees[self.windowIndex - 1]
+            print ("Changed branches:")
+            changed = False
+            for thisP in thisTree.flattenPoints():
+                lastP = lastTree.getPointByID(thisP.id)
+                if lastP is None:
+                    continue
+                if thisP.parentBranch is None or lastP.parentBranch is None:
+                    continue # roots
+                if lastP.parentBranch.id != thisP.parentBranch.id:
+                    changed = True
+                    print ("\tPoint %s changed from branch %s to branch %s" % (
+                        thisP.id, lastP.parentBranch.id, thisP.parentBranch.id
+                    ))
+            if not changed:
+                print ("\tNone found!")
+
 
         # TODO: show in message box in UI instead?
         QMessageBox.information(self.canvas.parent(), "Done", "Checks performed - see console for results")
