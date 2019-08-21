@@ -5,11 +5,13 @@ import pydynamo_brain.util as util
 
 from pydynamo_brain.ui.common import createAndShowInfo
 from pydynamo_brain.ui.dendrite3DViewWindow import Dendrite3DViewWindow
-from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 from pydynamo_brain.ui.helpDialog import showHelpDialog
+from pydynamo_brain.ui.registration.idRegisterWindow import IdRegisterWindow
+from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 
 from pydynamo_brain.files import importFromSWC
-from pydynamo_brain.model import recursiveAdjust
+from pydynamo_brain.model import IdAligner, recursiveAdjust
+
 
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
@@ -143,60 +145,14 @@ class DendriteCanvasActions():
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
-        self.fullActions.history.pushState()
 
         fullState = self.uiState.parent()
         oldTree = fullState.trees[windowIndex - 1]
         newTree = fullState.trees[windowIndex]
-        oldPoints = oldTree.flattenPoints(includeDisconnected=True)
-        newPoints = newTree.flattenPoints(includeDisconnected=True)
 
-        # Step 1: Fully change all the IDs of the second scan
-        fullNewRemap = {}
-        for p in newPoints:
-            newID = fullState.nextPointID()
-            fullNewRemap[p.id] = newID
-            p.id = newID
-
-        # Step 2: Normalize by shifting new tree to match soma location
-        oldSomaXYZ = oldTree.rootPoint.location
-        newSomaXYZ = newTree.rootPoint.location
-        somaShiftDist = util.deltaSz(oldSomaXYZ, newSomaXYZ)
-        shift = util.locationMinus(oldSomaXYZ, newSomaXYZ)
-        shiftCutoff = max(somaShiftDist * somaScale, 0.001)
-
-        # Step 3: Sort all close pairs (old point, new point) by distance
-        shortDistPairs, closestDists = [], []
-        for newPoint in newPoints:
-            newLoc = newPoint.location
-            shiftedNewLoc = util.locationPlus(newLoc, shift)
-
-            closestDist = None
-            for oldPoint in oldPoints:
-                oldLoc = oldPoint.location
-                dist = util.deltaSz(oldLoc, shiftedNewLoc)
-                if dist < shiftCutoff:
-                    shortDistPairs.append((dist, oldPoint, newPoint))
-                if closestDist is None or dist < closestDist:
-                    closestDist = dist
-                closestDists.append(closestDist)
-        shortDistPairs = sorted(shortDistPairs, key=lambda x: x[0])
-
-        # Step 4: Walk through, mapping closest first
-        oldToNewMap, newToOldMap, madeUnique = {}, {}, {}
-        for (dist, oldPoint, newPoint) in shortDistPairs:
-            if dist > shiftCutoff:
-                break # shouldn't happen, but just in case
-
-            oldID, newID = oldPoint.id, newPoint.id
-            newAlreadyMapped = (newID in newToOldMap) and (not newID in madeUnique)
-            oldAlreadyMapped = (oldID in oldToNewMap)
-            if (not newAlreadyMapped) and (not oldAlreadyMapped):
-                newToOldMap[newID] = oldID
-                oldToNewMap[oldID] = newID
-                # new point is unmapped and close to old unmapped point, copy ID
-                newPoint.id = oldID
-
+        registrationWindow = IdRegisterWindow(self.canvas.parent(), oldTree, newTree)
+        registrationWindow.showMaximized()
+        registrationWindow.startRegistration()
 
     def startReplaceParent(self):
         self.uiState.isReparenting = True

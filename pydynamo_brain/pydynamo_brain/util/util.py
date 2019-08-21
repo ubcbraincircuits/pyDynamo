@@ -6,6 +6,9 @@ import os.path
 SAVE_KEY = 'persist'
 SAVE_META = {SAVE_KEY: True}
 
+# Function that does nothing:
+NOOP_FUNC = lambda: None
+
 def currentTimeMillis():
     return int(round(time.time() * 1000))
 
@@ -91,3 +94,7 @@ def zStackForUiState(uiState):
     # Left here to support the future possibility of making all Z the same,
     # rather than relative to the selected point.
     return uiState.zAxisAt
+
+# Return a new list, same as the old one except skipping one index
+def listWithoutIdx(data, index):
+    return [v for i, v in enumerate(data) if i != index]
