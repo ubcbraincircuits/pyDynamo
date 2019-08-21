@@ -229,6 +229,9 @@ class IdRegisterWindow(QtWidgets.QMainWindow):
             time.sleep(1)
             self.progress.setValue(self.progress.maximum())
             self.idRemapResults = bundle[1]
+            print ("Remaps found:")
+            for mapFrom, mapTo in self.idRemapResults.items():
+                print ("    %s -> %s" % (mapFrom, mapTo))
             self.afterView.updateWithResults(self.idRemapResults)
             self.applyButton.setEnabled(True)
             self.backgroundThread.requestInterruption()

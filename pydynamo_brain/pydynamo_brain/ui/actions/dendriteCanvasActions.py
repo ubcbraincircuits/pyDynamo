@@ -11,7 +11,7 @@ from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 
 from pydynamo_brain.files import importFromSWC
 from pydynamo_brain.model import IdAligner, recursiveAdjust
-
+from pydynamo_brain.model.tree.util import findTightAngles
 
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
@@ -70,6 +70,18 @@ class DendriteCanvasActions():
     def unmarkPoints(self):
         self.uiState.setAllDownstreamPointsMarked(marked=False)
         self.canvas.redraw()
+
+    # Perform basic checks and show the result:
+    def performChecks(self):
+        thisTree = self.uiState.parent().trees[self.windowIndex]
+        badBends = findTightAngles(thisTree)
+        for bend in badBends:
+            print ("%s -> %s -> %s has angle %.2f deg" % (bend[0].id, bend[1].id, bend[2].id, bend[3]))
+        if len(badBends) == 0:
+            print ("No tight angles found")
+
+        # TODO: show in message box in UI instead?
+        QMessageBox.information(self.canvas.parent(), "Done", "Checks performed - see console for results")
 
     def launch3DArbor(self):
         infoBox = createAndShowInfo("Drawing 3D Arbor")

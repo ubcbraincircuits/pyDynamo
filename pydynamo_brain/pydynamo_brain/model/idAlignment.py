@@ -1,5 +1,6 @@
 import numpy as np
 
+from pydynamo_brain.model.tree.util import findNextPoints
 from pydynamo_brain.util import listWithoutIdx
 
 class IdAligner():
@@ -33,10 +34,7 @@ class IdAligner():
     def nextPoints(self, treeID, point):
         key = '%s:%s' % (treeID, point.id)
         if key not in self.nextPointsCache:
-            nextAlongBranch = point.nextPointInBranch(1, noWrap=True)
-            branchPoint = [] if nextAlongBranch is None else [nextAlongBranch]
-            firstChildPoints = [b.points[0] for b in point.children]
-            self.nextPointsCache[key] = branchPoint + firstChildPoints
+            self.nextPointsCache[key] = findNextPoints(point)
         return self.nextPointsCache[key]
 
     # Calculates the number of points in the subtree rooted at the given point.

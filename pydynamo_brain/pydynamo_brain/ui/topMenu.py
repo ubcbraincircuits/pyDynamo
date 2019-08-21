@@ -97,6 +97,7 @@ class TopMenu():
         menuBar.addMenu(viewMenu)
 
         analysisMenu = QtWidgets.QMenu('&Analysis', stackWindow)
+        analysisMenu.addAction('Perform data checks', self.performChecks)
         analysisMenu.addAction('Launch export window', self.launchAnalysis, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_A)
         analysisMenu.addSeparator()
 
@@ -302,6 +303,9 @@ class TopMenu():
         tileFigs(self._global().stackWindows)
 
     # Analysis menu callbacks:
+    def performChecks(self):
+        self._local().performChecks()
+
     def launchAnalysis(self):
         self._global().openAnalysisPopup()
 
