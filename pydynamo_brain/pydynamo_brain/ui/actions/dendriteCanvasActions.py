@@ -146,13 +146,17 @@ class DendriteCanvasActions():
             print ("Can't register the first image, nothing to register it against...")
             return
 
+        self.fullActions.history.pushState()
+
         fullState = self.uiState.parent()
         oldTree = fullState.trees[windowIndex - 1]
         newTree = fullState.trees[windowIndex]
 
-        registrationWindow = IdRegisterWindow(self.canvas.parent(), oldTree, newTree)
+        registrationWindow = IdRegisterWindow(self.canvas.parent(), fullState, oldTree, newTree)
         registrationWindow.showMaximized()
-        registrationWindow.startRegistration()
+
+        redrawFunc = lambda: self.canvas.redraw()
+        registrationWindow.startRegistration(redrawFunc)
 
     def startReplaceParent(self):
         self.uiState.isReparenting = True

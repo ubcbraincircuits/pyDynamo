@@ -61,9 +61,10 @@ class TopMenu():
 
         manualRegisterSubmenu = editMenu.addMenu("Registration")
         manualRegisterSubmenu.addAction('View point registration', self.viewRegistration, QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
-        dmo(manualRegisterSubmenu.addAction('Smart register from previous stack images', self.registerSmart, QtCore.Qt.Key_R))
-        dmo(manualRegisterSubmenu.addAction('Simple register from previous stack locations',
-            self.registerSimple, QtCore.Qt.SHIFT + QtCore.Qt.Key_F))
+        dmo(manualRegisterSubmenu.addAction("Register and move from previous stack's volume",
+            self.registerSmart, QtCore.Qt.Key_R))
+        dmo(manualRegisterSubmenu.addAction("Register IDs from previous stack's tree (no movement)",
+            self.registerIDs, QtCore.Qt.SHIFT + QtCore.Qt.Key_F))
         manualRegisterSubmenu.addSeparator()
         manualRegisterSubmenu.addAction('Start/end manual registration',
             self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
@@ -195,7 +196,7 @@ class TopMenu():
         self._local().smartRegisterImages(self.stackWindow.windowIndex)
         self.redraw()
 
-    def registerSimple(self):
+    def registerIDs(self):
         if self._global().fullState.inManualRegistrationMode:
             return
         self._local().simpleRegisterImages(self.stackWindow.windowIndex)

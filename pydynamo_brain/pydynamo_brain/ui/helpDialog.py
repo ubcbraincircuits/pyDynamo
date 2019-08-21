@@ -64,8 +64,8 @@ HELP_MSG = """
 <h3>Registration</h3>
 <ul>
 <li><b>Shift-R</b> to see all pairwise point registrations between stacks in 3D</li>
-<li><b>R</b> for 'smart' registration: Adjust point IDs and locations based the previous stack images.</li>
-<li><b>Shift-F</b> for 'simple' registration: Adjust point IDs based of the previous stack locations.</li>
+<li><b>R</b> for 'smart' registration: Adjust point IDs and locations based the previous stack volume.</li>
+<li><b>Shift-F</b> for 'simple' registration: Adjust only point IDs, based of the previous stack tree structure (slow).</li>
 <li><b>Ctrl-Shift-R</b> to enter/leave manual registration mode.
   <ul>
     <li>Click on points, and <b>Shift-Enter</b> to set all to the same ID</li>
@@ -95,7 +95,7 @@ HELP_MSG = """
 <ul>
 <li><b>Ctrl-Shift-B</b> to update all primary branches to be the longest at each branch point.</li>
 <li><b>Ctrl-Shift-I</b> to change all branch IDs to the ID of their first point.</li>
-<li><b>Shift-E</b> to remove all empty branches (ones with no points, but still attached to the tree). </li> 
+<li><b>Shift-E</b> to remove all empty branches (ones with no points, but still attached to the tree). </li>
 </ul>
 <h3>View options</h3>
 <ul>

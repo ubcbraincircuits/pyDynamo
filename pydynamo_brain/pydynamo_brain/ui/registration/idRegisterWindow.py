@@ -8,6 +8,15 @@ from tqdm import tqdm
 from pydynamo_brain.model import IdAligner
 from pydynamo_brain.ui.baseMatplotlibCanvas import BaseMatplotlibCanvas
 
+# Configuration: These can be played around with if you know what you're doing.
+
+# Max distance from previous paired points to new paired points.
+MAX_SKIP = 3 # Caution: bigger results in *a lot* slower computation.
+
+# For points at two times this distance apart, we prefer to leave them unmatched as they're too far.
+UNMATCHED_PENALTY_UM = 10
+
+# UI Colors
 GREY     = (0.75, 0.75, 0.75, 0.75)
 GREEN    = (0.00, 1.00, 0.00)
 RED      = (1.00, 0.00, 0.00)
@@ -21,11 +30,12 @@ class IdRegisterThread(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.treeA = treeA
         self.treeB = treeB
+        self.cancelled = False
 
     # Runs in another thread:
     def run(self):
         # TODO: custom arguments?
-        aligner = IdAligner(self.treeA, self.treeB, maxSkip=2, unmatchedPenalty=10)
+        aligner = IdAligner(self.treeA, self.treeB, maxSkip=MAX_SKIP, unmatchedPenalty=UNMATCHED_PENALTY_UM)
         alignment = {}
 
         maxCount = aligner.maxCallCount()
@@ -35,9 +45,12 @@ class IdRegisterThread(QtCore.QThread):
             def _updateFunc():
                 self.signal.emit( (1, None) )
                 consoleProgress.update(1)
+                self.cancelled = self.cancelled or self.isInterruptionRequested()
+                return self.cancelled
 
             alignment = aligner.performAlignment(_updateFunc)
-            self.signal.emit( (2, alignment) )
+            if not self.cancelled:
+                self.signal.emit( (2, alignment) )
 
 class IdRegisterPair(BaseMatplotlibCanvas):
     def __init__(self, parent, treeA, treeB, isAfter, *args, **kwargs):
@@ -112,11 +125,11 @@ class IdRegisterPair(BaseMatplotlibCanvas):
         if self.isAfter:
             flatA = self.treeA.flattenPoints()
             flatB = self.treeB.flattenPoints()
+            idsA = set([p.id for p in flatA])
+            idsB = set([p.id for p in flatB])
 
             idsARemapped = set(results.values())
             idsBRemapped = set(results.keys())
-            idsA = set([p.id for p in flatA])
-            idsB = set([p.id for p in flatB])
 
             # Points in A and not B = removed (red)
             # Points in A and B and remapped: purple
@@ -133,7 +146,6 @@ class IdRegisterPair(BaseMatplotlibCanvas):
                 (addedPoints, GREEN),
                 (idsBRemapped, PURPLE)
             ])
-
 
             xA, yA, zA = self.treeA.worldCoordPoints(flatA)
             xB, yB, zB = self.treeB.worldCoordPoints(flatB)
@@ -162,20 +174,20 @@ class IdRegisterPair(BaseMatplotlibCanvas):
 class IdRegisterWindow(QtWidgets.QMainWindow):
     """Window that performs an id-only registration, and shows the results."""
 
-    def __init__(self, parent, oldTree, newTree):
+    def __init__(self, parent, fullState, oldTree, newTree):
         QtWidgets.QMainWindow.__init__(self, parent)
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowTitle("ID Registration")
 
         self.root = QtWidgets.QWidget(self)
+        self.fullState = fullState
         self.oldTree = oldTree
         self.newTree = newTree
+        self.backgroundThread = None
+        self.idRemapResults = None
+        self.successFunc = None
 
         l = QtWidgets.QGridLayout()
-        # grid.addWidget(self.homeBtn,    0, 0, alignment=Qt.AlignTop | Qt.AlignLeft)
-        # grid.addWidget(self.frontLabel, 1, 0, alignment=Qt.AlignCenter)
-        # grid.addWidget(self.frontEdit,  2, 0)
-
         at = 0
 
         l.addWidget(QtWidgets.QLabel("Added/Removed before:"), at, 0); at += 1
@@ -191,14 +203,19 @@ class IdRegisterWindow(QtWidgets.QMainWindow):
         l.addWidget(self.afterView, at, 0); at += 1
 
         self.applyButton = QtWidgets.QPushButton("Apply", self)
-        l.addWidget(self.applyButton, at, 0); at += 1
         self.cancelButton = QtWidgets.QPushButton("Cancel", self)
+        l.addWidget(self.applyButton, at, 0); at += 1
         l.addWidget(self.cancelButton, at, 0); at += 1
 
+        self.applyButton.clicked.connect(self.applyChanges)
+        self.cancelButton.clicked.connect(self.cancelRun)
+
         self.root.setLayout(l)
+        self.applyButton.setEnabled(False)
         self.setCentralWidget(self.root)
 
-    def startRegistration(self):
+    def startRegistration(self, successFunc=None):
+        self.successFunc = successFunc
         self.backgroundThread = IdRegisterThread(self.oldTree, self.newTree)
         self.backgroundThread.signal.connect(self.handleCallback)
         self.backgroundThread.start()
@@ -210,8 +227,41 @@ class IdRegisterWindow(QtWidgets.QMainWindow):
             self.progress.setValue(self.progress.value() + 1)
         elif bundle[0] == 2:
             time.sleep(1)
-            self.afterView.updateWithResults(bundle[1])
-            print ("Aligned!")
+            self.progress.setValue(self.progress.maximum())
+            self.idRemapResults = bundle[1]
+            self.afterView.updateWithResults(self.idRemapResults)
+            self.applyButton.setEnabled(True)
+            self.backgroundThread.requestInterruption()
+            self.backgroundThread.wait()
+            self.backgroundThread = None
         else:
             print ("Hmm...")
             print (bundle)
+
+    # Apply the suggested ID remappings:
+    def applyChanges(self):
+        if self.idRemapResults is None:
+            return
+
+        # Need to look up all first, to make sure none get remapped during the process
+        cachedPoints = {}
+        for mapFrom, mapTo in self.idRemapResults.items():
+            cachedPoints[mapFrom] = self.newTree.getPointByID(mapFrom)
+        for mapFrom, mapTo in self.idRemapResults.items():
+            self.fullState.setPointIDWithoutCollision(
+                self.newTree, cachedPoints[mapFrom], mapTo)
+
+        msg = "%d ID remaps performed." % len(self.idRemapResults)
+        QtWidgets.QMessageBox.information(self, "Remapped", msg)
+
+        if self.successFunc is not None:
+            self.successFunc()
+        self.close()
+
+    # Ignore remappings, and stop the matching if it's still going on.
+    def cancelRun(self):
+        if self.backgroundThread is not None:
+            self.backgroundThread.requestInterruption()
+            self.backgroundThread.wait()
+            self.backgroundThread = None
+        self.close()

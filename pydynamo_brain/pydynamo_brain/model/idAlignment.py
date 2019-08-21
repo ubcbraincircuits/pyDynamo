@@ -193,6 +193,11 @@ class IdAligner():
         if key in self.resultCache:
             return self.resultCache[key][0]
 
+        # updateFunc returns True if interruption is needed
+        if self.updateFunc is not None:
+            if self.updateFunc():
+                return np.inf
+
         nextPointsA = self.nextPoints('A', pointA)
         nextPointsB = self.nextPoints('B', pointB)
 
@@ -217,8 +222,6 @@ class IdAligner():
                 bestRunParams = skipRunParams
 
         self.resultCache[key] = (bestScore, bestRunParams)
-        if self.updateFunc is not None:
-            self.updateFunc()
         return bestScore
 
     # Once roots are matched, walk the tree back along the optimal path to
