@@ -103,7 +103,8 @@ class IdRegisterPair(BaseMatplotlibCanvas):
     def compute_initial_figure(self):
         for ax in self.axes:
             ax.cla()
-            ax.set_aspect('equal')
+            # TODO: reenable once matplotlib supports it again
+            #ax.set_aspect('equal')
 
         if not self.isAfter:
             idsA = set([p.id for p in self.treeA.flattenPoints()])
