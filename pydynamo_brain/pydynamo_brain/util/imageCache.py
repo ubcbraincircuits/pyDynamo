@@ -27,7 +27,9 @@ def tiffRead(path, verbose=True):
         print ("Resized to: %s" % str(shape))
 
     if len(shape) == 3:
-        # HACK - colours have been merged?
+        # NOTE: we used to split large stacks into two colours,
+        #   but this is no longer supported. Do in ImageJ or similar first!
+        """
         if stack.shape[0] % 2 == 0 and stack.shape[0] > 100:
             sz = stack.shape[0] // 2
             stack = np.array([
@@ -35,7 +37,8 @@ def tiffRead(path, verbose=True):
                 stack[sz:, :, :]
             ])
         else:
-            stack = np.expand_dims(stack, axis=0)
+        """;
+        stack = np.expand_dims(stack, axis=0)
 
     # Should be color, Z, (XY), and # color < # Z
     if stack.shape[0] > stack.shape[1]:
