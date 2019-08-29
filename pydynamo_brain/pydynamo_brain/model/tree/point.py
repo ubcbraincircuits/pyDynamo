@@ -30,7 +30,7 @@ class Point():
     children = attr.ib(default=attr.Factory(list))
     """Branches coming off the node."""
 
-    hilighted = attr.ib(default=None, cmp=False)
+    hilighted = attr.ib(default=None, cmp=False, metadata=SAVE_META)
     """Indicates which points could not be registered."""
 
     manuallyMarked = attr.ib(default=None, cmp=False, metadata=SAVE_META)
