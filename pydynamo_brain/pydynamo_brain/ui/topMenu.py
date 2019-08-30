@@ -8,6 +8,7 @@ from .common import createAndShowInfo
 from .motility.motility3DViewWindow import Motility3DViewWindow
 from .registration.registration3DViewWindow import Registration3DViewWindow
 from .sholl.shollViewWindow import ShollViewWindow
+from .tree3D.tree3DViewWindow import Tree3DViewWindow
 from .tilefigs import tileFigs
 
 class TopMenu():
@@ -77,7 +78,8 @@ class TopMenu():
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
         viewMenu.addAction('Zoom In', self.zoomIn, QtCore.Qt.Key_X)
         viewMenu.addAction('Zoom Out', self.zoomOut, QtCore.Qt.Key_Z)
-        viewMenu.addAction('View 3D Arbor', self.view3DArbor, QtCore.Qt.Key_3)
+        viewMenu.addAction('View 3D Arbor', self.view3DArbor, QtCore.Qt.CTRL + QtCore.Qt.Key_3)
+        viewMenu.addAction('View 3D Arbor (old)', self.view3DArborOld, QtCore.Qt.Key_3)
         viewMenu.addAction('View 3D Image Volume', self.view3DVolume, QtCore.Qt.SHIFT + QtCore.Qt.Key_3)
 
         viewMenu.addSeparator()
@@ -251,8 +253,20 @@ class TopMenu():
     def zoomOut(self):
         self._local().zoom(0.2)
 
-    def view3DArbor(self):
+    # TODO: remove when #trees for the new mode is configured in settings.
+    def view3DArborOld(self):
         self._local().launch3DArbor()
+
+    def view3DArbor(self):
+        parent = self._global()
+        if len(parent.fullState.trees) == 0:
+            print ("Need at least one tree for 3D arbor view")
+            return
+
+        infoBox = createAndShowInfo("Drawing 3D trees...")
+        Tree3DViewWindow(parent, parent.fullState, self.stackWindow.windowIndex,
+            parent.fullState.trees, parent.fullState.filePaths).show()
+        infoBox.hide()
 
     def view3DVolume(self):
         self._local().launch3DVolume()
