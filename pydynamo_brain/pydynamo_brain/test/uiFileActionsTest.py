@@ -39,6 +39,8 @@ def run(qtbot):
     # Import SWC from file:
     setNextTestPaths(swc1Path)
     qtbot.keyClick(sW, 'i', modifier=Qt.ControlModifier)
+    # Not sure why this is needed:
+    time.sleep(5)
 
     assert dW.fullState.trees[0].rootPoint.id == '00000000'
     assert (229.0, 211.0, 25.0) == dW.fullState.trees[0].rootPoint.location
