@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
@@ -39,6 +40,7 @@ def run(qtbot):
     # Import SWC from file:
     setNextTestPaths(swc1Path)
     qtbot.keyClick(sW, 'i', modifier=Qt.ControlModifier)
+    sys.stdout.flush()    
     qtbot.waitUntil(lambda: dW.fullState.trees[0].rootPoint is not None, timeout=10000)
 
     assert dW.fullState.trees[0].rootPoint.id == '00000000'
