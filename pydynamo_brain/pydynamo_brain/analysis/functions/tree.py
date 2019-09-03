@@ -7,6 +7,8 @@ from pydynamo_brain.analysis import addedSubtractedTransitioned, TDBL
 from pydynamo_brain.analysis import motility as motilityFunc
 from pydynamo_brain.analysis import sholl
 
+from pydynamo_brain.model import FiloType
+
 
 MIN_MOTILITY  = 0.1
 
@@ -17,12 +19,40 @@ def pointCount(fullState, **kwargs):
         counts.append(len(tree.flattenPoints()))
     return pd.DataFrame({'pointCount': counts})
 
-# Provide the number of brances in each tree.
+# Provide the number of branches in each tree.
 def branchCount(fullState, **kwargs):
     counts = []
     for tree in fullState.trees:
         counts.append(len(tree.branches))
     return pd.DataFrame({'branchCount': counts})
+
+# Provide the number of filo in each tree:
+def filoCount(fullState, **kwargs):
+    filoTypes = addedSubtractedTransitioned(fullState.trees, **kwargs)[0]
+    countInterstitial = np.sum(
+        (filoTypes == FiloType.INTERSTITIAL) |
+        (filoTypes == FiloType.BRANCH_WITH_INTERSTITIAL)
+    , axis=1)
+    countTerminal = np.sum(
+        (filoTypes == FiloType.TERMINAL) |
+        (filoTypes == FiloType.BRANCH_WITH_TERMINAL)
+    , axis=1)
+    return pd.DataFrame({
+        'filoCount': countInterstitial + countTerminal,
+        'interstitialFiloCount': countInterstitial,
+        'terminalFiloCount': countTerminal,
+    })
+
+# Calculate filopodia density (#/mm):
+def filoDensity(fullState, **kwargs):
+    counts = filoCount(fullState, **kwargs)
+    # Scale up to per-mm, rather than per-micron
+    lengths = tdbl(fullState, **kwargs)['tdbl'] / 1000.0
+    return pd.DataFrame({
+        'filoDensity': counts['filoCount'] / lengths,
+        'interstitialFiloDensity': counts['interstitialFiloCount'] / lengths,
+        'terminalFiloDensity': counts['terminalFiloCount'] / lengths,
+    })
 
 # Provide the total dendritic branch length in each tree.
 def tdbl(fullState, **kwargs):

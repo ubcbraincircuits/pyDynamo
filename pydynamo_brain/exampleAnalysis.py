@@ -36,6 +36,8 @@ def runTreeAnalysis(path=None):
     toRun = [
         pointCount,
         branchCount,
+        filoCount,
+        filoDensity,
         tdbl,
         shollStats
     ]
