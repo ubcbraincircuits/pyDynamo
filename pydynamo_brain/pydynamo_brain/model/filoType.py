@@ -2,11 +2,11 @@
 .. module:: filoT
 """
 
-from enum import Enum
+from enum import IntEnum
 from functools import total_ordering
 
 @total_ordering
-class FiloType(Enum):
+class FiloType(IntEnum):
     """Categorization for a point/branch based of Filo present.
     Note that order matters, 1->4 are counted as Filo."""
 
