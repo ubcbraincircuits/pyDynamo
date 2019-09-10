@@ -5,7 +5,6 @@ from pydynamo_brain.ui.baseMatplotlibCanvas import BaseMatplotlibCanvas
 from pydynamo_brain.ui.dendrogram import calculateAllPositions
 import pydynamo_brain.util as util
 
-MIN_MOTILITY  = 0.1
 GREY_COLOUR   = (0.75, 0.75, 0.75, 1.00)
 ADDED_COLOR   = (0.00, 1.00, 0.00, 0.75)
 TRANS_COLOR   = (0.00, 0.00, 0.00, 0.00) # Not shown ?! TODO: verify
@@ -112,7 +111,7 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                         plot = False # Don't draw transitions ?!
                     else:
                         mot = self.motility[treeIdx-1][branchIdx]
-                        if abs(mot) > MIN_MOTILITY and len(branch.points) > 0:
+                        if abs(mot) >= self.options.minMotilityDist and len(branch.points) > 0:
                             color = GROW_COLOR if mot > 0 else SHRINK_COLOR
                             if mot > 0:
                                 growCount += 1

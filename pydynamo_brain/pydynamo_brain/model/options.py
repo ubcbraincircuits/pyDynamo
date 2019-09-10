@@ -10,6 +10,9 @@ class MotilityOptions():
     terminalDist = attr.ib(default=10, metadata=SAVE_META)
     """ Distance (in microns) between the final branch point and end of branch to be considered a filopodia. """
 
+    minMotilityDist = attr.ib(default=0.1, metadata=SAVE_META)
+    """ Minimum length change (in microns) for a branch to change to be considered motile. """
+
     excludeAxon = attr.ib(default=True, metadata=SAVE_META)
     """ Whether to exclude branches with points with 'axon' in their annotation. """
 
