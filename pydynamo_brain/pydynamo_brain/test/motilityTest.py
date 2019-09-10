@@ -36,7 +36,7 @@ def calculateResults(path='data/movie5local.mat'):
 
     filoTypes, added, subtracted, transitioned, masterChanged, masterNodes = \
         addedSubtractedTransitioned(trees, excludeAxon=True, excludeBasal=False, terminalDist=TERM_DIST, filoDist=FILO_DIST)
-    results['filotypes'] = np.vectorize(lambda t: t.value)(filoTypes)
+    results['filotypes'] = filoTypes
     results['added'] = added
     results['subtracted'] = subtracted
     results['transitioned'] = transitioned
@@ -163,8 +163,6 @@ def testImportNoChange(path='data/localFirst.dyn.gz'):
     mot = motilities['raw'][0]
     assert np.all(np.logical_or(mot == 0, np.isnan(mot)))
     assert np.all(np.logical_or(filoLengths[0] == filoLengths[1], np.isnan(filoLengths[0])))
-
-    filoTypes = np.vectorize(lambda t: t.value)(filoTypes)
     assert np.array_equal(filoTypes[0], filoTypes[1])
     print ("🙌 Filotypes, filo lengths match!")
 
