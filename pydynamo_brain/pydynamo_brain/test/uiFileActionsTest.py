@@ -40,7 +40,7 @@ def run(qtbot):
     # Import SWC from file:
     setNextTestPaths(swc1Path)
     qtbot.keyClick(sW, 'i', modifier=Qt.ControlModifier)
-    sys.stdout.flush()    
+    sys.stdout.flush()
     qtbot.waitUntil(lambda: dW.fullState.trees[0].rootPoint is not None, timeout=10000)
 
     assert dW.fullState.trees[0].rootPoint.id == '00000000'
@@ -85,8 +85,8 @@ def run(qtbot):
         (277.04, 288.029, 20.1444),
         dW.fullState.trees[1].branches[5].points[2].location)
 
-    hilighted = [p.id for p in dW.fullState.trees[1].flattenPoints() if p.hilighted]
-    assert ['0000006c', '0000002b'] == hilighted
+    marked = [p.id for p in dW.fullState.trees[1].flattenPoints() if p.manuallyMarked]
+    assert ['0000006c', '0000002b'] == marked
 
     dW.close()
     return True

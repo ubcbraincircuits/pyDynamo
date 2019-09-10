@@ -27,7 +27,6 @@ class DendritePainter():
     NODE_CIRCLE_REPARENTING_BRUSH = QBrush(Qt.blue)
     NODE_CIRCLE_DEFAULT_RADIUS = 5
     MARKED_CIRCLE_BRUSH = QBrush(QColor(255, 108, 180))
-    HILIGHTED_CIRCLE_BRUSH = QBrush(Qt.green)
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
     ANNOTATION_FONT = QFont("Arial", 12, QFont.Bold)
@@ -77,13 +76,15 @@ class DendritePainter():
     def drawPoint(self, point, selectedPointID):
         x, y, z = self.zoomedLocation(point.location)
         if round(z) == self.zAt:
+            # Hilighting has been removed, keep here for backwards compatibility
+            marked = point.manuallyMarked or point.hilighted
             self.drawCircleThisZ(x, y,
-                point.id == selectedPointID, point.manuallyMarked, point.hilighted,
+                point.id == selectedPointID, marked,
                 self.uiState.parent().dotSize, point.radius
             )
             self.maybeDrawText(x, y, point)
 
-    def drawCircleThisZ(self, x, y, isSelected, isMarked, isHilighted, fakeRadius, realRadius):
+    def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius):
         radius = fakeRadius
         resizeRadius = False
         if radius is None:
@@ -99,10 +100,8 @@ class DendritePainter():
                 brushColor = self.NODE_CIRCLE_MOVING_BRUSH
             elif self.uiState.isReparenting:
                 brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH
-        elif isMarked:
+        elif isMarked and self.uiState.showMarked:
             brushColor = self.MARKED_CIRCLE_BRUSH
-        elif isHilighted and self.uiState.showHilighted:
-            brushColor = self.HILIGHTED_CIRCLE_BRUSH
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
         if resizeRadius:

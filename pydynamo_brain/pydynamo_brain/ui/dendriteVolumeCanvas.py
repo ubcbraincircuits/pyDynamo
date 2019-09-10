@@ -91,7 +91,6 @@ class DendriteVolumeCanvas(QWidget):
 
             pointClicked = self.pointOnPixel(location)
             if pointClicked is not None:
-                pointClicked.hilighted = False
                 pointClicked.manuallyMarked = False
 
             # Handle manual registration first: select or deselect the point

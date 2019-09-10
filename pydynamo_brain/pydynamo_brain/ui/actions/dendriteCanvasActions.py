@@ -150,11 +150,11 @@ class DendriteCanvasActions():
             pointNew = self.uiState.parent().trees[windowIndex].rootPoint
             pointOld = self.uiState.parent().trees[windowIndex-1].rootPoint
 
-        # Un-hilight old points
+        # Un-mark old points
         allSubtreePoints = pointNew.flattenSubtreePoints()
         pointCount = len(allSubtreePoints)
         for p in allSubtreePoints:
-            p.hilighted = False
+            p.manuallyMarked = False
 
         # Progress bar! Note: array here as it's edited inside the callback.
         pointAt = [0]
@@ -167,10 +167,10 @@ class DendriteCanvasActions():
                 "Registering...  %d/%d points processed." % (pointAt[0], pointCount))
 
         recursiveAdjust(self.uiState.parent(), windowIndex, branch, pointNew, pointOld, progressUpdate)
-        self.uiState.showHilighted = True
+        self.uiState.showMarked = True
         self.canvas.redraw()
         msg = QMessageBox(QMessageBox.Information, "Registration",
-            "Registration complete! Unregistered points shown in green, press 'h' to toggle hilight.", parent=self.canvas)
+            "Registration complete! Unregistered points marked, press 'h' to toggle showing them.", parent=self.canvas)
         msg.show()
         self.canvas.stackWindow.statusBar().clearMessage()
 

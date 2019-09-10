@@ -90,7 +90,7 @@ class TopMenu():
         viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
             self.cycleBranchDisplayMode, QtCore.Qt.Key_V)
         viewMenu.addAction('Cycle showing annotations -> IDs -> nothing per point', self.cyclePointInfo, QtCore.Qt.Key_F)
-        dmo(viewMenu.addAction('Show/Hide hilighted points', self.toggleHilight, QtCore.Qt.Key_H))
+        dmo(viewMenu.addAction('Show/Hide marked points', self.toggleMarked, QtCore.Qt.Key_H))
         viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
         viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
         viewMenu.addAction('Mark downstream points on selected window', self.markPoints, QtCore.Qt.SHIFT + QtCore.Qt.Key_M)
@@ -295,8 +295,8 @@ class TopMenu():
         self.stackWindow.uiState.cyclePointInfo()
         self.redraw()
 
-    def toggleHilight(self):
-        self.stackWindow.uiState.showHilighted = not self.stackWindow.uiState.showHilighted
+    def toggleMarked(self):
+        self.stackWindow.uiState.showMarked = not self.stackWindow.uiState.showMarked
         self.redraw()
 
     def toggleShowAll(self):

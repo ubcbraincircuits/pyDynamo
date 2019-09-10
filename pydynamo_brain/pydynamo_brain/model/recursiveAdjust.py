@@ -47,7 +47,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     volume = _IMG_CACHE.getVolume(fullState.uiStates[id - 1].imagePath)
     oldBox = _imageBoxIfInside(volume, fullState.channel, oldLocMin, oldLocMax)
     if oldBox is None:
-        callback(_recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent()))
+        callback(_recursiveMark(newTree, branch, fromPointIdx=point.indexInParent()))
         return
 
     xyz = point.location
@@ -57,7 +57,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
     newBox = _imageBoxIfInside(volume, fullState.channel, newLocMin, newLocMax)
     if newBox is None:
-        callback(_recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent()))
+        callback(_recursiveMark(newTree, branch, fromPointIdx=point.indexInParent()))
         return
 
     I1 = np.mean(oldBox.astype(np.int32) ** 2)
@@ -85,7 +85,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
         if Rxy < 25: # try a larger window
             recursiveAdjust(fullState, id, branch, point, pointref, callback, 25, 4)
         else:
-            callback(_recursiveHilight(newTree, branch, fromPointIdx=point.indexInParent()))
+            callback(_recursiveMark(newTree, branch, fromPointIdx=point.indexInParent()))
         return
 
     # Find optimal Z-offset for known 2d alignment
@@ -131,14 +131,14 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     # TODO - match up branches more cleverly, not just based on order
     for i, branch in enumerate(point.children):
         if i >= len(pointref.children): # unmatched branch
-            callback(_recursiveHilight(newTree, branch))
+            callback(_recursiveMark(newTree, branch))
             continue
 
         branchRef = pointref.children[i]
         if len(branch.points) == 0:
             continue # empty branch, skip
         elif len(branchRef.points) == 0:
-            callback(_recursiveHilight(newTree, branch)) # can't match to empty branch
+            callback(_recursiveMark(newTree, branch)) # can't match to empty branch
         else:
             recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0], callback)
 
@@ -157,21 +157,21 @@ def _recursiveMoveBranch(tree, branch, shift, fromPointIdx=0):
             for childBranch in pointToMove.children:
                 _recursiveMoveBranch(tree, childBranch, shift)
 
-# Hilight all down-tree points (mark as un-registered), and return the number hilighted
-def _recursiveHilight(tree, branch, fromPointIdx=0):
-    nHilighted = 0
+# Mark all down-tree points (mark as un-registered), and return the number marked
+def _recursiveMark(tree, branch, fromPointIdx=0):
+    nMarked = 0
     if branch is None:
         points = tree.flattenPoints()
         for point in points:
-            point.hilighted = True
-        nHilighted = len(points)
+            point.manuallyMarked = True
+        nMarked = len(points)
     else:
-        for pointToHilight in branch.points[fromPointIdx:]:
-            pointToHilight.hilighted = True
-            nHilighted = 1
-            for childBranch in pointToHilight.children:
-                nHilighted += _recursiveHilight(tree, childBranch)
-    return nHilighted
+        for pointToMark in branch.points[fromPointIdx:]:
+            pointToMark.manuallyMarked = True
+            nMarked = 1
+            for childBranch in pointToMark.children:
+                nMarked += _recursiveMark(tree, childBranch)
+    return nMarked
 
 def _imageBoxIfInside(volume, channel, fr, to):
     to = util.locationPlus(to, (1, 1, 1)) # inclusive to exclusive upper bounds

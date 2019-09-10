@@ -31,7 +31,7 @@ class Point():
     """Branches coming off the node."""
 
     hilighted = attr.ib(default=None, cmp=False, metadata=SAVE_META)
-    """Indicates which points could not be registered."""
+    """ NOTE: Hilighting has been removed, keep here for backwards compatibility."""
 
     manuallyMarked = attr.ib(default=None, cmp=False, metadata=SAVE_META)
     """Indicates which points have been marked to be revisited."""
