@@ -31,7 +31,6 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.initialMenu = InitialMenu(self)
         self.settingsWindow = SettingsWindow(self)
         self.stackList = StackListWindow(self)
-        self.analysisPopup = AnalysisWindow(self)
         self.currentStatusMessage = None
 
         self.root = self._setupUI()
@@ -230,7 +229,9 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     # Show analysis popup
     def openAnalysisPopup(self):
-        self.analysisPopup.show()
+        # Note: Open a new one each time, so it has the right FullState
+        # self.analysisPopup.show()
+        AnalysisWindow(self).show()
 
     # Make the settings dialog visible:
     def openSettings(self):

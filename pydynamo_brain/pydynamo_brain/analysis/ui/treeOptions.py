@@ -90,8 +90,8 @@ class ShollOptions(BaseOptions):
 
 # Parameters supported are passed to motility
 class MotilityOptions(BaseOptions):
-    def __init__(self, name):
-        super().__init__(name, tree.motility)
+    def __init__(self, name, methodToCall=tree.motility):
+        super().__init__(name, methodToCall)
 
     def fillOptionsInner(self, currentState, fullState, formParent):
         self.filoDist = QtWidgets.QLineEdit(formParent)
@@ -133,3 +133,13 @@ class MotilityOptions(BaseOptions):
             'excludeAxon': True,
             'excludeBasal': True,
         }
+
+# Filo count & density, same as motility, just different method:
+class FiloCountOptions(MotilityOptions):
+    def __init__(self, name):
+        super().__init__(name, tree.filoCount)
+
+class FiloDensityOptions(MotilityOptions):
+    def __init__(self, name):
+        # NOTE: TDBL also called, should get default includeFilo=True
+        super().__init__(name, tree.filoDensity)

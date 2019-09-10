@@ -27,8 +27,12 @@ class AnalysisWindow(QtWidgets.QMainWindow):
         for methodsPerType in self.analysisMethods.values():
             for method in methodsPerType:
                 for k, v in method.defaultValues().items():
+                    print (k, '->', v)
                     if k not in self.getOpt():
+                        print ("SETTING ", k)
                         self.getOpt()[k] = v
+
+        print (self.getOpt())
 
         # Build up tabs per analysis type:
         tabTree, self.listTree, self.optTreeLayout = self._buildTab('tree')
@@ -61,6 +65,8 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             'tree': [
                 treeOptions.PointCountOptions('Point Count'),
                 treeOptions.BranchCountOptions('Branch Count'),
+                treeOptions.FiloCountOptions('Filopodia Count'),
+                treeOptions.FiloDensityOptions('Filopodia Density'),
                 treeOptions.TDBLOptions('TDBL'),
                 treeOptions.MotilityOptions('Motility'),
                 treeOptions.ShollOptions('Sholl'),
@@ -121,6 +127,9 @@ class AnalysisWindow(QtWidgets.QMainWindow):
     def _updateOnChange(self):
         if self.lastOption is not None:
             self.getOpt().update(self.lastOption.readOptions())
+
+        print ("UPDATE")
+        print (self.getOpt())
 
         selected = self.tabs.currentIndex()
         if selected == 0:
