@@ -19,7 +19,7 @@ class AutoSaver():
         self.fullState = fullState
         self.lastSaveMs = util.currentTimeMillis()
 
-    def handleStateChange(self):
+    def handleStateChange(self, msgBoxFunc):
         msSinceLastSave = self._msSinceLastSave()
         if msSinceLastSave < MAX_UNSAVED_MS:
             return
@@ -27,8 +27,10 @@ class AutoSaver():
             return
 
         pathToSave = self._buildAutoSavePath(self.fullState._rootPath)
+        msgBox = msgBoxFunc("Autosaving...")
         saveState(self.fullState, pathToSave)
         self.lastSaveMs = util.currentTimeMillis()
+        msgBox.hide()
         print ("Autosaved to " + pathToSave)
 
     def _msSinceLastSave(self):

@@ -113,6 +113,14 @@ class ImageCache:
             self._images[path] = imgClean
         return self._images[path]
 
+    # Returns the number of volumes unloaded for the given states:
+    def unloadedCount(self, uiStates):
+        nUnloaded = 0
+        for uiState in uiStates:
+            if uiState.imagePath not in self._images:
+                nUnloaded += 1
+        return nUnloaded        
+
     # Applies post-processing to a loaded tiff - gamma correct, scale, and convert to uint8
     def _postProcess(self, image):
         image = image.astype(np.float64) ** 0.8 # Gamma correction

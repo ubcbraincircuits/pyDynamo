@@ -11,7 +11,7 @@ import time
 
 from .actions import FullStateActions
 from .analysisWindow import AnalysisWindow
-from .common import centerWindow, cursorPointer
+from .common import centerWindow, createAndShowInfo, cursorPointer
 from .initialMenu import InitialMenu
 from .settingsWindow import SettingsWindow
 from .stackListWindow import StackListWindow
@@ -370,7 +370,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
     # TODO - listen to full state changes.
     def maybeAutoSave(self):
         if self.autoSaver is not None:
-            self.autoSaver.handleStateChange()
+            self.autoSaver.handleStateChange(createAndShowInfo)
 
     def updateUndoStack(self, isRedo, originWindow=None):
         if originWindow is not None:

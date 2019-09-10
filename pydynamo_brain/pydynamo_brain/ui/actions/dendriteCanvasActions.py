@@ -158,6 +158,7 @@ class DendriteCanvasActions():
 
         # Progress bar! Note: array here as it's edited inside the callback.
         pointAt = [0]
+        infoBox = createAndShowInfo("Registering")
         self.canvas.stackWindow.statusBar().showMessage(
             "Registering...  %d/%d points processed." % (pointAt[0], pointCount))
         self.canvas.stackWindow.repaint()
@@ -172,6 +173,7 @@ class DendriteCanvasActions():
         msg = QMessageBox(QMessageBox.Information, "Registration",
             "Registration complete! Unregistered points marked, press 'h' to toggle showing them.", parent=self.canvas)
         msg.show()
+        infoBox.hide()
         self.canvas.stackWindow.statusBar().clearMessage()
 
     def simpleRegisterImages(self, windowIndex, somaScale=1.01):

@@ -6,6 +6,10 @@ from .punctaActions import PunctaActions
 
 from pydynamo_brain.analysis import absOrient
 from pydynamo_brain.model.tree import *
+from pydynamo_brain.ui.common import createAndShowInfo
+from pydynamo_brain.util import ImageCache
+
+_IMG_CACHE = ImageCache()
 
 class FullStateActions():
     def __init__(self, fullState, history):
@@ -110,7 +114,14 @@ class FullStateActions():
         self.selectPoint(localIdx, nextToSelect, avoidPush=True)
 
     def changeAllZAxis(self, zDelta):
+        nUnloadedVolumes = _IMG_CACHE.unloadedCount(self.state.uiStates)
+
+        infoBox = None
+        if nUnloadedVolumes > 0:
+            infoBox = createAndShowInfo("Loading %d image volumes..." % nUnloadedVolumes)
         self.state.changeAllZAxis(zDelta)
+        if infoBox is not None:
+            infoBox.hide()
 
     def nextChannel(self):
         self.history.pushState()

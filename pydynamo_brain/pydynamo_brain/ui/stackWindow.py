@@ -79,6 +79,7 @@ class StackWindow(QtWidgets.QMainWindow):
 
     def redraw(self):
         self.dendrites.redraw()
+        self.parent().maybeAutoSave()
 
     # Get the current x,y position of the selected point
     def getSelectionLocation(self):
@@ -108,7 +109,7 @@ class StackWindow(QtWidgets.QMainWindow):
         if laterStacks:
             self.parent().redrawAllStacks()
         else:
-            self.dendrites.redraw()
+            self.redraw()
 
     def doPunctaMove(self, dX, dY, laterStacks):
         MOVE_FACTOR = 0.05 # 1/20 of screen per button press
@@ -120,14 +121,14 @@ class StackWindow(QtWidgets.QMainWindow):
         if laterStacks:
             self.parent().redrawAllStacks()
         else:
-            self.dendrites.redraw()
+            self.redraw()
 
     def doPunctaGrow(self, dR, laterStacks):
         self.fullActions.punctaActions.relativeGrow(self.windowIndex, dR, laterStacks)
         if laterStacks:
             self.parent().redrawAllStacks()
         else:
-            self.dendrites.redraw()
+            self.redraw()
 
     def keyPressEvent(self, event):
         try:
