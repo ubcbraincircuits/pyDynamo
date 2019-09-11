@@ -6,11 +6,9 @@ import numpy as np
 
 import pydynamo_brain.util as util
 
-LINE_COLOR_COUNT = 7
-LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
+from .branchToColorMap import BranchToColorMap
 
-def colorForBranch(branchNumber):
-    return LINE_COLORS[(branchNumber + 1) % LINE_COLOR_COUNT] # +1 to start at yellow, not red.
+_BRANCH_TO_COLOR_MAP = BranchToColorMap()
 
 """
 White dot = point on this plane
@@ -40,6 +38,7 @@ class DendritePainter():
         self.zAt = self.uiState.zAxisAt
         self.zoomMapFunc = zoomMapFunc
         self.zoomDistFunc = zoomDistFunc
+        # POIUY remove
         self.branchAt = 0
 
     def drawTree(self, tree):
@@ -137,12 +136,10 @@ class DendritePainter():
         drawAll = (self.uiState.branchDisplayMode == 1)
         drawNear = not (self.uiState.branchDisplayMode == 2)
         if same1 or same2:
-            color = colorForBranch(self.branchAt)
-            color = QColor.fromRgbF(color[0], color[1], color[2])
+            color = _BRANCH_TO_COLOR_MAP.colorForBranch(self.branchAt)
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.SolidLine)
         elif drawNear and (near1 or near2 or drawAll):
-            color = colorForBranch(self.branchAt)
-            color = QColor.fromRgbF(color[0], color[1], color[2])
+            color = _BRANCH_TO_COLOR_MAP.colorForBranch(self.branchAt)
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.DotLine)
         else:
             return None

@@ -3,7 +3,9 @@ import numpy as np
 import pydynamo_brain.util as util
 
 from pydynamo_brain.ui.baseMatplotlibCanvas import BaseMatplotlibCanvas
-from pydynamo_brain.ui.dendritePainter import colorForBranch
+from pydynamo_brain.ui.branchToColorMap import BranchToColorMap
+
+_BRANCH_TO_COLOR_MAP = BranchToColorMap()
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class Tree3DCanvas(BaseMatplotlibCanvas):
@@ -67,22 +69,11 @@ class Tree3DCanvas(BaseMatplotlibCanvas):
                 continue
             points = [branch.parentPoint] + branch.points
             x, y, z = treeModel.worldCoordPoints(points)
-            ax.plot(x, y, z, c=colorForBranch(i))
+            ax.plot(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(i))
 
         # And finally draw the soma as a big sphere:
         x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
-        ax.scatter(x, y, z, c=colorForBranch(0), s=100)
-
-
-    # Given one tree, draw sholl data for that tree
-    def drawSingleTreeSholl(self, ax, treeIdx):
-        counts, xs, pCoeff, maxX, maxY = self.shollResults[treeIdx]
-        bounds = [np.min(xs), np.max(xs)]
-        hdPolyX = np.arange(bounds[0], bounds[1], (bounds[1]-bounds[0]) / 1000)
-
-        ax.bar(xs, counts, width=(self.binSizeUm * 0.8), color='b', alpha=0.5, zorder=1)
-        ax.plot(hdPolyX, npPoly.polyval(hdPolyX, pCoeff).clip(min=0), color='b', zorder=2)
-        ax.scatter(maxX, maxY, c='r', zorder=3)
+        ax.scatter(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(0), s=100)
 
     def needToUpdate(self):
         for ax in self.axes:
