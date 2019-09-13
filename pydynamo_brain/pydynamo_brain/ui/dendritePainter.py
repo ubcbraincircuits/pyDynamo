@@ -38,8 +38,6 @@ class DendritePainter():
         self.zAt = self.uiState.zAxisAt
         self.zoomMapFunc = zoomMapFunc
         self.zoomDistFunc = zoomDistFunc
-        # POIUY remove
-        self.branchAt = 0
 
     def drawTree(self, tree):
         if self.uiState.hideAll:
@@ -50,7 +48,6 @@ class DendritePainter():
 
         for branch in tree.branches:
             self.drawBranchLines(branch)
-            self.branchAt = self.branchAt + 1
         if tree.rootPoint is not None:
             self.drawPoint(tree.rootPoint, selectedPointID)
         for branch in tree.branches:
@@ -63,7 +60,7 @@ class DendritePainter():
                 continue # In theory should not get triggered, but added just in case.
             lastX, lastY, lastZ = self.zoomedLocation(previousPoint.location)
             thisX, thisY, thisZ = self.zoomedLocation(branch.points[i].location)
-            linePen = self.getLinePen(lastZ, thisZ)
+            linePen = self.getLinePen(branch, lastZ, thisZ)
             if linePen is not None:
                 self.p.setPen(linePen)
                 self.p.drawLine(lastX, lastY, thisX, thisY)
@@ -129,17 +126,17 @@ class DendritePainter():
         )
         self.p.drawText(textRect, Qt.AlignVCenter, text)
 
-    def getLinePen(self, z1, z2):
+    def getLinePen(self, branch, z1, z2):
+        color = _BRANCH_TO_COLOR_MAP.colorForBranch(branch)
+
         same1, same2 = round(z1) == self.zAt, round(z2) == self.zAt
         near1, near2 = self.isNearZ(z1), self.isNearZ(z2)
 
         drawAll = (self.uiState.branchDisplayMode == 1)
         drawNear = not (self.uiState.branchDisplayMode == 2)
         if same1 or same2:
-            color = _BRANCH_TO_COLOR_MAP.colorForBranch(self.branchAt)
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.SolidLine)
         elif drawNear and (near1 or near2 or drawAll):
-            color = _BRANCH_TO_COLOR_MAP.colorForBranch(self.branchAt)
             return QPen(QBrush(color), self.uiState.parent().lineWidth, Qt.DotLine)
         else:
             return None

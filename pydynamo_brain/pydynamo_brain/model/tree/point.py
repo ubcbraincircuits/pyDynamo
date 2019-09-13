@@ -30,11 +30,11 @@ class Point():
     children = attr.ib(default=attr.Factory(list))
     """Branches coming off the node."""
 
-    hilighted = attr.ib(default=None, cmp=False, metadata=SAVE_META)
-    """ NOTE: Hilighting has been removed, keep here for backwards compatibility."""
-
     manuallyMarked = attr.ib(default=None, cmp=False, metadata=SAVE_META)
     """Indicates which points have been marked to be revisited."""
+
+    hilighted = attr.ib(default=None, cmp=False, metadata=SAVE_META)
+    """ NOTE: Hilighting has been removed, keep here for backwards compatibility."""
 
     def isRoot(self):
         """Whether this point represents the root of the whole tree."""

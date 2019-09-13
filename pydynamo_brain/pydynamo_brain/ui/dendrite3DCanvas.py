@@ -32,11 +32,11 @@ class Dendrite3DCanvas(BaseMatplotlibCanvas):
                 continue
             points = [branch.parentPoint] + branch.points
             x, y, z = self.treeModel.worldCoordPoints(points)
-            ax.plot(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(i))
+            ax.plot(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(branch))
 
         # And finally draw the soma as a big sphere:
         x, y, z = self.treeModel.worldCoordPoints([self.treeModel.rootPoint])
-        ax.scatter(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(0), s=100)
+        ax.scatter(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(None), s=100)
 
         # Scale results to keep same aspect ratio (matplotlib apsect='equal' is broken in 3d...)
         x, y, z = self.treeModel.worldCoordPoints(self.treeModel.flattenPoints())

@@ -11,6 +11,7 @@ import time
 
 from .actions import FullStateActions
 from .analysisWindow import AnalysisWindow
+from .branchToColorMap import BranchToColorMap
 from .common import centerWindow, createAndShowInfo, cursorPointer
 from .initialMenu import InitialMenu
 from .settingsWindow import SettingsWindow
@@ -28,6 +29,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.history = History(self.fullState)
         self.fullActions = FullStateActions(self.fullState, self.history)
         self.autoSaver = AutoSaver(self.fullState)
+        BranchToColorMap().initFromFullState(self.fullState)
         self.initialMenu = InitialMenu(self)
         self.settingsWindow = SettingsWindow(self)
         self.stackList = StackListWindow(self)
@@ -119,6 +121,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.history = History(self.fullState)
             self.fullActions = FullStateActions(self.fullState, self.history)
             self.autoSaver = AutoSaver(self.fullState)
+            BranchToColorMap().initFromFullState(self.fullState)
             self.initialMenu.hide()
             self.makeNewWindows()
 
@@ -133,6 +136,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             self.history = History(self.fullState)
             self.fullActions = FullStateActions(self.fullState, self.history)
             self.autoSaver = AutoSaver(self.fullState)
+            BranchToColorMap().initFromFullState(self.fullState)
             self.initialMenu.hide()
             self.makeNewWindows()
 

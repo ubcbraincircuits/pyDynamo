@@ -73,7 +73,7 @@ class Tree():
                     self.rootPoint = None
                 else:
                     print ("You can't remove the soma if other points exist - please remove those first!")
-                    return None
+                return None
             else:
                 result = pointToRemove.parentBranch.removePointLocally(pointToRemove)
                 # Clean up branch if its only point was removed

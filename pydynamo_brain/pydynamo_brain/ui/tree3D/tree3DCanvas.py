@@ -69,11 +69,11 @@ class Tree3DCanvas(BaseMatplotlibCanvas):
                 continue
             points = [branch.parentPoint] + branch.points
             x, y, z = treeModel.worldCoordPoints(points)
-            ax.plot(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(i))
+            ax.plot(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(branch))
 
         # And finally draw the soma as a big sphere:
         x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
-        ax.scatter(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(0), s=100)
+        ax.scatter(x, y, z, c=_BRANCH_TO_COLOR_MAP.rgbForBranch(None), s=100)
 
     def needToUpdate(self):
         for ax in self.axes:

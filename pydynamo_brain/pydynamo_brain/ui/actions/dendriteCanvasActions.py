@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QMes
 
 import pydynamo_brain.util as util
 
+from pydynamo_brain.ui.branchToColorMap import BranchToColorMap
 from pydynamo_brain.ui.common import createAndShowInfo
 from pydynamo_brain.ui.dendrite3DViewWindow import Dendrite3DViewWindow
 from pydynamo_brain.ui.helpDialog import showHelpDialog
@@ -22,6 +23,7 @@ class DendriteCanvasActions():
         self.uiState = uiState
         self.canvas = dendriteCanvas
         self.imagePath = imagePath
+        self.branchToColorMap = BranchToColorMap()
 
     def updateUIState(self, newUiState):
         self.uiState = newUiState
@@ -124,6 +126,7 @@ class DendriteCanvasActions():
         lastTree = self.uiState.parent().trees[windowIndex - 1]
         assert thisTree is not None and lastTree is not None
         thisTree.clearAndCopyFrom(lastTree, None) # No id maker, so clone IDs
+        self.branchToColorMap.addNewTree(thisTree)
 
     def importPointsFromSWC(self, windowIndex, filePath):
         thisTree = self.uiState.parent().trees[windowIndex]
@@ -133,6 +136,7 @@ class DendriteCanvasActions():
         newTree = importFromSWC(filePath)
         if newTree is not None:
             thisTree.clearAndCopyFrom(newTree, self.uiState.parent())
+            self.branchToColorMap.addNewTree(thisTree)
 
     def smartRegisterImages(self, windowIndex):
         if windowIndex == 0:

@@ -6,6 +6,7 @@ from .punctaActions import PunctaActions
 
 from pydynamo_brain.analysis import absOrient
 from pydynamo_brain.model.tree import *
+from pydynamo_brain.ui.branchToColorMap import BranchToColorMap
 from pydynamo_brain.ui.common import createAndShowInfo
 from pydynamo_brain.util import ImageCache
 
@@ -16,6 +17,7 @@ class FullStateActions():
         self.state = fullState
         self.history = history
         self.punctaActions = PunctaActions(fullState, history)
+        self.branchToColorMap = BranchToColorMap()
 
     def selectPoint(self, localIdx, point, avoidPush=False, deselectHidden=False):
         if not avoidPush:
@@ -60,7 +62,12 @@ class FullStateActions():
         if newPoint is None:
             # Points exist, but none selected. Skipping.
             return
+
         newPointBranchID = None if newPoint.isRoot() else newPoint.parentBranch.id
+        # If child of the root, make sure to add a color for this branch:
+        pointBefore = newPoint.nextPointInBranch(delta=-1)
+        if pointBefore is not None and pointBefore.isRoot():
+            self.branchToColorMap.updateBranch(newPoint.parentBranch)
 
         for i in range(localIdx + 1, len(self.state.uiStates)):
             state = self.state.uiStates[i]
@@ -72,6 +79,7 @@ class FullStateActions():
         localState = self.state.uiStates[localIdx]
         currentSource = localState.currentPoint()
         newPoint, newBranch = localState.addPointToNewBranchAndSelect(location)
+        self.branchToColorMap.updateBranch(newBranch)
 
         for i in range(localIdx + 1, len(self.state.uiStates)):
             state = self.state.uiStates[i]
@@ -187,7 +195,13 @@ class FullStateActions():
             if childPoint.subtreeContainsID(newParent.id):
                 print ("Can't set that as the parent, it will cause a loop!")
                 return
+
+            oldBranch = childPoint.parentBranch
             newBranchID = state._tree.reparentPoint(childPoint, newParent, newBranchID)
+            self.branchToColorMap.updateBranch(oldBranch)
+            if newBranchID is not None:
+                newBranch = state._tree.getBranchByID(newBranchID)
+                self.branchToColorMap.updateBranch(newBranch)
 
         self.state.uiStates[localIdx].isReparenting = False
 
@@ -210,12 +224,14 @@ class FullStateActions():
         self.history.pushState()
         for i, tree in enumerate(self.state.trees):
             tree.updateAllPrimaryBranches()
+        self.branchToColorMap.initFromFullState(self.state)
 
     def cleanBranchIDs(self):
         """For each branch, set the branch ID to the ID of the first point along it."""
         self.history.pushState()
         for i, tree in enumerate(self.state.trees):
             tree.cleanBranchIDs()
+        self.branchToColorMap.initFromFullState(self.state)
 
     def cleanEmptyBranches(self):
         """For each branch, if it has no points, remove it completely."""
