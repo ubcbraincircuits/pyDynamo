@@ -57,7 +57,7 @@ class UIState():
     zProject = attr.ib(default=False)
 
     # UI Option for whether or not to show marked points in a different color
-    showMarked = attr.ib(default=False)
+    showMarked = attr.ib(default=True)
 
     # UI Option for whether or not to show *all* the points and dendrites
     hideAll = attr.ib(default=False)
