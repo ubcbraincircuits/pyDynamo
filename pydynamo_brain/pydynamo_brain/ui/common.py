@@ -36,8 +36,8 @@ def clearChildWidgets(layout):
     layout.parentWidget().repaint()
 
 # Create and pop up a message window, to grab access while slow stuff is happening
-def createAndShowInfo(msg):
-    infoBox = QMessageBox(QMessageBox.Information, msg, "")
+def createAndShowInfo(msg, parentWindow):
+    infoBox = QMessageBox(QMessageBox.Information, msg, "", parent=parentWindow)
     infoBox.setWindowModality(Qt.NonModal)
     infoBox.show()
     return infoBox

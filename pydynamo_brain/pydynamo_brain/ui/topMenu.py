@@ -179,7 +179,7 @@ class TopMenu():
         pointOrBranchID, okPressed = QtWidgets.QInputDialog.getText(self.stackWindow,
             "Find by ID", "Point or Branch ID:", QtWidgets.QLineEdit.Normal, "")
         if okPressed:
-            self._global().findByID(pointOrBranchID)
+            self._global().findByID(pointOrBranchID, self.stackWindow)
 
     def annotateThis(self):
         self._global().fullActions.getAnnotation(
@@ -191,7 +191,7 @@ class TopMenu():
         self._global().fullActions.getAnnotation(
             self.stackWindow.windowIndex, self.stackWindow, True
         )
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def registerSmart(self):
         if self._global().fullState.inManualRegistrationMode:
@@ -210,41 +210,41 @@ class TopMenu():
 
     def primaryBranch(self):
         self._global().fullActions.setSelectedAsPrimaryBranch(self.stackWindow.windowIndex)
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def allPrimaryBranches(self):
         self._global().updateAllPrimaryBranches(self.stackWindow)
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def cleanBranchIDs(self):
         self._global().fullActions.cleanBranchIDs()
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def cleanEmptyBranches(self):
         self._global().cleanEmptyBranches(self.stackWindow)
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def punctaMode(self):
-        self._global().togglePunctaMode()
+        self._global().togglePunctaMode(self.stackWindow)
         self._updateForDrawMode()
 
     def manualRegister(self):
-        self._global().toggleManualRegistration()
+        self._global().toggleManualRegistration(self.stackWindow)
         self._updateForDrawMode()
 
     def alignIDsToFirst(self):
         if self._global().fullState.inManualRegistrationMode:
             self._global().fullActions.alignVisibleIDs(toNewID=False)
-            self._global().redrawAllStacks()
+            self._global().redrawAllStacks(self.stackWindow)
 
     def alignIDsToNew(self):
         if self._global().fullState.inManualRegistrationMode:
             self._global().fullActions.alignVisibleIDs(toNewID=True)
-            self._global().redrawAllStacks()
+            self._global().redrawAllStacks(self.stackWindow)
 
     def cyclePointModes(self):
         self._local().cyclePointModes()
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     # View menu callbacks:
     def zoomIn(self):
@@ -263,7 +263,7 @@ class TopMenu():
             print ("Need at least one tree for 3D arbor view")
             return
 
-        infoBox = createAndShowInfo("Drawing 3D trees...")
+        infoBox = createAndShowInfo("Drawing 3D trees...", self.stackWindow)
         Tree3DViewWindow(parent, parent.fullState, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
         infoBox.hide()
@@ -273,19 +273,19 @@ class TopMenu():
 
     def toggleLineSize(self):
         self._global().fullState.toggleLineWidth()
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def toggleDotSize(self):
         self._global().fullState.toggleDotSize()
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def changeChannel(self):
         self._global().fullActions.nextChannel()
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def toggleColor(self):
         self._global().fullState.useColor = not self._global().fullState.useColor
-        self._global().redrawAllStacks()
+        self._global().redrawAllStacks(self.stackWindow)
 
     def cycleBranchDisplayMode(self):
         self.stackWindow.uiState.cycleBranchDisplayMode()
@@ -329,7 +329,7 @@ class TopMenu():
             print ("Need >= 2 trees for morphometrics display")
             return
 
-        infoBox = createAndShowInfo("Calculating Motility...")
+        infoBox = createAndShowInfo("Calculating Motility...", self.stackWindow)
         opt = parent.fullState.projectOptions.motilityOptions
         Motility3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, is2D, parent.fullState.filePaths, opt).show()
@@ -340,7 +340,7 @@ class TopMenu():
         if len(parent.fullState.trees) <= 1:
             print ("Need >= 2 trees for registration display")
             return
-        infoBox = createAndShowInfo("Calculating Registration...")
+        infoBox = createAndShowInfo("Calculating Registration...", self.stackWindow)
         Registration3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
         infoBox.hide()
@@ -351,7 +351,7 @@ class TopMenu():
             print ("Need at least one tree for Sholl display")
             return
 
-        infoBox = createAndShowInfo("Calculating Sholl...")
+        infoBox = createAndShowInfo("Calculating Sholl...", self.stackWindow)
         ShollViewWindow(parent, parent.fullState, self.stackWindow.windowIndex,
             parent.fullState.trees, parent.fullState.filePaths).show()
         infoBox.hide()

@@ -25,6 +25,9 @@ class DendriteCanvasActions():
         self.imagePath = imagePath
         self.branchToColorMap = BranchToColorMap()
 
+    def _stackWindow(self):
+        return self.canvas.stackWindow
+
     def updateUIState(self, newUiState):
         self.uiState = newUiState
 
@@ -107,14 +110,16 @@ class DendriteCanvasActions():
         QMessageBox.information(self.canvas.parent(), "Done", "Checks performed - see console for results")
 
     def launch3DArbor(self):
-        infoBox = createAndShowInfo("Drawing 3D Arbor")
-        viewWindow = Dendrite3DViewWindow(self.canvas.parent(), self.imagePath, self.uiState._tree)
+        stackWindow = self._stackWindow()
+        infoBox = createAndShowInfo("Drawing 3D Arbor", stackWindow)
+        viewWindow = Dendrite3DViewWindow(stackWindow, self.imagePath, self.uiState._tree)
         infoBox.hide()
         viewWindow.show()
 
     def launch3DVolume(self):
-        infoBox = createAndShowInfo("Drawing 3D Volume")
-        viewWindow = Volume3DWindow(self.canvas.parent(), self.uiState, applyColorLimits=True)
+        stackWindow = self._stackWindow()
+        infoBox = createAndShowInfo("Drawing 3D Volume", stackWindow)
+        viewWindow = Volume3DWindow(stackWindow, self.uiState, applyColorLimits=True)
         infoBox.hide()
         viewWindow.show()
 
@@ -142,6 +147,8 @@ class DendriteCanvasActions():
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
+
+        stackWindow = self._stackWindow()
         self.fullActions.history.pushState()
 
         pointNew = self.uiState.currentPoint()
@@ -162,7 +169,7 @@ class DendriteCanvasActions():
 
         # Progress bar! Note: array here as it's edited inside the callback.
         pointAt = [0]
-        infoBox = createAndShowInfo("Registering")
+        infoBox = createAndShowInfo("Registering", stackWindow)
         self.canvas.stackWindow.statusBar().showMessage(
             "Registering...  %d/%d points processed." % (pointAt[0], pointCount))
         self.canvas.stackWindow.repaint()

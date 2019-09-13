@@ -86,7 +86,7 @@ class DendriteVolumeCanvas(QWidget):
             # Shortcut out in puncta mode:
             if self.uiState.parent().inPunctaMode:
                 if self.handlePunctaClick(location, shiftPressed, ctrlPressed, rightClick, middleClick):
-                    self.dynamoWindow.redrawAllStacks()
+                    self.dynamoWindow.redrawAllStacks(self.stackWindow)
                 return
 
             pointClicked = self.pointOnPixel(location)
@@ -147,7 +147,7 @@ class DendriteVolumeCanvas(QWidget):
                     self.fullActions.selectPoint(self.windowIndex, pointClicked)
                 else:
                     self.fullActions.addPointToCurrentBranchAndSelect(self.windowIndex, location)
-            self.dynamoWindow.redrawAllStacks() # HACK - redraw only those that have changed.
+            self.dynamoWindow.redrawAllStacks(self.stackWindow)
         except Exception as e:
             print ("Whoops - error on click: " + str(e))
             raise
@@ -177,8 +177,8 @@ class DendriteVolumeCanvas(QWidget):
             scrollDelta = -(int)(np.ceil(event.angleDelta().y() / self.SCROLL_SENSITIVITY))
             if self.INVERT_SCROLL:
                 scrollDelta *= -1
-            self.fullActions.changeAllZAxis(scrollDelta)
-            self.dynamoWindow.redrawAllStacks()
+            self.fullActions.changeAllZAxis(scrollDelta, self.stackWindow)
+            self.dynamoWindow.redrawAllStacks(self.stackWindow)
         except Exception as e:
             print ("Whoops - error on scroll: " + str(e))
 

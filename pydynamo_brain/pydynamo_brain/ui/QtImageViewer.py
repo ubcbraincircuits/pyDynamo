@@ -245,7 +245,7 @@ class QtImageViewer(QGraphicsView):
         if not alreadySetFromScroll:
             self.fitInView(newViewRect, self.aspectRatioMode) # Only set locally if not done already...
         if not self.onlyPerformLocalViewRect:
-            self.parentView.dynamoWindow.handleDendriteMoveViewRect(newViewRect)
+            self.parentView.dynamoWindow.handleDendriteMoveViewRect(newViewRect, self.parentView.stackWindow)
         self.ignoreGlobalMoveViewRect = False
 
     def handleGlobalMoveViewRect(self, newViewRect):

@@ -79,7 +79,7 @@ class StackWindow(QtWidgets.QMainWindow):
 
     def redraw(self):
         self.dendrites.redraw()
-        self.parent().maybeAutoSave()
+        self.parent().maybeAutoSave(self)
 
     # Get the current x,y position of the selected point
     def getSelectionLocation(self):
@@ -107,7 +107,7 @@ class StackWindow(QtWidgets.QMainWindow):
         dY = dY * scale * MOVE_FACTOR
         self.fullActions.doMove(self.windowIndex, dX, dY, downstream, laterStacks)
         if laterStacks:
-            self.parent().redrawAllStacks()
+            self.parent().redrawAllStacks(self)
         else:
             self.redraw()
 
@@ -119,14 +119,14 @@ class StackWindow(QtWidgets.QMainWindow):
         dY = dY * scale * MOVE_FACTOR
         self.fullActions.punctaActions.relativeMove(self.windowIndex, dX, dY, laterStacks)
         if laterStacks:
-            self.parent().redrawAllStacks()
+            self.parent().redrawAllStacks(self)
         else:
             self.redraw()
 
     def doPunctaGrow(self, dR, laterStacks):
         self.fullActions.punctaActions.relativeGrow(self.windowIndex, dR, laterStacks)
         if laterStacks:
-            self.parent().redrawAllStacks()
+            self.parent().redrawAllStacks(self)
         else:
             self.redraw()
 
@@ -200,14 +200,14 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.fullActions.selectNextPoints(delta)
                     self.parent().updateSelectionLocation(locationSnapshot)
 
-                self.parent().redrawAllStacks()
+                self.parent().redrawAllStacks(self)
             elif key == ord('?'):
                 # First child of current point selector
                 if not self.uiState._parent.inPunctaMode:
                     locationSnapshot = self.parent().snapshotSelectionLocation()
                     self.fullActions.selectFirstChildren()
                     self.parent().updateSelectionLocation(locationSnapshot)
-                    self.parent().redrawAllStacks()
+                    self.parent().redrawAllStacks(self)
 
             if self.uiState._parent.inManualRegistrationMode:
                 return
@@ -220,7 +220,7 @@ class StackWindow(QtWidgets.QMainWindow):
                     print ("Need to select a point before you can delete...")
                 else:
                     self.fullActions.deletePoint(self.windowIndex, toDelete, laterStacks=shftPressed)
-                    self.parent().redrawAllStacks() # HACK - auto redraw on change
+                    self.parent().redrawAllStacks(self)
 
         except Exception as e:
             print ("Whoops - error on keypress: " + str(e))

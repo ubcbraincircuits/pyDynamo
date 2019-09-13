@@ -177,59 +177,59 @@ class DynamoWindow(QtWidgets.QMainWindow):
         QtWidgets.QMessageBox.information(parentWindow, "Save complete", "SWC files saved!")
 
     # Global key handler for actions shared between all stack windows
-    def childKeyPress(self, event, childWindow):
+    def childKeyPress(self, event, originWindow):
         key = event.key()
         ctrlPressed = (event.modifiers() & Qt.ControlModifier)
         shftPressed = (event.modifiers() & Qt.ShiftModifier)
 
         if (key == ord('1')):
-            self.fullActions.changeAllZAxis(1)
-            self.redrawAllStacks()
+            self.fullActions.changeAllZAxis(1, originWindow)
+            self.redrawAllStacks(originWindow)
             return True
         elif (key == ord('2')):
-            self.fullActions.changeAllZAxis(-1)
-            self.redrawAllStacks()
+            self.fullActions.changeAllZAxis(-1, originWindow)
+            self.redrawAllStacks(originWindow)
             return True
 
         return False
 
     # For all stacks, redraw those who have a window open:
-    def redrawAllStacks(self):
+    def redrawAllStacks(self, originWindow):
         for window in self.stackWindows:
             if window is not None:
                 window.dendrites.drawImage()
-        self.maybeAutoSave()
+        self.maybeAutoSave(originWindow)
 
     # For all stacks, move the image for those who have a window open:
-    def handleDendriteMoveViewRect(self, viewRect):
+    def handleDendriteMoveViewRect(self, viewRect, originWindow):
         for window in self.stackWindows:
             if window is not None:
                 window.dendrites.imgView.handleGlobalMoveViewRect(viewRect)
-        self.maybeAutoSave()
+        self.maybeAutoSave(originWindow)
 
     # Either start puncta drawing, or stop
-    def togglePunctaMode(self):
+    def togglePunctaMode(self, originWindow):
         if not self.fullState.inPunctaMode:
             self.updateStatusMessage("Drawing puncta...")
         else:
             self.updateStatusMessage(None)
         self.fullActions.togglePunctaMode()
-        self.redrawAllStacks()
+        self.redrawAllStacks(originWindow)
 
     # Either start manual registration, or stop (and maybe save)
-    def toggleManualRegistration(self):
+    def toggleManualRegistration(self, originWindow):
         if not self.fullState.inManualRegistrationMode:
             self.updateStatusMessage("Manual ID registration active...")
         else:
             self.updateStatusMessage(None)
 
         self.fullActions.toggleManualRegistration()
-        self.redrawAllStacks()
+        self.redrawAllStacks(originWindow)
 
     # Find a point or branch by ID:
-    def findByID(self, pointOrBranchID):
+    def findByID(self, pointOrBranchID, originWindow):
         self.fullActions.findPointOrBranch(pointOrBranchID)
-        self.redrawAllStacks()
+        self.redrawAllStacks(originWindow)
 
     # Show analysis popup
     def openAnalysisPopup(self):
@@ -372,9 +372,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
         originWindow.statusBar().clearMessage()
 
     # TODO - listen to full state changes.
-    def maybeAutoSave(self):
+    def maybeAutoSave(self, originWindow=None):
         if self.autoSaver is not None:
-            self.autoSaver.handleStateChange(createAndShowInfo)
+            showInfoCB = lambda msg: createAndShowInfo(msg, originWindow)
+            self.autoSaver.handleStateChange(showInfoCB)
 
     def updateUndoStack(self, isRedo, originWindow=None):
         if originWindow is not None:
@@ -389,6 +390,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
             if not self.history.undo():
                 closeStatus()
                 return
+        BranchToColorMap().initFromFullState(self.fullState)
 
         while len(self.stackWindows) > len(self.fullState.uiStates):
             lastWindow = self.stackWindows.pop()
