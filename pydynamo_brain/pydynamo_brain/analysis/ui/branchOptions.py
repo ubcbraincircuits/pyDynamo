@@ -71,3 +71,27 @@ class BranchTypeOptions(BaseOptions):
             'excludeAxon': True,
             'excludeBasal': True
         }
+
+
+# Type of branch order, whether it's centrifugal (default) or shaft
+class BranchOrderOptions(BaseOptions):
+    def __init__(self, name):
+        super().__init__(name, branch.branchOrder)
+
+    def fillOptionsInner(self, currentState, fullState, formParent):
+        self.shaftOrder = QtWidgets.QCheckBox(formParent)
+        k = 'shaftOrder'
+        self.shaftOrder.setChecked(currentState[k] if k in currentState else False)
+        self._addFormRow("Shaft order?", self.shaftOrder)
+
+    def readOptions(self):
+        localOptions = {
+            'shaftOrder': self.shaftOrder.isChecked(),
+        }
+        localOptions.update(super().readOptions())
+        return localOptions
+
+    def defaultValues(self):
+        return {
+            'shaftOrder': False,
+        }

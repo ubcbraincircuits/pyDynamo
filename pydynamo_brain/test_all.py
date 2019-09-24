@@ -5,6 +5,7 @@ from pydynamo_brain.test import (
     absOrientTest,
     dendrogramTest,
     historyTest,
+    modelTest,
     motilityTest,
     recursiveAdjustTest,
     shollTest,
@@ -27,6 +28,11 @@ def test_dendrogram():
 def test_history():
     print ("History test...")
     assert historyTest.run()
+    print ("")
+
+def test_model():
+    print ("Model test...")
+    assert modelTest.run()
     print ("")
 
 def test_motility():

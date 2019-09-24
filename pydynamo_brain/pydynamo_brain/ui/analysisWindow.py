@@ -27,12 +27,8 @@ class AnalysisWindow(QtWidgets.QMainWindow):
         for methodsPerType in self.analysisMethods.values():
             for method in methodsPerType:
                 for k, v in method.defaultValues().items():
-                    print (k, '->', v)
                     if k not in self.getOpt():
-                        print ("SETTING ", k)
                         self.getOpt()[k] = v
-
-        print (self.getOpt())
 
         # Build up tabs per analysis type:
         tabTree, self.listTree, self.optTreeLayout = self._buildTab('tree')
@@ -74,6 +70,7 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             'branch': [
                 branchOptions.BranchLengthOptions('Branch Length'),
                 branchOptions.BranchTypeOptions('Branch Type'),
+                branchOptions.BranchOrderOptions('Branch order'),
                 branchOptions.IsAxonOptions('Is axon?'),
                 branchOptions.IsBasalOptions('Is basal?'),
                 branchOptions.BranchParentIDOptions('Branch Parent IDs'),
@@ -127,9 +124,6 @@ class AnalysisWindow(QtWidgets.QMainWindow):
     def _updateOnChange(self):
         if self.lastOption is not None:
             self.getOpt().update(self.lastOption.readOptions())
-
-        print ("UPDATE")
-        print (self.getOpt())
 
         selected = self.tabs.currentIndex()
         if selected == 0:

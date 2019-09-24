@@ -74,3 +74,23 @@ def branchParentIDs(fullState, branchIDList, **kwargs):
         result['parentPointID_%02d' % (treeIdx + 1)] = parentPointIDs
         result['parentBranchID_%02d' % (treeIdx + 1)] = parentBranchIDs
     return pd.DataFrame(data=result, index=branchIDList).sort_index(axis=1)
+
+# For each branch, find the branch order (shaft or centrifugal)
+# https://www.mbfbioscience.com/help/nl11/Default.htm#Editing/branchOrder.htm
+def branchOrder(fullState, branchIDList, **kwargs):
+    centrifugalOrder = True
+    if 'shaftOrder' in kwargs:
+        centrifugalOrder = not kwargs['shaftOrder']
+
+    result = {}
+    for treeIdx, tree in enumerate(fullState.trees):
+        branchOrders = []
+        for branchID in branchIDList:
+            branch = tree.getBranchByID(branchID)
+            if branch is None:
+                branchOrders.append(-1)
+            else:
+                branchOrders.append(branch.getOrder(centrifugalOrder))
+        result['order_%02d' % (treeIdx + 1)] = branchOrders
+
+    return pd.DataFrame(data=result, index=branchIDList).sort_index(axis=1)

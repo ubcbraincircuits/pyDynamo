@@ -94,6 +94,32 @@ class Branch():
         totalLength, _ = self.worldLengths()
         return totalLength < maxLength, totalLength
 
+    def getOrder(self, centrifugal=False):
+        """Order of the branch - number of branches away from the soma.
+        Shaft order by default, centrifugal = split branch at each branching spot."""
+        assert self.parentPoint is not None
+        if self.parentPoint.isRoot():
+            return 1
+
+        assert self.parentPoint.parentBranch is not None
+
+        parentOrder = self.parentPoint.parentBranch.getOrder()
+
+        if centrifugal:
+            # Centrifugal order: When walking along a branch,
+            # increment order each time subbranches come off it.
+            pointAt = self.parentPoint.parentBranch.points[0]
+            while pointAt is not None and pointAt.id != self.parentPoint.id:
+                if len(pointAt.children) > 0:
+                    parentOrder += 1
+                pointAt = pointAt.nextPointInBranch(noWrap=True)
+        else:
+            # Shaft order: no adjustment needed,
+            # just count branches upwards until we get to the root
+            pass
+
+        return parentOrder + 1
+
     def addPoint(self, point):
         """Appends a point at the end of the branch.
 
@@ -170,7 +196,6 @@ class Branch():
             cumulativeLength += edgeDistance
             lengths.append(cumulativeLength)
         return lengths
-
 
 ### Utilities
 
