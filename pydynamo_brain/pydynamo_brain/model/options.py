@@ -32,3 +32,6 @@ class ProjectOptions():
 
     analysisOptions = attr.ib(default=attr.Factory(dict), metadata=SAVE_META)
     """ What options to use when running the analysis pipeline, may be different to motilityOptions. """
+
+    zProjectionMethod = attr.ib(default=None, metadata=SAVE_META)
+    """ What type of Z-projection is supported. 'max' / 'mean' / 'median' / 'std'. """

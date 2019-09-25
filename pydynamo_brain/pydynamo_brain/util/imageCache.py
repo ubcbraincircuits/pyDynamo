@@ -29,15 +29,6 @@ def tiffRead(path, verbose=True):
     if len(shape) == 3:
         # NOTE: we used to split large stacks into two colours,
         #   but this is no longer supported. Do in ImageJ or similar first!
-        """
-        if stack.shape[0] % 2 == 0 and stack.shape[0] > 100:
-            sz = stack.shape[0] // 2
-            stack = np.array([
-                stack[:sz, :, :],
-                stack[sz:, :, :]
-            ])
-        else:
-        """;
         stack = np.expand_dims(stack, axis=0)
 
     # Should be color, Z, (XY), and # color < # Z
@@ -98,7 +89,16 @@ class ImageCache:
     def imageForUIState(self, uiState):
         channelImage = self.getVolume(uiState.imagePath)[uiState._parent.channel]
         if uiState.zProject:
-            return np.amax(channelImage, axis=0)
+            method = uiState._parent.projectOptions.zProjectionMethod
+            if method == 'mean':
+                return np.mean(channelImage, axis=0)
+            elif method == 'median':
+                return np.median(channelImage, axis=0)
+            elif method == 'std':
+                return np.std(channelImage, axis=0)
+            else:
+                # method == 'max', or default
+                return np.amax(channelImage, axis=0)
         else:
             zAt = zStackForUiState(uiState)
             if zAt < 0 or zAt >= channelImage.shape[0]:
@@ -119,7 +119,7 @@ class ImageCache:
         for uiState in uiStates:
             if uiState.imagePath not in self._images:
                 nUnloaded += 1
-        return nUnloaded        
+        return nUnloaded
 
     # Applies post-processing to a loaded tiff - gamma correct, scale, and convert to uint8
     def _postProcess(self, image):

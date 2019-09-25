@@ -15,32 +15,35 @@ class SettingsWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Project settings")
         centerWindow(self)
 
-        # Fields for Pixel x/y/z
-        self.xValue = QtWidgets.QLineEdit()
-        self.xValue.setValidator(QtGui.QDoubleValidator(0, 10, 5))
-        self.yValue = QtWidgets.QLineEdit()
-        self.yValue.setValidator(QtGui.QDoubleValidator(0, 10, 5))
-        self.zValue = QtWidgets.QLineEdit()
-        self.zValue.setValidator(QtGui.QDoubleValidator(0, 30, 5))
-
-        # Fields for motility options:
-        self.filoDist = QtWidgets.QLineEdit()
-        self.filoDist.setValidator(QtGui.QDoubleValidator(0, 20, 1))
-        self.terminalDist = QtWidgets.QLineEdit()
-        self.terminalDist.setValidator(QtGui.QDoubleValidator(0, 20, 1))
-        self.minMotilityDist = QtWidgets.QLineEdit()
-        self.minMotilityDist.setValidator(QtGui.QDoubleValidator(0, 5, 2))
-        self.excludeAxon = QtWidgets.QCheckBox()
-        self.excludeBasal = QtWidgets.QCheckBox()
-        self.includeAS = QtWidgets.QCheckBox()
-
-        # Fields for misc options:
-        self.shollBinSize = QtWidgets.QLineEdit()
-        self.shollBinSize.setValidator(QtGui.QDoubleValidator(0, 20, 3))
-
         # Root = vertical layout
         self.root = QtWidgets.QWidget(self)
         l = QtWidgets.QVBoxLayout(self.root)
+
+        # Fields for Pixel x/y/z
+        self.xValue = QtWidgets.QLineEdit(self.root)
+        self.xValue.setValidator(QtGui.QDoubleValidator(0, 10, 5))
+        self.yValue = QtWidgets.QLineEdit(self.root)
+        self.yValue.setValidator(QtGui.QDoubleValidator(0, 10, 5))
+        self.zValue = QtWidgets.QLineEdit(self.root)
+        self.zValue.setValidator(QtGui.QDoubleValidator(0, 30, 5))
+
+        # Fields for motility options:
+        self.filoDist = QtWidgets.QLineEdit(self.root)
+        self.filoDist.setValidator(QtGui.QDoubleValidator(0, 20, 1))
+        self.terminalDist = QtWidgets.QLineEdit(self.root)
+        self.terminalDist.setValidator(QtGui.QDoubleValidator(0, 20, 1))
+        self.minMotilityDist = QtWidgets.QLineEdit(self.root)
+        self.minMotilityDist.setValidator(QtGui.QDoubleValidator(0, 5, 2))
+        self.excludeAxon = QtWidgets.QCheckBox(self.root)
+        self.excludeBasal = QtWidgets.QCheckBox(self.root)
+        self.includeAS = QtWidgets.QCheckBox(self.root)
+
+        # Fields for misc options:
+        self.shollBinSize = QtWidgets.QLineEdit(self.root)
+        self.shollBinSize.setValidator(QtGui.QDoubleValidator(0, 20, 3))
+        self.zProjectionMethod = QtWidgets.QComboBox(self.root)
+        for option in ['max', 'mean', 'median', 'std']:
+            self.zProjectionMethod.addItem(option)
 
         # First up: Pixel x/y/z size in microns
         pixelSizes = QtWidgets.QWidget(self)
@@ -63,6 +66,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
         otherOptions = QtWidgets.QWidget(self)
         l3 = QtWidgets.QFormLayout(otherOptions)
         l3.addRow("Sholl bin size (μM)", self.shollBinSize)
+        l3.addRow("Z projection method", self.zProjectionMethod)
 
         # And finally, buttons:
         bCancel = QtWidgets.QPushButton("Cancel", self)
@@ -110,6 +114,12 @@ class SettingsWindow(QtWidgets.QMainWindow):
         shollSize = analysisOpt['shollBinSize'] if 'shollBinSize' in analysisOpt else 5.0
         self.shollBinSize.setText("%.3f" % shollSize)
 
+        comboIdx = self.zProjectionMethod.findText(
+            fullState.projectOptions.zProjectionMethod, QtCore.Qt.MatchFixedString)
+        if comboIdx < 0:
+            comboIdx = 0 # Default to first option
+        self.zProjectionMethod.setCurrentIndex(comboIdx)
+
         self.show()
 
     def saveOptions(self):
@@ -132,6 +142,7 @@ class SettingsWindow(QtWidgets.QMainWindow):
         options.motilityOptions = self.buildMotilityOptions()
         # TODO - split into buildAnalysisOptions if more get added here...
         options.analysisOptions['shollBinSize'] = floatOrDefault(self.shollBinSize, 5.0)
+        options.zProjectionMethod = self.zProjectionMethod.currentText()
         return options
 
     def buildMotilityOptions(self):
