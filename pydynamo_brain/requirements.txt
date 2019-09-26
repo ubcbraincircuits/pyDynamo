@@ -7,6 +7,6 @@ PyOpenGL
 pyqtgraph
 PyQt5
 scikit-image
-scipy
+scipy >= 1.2.0
 tifffile
 tqdm
