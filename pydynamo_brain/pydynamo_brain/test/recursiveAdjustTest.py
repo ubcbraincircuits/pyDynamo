@@ -34,7 +34,7 @@ def test():
     # x = [-30, 15, 0]
     # _affineError(x, [1, 1, 1], movingImgSmooth, staticImgSmooth, drawTitle=str(x))
 
-    _registerImages(movingImg, staticImg, None) #, drawTitle=True)
+    _registerImages(movingImg, staticImg, 20) #, drawTitle=True)
 
 def run():
     test()

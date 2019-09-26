@@ -10,7 +10,7 @@ WARP_MODE = 'edge'
 
 _IMG_CACHE = util.ImageCache()
 
-def centreRotation(shape, R, T):
+def centreRotation(shape, T, R):
     (x, y) = shape
     dx, dy = (x - 1) // 2, (y - 1) // 2
     tf_rotate = tf.SimilarityTransform(rotation=R)
@@ -64,12 +64,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     I2 = np.mean(newBox.astype(np.int32) ** 2)
 
     # align the z-projected images in XY
-    opt = {
-        'Similarity': 'p',
-        'Registration': 'Rigid',
-        'Verbose': 0,
-    }
-    Bx, By, angle, fval = _registerImages(np.max(oldBox, axis=2), np.max(newBox, axis=2), opt)
+    Bx, By, angle, fval = _registerImages(np.max(oldBox, axis=2), np.max(newBox, axis=2), Rxy)
 
     # the alignment is poor; give up!
     fTooBad = (fval is None) or fval > (max(I1,I2)*0.9)
@@ -105,8 +100,8 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
         if bestZ is None or bestZScore > score:
             bestZ, bestZScore = dZ, score
 
-    shiftX = -By[Rxy, Rxy]
-    shiftY = -Bx[Rxy, Rxy]
+    shiftX = By[Rxy, Rxy]
+    shiftY = Bx[Rxy, Rxy]
     shiftZ = bestZ # minIdx - Rz - 1
     shift = (shiftX, shiftY, shiftZ)
     print ("moving by (%.3f, %.3f, %.3f)" % (shiftX, shiftY, shiftZ))
@@ -124,7 +119,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     nextPointRef = pointref.nextPointInBranch(noWrap=True)
     if nextPoint is not None and nextPointRef is not None:
         deltaXYZ = np.abs(util.locationMinus(nextPoint.location, point.location))
-        dXY = int(round(util.snapToRange(np.max(deltaXYZ[0:1]), 20, 30)))
+        dXY = int(round(util.snapToRange(np.max(deltaXYZ[0:1]), 10, 30)))
         dZ = int(round(util.snapToRange(deltaXYZ[2], 2, 4) + 1))
         recursiveAdjust(fullState, id, branch, nextPoint, nextPointRef, callback, dXY, dZ)
 
@@ -184,37 +179,42 @@ def _imageBoxIfInside(volume, channel, fr, to):
     subVolume = np.moveaxis(subVolume, 0, -1) # YXZ
     return subVolume
 
-def _registerImages(movingImg, staticImg, opt, drawTitle=False):
-    assert movingImg.shape == staticImg.shape
+def _registerImages(staticImg, movingImg, Rxy, drawTitle=None):
+    assert staticImg.shape == movingImg.shape
     # Make smooth images for histogram and fast affine registration
-    movingImgSmooth = _imgGaussian(movingImg, 1.5)
     staticImgSmooth = _imgGaussian(staticImg, 1.5)
+    movingImgSmooth = _imgGaussian(movingImg, 1.5)
 
     # Set initial affine parameters
-    x = [0, 0, 0]
+    params = [0, 0, 0] # tx, ty, r
 
-    def _affineRegistrationError(x):
-        return _affineError(x, movingImgSmooth, staticImgSmooth)
+    def _affineRegistrationError(params):
+        return _affineError(params, staticImgSmooth, movingImgSmooth)
 
     # 'MaxIter',100,'MaxFunEvals',1000,'TolFun',1e-10,'DiffMinChange',1e-6);
     opt = {
         # 'maxiter': 100,
-        # 'maxfun': 1000,
+        'maxfun': 1000,
         'ftol': 1e-6,
         'disp': False,
-        # 'eps': 1e-6
+        'Similarity': 'p',
+        'Registration': 'Rigid',
+        'Verbose': 0,
     }
     # method = 'L-BFGS-B'
     # method = 'BFGS'
-    method = 'Nelder-Mead'
-    res = scipy.optimize.minimize(_affineRegistrationError, x, tol=1e-4, method=method, options=opt)
+    # method = 'Nelder-Mead'
+    # res = scipy.optimize.minimize(_affineRegistrationError, params, tol=1e-4, method=method, options=opt)
+    bounds = [(-Rxy, Rxy), (-Rxy, Rxy), (-np.pi, np.pi)]
+    res = scipy.optimize.shgo(_affineRegistrationError, bounds, options=opt)
+
     if not res.success:
         print (res.message)
         # raise Exception("COULD NOT OPTIMIZE!")
         return None, None, None, None
-    x = res.x
+    params = res.x
 
-    trans = centreRotation(staticImgSmooth.shape, R=x[2], T=(x[1], x[0]))
+    trans = centreRotation(staticImgSmooth.shape, T=(params[0], params[1]), R=params[2])
     M = trans.params
     warpedImgSmooth = UINT8_WARP(movingImgSmooth, trans)
     fval = _imageDifference(staticImgSmooth, warpedImgSmooth)
@@ -223,18 +223,18 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=False):
     x, y = np.meshgrid(range(movingImg.shape[0]), range(movingImg.shape[1]))
     xd = x - (movingImg.shape[0]/2)
     yd = y - (movingImg.shape[1]/2)
-    M[0, 2] = res.x[0]
-    M[1, 2] = res.x[1]
+    M[0, 2] = params[0]
+    M[1, 2] = params[1]
     Bx = ((movingImg.shape[0]/2) + M[0, 0] * xd + M[0, 1] * yd + M[0, 2] * 1) - x;
     By = ((movingImg.shape[1]/2) + M[1, 0] * xd + M[1, 1] * yd + M[1, 2] * 1) - y;
     angle = trans.rotation
 
-    if drawTitle:
+    if drawTitle is not None:
         title = "Best: %s (score %f)" % (str(res.x), fval)
         f, (ax1, ax2, ax3) = plt.subplots(1, 3)
         f.suptitle(title)
-        img1 = np.copy(movingImgSmooth.astype(np.float))
-        img2 = np.copy(staticImgSmooth.astype(np.float))
+        img1 = np.copy(staticImgSmooth.astype(np.float))
+        img2 = np.copy(movingImgSmooth.astype(np.float))
         img3 = np.copy(UINT8_WARP(movingImgSmooth, trans))
         img1[img1.shape[0] // 2, img1.shape[1] // 2] = 1.0
         img2[img2.shape[0] // 2, img2.shape[1] // 2] = 1.0
@@ -242,6 +242,9 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=False):
         ax1.imshow(img1, cmap='gray')
         ax2.imshow(img2, cmap='gray')
         ax3.imshow(img3, cmap='gray')
+        ax1.set_title("Reference")
+        ax2.set_title("Before")
+        ax3.set_title("After")
         plt.show()
 
     return Bx, By, angle, fval
@@ -249,15 +252,19 @@ def _registerImages(movingImg, staticImg, opt, drawTitle=False):
 def _imgGaussian(img, sigma):
     return np.round(gaussian_filter(img.astype(np.float), sigma)).astype(np.uint8)
 
-def _affineError(par,I1,I2,drawTitle=None):
-    trans = centreRotation(I1.shape, R=par[2], T=(par[1], par[0]))
-    warpedImg = UINT8_WARP(I1, trans)
+def _affineError(params, staticImg, movingImg, drawTitle=None):
+    trans = centreRotation(movingImg.shape, T=(params[0], params[1]), R=params[2])
+    warpedImg = UINT8_WARP(movingImg, trans)
+
+    errorScale = 1 + 0.1 * np.sqrt(params[0] ** 2 + params[1] ** 2)
+    imgDelta = _imageDifference(staticImg, warpedImg)
+    fval = imgDelta * errorScale
 
     if drawTitle is not None:
         f, (ax1, ax2, ax3) = plt.subplots(1, 3)
-        f.suptitle(drawTitle)
-        img1 = np.copy(I1.astype(np.float))
-        img2 = np.copy(I2.astype(np.float))
+        f.suptitle(drawTitle + " (error: %.4f)" % fval)
+        img1 = np.copy(staticImg.astype(np.float))
+        img2 = np.copy(movingImg.astype(np.float))
         img3 = np.copy(warpedImg.astype(np.float))
         img1[img1.shape[0] // 2, img1.shape[1] // 2] = 1.0
         img2[img2.shape[0] // 2, img2.shape[1] // 2] = 1.0
@@ -267,19 +274,16 @@ def _affineError(par,I1,I2,drawTitle=None):
         ax3.imshow(img3, cmap='gray')
         plt.show()
 
-    errorScale = 1 + 0.1 * np.sqrt(par[0] ** 2 + par[1] ** 2)
-    imgDelta = _imageDifference(I2, warpedImg)
-    fval = imgDelta * errorScale
     return fval
 
-def affine_registration_error_2d(par,I1,I2,type,mode):
-    M = _getTransformationMatrix(par)
+def affine_registration_error_2d(params, I1, I2, type, mode):
+    M = _getTransformationMatrix(params)
     I3 = _affineTransform(I1, M, mode)
     e = _imageDifference(I3, I2)
 
-def _getTransformationMatrix(par):
-    assert len(par) == 3
-    return _makeTransformationMatrix(par[0:2], par[3])
+def _getTransformationMatrix(params):
+    assert len(params) == 3
+    return _makeTransformationMatrix(params[0:2], params[3])
 
 def _makeTransformationMatrix(t, r):
     assert len(t) == 2
