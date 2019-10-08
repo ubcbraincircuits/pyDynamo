@@ -1,3 +1,5 @@
+import napari
+
 from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QMessageBox
 
@@ -119,7 +121,7 @@ class DendriteCanvasActions():
     def launch3DVolume(self):
         stackWindow = self._stackWindow()
         infoBox = createAndShowInfo("Drawing 3D Volume", stackWindow)
-        viewWindow = Volume3DWindow(stackWindow, self.uiState, applyColorLimits=True)
+        viewWindow = Volume3DWindow(stackWindow, self.uiState)
         infoBox.hide()
         viewWindow.show()
 

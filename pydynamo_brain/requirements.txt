@@ -1,10 +1,9 @@
 attrs
 matplotlib
+napari
 neurom
 numpy
 pandas
-PyOpenGL
-pyqtgraph
 PyQt5
 scikit-image
 scipy >= 1.2.0
