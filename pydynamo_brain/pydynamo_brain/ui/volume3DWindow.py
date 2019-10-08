@@ -1,3 +1,4 @@
+import PyQt5.QtCore # Needs to be before napari
 import napari
 import numpy as np
 
