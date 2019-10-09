@@ -11,20 +11,23 @@ class Volume3DWindow():
         self.uiState = uiState
 
         # Load in the volume to show, picking one channel:
-        volume = _IMG_CACHE.getVolume(self.uiState.imagePath)
-
-        # TODO: Add one layer per channel
-        self.data = volume[self.uiState._parent.channel]
-        print (self.data.shape)
+        self.volume = _IMG_CACHE.getVolume(self.uiState.imagePath)
 
     def show(self):
-        with napari.gui_qt():
-            viewer = napari.view_image(self.data, name='Volume', rgb=False)
-            xyzScale = self.uiState._parent.projectOptions.pixelSizes
-            zyxScale = [1, xyzScale[1] / xyzScale[2], xyzScale[0] / xyzScale[2]]
-            viewer.layers['Volume'].scale = zyxScale
+        xyzScale = self.uiState._parent.projectOptions.pixelSizes
+        zyxScale = [1, xyzScale[1] / xyzScale[2], xyzScale[0] / xyzScale[2]]
 
-            viewer.layers['Volume'].contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
+        with napari.gui_qt():
+            viewer = napari.Viewer()
+            for c in reversed(range(self.volume.shape[0])):
+                name = 'Volume'
+                if self.volume.shape[0] > 1:
+                    name = '%s (%d)' % (name, c + 1)
+                layer = viewer.add_image(self.volume[c], name=name, rgb=False)
+                layer.scale = zyxScale
+                layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
+                layer.visible = (c == self.uiState._parent.channel)
+
             viewer.dims.ndim = 3
             viewer.dims.ndisplay = 3
 
