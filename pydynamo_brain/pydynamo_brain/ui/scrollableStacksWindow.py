@@ -5,7 +5,7 @@ from .common import cursorPointer
 DEFAULT_TREE_COUNT = 3 # Show this many trees, scroll to the others.
 
 class ScrollableStacksWindow(QtWidgets.QMainWindow):
-    """docstring for ScrollableStacksWindow."""
+    """Window that shows a bunch of stacks and lets you scroll left & right."""
     def __init__(self, parent, treeModels, title, view, treesShown=DEFAULT_TREE_COUNT):
         super(ScrollableStacksWindow, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)

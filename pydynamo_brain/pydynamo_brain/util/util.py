@@ -98,3 +98,9 @@ def zStackForUiState(uiState):
 # Return a new list, same as the old one except skipping one index
 def listWithoutIdx(data, index):
     return [v for i, v in enumerate(data) if i != index]
+
+# Move an item from one location in a list to another, in place
+def moveInList(data, indexFrom, indexTo):
+    n = len(data)
+    assert (0 <= indexFrom < n) and (0 <= indexTo < n)
+    data.insert(indexTo, data.pop(indexFrom))

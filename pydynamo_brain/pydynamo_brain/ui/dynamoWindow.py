@@ -3,6 +3,7 @@ from PyQt5.Qt import Qt
 
 from pydynamo_brain.model import FullState, Tree, UIState, History
 from pydynamo_brain.files import AutoSaver, loadState, saveState, checkIfChanged, importFromMatlab, exportToSWC, saveRemapWithMerge
+from pydynamo_brain.util import moveInList
 from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
 import os
@@ -342,6 +343,31 @@ class DynamoWindow(QtWidgets.QMainWindow):
             for i in range(len(self.stackWindows)):
                 if self.stackWindows[i] is not None:
                     self.stackWindows[i].updateWindowIndex(i)
+        self.stackList.updateListFromStacks()
+
+    def moveStackWindow(self, indexFrom, indexTo):
+        n = len(self.fullState.uiStates)
+        assert 0 <= indexFrom < n
+        assert 0 <= indexTo < n
+        if indexFrom == indexTo:
+            return
+
+        # Force puncta to be stored for each
+        while len(self.fullState.puncta) < n:
+            self.fullState.puncta.append({})
+
+        while len(self.stackWindows) < n:
+            self.stackWindows.append(None) # Hidden windows
+
+        # move everything around:
+        moveInList(self.fullState.trees, indexFrom, indexTo)
+        moveInList(self.fullState.filePaths, indexFrom, indexTo)
+        moveInList(self.fullState.uiStates, indexFrom, indexTo)
+        moveInList(self.fullState.puncta, indexFrom, indexTo)
+        moveInList(self.stackWindows, indexFrom, indexTo)
+        for i, stackWindow in enumerate(self.stackWindows):
+            if stackWindow is not None:
+                stackWindow.updateWindowIndex(i)
         self.stackList.updateListFromStacks()
 
     def toggleStackWindowVisibility(self, windowIndex):

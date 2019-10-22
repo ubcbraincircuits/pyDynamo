@@ -2,7 +2,7 @@ import os
 import sys
 import time
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint
 
 from pydynamo_brain.ui import DynamoWindow
 
@@ -87,6 +87,37 @@ def run(qtbot):
 
     marked = [p.id for p in dW.fullState.trees[1].flattenPoints() if p.manuallyMarked]
     assert ['0000006c', '0000002b'] == marked
+
+    # Add point to second window only:
+    sW = dW.stackWindows[1]
+    sW.setFocus(True)
+    assert dW.fullState.uiStates[1].zAxisAt == 0
+    dW.fullActions.changeAllZAxis(25, sW) # Scroll to right z plane
+    dW.redrawAllStacks(sW)
+    assert dW.fullState.uiStates[1].zAxisAt == 25
+    view = sW.dendrites.imgView.viewport()
+    qtbot.mouseClick(view, Qt.LeftButton, pos=QPoint(414.5, 414.5))
+    qtbot.mouseClick(view, Qt.LeftButton, pos=QPoint(500, 400))
+
+    assert 194 == len(dW.fullState.trees[0].flattenPoints())
+    assert 195 == len(dW.fullState.trees[1].flattenPoints()) # Added only to second
+
+    # Swap first and second windows
+    dW.moveStackWindow(0, 1)
+
+    assert 195 == len(dW.fullState.trees[0].flattenPoints())
+    assert 194 == len(dW.fullState.trees[1].flattenPoints()) # Swapped
+
+    # Add point to first window, should be added to second
+    sW = dW.stackWindows[0]
+    sW.setFocus(True)
+    assert dW.fullState.uiStates[0].zAxisAt == 25
+    view = sW.dendrites.imgView.viewport()
+    # Create new branch off soma
+    qtbot.mouseClick(view, Qt.LeftButton, pos=QPoint(414.5, 414.5))
+    qtbot.mouseClick(view, Qt.RightButton, pos=QPoint(510, 420))
+    assert 196 == len(dW.fullState.trees[0].flattenPoints()) # Added to both
+    assert 195 == len(dW.fullState.trees[1].flattenPoints())
 
     dW.close()
     return True

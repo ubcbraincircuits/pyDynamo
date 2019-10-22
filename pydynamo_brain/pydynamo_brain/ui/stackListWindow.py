@@ -49,7 +49,7 @@ class StackListWindow(QtWidgets.QMainWindow):
         # Clear, add all items, and resize to fit:
         self.list.clear()
         for i in range(n):
-            self._addItem(i, p.fullState.filePaths[i], p.fullState.uiStates[i].isHidden)
+            self._addItem(i, p.fullState.filePaths[i], p.fullState.uiStates[i].isHidden, i == 0, i == n-1)
         listSize = self.list.sizeHint()
         buttonSize = self.toFrontButton.sizeHint()
         combined = QtCore.QSize()
@@ -66,22 +66,33 @@ class StackListWindow(QtWidgets.QMainWindow):
                 stackWindow.show()
                 stackWindow.raise_()
 
-    def _addItem(self, idx, filePath, stackHidden):
+    def _addItem(self, idx, filePath, stackHidden, isFirst, isLast):
         """Adds a single row into the list, and attaches events."""
         title = util.createTitle(idx, filePath)
 
         # Build the widget itself.
         container = QtWidgets.QWidget()
         wText =  QtWidgets.QLabel(title)
-        bViz = QtWidgets.QPushButton("Show" if stackHidden else "Hide")
-        bDel = QtWidgets.QPushButton("Delete")
+        bViz = cursorPointer(QtWidgets.QPushButton("Show" if stackHidden else "Hide"))
+        bDel = cursorPointer(QtWidgets.QPushButton("Delete"))
+        bUp  = cursorPointer(QtWidgets.QPushButton("▲"))
+        bDn  = cursorPointer(QtWidgets.QPushButton("▼"))
+        for b in [bUp, bDn]:
+            b.setMaximumWidth(20)
         l = QtWidgets.QHBoxLayout()
         l.addWidget(wText)
         l.addWidget(bViz)
         l.addWidget(bDel)
+        l.addWidget(bUp)
+        l.addWidget(bDn)
         l.addStretch()
         l.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         container.setLayout(l)
+
+        if isFirst:
+            bUp.setEnabled(False)
+        if isLast:
+            bDn.setEnabled(False)
 
         # Build the list item, and add the widget:
         itemN = QtWidgets.QListWidgetItem()
@@ -92,6 +103,8 @@ class StackListWindow(QtWidgets.QMainWindow):
         # Attach events:
         bViz.clicked.connect(lambda: self._handleVizChange(idx))
         bDel.clicked.connect(lambda: self._handleDelete(idx, title))
+        bUp.clicked.connect(lambda: self._handleUp(idx))
+        bDn.clicked.connect(lambda: self._handleDn(idx))
 
     def _handleVizChange(self, idx):
         """Handle the 'show'/'hide' option selection for a stack."""
@@ -105,3 +118,14 @@ class StackListWindow(QtWidgets.QMainWindow):
         )
         if reply == QtWidgets.QMessageBox.Yes: # Confirm first! This deletes a lot of data.
             self.parent().removeStackWindow(idx, deleteData=True)
+
+    def _handleUp(self, idx):
+        if idx < 1:
+            return
+        self.parent().moveStackWindow(idx, idx - 1)
+
+    def _handleDn(self, idx):
+        n = len(self.parent().fullState.filePaths)
+        if idx >= n - 1:
+            return
+        self.parent().moveStackWindow(idx, idx + 1)
