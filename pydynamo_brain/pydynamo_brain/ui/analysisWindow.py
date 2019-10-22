@@ -8,6 +8,7 @@ from PyQt5.Qt import Qt
 from pydynamo_brain.analysis import allTrees, allBranches, allPuncta
 from pydynamo_brain.analysis.ui import branchOptions, punctaOptions, treeOptions
 from pydynamo_brain.model import MotilityOptions, ProjectOptions
+from pydynamo_brain.ui.common import createAndShowInfo
 
 from .common import centerWindow, clearChildWidgets, cursorPointer, floatOrDefault
 
@@ -177,8 +178,10 @@ class AnalysisWindow(QtWidgets.QMainWindow):
             if "_do " not in k:
                 filteredOptions[k] = v
 
-        fullState = self.parent().fullState
-        resultDF = runner(fullState, selectedFunctions, **filteredOptions)
+        infoBox = createAndShowInfo("Running analysis...", self)
+        resultDF = runner(self.parent().fullState, selectedFunctions, **filteredOptions)
+        infoBox.close()
+
         filePath, _ = QtWidgets.QFileDialog.getSaveFileName(self,
             "Output for results", "", "CSV (*.csv)"
         )
