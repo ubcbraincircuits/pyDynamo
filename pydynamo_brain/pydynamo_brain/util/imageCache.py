@@ -113,6 +113,10 @@ class ImageCache:
             self._images[path] = imgClean
         return self._images[path]
 
+    # Returns volume for a tif path only if cached, otherwise None.
+    def getVolumeIfLoaded(self, path):
+        return self._images[path] if path in self._images else None
+
     # Returns the number of volumes unloaded for the given states:
     def unloadedCount(self, uiStates):
         nUnloaded = 0

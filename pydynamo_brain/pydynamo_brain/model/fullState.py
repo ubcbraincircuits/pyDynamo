@@ -96,24 +96,35 @@ class FullState:
 
     def changeAllZAxis(self, delta):
         delta = int(round(delta))
+        if delta == 0:
+            return
 
-        scrollForwards, scrollBackwards = None, None
+        highestZ = None # Highest Z = max to scroll backwards
+        highestLeft = None # Highest left = max to scroll forwards
+
+        for uiState in self.uiStates:
+            maybeVolume = _IMG_CACHE.getVolumeIfLoaded(uiState.imagePath)
+            if maybeVolume is None:
+                # Volume not yet loaded, ignore
+                continue
+
+            zDim = maybeVolume.shape[1] # C, Z, X, Y
+
+            if highestZ is None:
+                highestZ = uiState.zAxisAt
+                highestLeft = zDim - 1 - uiState.zAxisAt
+            else:
+                highestZ = max(highestZ, uiState.zAxisAt)
+                highestLeft = max(highestLeft, zDim - 1 - uiState.zAxisAt)
+
+        # Make sure that we're in at least one volume by the end of the scroll:
+        if delta < 0:
+            delta = -min(-delta, highestZ)
+        else:
+            delta = min(delta, highestLeft)
+
         for uiState in self.uiStates:
             uiState.zAxisAt += delta
-            zCount = _IMG_CACHE.getVolume(uiState.imagePath).shape[1] # C, Z, X, Y
-            if scrollForwards is None:
-                scrollForwards, scrollBackwards = -uiState.zAxisAt, uiState.zAxisAt + 1 - zCount
-            else:
-                scrollForwards = min(scrollForwards, -uiState.zAxisAt)
-                scrollBackwards = min(scrollBackwards, uiState.zAxisAt + 1 - zCount)
-
-        # If scrolling past the ends, snap back:
-        if scrollForwards > 0:
-            for uiState in self.uiStates:
-                uiState.zAxisAt += scrollForwards
-        elif scrollBackwards > 0:
-            for uiState in self.uiStates:
-                uiState.zAxisAt -= scrollBackwards
 
     def changeChannel(self, delta):
         self.channel = (self.channel + delta) % self.volumeSize[0]
