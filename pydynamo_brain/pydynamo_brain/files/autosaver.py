@@ -29,8 +29,16 @@ class AutoSaver():
         pathToSave = self._buildAutoSavePath(self.fullState._rootPath)
         msgBox = msgBoxFunc("Autosaving...")
         saveState(self.fullState, pathToSave)
+
+
+
         self.lastSaveMs = util.currentTimeMillis()
+
+        #fix an issue with saving to quickly and the window not closing
+        time.sleep(0.05)
         msgBox.hide()
+
+
         print ("Autosaved to " + pathToSave)
 
     def _msSinceLastSave(self):
