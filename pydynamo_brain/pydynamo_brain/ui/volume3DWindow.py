@@ -13,6 +13,30 @@ class Volume3DWindow():
         # Load in the volume to show, picking one channel:
         self.volume = _IMG_CACHE.getVolume(self.uiState.imagePath)
 
+    # @return Napari viewer position, for a given tree location
+    def locationToZYXList(self, location, zyxScale):
+        # XYZ -> ZYX
+        location = list(location)[::-1]
+        return [location[0] * zyxScale[0], location[1] * zyxScale[1], location[2] * zyxScale[2]]
+
+    # @return Numpy list for the path along a branch, in napari space.
+    def branchToPath(self, branch, zyxScale):
+        if branch.parentPoint is None:
+            return []
+        path = [ self.locationToZYXList(branch.parentPoint.location, zyxScale) ]
+        for p in branch.points:
+            path.append(self.locationToZYXList(p.location, zyxScale))
+        return np.array(path)
+
+    # @return Numpy list of paths in the tree, one for each branch.
+    def treeToPaths(self, tree, zyxScale):
+        paths = []
+        for b in tree.branches:
+            branchPath = self.branchToPath(b, zyxScale)
+            if len(branchPath) > 1:
+                paths.append(np.array(branchPath))
+        return np.array(paths)
+
     def show(self):
         xyzScale = self.uiState._parent.projectOptions.pixelSizes
         zyxScale = [1, xyzScale[1] / xyzScale[2], xyzScale[0] / xyzScale[2]]
@@ -31,5 +55,11 @@ class Volume3DWindow():
             viewer.dims.ndim = 3
             viewer.dims.ndisplay = 3
 
-            # TODO: Add shape layer for drawing
-            # viewer.layers['Shapes'].add(y, shape_type='rectangle')
+            # Add a layer representing the tree
+            paths = self.treeToPaths(self.uiState._tree, zyxScale)
+            viewer.add_shapes(
+                paths, shape_type='path',
+                name='Arbor',
+                edge_width=0.3,
+                edge_color='blue',
+            )
