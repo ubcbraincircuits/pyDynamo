@@ -3,6 +3,7 @@ import napari
 import numpy as np
 
 import pydynamo_brain.util as util
+from pydynamo_brain.util.nearTreeMasking import maskedNearTree
 
 _IMG_CACHE = util.ImageCache()
 
@@ -51,6 +52,17 @@ class Volume3DWindow():
                 layer.scale = zyxScale
                 layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
                 layer.visible = (c == self.uiState._parent.channel)
+
+            if self.uiState._tree is not None and len(self.uiState._tree.flattenPoints()) > 1:
+                maskedVolume = maskedNearTree(self.volume, self.uiState._tree, xyzScale)
+                for c in reversed(range(maskedVolume.shape[0])):
+                    name = 'Masked Volume'
+                    if maskedVolume.shape[0] > 1:
+                        name = '%s (%d)' % (name, c + 1)
+                    layer = viewer.add_image(maskedVolume[c], name=name, rgb=False)
+                    layer.scale = zyxScale
+                    layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
+                    layer.visible = False
 
             viewer.dims.ndim = 3
             viewer.dims.ndisplay = 3
