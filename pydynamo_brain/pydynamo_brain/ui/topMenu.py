@@ -20,6 +20,8 @@ class TopMenu():
         dmo = lambda x: self.drawModeOnly.append(x)
         self.registerModeOnly = []
         rmo = lambda x: self.registerModeOnly.append(x)
+        self.radiModeOnly = []
+        radi = lambda x: self.radiModeOnly.append(x)
 
         fileMenu = QtWidgets.QMenu('&File', stackWindow)
         fileMenu.addAction('&New stack...', self.appendStack, QtCore.Qt.Key_N)
@@ -58,7 +60,9 @@ class TopMenu():
         dmo(editMenu.addAction('Remove empty branches from all stacks',
             self.cleanEmptyBranches, QtCore.Qt.SHIFT + QtCore.Qt.Key_E))
         editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
+        editMenu.addAction('Draw Radi', self.radiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
         dmo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
+        radi(editMenu.addAction('Cycle select->move-> reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
 
         manualRegisterSubmenu = editMenu.addMenu("Registration")
         manualRegisterSubmenu.addAction('View point registration', self.viewRegistration, QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
@@ -90,7 +94,7 @@ class TopMenu():
         viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
             self.cycleBranchDisplayMode, QtCore.Qt.Key_V)
         viewMenu.addAction('Cycle showing annotations -> IDs -> nothing per point', self.cyclePointInfo, QtCore.Qt.Key_F)
-        dmo(viewMenu.addAction('Show/Hide marked points', self.toggleMarked, QtCore.Qt.Key_H))
+        dmo(viewMenu.addAction('Show/Hide marked points', self.arked, QtCore.Qt.Key_H))
         viewMenu.addAction('Show/Hide entire tree', self.toggleShowAll, QtCore.Qt.SHIFT + QtCore.Qt.Key_H)
         viewMenu.addAction('Project all Z onto one image', self.zProject, QtCore.Qt.Key_Underscore)
         viewMenu.addAction('Mark downstream points on selected window', self.markPoints, QtCore.Qt.SHIFT + QtCore.Qt.Key_M)
@@ -130,6 +134,9 @@ class TopMenu():
         inDrawMode = self._global().fullState.inDrawMode()
         for action in self.drawModeOnly:
             action.setEnabled(inDrawMode)
+        inRadiMode = self._global().fullState.inRadiMode
+        for action in self.radiModeOnly:
+            action.setEnabled(inRadiMode)
         inRegMode = self._global().fullState.inManualRegistrationMode
         for action in self.registerModeOnly:
             action.setEnabled(inRegMode)
@@ -225,11 +232,15 @@ class TopMenu():
         self._global().redrawAllStacks(self.stackWindow)
 
     def punctaMode(self):
-        self._global().togglePunctaMode(self.stackWindow)
+        self._global().punctaMode(self.stackWindow)
+        self._updateForDrawMode()
+
+    def radiMode(self):
+        self._global().toggleRadiMode(self.stackWindow)
         self._updateForDrawMode()
 
     def manualRegister(self):
-        self._global().toggleManualRegistration(self.stackWindow)
+        self._global().anualRegistration(self.stackWindow)
         self._updateForDrawMode()
 
     def alignIDsToFirst(self):
@@ -295,7 +306,7 @@ class TopMenu():
         self.stackWindow.uiState.cyclePointInfo()
         self.redraw()
 
-    def toggleMarked(self):
+    def arked(self):
         self.stackWindow.uiState.showMarked = not self.stackWindow.uiState.showMarked
         self.redraw()
 
