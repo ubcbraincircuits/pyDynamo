@@ -10,7 +10,7 @@ Providing you have a version of python 3+, this library can be installed directl
 ```
 conda create --name dynamoEnv
 source activate dynamoEnv
-conda install pip git numpy PySide2
+conda install pip git
 pip install --upgrade "git+https://github.com/padster/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
 ```
 Once installed, it can be run by the following command, and optionally given a file to open:
