@@ -6,7 +6,7 @@ import numpy as np
 
 from .dendritePainter import DendritePainter
 from .punctaPainter import PunctaPainter
-from .radiPainter import RadiPainter
+from .radiiPainter import RadiiPainter
 
 class DendriteOverlay(QWidget):
     def __init__(self, dendriteCanvas, windowIndex, *args, **kwargs):
@@ -35,8 +35,8 @@ class DendriteOverlay(QWidget):
                 self.dendriteCanvas.imgView.fromSceneDist
             ).drawPuncta(puncta)
 
-        if fullState.inRadiMode:
-            RadiPainter(p,
+        elif fullState.inRadiiMode:
+            RadiiPainter(p,
                 self.dendriteCanvas.uiState,
                 self.dendriteCanvas.imgView.mapFromScene,
                 self.dendriteCanvas.imgView.fromSceneDist

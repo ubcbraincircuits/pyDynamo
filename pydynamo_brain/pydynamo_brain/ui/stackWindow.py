@@ -131,7 +131,7 @@ class StackWindow(QtWidgets.QMainWindow):
             self.redraw()
 
     def editRadius(self, dR, laterStacks):
-        self.fullActions.radiActions.changeRadius(self.windowIndex, dR, laterStacks)
+        self.fullActions.radiiActions.changeRadius(self.windowIndex, dR, laterStacks)
         if laterStacks:
             self.parent().redrawAllStacks(self)
         else:
@@ -188,13 +188,13 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('Q')):
                 if self.uiState._parent.inPunctaMode:
                     self.doPunctaGrow(1.0 / 0.9, altsPressed)
-                if self.uiState._parent.inRadiMode:
-                    self.editRadius(1.0 / 0.9, altsPressed)
+                elif self.uiState._parent.inRadiiMode:
+                    self.editRadius(1.0 / 0.9, shftPressed)
             elif (key == ord('E')):
                 if self.uiState._parent.inPunctaMode:
                     self.doPunctaGrow(0.9, altsPressed)
-                if self.uiState._parent.inRadiMode:
-                    self.editRadius(0.9, altsPressed)
+                elif self.uiState._parent.inRadiiMode:
+                    self.editRadius(0.9, shftPressed)
 
             if self.uiState.hideAll:
                 return
@@ -222,7 +222,7 @@ class StackWindow(QtWidgets.QMainWindow):
 
             if self.uiState._parent.inManualRegistrationMode:
                 return
-            if self.uiState._parent.inRadiMode:
+            if self.uiState._parent.inRadiiMode:
                 return
             if self.uiState._parent.inPunctaMode:
                 return

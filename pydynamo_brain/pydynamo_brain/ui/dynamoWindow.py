@@ -218,12 +218,12 @@ class DynamoWindow(QtWidgets.QMainWindow):
         self.redrawAllStacks(originWindow)
 
     # Either start radi drawing, or stop
-    def toggleRadiMode(self, originWindow):
-        if not self.fullState.inRadiMode:
+    def toggleRadiiMode(self, originWindow):
+        if not self.fullState.inRadiiMode:
             self.updateStatusMessage("Drawing radi...")
         else:
             self.updateStatusMessage(None)
-        self.fullActions.toggleRadiMode()
+        self.fullActions.toggleRadiiMode()
         self.redrawAllStacks(originWindow)
 
     # Either start manual registration, or stop (and maybe save)

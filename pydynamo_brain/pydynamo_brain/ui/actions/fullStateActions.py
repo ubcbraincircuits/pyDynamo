@@ -2,7 +2,7 @@ import attr
 
 from PyQt5 import QtWidgets
 
-from .radiActions import RadiActions
+from .radiiActions import RadiiActions
 from .punctaActions import PunctaActions
 
 from pydynamo_brain.analysis import absOrient
@@ -18,7 +18,7 @@ class FullStateActions():
         self.state = fullState
         self.history = history
         self.punctaActions = PunctaActions(fullState, history)
-        self.radiActions = RadiActions(fullState, history)
+        self.radiiActions = RadiiActions(fullState, history)
         self.branchToColorMap = BranchToColorMap()
 
     def selectPoint(self, localIdx, point, avoidPush=False, deselectHidden=False):
@@ -239,8 +239,8 @@ class FullStateActions():
     def togglePunctaMode(self):
         return self.state.togglePunctaMode()
 
-    def toggleRadiMode(self):
-        return self.state.toggleRadiMode()
+    def toggleRadiiMode(self):
+        return self.state.toggleRadiiMode()
 
     def toggleManualRegistration(self):
         return self.state.toggleManualRegistrationMode()

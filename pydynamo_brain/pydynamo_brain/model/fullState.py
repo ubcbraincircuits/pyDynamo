@@ -40,7 +40,7 @@ class FullState:
     inPunctaMode = attr.ib(default=False)
 
     # Whether we're currently drawing radi
-    inRadiMode = attr.ib(default=False)
+    inRadiiMode = attr.ib(default=False)
 
     # Whether we're currently manually registering points
     inManualRegistrationMode = attr.ib(default=False)
@@ -135,7 +135,7 @@ class FullState:
     def inDrawMode(self):
         return not self.inManualRegistrationMode \
             and not self.inPunctaMode \
-            and not self.inRadiMode
+            and not self.inRadiiMode
 
     def togglePunctaMode(self):
         isInMode = self.inPunctaMode
@@ -144,21 +144,21 @@ class FullState:
         else:
             if self.inManualRegistrationMode:
                 self.toggleManualRegistrationMode()
-            if self.inRadiMode:
-                self.toggleRadiMode()
+            if self.inRadiiMode:
+                self.toggleRadiiMode()
             self.inPunctaMode = True
 
 
-    def toggleRadiMode(self):
-        isInMode = self.inRadiMode
+    def toggleRadiiMode(self):
+        isInMode = self.inRadiiMode
         if isInMode:
-            self.inRadiMode = False
+            self.inRadiiMode = False
         else:
             if self.inManualRegistrationMode:
                 self.toggleManualRegistrationMode()
             if self.inPunctaMode:
-                    self.togglePunctaMode()
-            self.inRadiMode = True
+                self.togglePunctaMode()
+            self.inRadiiMode = True
 
     def toggleManualRegistrationMode(self):
         isInMode = self.inManualRegistrationMode
@@ -167,8 +167,8 @@ class FullState:
         else:
             if self.inPunctaMode:
                 self.togglePunctaMode()
-            if self.inRadiMode:
-                self.toggleRadiMode()
+            if self.inRadiiMode:
+                self.toggleRadiiMode()
             self.inManualRegistrationMode = True
 
     def appendIDRemap(self, idRemaps):
