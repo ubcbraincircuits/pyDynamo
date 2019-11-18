@@ -30,6 +30,7 @@ class DendriteVolumeCanvas(QWidget):
         self.uiState = uiState
         self.dynamoWindow = dynamoWindow
         self.stackWindow = stackWindow
+        self.history = dynamoWindow.history
 
         self.imgView = QtImageViewer(self,
             np2qt(self.currentImg(), normalize=True, channel=self.uiState.parent().colorChannel())
@@ -240,6 +241,7 @@ class DendriteVolumeCanvas(QWidget):
 
     #Function to edit radius of selected point by clicking
     def editRadiiOnClick(self, location, zFilter=True):
+        self.fullActions.history.pushState()
         #self.FullStateActions.history.pushState()
         mouseX, mouseY, mouseZ = location
         point = self.uiState.currentPoint()
