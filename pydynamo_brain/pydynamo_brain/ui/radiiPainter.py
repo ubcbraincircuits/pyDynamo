@@ -32,7 +32,7 @@ class RadiiPainter():
 
     #Colors for Radius Calipers
     RAIDUS_COLOR_NONE = (219, 164, 11)
-    RAIDUS_COLOR_REAL = (255, 58, 23)
+    RAIDUS_COLOR_REAL = (255,0,255)
     RAIDUS_COLOR_SELECTED = (11, 219, 209)
 
     def __init__(self, painter, uiState, zoomMapFunc, zoomDistFunc):
