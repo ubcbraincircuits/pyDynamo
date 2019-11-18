@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QWidget, QGridLayout, QApplication, QLayout
 
+import math
 import numpy as np
 
 from .baseMatplotlibCanvas import BaseMatplotlibCanvas
@@ -145,6 +146,9 @@ class DendriteVolumeCanvas(QWidget):
             else:
                 if pointClicked:
                     self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                elif self.uiState.parent().inRadiiMode:
+                    self.editRadiiOnClick(location)
+                    print("RadiiMode click event")
                 else:
                     self.fullActions.addPointToCurrentBranchAndSelect(self.windowIndex, location)
             self.dynamoWindow.redrawAllStacks(self.stackWindow)
@@ -233,3 +237,14 @@ class DendriteVolumeCanvas(QWidget):
         x, y, z = xyz
         zoomedXY = self.imgView.mapFromScene(x, y)
         return (zoomedXY.x(), zoomedXY.y(), z)
+
+    #Function to edit radius of selected point by clicking
+    def editRadiiOnClick(self, location, zFilter=True):
+        #self.FullStateActions.history.pushState()
+        mouseX, mouseY, mouseZ = location
+        point = self.uiState.currentPoint()
+        pointX, pointY, pointZ = point.location
+        if mouseZ == pointZ:
+            newRadius =  math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
+            point.radius = newRadius
+        return

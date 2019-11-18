@@ -85,27 +85,40 @@ class RadiiPainter():
 
     def returnRadiusCoord(self, point, radius):
         #point radius will be drawn from
-        p2Loc = point.location
-        x2, y2, z2 = self.zoomedLocation(p2Loc)
-        #previous point
-        posX, posY, negX, negY = x2, y2, x2, y2,
-        if point.isRoot is not True:
+        delta = 1
+
+        """        #previous point
+        posX, posY, negX, negY = x2, y2, x2, y2,"""
+        if  point.isRoot():
+            print(point.isRoot)
+            nextPoint  = point.nextPointInBranch(delta)
+            #print(nextPoint)
+            p2Loc = point.location
+            print(p2Loc)
+            x2, y2, z2 = self.zoomedLocation(p2Loc)
+
+            p1Loc = nextPoint.location
+            x1, y1, z1 = self.zoomedLocation(p1Loc)
+
+
+        else:
+            p2Loc = point.location
+            x2, y2, z2 = self.zoomedLocation(p2Loc)
             point1 =  point.pathFromRoot()[-2:][0]
             p1Loc = point1.location
             x1, y1, z1 = self.zoomedLocation(p1Loc)
 
-            #length between two points
-            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-            if L == 0:
-                L = 1
-            #all solutions for the plotting radius
-            #assuming a right triangle
-            negX = x2 -((radius*(y1-y2)/L))
-            posX = x2 +((radius*(y1-y2)/L))
-            posY = y2 +((radius*(x1-x2)/L))
-            negY = y2 -((radius*(x1-x2)/L))
+        #length between two points
+        L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
+        if L == 0:
+            L = 1
+        #all solutions for the plotting radius
+        #assuming a right triangle
+        negX = x2 -((radius*(y1-y2)/L))
+        posX = x2 +((radius*(y1-y2)/L))
+        posY = y2 +((radius*(x1-x2)/L))
+        negY = y2 -((radius*(x1-x2)/L))
 
-            return negX, posY, posX, negY
         return negX, posY, posX, negY
 
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
