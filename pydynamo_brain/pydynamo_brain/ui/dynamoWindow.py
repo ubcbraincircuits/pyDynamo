@@ -319,11 +319,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
                 self.stackWindows.append(None)
             else:
                 childWindow = StackWindow(
-                    i,
+                    self, i,
                     self.fullState.filePaths[i],
                     self.fullActions,
-                    self.fullState.uiStates[i],
-                    self
+                    self.fullState.uiStates[i]
                 )
                 childWindow.show()
                 self.updateWindowMessage(childWindow)
@@ -384,11 +383,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
         if self.fullState.uiStates[windowIndex].isHidden:
             self.fullState.uiStates[windowIndex].isHidden = False
             self.stackWindows[windowIndex] = StackWindow(
-                windowIndex,
+                self, windowIndex,
                 self.fullState.filePaths[windowIndex],
                 self.fullActions,
                 self.fullState.uiStates[windowIndex],
-                self
             )
             self.stackWindows[windowIndex].show()
             self.updateWindowMessage(self.stackWindows[windowIndex])
@@ -454,11 +452,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     # new shown, old not shown, so create new:
                     else:
                         childWindow = StackWindow(
-                            i,
+                            self, i,
                             self.fullState.filePaths[i],
                             self.fullActions,
-                            self.fullState.uiStates[i],
-                            self
+                            self.fullState.uiStates[i]
                         )
                         self.updateWindowMessage(childWindow)
                         childWindow.show()
@@ -468,11 +465,10 @@ class DynamoWindow(QtWidgets.QMainWindow):
                     self.stackWindows.append(None)
                 else:
                     childWindow = StackWindow(
-                        i,
+                        self, i,
                         self.fullState.filePaths[i],
                         self.fullActions,
-                        self.fullState.uiStates[i],
-                        self
+                        self.fullState.uiStates[i]
                     )
                     childWindow.show()
                     self.updateWindowMessage(childWindow)

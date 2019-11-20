@@ -16,7 +16,7 @@ from .topMenu import TopMenu
 _IMG_CACHE = util.ImageCache()
 
 class StackWindow(QtWidgets.QMainWindow):
-    def __init__(self, windowIndex, imagePath, fullActions, uiState, parent):
+    def __init__(self, parent, windowIndex, imagePath, fullActions, uiState):
         QtWidgets.QMainWindow.__init__(self, parent)
 
         assert not uiState.isHidden # Only have windows attached to shown states.
