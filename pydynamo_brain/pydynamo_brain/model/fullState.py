@@ -4,7 +4,9 @@ from .options import ProjectOptions
 from .tree.branch import Branch
 from .tree.point import Point
 from .tree.tree import Tree
-from .uiState import *
+
+from .drawMode import DrawMode
+from .uiState import UIState
 
 from pydynamo_brain.util import SAVE_META, ImageCache, locationMinus, locationPlus
 
@@ -36,14 +38,8 @@ class FullState:
     # Shared color channel information
     channel = attr.ib(default=0)
 
-    # Whether we're currently drawing puncta
-    inPunctaMode = attr.ib(default=False)
-
-    # Whether we're currently drawing radi
-    inRadiiMode = attr.ib(default=False)
-
-    # Whether we're currently manually registering points
-    inManualRegistrationMode = attr.ib(default=False)
+    # What drawing mode the user is currently in (normal, puncta, radii, registration)
+    drawMode = attr.ib(default=DrawMode.DEFAULT)
 
     # Whether to draw channels in color (True for r/g/b) or white (False)
     useColor = attr.ib(default=False)
@@ -66,6 +62,19 @@ class FullState:
             return self.uiStates.index(uiState)
         except:
             return -1
+
+    # Draw status
+    def inDrawMode(self):
+        return self.drawMode == DrawMode.DEFAULT
+
+    def inPunctaMode(self):
+        return self.drawMode == DrawMode.PUNCTA
+
+    def inManualRegistrationMode(self):
+        return self.drawMode == DrawMode.REGISTRATION
+
+    def inRadiiMode(self):
+        return self.drawMode == DrawMode.RADII
 
     # TODO: active window
     # TODO: add new window off active
@@ -132,44 +141,14 @@ class FullState:
     def changeChannel(self, delta):
         self.channel = (self.channel + delta) % self.volumeSize[0]
 
-    def inDrawMode(self):
-        return not self.inManualRegistrationMode \
-            and not self.inPunctaMode \
-            and not self.inRadiiMode
-
     def togglePunctaMode(self):
-        isInMode = self.inPunctaMode
-        if isInMode:
-            self.inPunctaMode = False
-        else:
-            if self.inManualRegistrationMode:
-                self.toggleManualRegistrationMode()
-            if self.inRadiiMode:
-                self.toggleRadiiMode()
-            self.inPunctaMode = True
-
+        self.drawMode = DrawMode.DEFAULT if self.inPunctaMode() else DrawMode.PUNCTA
 
     def toggleRadiiMode(self):
-        isInMode = self.inRadiiMode
-        if isInMode:
-            self.inRadiiMode = False
-        else:
-            if self.inManualRegistrationMode:
-                self.toggleManualRegistrationMode()
-            if self.inPunctaMode:
-                self.togglePunctaMode()
-            self.inRadiiMode = True
+        self.drawMode = DrawMode.DEFAULT if self.inRadiiMode() else DrawMode.RADII
 
     def toggleManualRegistrationMode(self):
-        isInMode = self.inManualRegistrationMode
-        if isInMode:
-            self.inManualRegistrationMode = False
-        else:
-            if self.inPunctaMode:
-                self.togglePunctaMode()
-            if self.inRadiiMode:
-                self.toggleRadiiMode()
-            self.inManualRegistrationMode = True
+        self.drawMode = DrawMode.DEFAULT if self.inManualRegistrationMode() else DrawMode.REGISTRATION
 
     def appendIDRemap(self, idRemaps):
         for stepID, idRemapList in idRemaps.items():

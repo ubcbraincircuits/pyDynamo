@@ -2,6 +2,7 @@ from PyQt5 import QtCore, QtWidgets
 
 import webbrowser
 
+from pydynamo_brain.model import DrawMode
 from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
 from .common import createAndShowInfo
@@ -16,16 +17,12 @@ class TopMenu():
         self.stackWindow = stackWindow
         menuBar = stackWindow.menuBar()
 
-        self.drawModeOnly = []
-        dmo = lambda x: self.drawModeOnly.append(x)
-        self.registerModeOnly = []
-        rmo = lambda x: self.registerModeOnly.append(x)
-        self.radiiModeOnly = []
-        radii = lambda x: self.radiiModeOnly.append(x)
-
-        #Bin for Shared Functions
-        self.drawOrRadii = []
-        bothRadii_dmo = lambda x: self.drawOrRadii.append(x)
+        # Map {action: list of modes they are enabled in}
+        # Any action not in the map is always enabled
+        self.modeRestrictedActions = {}
+        dmo    = lambda x: self.modeRestrictedActions.update({x: [DrawMode.DEFAULT]})
+        rmo    = lambda x: self.modeRestrictedActions.update({x: [DrawMode.REGISTRATION]})
+        doramo = lambda x: self.modeRestrictedActions.update({x: [DrawMode.DEFAULT, DrawMode.RADII]})
 
         fileMenu = QtWidgets.QMenu('&File', stackWindow)
         fileMenu.addAction('&New stack...', self.appendStack, QtCore.Qt.Key_N)
@@ -65,7 +62,7 @@ class TopMenu():
             self.cleanEmptyBranches, QtCore.Qt.SHIFT + QtCore.Qt.Key_E))
         editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
         editMenu.addAction('Draw Radii', self.radiiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
-        bothRadii_dmo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
+        doramo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
 
         manualRegisterSubmenu = editMenu.addMenu("Registration")
         manualRegisterSubmenu.addAction('View point registration', self.viewRegistration, QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
@@ -90,8 +87,8 @@ class TopMenu():
         viewMenu.addAction('View 3D Image Volume', self.view3DVolume, QtCore.Qt.SHIFT + QtCore.Qt.Key_3)
 
         viewMenu.addSeparator()
-        bothRadii_dmo(viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J))
-        bothRadii_dmo(viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J))
+        doramo(viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J))
+        doramo(viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J))
         viewMenu.addAction('Change channel', self.changeChannel, QtCore.Qt.Key_C)
         viewMenu.addAction('Turn on/off colours', self.toggleColor, QtCore.Qt.SHIFT + QtCore.Qt.Key_C)
         viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
@@ -134,17 +131,9 @@ class TopMenu():
         return self.stackWindow.parent()
 
     def _updateForDrawMode(self):
-        inDrawMode = self._global().fullState.inDrawMode()
-        for action in self.drawModeOnly:
-            action.setEnabled(inDrawMode)
-        inRadiiMode = self._global().fullState.inRadiiMode
-        for action in self.radiiModeOnly:
-            action.setEnabled(inRadiiMode)
-        inRegMode = self._global().fullState.inManualRegistrationMode
-        for action in self.registerModeOnly:
-            action.setEnabled(inRegMode)
-        for action in self.drawOrRadii:
-            action.setEnabled(inDrawMode or inRadiiMode)
+        mode = self._global().fullState.drawMode
+        for action, enabledModes in self.modeRestrictedActions.items():
+            action.setEnabled(mode in enabledModes)
 
     # File menu callbacks:
     def appendStack(self, *args):
@@ -206,13 +195,13 @@ class TopMenu():
         self._global().redrawAllStacks(self.stackWindow)
 
     def registerSmart(self):
-        if self._global().fullState.inManualRegistrationMode:
+        if self._global().fullState.inManualRegistrationMode():
             return
         self._local().smartRegisterImages(self.stackWindow.windowIndex)
         self.redraw()
 
     def registerIDs(self):
-        if self._global().fullState.inManualRegistrationMode:
+        if self._global().fullState.inManualRegistrationMode():
             return
         self._local().simpleRegisterImages(self.stackWindow.windowIndex)
         self.redraw()
@@ -249,12 +238,12 @@ class TopMenu():
         self._updateForDrawMode()
 
     def alignIDsToFirst(self):
-        if self._global().fullState.inManualRegistrationMode:
+        if self._global().fullState.inManualRegistrationMode():
             self._global().fullActions.alignVisibleIDs(toNewID=False)
             self._global().redrawAllStacks(self.stackWindow)
 
     def alignIDsToNew(self):
-        if self._global().fullState.inManualRegistrationMode:
+        if self._global().fullState.inManualRegistrationMode():
             self._global().fullActions.alignVisibleIDs(toNewID=True)
             self._global().redrawAllStacks(self.stackWindow)
 

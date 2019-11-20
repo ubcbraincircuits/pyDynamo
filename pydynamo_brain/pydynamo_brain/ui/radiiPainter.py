@@ -90,11 +90,11 @@ class RadiiPainter():
         """        #previous point
         posX, posY, negX, negY = x2, y2, x2, y2,"""
         if  point.isRoot():
-            print(point.isRoot)
+            #print(point.isRoot)
             nextPoint  = point.nextPointInBranch(delta)
             #print(nextPoint)
             p2Loc = point.location
-            print(p2Loc)
+            #print(p2Loc)
             x2, y2, z2 = self.zoomedLocation(p2Loc)
 
             p1Loc = nextPoint.location

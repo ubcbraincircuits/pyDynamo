@@ -159,7 +159,7 @@ class QtImageViewer(QGraphicsView):
         location = (scenePos.x(), scenePos.y(), zAt)
 
         circleOver = None
-        if self.parentView.uiState.parent().inPunctaMode:
+        if self.parentView.uiState.parent().inPunctaMode():
             circleOver = self.parentView.punctaOnPixel(location)
         else:
             circleOver = self.parentView.pointOnPixel(location)

@@ -210,7 +210,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     # Either start puncta drawing, or stop
     def togglePunctaMode(self, originWindow):
-        if not self.fullState.inPunctaMode:
+        if not self.fullState.inPunctaMode():
             self.updateStatusMessage("Drawing puncta...")
         else:
             self.updateStatusMessage(None)
@@ -219,7 +219,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     # Either start radi drawing, or stop
     def toggleRadiiMode(self, originWindow):
-        if not self.fullState.inRadiiMode:
+        if not self.fullState.inRadiiMode():
             self.updateStatusMessage("Drawing radi...")
         else:
             self.updateStatusMessage(None)
@@ -228,7 +228,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
 
     # Either start manual registration, or stop (and maybe save)
     def toggleManualRegistration(self, originWindow):
-        if not self.fullState.inManualRegistrationMode:
+        if not self.fullState.inManualRegistrationMode():
             self.updateStatusMessage("Manual ID registration active...")
         else:
             self.updateStatusMessage(None)

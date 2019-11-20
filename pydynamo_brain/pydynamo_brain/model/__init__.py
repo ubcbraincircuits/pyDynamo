@@ -7,6 +7,7 @@ from .tree.point import Point
 from .tree.transform import Transform
 from .tree.tree import Tree, printTree
 
+from .drawMode import DrawMode
 from .filoType import FiloType
 from .fullState import FullState
 from .history import History

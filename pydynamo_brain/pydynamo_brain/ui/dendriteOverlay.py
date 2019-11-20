@@ -24,7 +24,7 @@ class DendriteOverlay(QWidget):
         p = QPainter()
         p.begin(self)
 
-        if fullState.inPunctaMode:
+        if fullState.inPunctaMode():
             puncta = []
             if (self.windowIndex < len(fullState.puncta)):
                 puncta = fullState.puncta[self.windowIndex]
@@ -34,8 +34,7 @@ class DendriteOverlay(QWidget):
                 self.dendriteCanvas.imgView.mapFromScene,
                 self.dendriteCanvas.imgView.fromSceneDist
             ).drawPuncta(puncta)
-
-        elif fullState.inRadiiMode:
+        elif fullState.inRadiiMode():
             RadiiPainter(p,
                 self.dendriteCanvas.uiState,
                 self.dendriteCanvas.imgView.mapFromScene,

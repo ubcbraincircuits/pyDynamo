@@ -50,7 +50,7 @@ def run(qtbot):
 
     # Enter puncta mode
     qtbot.keyClick(sW, 'p')
-    assert dW.fullState.inPunctaMode
+    assert dW.fullState.inPunctaMode()
 
     pDraw = QPoint(100, 100)
     pMove = QPoint(100, 150)

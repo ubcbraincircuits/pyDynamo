@@ -85,8 +85,10 @@ class DendriteVolumeCanvas(QWidget):
             rightClick = event.button() == Qt.RightButton
             middleClick = event.button() == Qt.MidButton
 
+            fullState = self.uiState.parent()
+
             # Shortcut out in puncta mode:
-            if self.uiState.parent().inPunctaMode:
+            if fullState.inPunctaMode():
                 if self.handlePunctaClick(location, shiftPressed, ctrlPressed, rightClick, middleClick):
                     self.dynamoWindow.redrawAllStacks(self.stackWindow)
                 return
@@ -96,7 +98,7 @@ class DendriteVolumeCanvas(QWidget):
                 pointClicked.manuallyMarked = False
 
             # Handle manual registration first: select or deselect the point
-            if self.uiState.parent().inManualRegistrationMode:
+            if fullState.inManualRegistrationMode():
                 if pointClicked:
                     if shiftPressed:
                         # select all points with this ID in all stacks:
@@ -147,7 +149,7 @@ class DendriteVolumeCanvas(QWidget):
             else:
                 if pointClicked:
                     self.fullActions.selectPoint(self.windowIndex, pointClicked)
-                elif self.uiState.parent().inRadiiMode:
+                elif fullState.inRadiiMode():
                     self.editRadiiOnClick(location)
                     print("RadiiMode click event")
                 else:

@@ -139,6 +139,8 @@ class StackWindow(QtWidgets.QMainWindow):
 
     def keyPressEvent(self, event):
         try:
+            fullState = self.uiState._parent
+
             if self.parent().childKeyPress(event, self):
                 return
             altsPressed = (event.modifiers() & QtCore.Qt.AltModifier)
@@ -160,40 +162,40 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('W')):
                 if self.uiState.isMoving():
                     self.doMove(0, -1, shftPressed, altsPressed)
-                elif self.uiState._parent.inPunctaMode:
+                elif fullState.inPunctaMode():
                     self.doPunctaMove(0, -1, altsPressed)
                 else:
                     self.actionHandler.pan(0, -1)
             elif (key == ord('A')):
                 if self.uiState.isMoving():
                     self.doMove(-1, 0, shftPressed, altsPressed)
-                elif self.uiState._parent.inPunctaMode:
+                elif fullState.inPunctaMode():
                     self.doPunctaMove(-1, 0, altsPressed)
                 else:
                     self.actionHandler.pan(-1, 0)
             elif (key == ord('S')):
                 if self.uiState.isMoving():
                     self.doMove(0, 1, shftPressed, altsPressed)
-                elif self.uiState._parent.inPunctaMode:
+                elif fullState.inPunctaMode():
                     self.doPunctaMove(0, 1, altsPressed)
                 else:
                     self.actionHandler.pan(0, 1)
             elif (key == ord('D')):
                 if self.uiState.isMoving():
                     self.doMove(1, 0, shftPressed, altsPressed)
-                elif self.uiState._parent.inPunctaMode:
+                elif fullState.inPunctaMode():
                     self.doPunctaMove(1, 0, altsPressed)
                 else:
                     self.actionHandler.pan(1, 0)
             elif (key == ord('Q')):
-                if self.uiState._parent.inPunctaMode:
+                if fullState.inPunctaMode():
                     self.doPunctaGrow(1.0 / 0.9, altsPressed)
-                elif self.uiState._parent.inRadiiMode:
+                elif fullState.inRadiiMode():
                     self.editRadius(1.0 / 0.9, shftPressed)
             elif (key == ord('E')):
-                if self.uiState._parent.inPunctaMode:
+                if fullState.inPunctaMode():
                     self.doPunctaGrow(0.9, altsPressed)
-                elif self.uiState._parent.inRadiiMode:
+                elif fullState.inRadiiMode():
                     self.editRadius(0.9, shftPressed)
 
             if self.uiState.hideAll:
@@ -204,7 +206,7 @@ class StackWindow(QtWidgets.QMainWindow):
             if key == ord('<') or key == ord('>'):
                 # Prev / Next in branch selector
                 delta = -1 if key == ord('<') else 1
-                if self.uiState._parent.inPunctaMode:
+                if fullState.inPunctaMode():
                     self.fullActions.punctaActions.selectNextPoint(self.windowIndex, delta)
                 else:
                     locationSnapshot = self.parent().snapshotSelectionLocation()
@@ -214,20 +216,16 @@ class StackWindow(QtWidgets.QMainWindow):
                 self.parent().redrawAllStacks(self)
             elif key == ord('?'):
                 # First child of current point selector
-                if not self.uiState._parent.inPunctaMode:
+                if not fullState.inPunctaMode():
                     locationSnapshot = self.parent().snapshotSelectionLocation()
                     self.fullActions.selectFirstChildren()
                     self.parent().updateSelectionLocation(locationSnapshot)
                     self.parent().redrawAllStacks(self)
 
-            if self.uiState._parent.inManualRegistrationMode:
-                return
-            if self.uiState._parent.inRadiiMode:
-                return
-            if self.uiState._parent.inPunctaMode:
+            if not fullState.inDrawMode():
                 return
 
-            elif key == QtCore.Qt.Key_Delete:
+            if key == QtCore.Qt.Key_Delete:
                 toDelete = self.uiState.currentPoint()
                 if toDelete is None:
                     print ("Need to select a point before you can delete...")
