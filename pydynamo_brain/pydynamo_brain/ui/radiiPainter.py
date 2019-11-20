@@ -22,7 +22,7 @@ class RadiiPainter():
     NODE_CIRCLE_MOVING_BRUSH = QBrush(QColor.fromRgbF(1.0, 0, 0, 0.5))
     NODE_CIRCLE_REPARENTING_BRUSH = QBrush(QColor.fromRgbF(0, 0, 1.0, 0.5))
     NODE_CIRCLE_DEFAULT_RADIUS = 5
-    MARKED_CIRCLE_BRUSH = QBrush(QColor(255, 108, 180))
+    MARKED_CIRCLE_BRUSH = QBrush(QColor.fromRgbF(10, 0.48, 0.8, 0.5))
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
     ANNOTATION_FONT = QFont("Arial", 12, QFont.Bold)
@@ -31,9 +31,10 @@ class RadiiPainter():
     ANNOTATION_MAX_WIDTH = 512
 
     #Colors for Radius Calipers
-    RAIDUS_COLOR_NONE = (219, 164, 11)
+    RAIDUS_COLOR_NONE = (255, 0, 0)
     RAIDUS_COLOR_REAL = (255,0,255)
     RAIDUS_COLOR_SELECTED = (11, 219, 209)
+    RADIUS_COLOR_IS_MARKED = (255, 108, 180)
 
     def __init__(self, painter, uiState, zoomMapFunc, zoomDistFunc):
         self.p = painter
@@ -90,13 +91,10 @@ class RadiiPainter():
         """        #previous point
         posX, posY, negX, negY = x2, y2, x2, y2,"""
         if  point.isRoot():
-            #print(point.isRoot)
             nextPoint  = point.nextPointInBranch(delta)
-            #print(nextPoint)
             p2Loc = point.location
-            #print(p2Loc)
-            x2, y2, z2 = self.zoomedLocation(p2Loc)
 
+            x2, y2, z2 = self.zoomedLocation(p2Loc)
             p1Loc = nextPoint.location
             x1, y1, z1 = self.zoomedLocation(p1Loc)
 
@@ -151,6 +149,7 @@ class RadiiPainter():
                 brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH
         elif isMarked and self.uiState.showMarked:
             brushColor = self.MARKED_CIRCLE_BRUSH
+            rgbRadius = self.RADIUS_COLOR_IS_MARKED
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
         if resizeRadius:

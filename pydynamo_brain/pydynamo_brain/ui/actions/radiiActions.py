@@ -1,7 +1,18 @@
 import attr
+import numpy as np
+import skimage
+import math
+
+from scipy.interpolate import interp1d
+from scipy import ndimage
+from skimage import feature
+from skimage.filters import roberts
+from skimage.measure import profile_line
 
 from pydynamo_brain.model import Point
-from pydynamo_brain.util import deltaSz
+import pydynamo_brain.util as util
+
+_IMG_CACHE = util.ImageCache()
 
 class RadiiActions():
     DEFAULT_RADIUS_PX = 3 # default size in zoomed out pixels
@@ -28,3 +39,50 @@ class RadiiActions():
                         current.radius = 10 * dR
                     else:
                         current.radius *= dR
+
+def _doesThisWork(xs, ys):
+    PADDING = 10
+    for i, x in enumerate(xs):
+        if ys[i] <= 0.05:
+            return xs[i]
+
+def intensityForPointRadius(volume, point):
+    zIdx = int(point.location[2])
+    plane = volume[0, (zIdx-1):(zIdx+1), :, :]
+    plane = np.amax(plane, axis=0)
+    planeMod = roberts(plane)
+    planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
+    edges = feature.canny(plane, sigma=2)
+    planeMod = planeMod - edges
+
+    plane01 = np.ones(plane.shape)
+    plane01[int(point.location[1]), int(point.location[0])] = 0
+    planeDist = ndimage.distance_transform_edt(plane01)
+
+    _mx = np.max(planeDist)
+    planeDistNorm = np.power(((_mx - planeDist) / _mx), 13)
+
+    X_POINTS = 100
+    SQUISH = 1
+    MAX_DIST_PX = 30
+    xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
+    ys = []
+    for x in xs:
+        selected = (planeDist < x)
+        ys.append(np.mean(planeMod[selected]))
+
+    radius = _doesThisWork(xs, ys)
+    return radius
+
+
+def recursiveRadiiEstimator(fullState, id, branch, point):
+    newTree = fullState.uiStates[id]._tree
+    volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
+
+    childrenPoints = point.flattenSubtreePoints()
+    for p in childrenPoints:
+        radius = intensityForPointRadius(volume, p)
+        p.radius = radius
+        p.manuallyMarked = True
+
+    return

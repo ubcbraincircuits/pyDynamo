@@ -79,6 +79,9 @@ class TopMenu():
             self.alignIDsToNew, QtCore.Qt.SHIFT + QtCore.Qt.Key_Apostrophe))
         menuBar.addMenu(editMenu)
 
+        manualRadiiSubmenu = editMenu.addMenu("Radii Mode")
+        radii(manualRegisterSubmenu.addAction("Estimate all point radii ", self.radiiEstimator, QtCore.Qt.Key_R))
+
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
         viewMenu.addAction('Zoom In', self.zoomIn, QtCore.Qt.Key_X)
         viewMenu.addAction('Zoom Out', self.zoomOut, QtCore.Qt.Key_Z)
@@ -198,6 +201,11 @@ class TopMenu():
         if self._global().fullState.inManualRegistrationMode():
             return
         self._local().smartRegisterImages(self.stackWindow.windowIndex)
+        self.redraw()
+
+    def radiiEstimator(self):
+        if self._global().fullState.inRadiiMode:
+            self._local().radiiEstimator(self.stackWindow.windowIndex)
         self.redraw()
 
     def registerIDs(self):
