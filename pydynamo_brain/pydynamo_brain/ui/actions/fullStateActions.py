@@ -6,6 +6,7 @@ from .radiiActions import RadiiActions
 from .punctaActions import PunctaActions
 
 from pydynamo_brain.analysis import absOrient
+from pydynamo_brain.model import PointMode
 from pydynamo_brain.model.tree import *
 from pydynamo_brain.ui.branchToColorMap import BranchToColorMap
 from pydynamo_brain.ui.common import createAndShowInfo
@@ -198,7 +199,7 @@ class FullStateActions():
                 newBranch = state._tree.getBranchByID(newBranchID)
                 self.branchToColorMap.updateBranch(newBranch)
 
-        self.state.uiStates[localIdx].isReparenting = False
+        self.state.uiStates[localIdx].pointMode = PointMode.DEFAULT
 
     def setSelectedAsPrimaryBranch(self, localIdx):
         """

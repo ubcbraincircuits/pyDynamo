@@ -13,7 +13,7 @@ from pydynamo_brain.ui.registration.idRegisterWindow import IdRegisterWindow
 from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 
 from pydynamo_brain.files import importFromSWC
-from pydynamo_brain.model import IdAligner, recursiveAdjust
+from pydynamo_brain.model import IdAligner, PointMode, recursiveAdjust
 from pydynamo_brain.model.tree.util import findTightAngles
 
 class DendriteCanvasActions():
@@ -207,22 +207,23 @@ class DendriteCanvasActions():
         registrationWindow.startRegistration(redrawFunc)
 
     def startReplaceParent(self):
-        self.uiState.isReparenting = True
+        self.uiState.pointMode = PointMode.REPARENT
         self.canvas.redraw()
 
     def stopReplaceParent(self):
-        self.uiState.isReparenting = False
+        self.uiState.pointMode = PointMode.DEFAULT
         self.canvas.redraw()
 
     # Cycle selection -> Moving -> Reparenting -> back
     def cyclePointModes(self):
+        # POIUY
         currentPoint = self.uiState.currentPoint()
         if currentPoint is not None:
-            if self.uiState.isMoving:
+            if self.uiState.isMoving():
                 # Moving -> Reparenting
                 self.fullActions.cancelMove()
                 self.startReplaceParent()
-            elif self.uiState.isReparenting:
+            elif self.uiState.isReparenting():
                 # Reparenting -> Selection
                 self.stopReplaceParent()
             else:

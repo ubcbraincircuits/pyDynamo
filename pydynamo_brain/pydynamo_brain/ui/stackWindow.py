@@ -158,28 +158,28 @@ class StackWindow(QtWidgets.QMainWindow):
             elif (key == ord('8')):
                 self.actionHandler.changeBrightness(0, 1)
             elif (key == ord('W')):
-                if self.uiState.isMoving:
+                if self.uiState.isMoving():
                     self.doMove(0, -1, shftPressed, altsPressed)
                 elif self.uiState._parent.inPunctaMode:
                     self.doPunctaMove(0, -1, altsPressed)
                 else:
                     self.actionHandler.pan(0, -1)
             elif (key == ord('A')):
-                if self.uiState.isMoving:
+                if self.uiState.isMoving():
                     self.doMove(-1, 0, shftPressed, altsPressed)
                 elif self.uiState._parent.inPunctaMode:
                     self.doPunctaMove(-1, 0, altsPressed)
                 else:
                     self.actionHandler.pan(-1, 0)
             elif (key == ord('S')):
-                if self.uiState.isMoving:
+                if self.uiState.isMoving():
                     self.doMove(0, 1, shftPressed, altsPressed)
                 elif self.uiState._parent.inPunctaMode:
                     self.doPunctaMove(0, 1, altsPressed)
                 else:
                     self.actionHandler.pan(0, 1)
             elif (key == ord('D')):
-                if self.uiState.isMoving:
+                if self.uiState.isMoving():
                     self.doMove(1, 0, shftPressed, altsPressed)
                 elif self.uiState._parent.inPunctaMode:
                     self.doPunctaMove(1, 0, altsPressed)

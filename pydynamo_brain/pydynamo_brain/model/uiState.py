@@ -6,6 +6,8 @@ from .tree.branch import Branch
 from .tree.point import Point
 from .tree.tree import Tree
 
+from .pointMode import PointMode
+
 from pydynamo_brain.util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 
 @attr.s
@@ -37,11 +39,8 @@ class UIState():
     # Cache of the current puncta
     _currentPunctaCache = attr.ib(default=None)
 
-    # Whether the current point is being moved (True) or just selected (False)
-    isMoving = attr.ib(default=False)
-
-    # Whether the current point is being reparented (True) or just selected (False)
-    isReparenting = attr.ib(default=False)
+    # What state the selected point in this stack is in:
+    pointMode = attr.ib(default=PointMode.DEFAULT)
 
     # UI Option for whether or not to show annotations.
     showAnnotations = attr.ib(default=False, metadata=SAVE_META)
@@ -84,6 +83,13 @@ class UIState():
     def currentPuncta(self):
         return self._currentPunctaCache
 
+    # Point mode checks
+    def isMoving(self):
+        return self.pointMode is PointMode.MOVE
+
+    def isReparenting(self):
+        return self.pointMode is PointMode.REPARENT
+
     def deleteBranch(self, branch):
         # Need to remove backwards, as we're removing while we're iterating
         reverseIndex = list(reversed(range(len(branch.points))))
@@ -104,12 +110,12 @@ class UIState():
         self._currentPointCache = self._tree.getPointByID(selectedID)
         if self._currentPointCache is not None:
             self.currentPointID = self._currentPointCache.id
-            self.isMoving = isMove
+            self.pointMode = PointMode.MOVE if isMove else PointMode.DEFAULT
         else:
             if not isMove:
                 self.currentPointID = None
-                self.isMoving = False
-        self.isReparenting = False
+                self.pointMode = PointMode.DEFAULT
+
         # Move z to show point:
         selected = self.currentPoint()
         if selected is not None:
@@ -258,12 +264,11 @@ class UIState():
         return self._tree.removePointByID(pointID)
 
     def endMove(self, newLocation, downstream):
-        # assert self.isMoving and self.currentPointID is not None, "Can only end a move if actually moving a point"
-        if self.isMoving and self.currentPointID is not None:
+        if self.isMoving() and self.currentPointID is not None:
             self._tree.movePoint(self.currentPointID, newLocation, downstream)
 
     def cancelMove(self):
-        self.isMoving = False
+        self.pointMode = PointMode.DEFAULT
 
     def cycleBranchDisplayMode(self):
         N_BRANCH_DISPLAY_MODES = 3 # Local, All Z, Only this Z

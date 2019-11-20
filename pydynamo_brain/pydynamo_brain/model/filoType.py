@@ -1,7 +1,3 @@
-"""
-.. module:: filoT
-"""
-
 from enum import IntEnum
 from functools import total_ordering
 

@@ -108,7 +108,7 @@ class DendriteVolumeCanvas(QWidget):
                         self.uiState.selectOrDeselectPointID(pointClicked.id)
 
             # Next, reparent; either reparent, or cancel reparenting.
-            elif self.uiState.isReparenting:
+            elif self.uiState.isReparenting():
                 if pointClicked:
                     self.fullActions.reparent(self.windowIndex, pointClicked)
                 else:
@@ -116,7 +116,7 @@ class DendriteVolumeCanvas(QWidget):
                     self.stackWindow.actionHandler.stopReplaceParent()
 
             # Next, moving; either switch moving point, cancel move, or move selected point to new spot.
-            elif self.uiState.isMoving:
+            elif self.uiState.isMoving():
                 if pointClicked:
                     if shiftPressed:
                         self.fullActions.beginMove(self.windowIndex, pointClicked)

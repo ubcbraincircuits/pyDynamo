@@ -145,9 +145,9 @@ class RadiiPainter():
         if isSelected:
             rgbRadius = self.RAIDUS_COLOR_SELECTED
             brushColor = self.NODE_CIRCLE_SELECTED_BRUSH
-            if self.uiState.isMoving:
+            if self.uiState.isMoving():
                 brushColor = self.NODE_CIRCLE_MOVING_BRUSH
-            elif self.uiState.isReparenting:
+            elif self.uiState.isReparenting():
                 brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH
         elif isMarked and self.uiState.showMarked:
             brushColor = self.MARKED_CIRCLE_BRUSH

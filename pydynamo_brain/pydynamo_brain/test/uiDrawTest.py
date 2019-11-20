@@ -93,7 +93,7 @@ def run(qtbot):
     # TODO: Renable using the shortcut. For some reason this fails...
     # qtbot.keyClick(sW, 'r', modifier=Qt.ControlModifier)
     sW.topMenu.reparent()
-    assert (dW.fullState.uiStates[0].isReparenting)
+    assert (dW.fullState.uiStates[0].isReparenting())
     assert (dW.fullState.uiStates[0].currentPoint().id == currentPoint.id)
 
     qtbot.mouseClick(view, Qt.LeftButton, pos=C)
