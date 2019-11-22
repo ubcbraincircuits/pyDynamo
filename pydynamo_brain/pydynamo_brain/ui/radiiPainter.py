@@ -22,7 +22,7 @@ class RadiiPainter():
     NODE_CIRCLE_MOVING_BRUSH = QBrush(QColor.fromRgbF(1.0, 0, 0, 0.5))
     NODE_CIRCLE_REPARENTING_BRUSH = QBrush(QColor.fromRgbF(0, 0, 1.0, 0.5))
     NODE_CIRCLE_DEFAULT_RADIUS = 5
-    MARKED_CIRCLE_BRUSH = QBrush(QColor.fromRgbF(10, 0.48, 0.8, 0.5))
+    MARKED_CIRCLE_BRUSH = QBrush(QColor.fromRgbF(1.0, 0.48, 0.8, 0.5))
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
     ANNOTATION_FONT = QFont("Arial", 12, QFont.Bold)
@@ -98,26 +98,95 @@ class RadiiPainter():
             p1Loc = nextPoint.location
             x1, y1, z1 = self.zoomedLocation(p1Loc)
 
+            #length between two points
+            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
+            if L == 0:
+                L = 1
+            #all solutions for the plotting radius
+            #assuming a right triangle
+            negX = x2 -((radius*(y1-y2)/L))
+            posX = x2 +((radius*(y1-y2)/L))
+            posY = y2 +((radius*(x1-x2)/L))
+            negY = y2 -((radius*(x1-x2)/L))
 
-        else:
+            return negX, posY, posX, negY
+
+        elif point.isLastInBranch():
             p2Loc = point.location
             x2, y2, z2 = self.zoomedLocation(p2Loc)
             point1 =  point.pathFromRoot()[-2:][0]
             p1Loc = point1.location
             x1, y1, z1 = self.zoomedLocation(p1Loc)
 
-        #length between two points
-        L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-        if L == 0:
-            L = 1
-        #all solutions for the plotting radius
-        #assuming a right triangle
-        negX = x2 -((radius*(y1-y2)/L))
-        posX = x2 +((radius*(y1-y2)/L))
-        posY = y2 +((radius*(x1-x2)/L))
-        negY = y2 -((radius*(x1-x2)/L))
+            #length between two points
+            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
+            if L == 0:
+                L = 1
+            #all solutions for the plotting radius
+            #assuming a right triangle
+            negX = x2 -((radius*(y1-y2)/L))
+            posX = x2 +((radius*(y1-y2)/L))
+            posY = y2 +((radius*(x1-x2)/L))
+            negY = y2 -((radius*(x1-x2)/L))
+            return negX, posY, posX, negY
 
-        return negX, posY, posX, negY
+        else:
+            #point
+            p2Loc = point.location
+            x2, y2, z2 = self.zoomedLocation(p2Loc)
+            #previous point
+            point1 =  point.pathFromRoot()[-2]
+            p1Loc = point1.location
+            x1, y1, z1 = self.zoomedLocation(p1Loc)
+
+            #length between two points
+            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
+            if L == 0:
+                L = 1
+            #all solutions for the plotting radius
+            #assuming a right triangle
+            pre_negX = x2 -((radius*(y1-y2)/L))
+            pre_posX = x2 +((radius*(y1-y2)/L))
+            pre_posY = y2 +((radius*(x1-x2)/L))
+            pre_negY = y2 -((radius*(x1-x2)/L))
+
+            #next point in branch
+            nextPoint  = point.nextPointInBranch(delta)
+            #current point
+            p2Loc = point.location
+            x2, y2, z2 = self.zoomedLocation(p2Loc)
+            p1Loc = nextPoint.location
+            x1, y1, z1 = self.zoomedLocation(p1Loc)
+
+            #length between two points
+            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
+            if L == 0:
+                L = 1
+            #all solutions for the plotting radius
+            #assuming a right triangle
+            next_negX = x2 -((radius*(y1-y2)/L))
+            next_posX = x2 +((radius*(y1-y2)/L))
+            next_posY = y2 +((radius*(x1-x2)/L))
+            next_negY = y2 -((radius*(x1-x2)/L))
+
+            print((next_negX + pre_negX))
+            negX = 0.5 * (next_posX + pre_negX)
+            posX = 0.5 * (next_negX + pre_posX)
+            posY = 0.5 * (next_negY + pre_posY)
+            negY = 0.5 * (next_posY + pre_negY)
+
+            midpoint_len = math.sqrt(math.pow((x2-posX),2)+math.pow((y2-posY),2))
+            radius_ratio = radius/ midpoint_len
+
+            #print(radius_ratio)
+
+            negX = negX * radius_ratio
+            posX = posX * radius_ratio
+            posY = posY * radius_ratio
+            negY = negY * radius_ratio
+            return negX, posY, posX, negY
+
+        print('broken')
 
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
         if realRadius is not None:
