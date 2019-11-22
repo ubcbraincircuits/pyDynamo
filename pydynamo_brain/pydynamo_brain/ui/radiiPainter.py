@@ -218,7 +218,10 @@ class RadiiPainter():
             rgbRadius = self.RADIUS_COLOR_IS_MARKED
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
-        if resizeRadius:
+
+        if point == self.uiState.currentPoint():
+            radiusX, radiusY = self.zoomDistFunc(point.radius, point.radius)
+        elif resizeRadius:
             radiusX, radiusY = self.zoomDistFunc(radius, radius)
         else:
             radiusX, radiusY = radius, radius
