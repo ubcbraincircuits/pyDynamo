@@ -178,15 +178,12 @@ class RadiiPainter():
             midpoint_len = math.sqrt(math.pow((x2-posX),2)+math.pow((y2-posY),2))
             radius_ratio = radius/ midpoint_len
 
-            #print(radius_ratio)
-
             negX = negX * radius_ratio
             posX = posX * radius_ratio
             posY = posY * radius_ratio
             negY = negY * radius_ratio
             return negX, posY, posX, negY
 
-        print('broken')
 
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
         if realRadius is not None:
