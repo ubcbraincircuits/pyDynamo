@@ -84,7 +84,7 @@ class RadiiPainter():
             )
             self.maybeDrawText(x, y, point)
 
-    def returnRadiusCoord(self, point, radius):
+    def returnRadiusCoord(self, point, radius, realRadius):
         #point radius will be drawn from
         delta = 1
 
@@ -169,29 +169,39 @@ class RadiiPainter():
             next_posY = y2 +((radius*(x1-x2)/L))
             next_negY = y2 -((radius*(x1-x2)/L))
 
-            print((next_negX + pre_negX))
             negX = 0.5 * (next_posX + pre_negX)
             posX = 0.5 * (next_negX + pre_posX)
             posY = 0.5 * (next_negY + pre_posY)
             negY = 0.5 * (next_posY + pre_negY)
 
+
             midpoint_len = math.sqrt(math.pow((x2-posX),2)+math.pow((y2-posY),2))
-            radius_ratio = radius/ midpoint_len
+            """#Using law of cosine
+            nextPoint2midPoint = math.sqrt(math.pow((x1-posX),2)+math.pow((y1-posY),2))
+
+            a = math.sqrt(math.pow((midpoint_len, 2) + math.pow((L),2) - math.pow((nextPoint2midPoint),2)))
+            b = (2*midpoint_len*L)
+            radiusAngle = np.arcoss(a/b)"""
+            arctan2X = [x2, negX]
+            arctan2Y = [y2, posY]
+            radiusAngle = np.arctan2(arctan2X, arctan2Y)
+            print("angle", radiusAngle)
+            radius_ratio = radius/midpoint_len
 
             negX = negX * radius_ratio
             posX = posX * radius_ratio
             posY = posY * radius_ratio
             negY = negY * radius_ratio
-            return negX, posY, posX, negY
 
+            return negX, posY, posX, negY
 
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
         if realRadius is not None:
             radius2Draw = realRadius
-            rgbRadius = self.RAIDUS_COLOR_NONE
+            rgbRadius = self.RAIDUS_COLOR_REAL
         else:
             radius2Draw = 10
-            rgbRadius = self.RAIDUS_COLOR_REAL
+            rgbRadius = self.RAIDUS_COLOR_NONE
         radius = fakeRadius
         resizeRadius = False
         if radius is None:
@@ -199,11 +209,12 @@ class RadiiPainter():
             resizeRadius = (realRadius is not None)
         if radius is None:
             radius = self.NODE_CIRCLE_DEFAULT_RADIUS
+        radiusX, radiusY = radius, radius
 
         #scale radius for image view
         radius2Draw, junk = self.zoomDistFunc(radius2Draw, radius2Draw)
         #calculate the line to represent neurite radius
-        x1, y1, x2, y2 = self.returnRadiusCoord(point, radius2Draw)
+        x1, y1, x2, y2 = self.returnRadiusCoord(point, radius2Draw, realRadius)
 
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
@@ -220,11 +231,14 @@ class RadiiPainter():
         self.p.setBrush(brushColor)
 
         if point == self.uiState.currentPoint():
-            radiusX, radiusY = self.zoomDistFunc(point.radius, point.radius)
+            if point.radius is not None:
+                radiusX, radiusY = self.zoomDistFunc(point.radius, point.radius)
         elif resizeRadius:
             radiusX, radiusY = self.zoomDistFunc(radius, radius)
         else:
             radiusX, radiusY = radius, radius
+
+
         self.p.drawEllipse(QPointF(x, y), radiusX, radiusY)
         #self.p.end()
         #draw lines to represent the size of the radius
