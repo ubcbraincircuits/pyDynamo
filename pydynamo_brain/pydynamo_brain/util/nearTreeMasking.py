@@ -66,7 +66,7 @@ def _drawLineInto(result, pA, pB):
         round(pB[0]), round(pB[1]), round(pB[2])
     )
     for (x, y, z) in allPoints:
-        if 0 <= z < result.shape[1] and 0 <= x < result.shape[2] and 0 <= y < result.shape[3]:
+        if 0 <= z < result.shape[1] and 0 <= y < result.shape[2] and 0 <= x < result.shape[3]:
             result[:, z, y, x] = 0
 
 def _drawBranchInto(result, branch):
