@@ -67,6 +67,8 @@ def intensityForPointRadius(volume, point):
     X_POINTS = 100
     SQUISH = 1
     MAX_DIST_PX = 30
+    if point.isRoot():
+        MAX_DIST_PX = 300
     xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
     ys = []
     for x in xs:
@@ -74,12 +76,16 @@ def intensityForPointRadius(volume, point):
         ys.append(np.mean(planeMod[selected]))
 
     radius = _radiiThreshold(xs, ys)
+    if radius == None:
+        radius = 1
 
     #prevent terminal points from having a radius lareger than their parents
     if point.isLastInBranch() and (point.isRoot()==False):
         parentPoint = point.pathFromRoot()[-2]
-        if radius > parentPoint.radius:
-            radius = parentPoint.radius
+        if parentPoint.radius!=None:
+            parentRadius = parentPoint.radius
+            if radius >= parentRadius:
+                radius = parentRadius
     return radius
 
 def singleRadiusEstimation(fullState, id, point):
