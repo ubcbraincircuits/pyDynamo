@@ -35,15 +35,17 @@ class RadiiActions():
             for atIndex in range(localIdx, upperBound):
                 current = self._localState(atIndex).currentPoint()
                 if current is not None:
+                    current.manuallyMarked = False
                     if current.radius == None:
                         current.radius = 10 * dR
                     else:
                         current.radius *= dR
 
-def _doesThisWork(xs, ys):
+
+def _radiiThreshold(xs, ys):
     PADDING = 10
     for i, x in enumerate(xs):
-        if ys[i] <= 0.05:
+        if ys[i] <= 0.0:
             return xs[i]
 
 def intensityForPointRadius(volume, point):
@@ -71,9 +73,23 @@ def intensityForPointRadius(volume, point):
         selected = (planeDist < x)
         ys.append(np.mean(planeMod[selected]))
 
-    radius = _doesThisWork(xs, ys)
+    radius = _radiiThreshold(xs, ys)
+
+    #prevent terminal points from having a radius lareger than their parents
+    if point.isLastInBranch() and (point.isRoot()==False):
+        parentPoint = point.pathFromRoot()[-2]
+        if radius > parentPoint.radius:
+            radius = parentPoint.radius
     return radius
 
+def singleRadiusEstimation(fullState, id, point):
+    newTree = fullState.uiStates[id]._tree
+    volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
+    radius = intensityForPointRadius(volume, point)
+    point.radius = radius
+    point.manuallyMarked = True
+
+    return
 
 def recursiveRadiiEstimator(fullState, id, branch, point):
     newTree = fullState.uiStates[id]._tree

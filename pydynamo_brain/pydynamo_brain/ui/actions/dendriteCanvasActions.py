@@ -16,7 +16,7 @@ from pydynamo_brain.files import importFromSWC
 from pydynamo_brain.model import IdAligner, PointMode, recursiveAdjust
 from pydynamo_brain.model.tree.util import findTightAngles
 
-from pydynamo_brain.ui.actions.radiiActions import recursiveRadiiEstimator
+from pydynamo_brain.ui.actions.radiiActions import recursiveRadiiEstimator, singleRadiusEstimation
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
 
@@ -205,13 +205,26 @@ class DendriteCanvasActions():
             point = self.uiState.parent().trees[windowIndex].rootPoint
             pointNew = self.uiState.parent().trees[windowIndex].rootPoint
 
-
         recursiveRadiiEstimator(self.uiState.parent(), windowIndex, branch, point)
         self.uiState.showMarked = True
         self.canvas.redraw()
-        msg = QMessageBox(QMessageBox.Information, "Radii Estimator",
-            "Radii estimations complete! Estimated points marked, press 'h' to toggle showing them.", parent=self.canvas)
-        msg.show()
+
+        return
+
+
+    def singleRadiusEstimator(self, windowIndex):
+
+        stackWindow = self._stackWindow()
+        self.fullActions.history.pushState()
+
+        point = self.uiState.currentPoint()
+        pointNew = self.uiState.currentPoint()
+
+        singleRadiusEstimation(self.uiState.parent(), windowIndex, point)
+        self.uiState.showMarked = True
+        self.canvas.redraw()
+
+        return
 
 
     def simpleRegisterImages(self, windowIndex, somaScale=1.01):

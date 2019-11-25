@@ -251,4 +251,5 @@ class DendriteVolumeCanvas(QWidget):
         if mouseZ == pointZ:
             newRadius =  math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
             point.radius = newRadius
+            point.manuallyMarked = False
         return
