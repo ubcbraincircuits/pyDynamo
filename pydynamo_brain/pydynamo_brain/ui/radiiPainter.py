@@ -87,7 +87,7 @@ class RadiiPainter():
     def returnRadiusCoord(self, point, radius, realRadius):
         #point radius will be drawn from
         delta = 1
-        #Drawing the radius calibers for root points
+        #Drawing the radius calipers for root points
         if  point.isRoot():
             nextPoint  = point.nextPointInBranch(delta)
             p2Loc = point.location
@@ -108,7 +108,7 @@ class RadiiPainter():
             negY = y2 -((radius*(x1-x2)/L))
 
             return negX, posY, posX, negY
-        #drawing the raidus calibers for terminal points
+        #drawing the raidus calipers for terminal points
         elif point.isLastInBranch():
             p2Loc = point.location
             x2, y2, z2 = self.zoomedLocation(p2Loc)
@@ -127,7 +127,7 @@ class RadiiPainter():
             posY = y2 +((radius*(x1-x2)/L))
             negY = y2 -((radius*(x1-x2)/L))
             return negX, posY, posX, negY
-        #drawing calibers for mid branch points, angles based off an average of
+        #drawing calipers for mid branch points, angles based off an average of
         #previous and last point
         else:
             #previous point
@@ -139,9 +139,9 @@ class RadiiPainter():
             nextPoint  = point.nextPointInBranch(delta)
 
 
-            PA = self.caliberPoints(point, nextPoint, ifNext= True)
+            PA = self.caliperPoints(point, nextPoint, ifNext= True)
 
-            PB = self.caliberPoints(point, previousPoint, ifNext= False)
+            PB = self.caliperPoints(point, previousPoint, ifNext= False)
 
             PC = PA + PB
 
@@ -256,7 +256,7 @@ class RadiiPainter():
 
     #Given a selected point and an additional neightboring point
     #returns a point perpendicular to the line joining these points
-    def caliberPoints(self, origin, point, ifNext):
+    def caliperPoints(self, origin, point, ifNext):
         origin = origin.location
         point = point.location
         x, y, _ = util.normDelta(point, origin)
