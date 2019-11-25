@@ -1,13 +1,15 @@
 from PyQt5.QtGui import QPen, QPainter, QBrush, QFont, QColor
 from PyQt5.QtCore import Qt, QPointF, QRectF
 
+import colorsys
 import matplotlib.pyplot as plt
 import numpy as np
 
-LINE_COLOR_COUNT = 7
+LINE_COLOR_COUNT = 8
+LINE_COLORS = [colorsys.hsv_to_rgb(i / LINE_COLOR_COUNT, 0.6, 1.0) for i in range(LINE_COLOR_COUNT)]
+
 COLOR_STEP = 3 # needs to be co-prime with color count
 ROOT_COLOR_ID = COLOR_STEP # Color of first branch to use.
-LINE_COLORS = plt.get_cmap('hsv')(np.arange(0.0, 1.0, 1.0/LINE_COLOR_COUNT))[:, :3]
 
 class BranchToColorMap():
     """Singleton cache mapping branch IDs to rbg colours."""
