@@ -87,9 +87,7 @@ class RadiiPainter():
     def returnRadiusCoord(self, point, radius, realRadius):
         #point radius will be drawn from
         delta = 1
-
-        """        #previous point
-        posX, posY, negX, negY = x2, y2, x2, y2,"""
+        #Drawing the radius calibers for root points
         if  point.isRoot():
             nextPoint  = point.nextPointInBranch(delta)
             p2Loc = point.location
@@ -110,7 +108,7 @@ class RadiiPainter():
             negY = y2 -((radius*(x1-x2)/L))
 
             return negX, posY, posX, negY
-
+        #drawing the raidus calibers for terminal points
         elif point.isLastInBranch():
             p2Loc = point.location
             x2, y2, z2 = self.zoomedLocation(p2Loc)
@@ -129,70 +127,33 @@ class RadiiPainter():
             posY = y2 +((radius*(x1-x2)/L))
             negY = y2 -((radius*(x1-x2)/L))
             return negX, posY, posX, negY
-
+        #drawing calibers for mid branch points, angles based off an average of
+        #previous and last point
         else:
-            #point
-            p2Loc = point.location
-            x2, y2, z2 = self.zoomedLocation(p2Loc)
             #previous point
-            point1 =  point.pathFromRoot()[-2]
-            p1Loc = point1.location
-            x1, y1, z1 = self.zoomedLocation(p1Loc)
+            pointCoord = point.location
+            xPix, yPix, zPix = self.zoomedLocation(pointCoord)
+            xyPix = np.array([xPix, yPix])
 
-            #length between two points
-            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-            if L == 0:
-                L = 1
-            #all solutions for the plotting radius
-            #assuming a right triangle
-            pre_negX = x2 -((radius*(y1-y2)/L))
-            pre_posX = x2 +((radius*(y1-y2)/L))
-            pre_posY = y2 +((radius*(x1-x2)/L))
-            pre_negY = y2 -((radius*(x1-x2)/L))
-
-            #next point in branch
+            previousPoint =  point.pathFromRoot()[-2]
             nextPoint  = point.nextPointInBranch(delta)
-            #current point
-            p2Loc = point.location
-            x2, y2, z2 = self.zoomedLocation(p2Loc)
-            p1Loc = nextPoint.location
-            x1, y1, z1 = self.zoomedLocation(p1Loc)
-
-            #length between two points
-            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-            if L == 0:
-                L = 1
-            #all solutions for the plotting radius
-            #assuming a right triangle
-            next_negX = x2 -((radius*(y1-y2)/L))
-            next_posX = x2 +((radius*(y1-y2)/L))
-            next_posY = y2 +((radius*(x1-x2)/L))
-            next_negY = y2 -((radius*(x1-x2)/L))
-
-            negX = 0.5 * (next_posX + pre_negX)
-            posX = 0.5 * (next_negX + pre_posX)
-            posY = 0.5 * (next_negY + pre_posY)
-            negY = 0.5 * (next_posY + pre_negY)
 
 
-            midpoint_len = math.sqrt(math.pow((x2-posX),2)+math.pow((y2-posY),2))
-            """#Using law of cosine
-            nextPoint2midPoint = math.sqrt(math.pow((x1-posX),2)+math.pow((y1-posY),2))
+            PA = self.caliberPoints(point, nextPoint, ifNext= True)
 
-            a = math.sqrt(math.pow((midpoint_len, 2) + math.pow((L),2) - math.pow((nextPoint2midPoint),2)))
-            b = (2*midpoint_len*L)
-            radiusAngle = np.arcoss(a/b)"""
-            arctan2X = [x2, negX]
-            arctan2Y = [y2, posY]
-            radiusAngle = np.arctan2(arctan2X, arctan2Y)
-            print("angle", radiusAngle)
-            radius_ratio = radius/midpoint_len
+            PB = self.caliberPoints(point, previousPoint, ifNext= False)
 
-            negX = negX * radius_ratio
-            posX = posX * radius_ratio
-            posY = posY * radius_ratio
-            negY = negY * radius_ratio
+            PC = PA + PB
 
+            PCprime = (radius/np.linalg.norm(PC))*PC
+
+            radiiPoint = PCprime + xyPix
+            negradiiPoint = -PCprime + xyPix
+
+            negX = negradiiPoint[0]
+            posX = radiiPoint[0]
+            posY = negradiiPoint[1]
+            negY = radiiPoint[1]
             return negX, posY, posX, negY
 
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
@@ -292,3 +253,15 @@ class RadiiPainter():
     # HACK - utilities
     def isNearZ(self, z):
         return abs(z - self.zAt) < 3
+
+    #Given a selected point and an additional neightboring point
+    #returns a point perpendicular to the line joining these points
+    def caliberPoints(self, origin, point, ifNext):
+        origin = origin.location
+        point = point.location
+        x, y, _ = util.normDelta(point, origin)
+        if ifNext:
+            vector = np.array([y, -x])
+        else:
+            vector = np.array([-y, x])
+        return vector

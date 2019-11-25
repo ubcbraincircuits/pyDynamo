@@ -22,6 +22,7 @@ class TopMenu():
         self.modeRestrictedActions = {}
         dmo    = lambda x: self.modeRestrictedActions.update({x: [DrawMode.DEFAULT]})
         rmo    = lambda x: self.modeRestrictedActions.update({x: [DrawMode.REGISTRATION]})
+        radii  = lambda x: self.modeRestrictedActions.update({x: [DrawMode.RADII]})
         doramo = lambda x: self.modeRestrictedActions.update({x: [DrawMode.DEFAULT, DrawMode.RADII]})
 
         fileMenu = QtWidgets.QMenu('&File', stackWindow)
