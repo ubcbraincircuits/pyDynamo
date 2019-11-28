@@ -7,6 +7,9 @@ from pydynamo_brain.util.nearTreeMasking import maskedNearTree
 
 _IMG_CACHE = util.ImageCache()
 
+from .branchToColorMap import BranchToColorMap
+_BRANCH_TO_COLOR_MAP = BranchToColorMap()
+
 class Volume3DWindow():
     def __init__(self, parent, uiState):
         self.uiState = uiState
@@ -20,23 +23,43 @@ class Volume3DWindow():
         location = list(location)[::-1]
         return [location[0] * zyxScale[0], location[1] * zyxScale[1], location[2] * zyxScale[2]]
 
-    # @return Numpy list for the path along a branch, in napari space.
-    def branchToPath(self, branch, zyxScale):
+    # @return (data, width, color) for a line segment between two points
+    def segmentToShape(self, prevPoint, nextPoint, zyxScale, color):
+        width = 0.3
+        if prevPoint.radius is None:
+            width = nextPoint.radius
+        elif nextPoint.radius is None:
+            width = prevPoint.radius
+        elif prevPoint.radius is not None and nextPoint.radius is not None:
+            width = (prevPoint.radius + nextPoint.radius) / 2.0
+
+        path = [
+            self.locationToZYXList(prevPoint.location, zyxScale),
+            self.locationToZYXList(nextPoint.location, zyxScale)
+        ]
+        return (path, width, color)
+
+    # @return list of (data, width, color) for each shape in the branch
+    def branchToShapes(self, branch, zyxScale):
         if branch.parentPoint is None:
             return []
-        path = [ self.locationToZYXList(branch.parentPoint.location, zyxScale) ]
-        for p in branch.points:
-            path.append(self.locationToZYXList(p.location, zyxScale))
-        return np.array(path)
+        color = list(_BRANCH_TO_COLOR_MAP.rgbForBranch(branch))
+        shapes = []
+        prevPoint = branch.parentPoint
+        for nextPoint in branch.points:
+            shapes.append(self.segmentToShape(prevPoint, nextPoint, zyxScale, color))
+            prevPoint = nextPoint
+        return shapes
 
-    # @return Numpy list of paths in the tree, one for each branch.
-    def treeToPaths(self, tree, zyxScale):
-        paths = []
+    # @return list of (data, width, color) for each shape in the tree
+    def treeToShapes(self, tree, zyxScale):
+        # data, width, color
+        shapes = []
         for b in tree.branches:
-            branchPath = self.branchToPath(b, zyxScale)
-            if len(branchPath) > 1:
-                paths.append(np.array(branchPath))
-        return np.array(paths)
+            branchShapes = self.branchToShapes(b, zyxScale)
+            if len(branchShapes) > 0:
+                shapes.extend(branchShapes)
+        return shapes
 
     def show(self):
         xyzScale = self.uiState._parent.projectOptions.pixelSizes
@@ -67,11 +90,21 @@ class Volume3DWindow():
             viewer.dims.ndim = 3
             viewer.dims.ndisplay = 3
 
-            # Add a layer representing the tree
-            paths = self.treeToPaths(self.uiState._tree, zyxScale)
-            viewer.add_shapes(
-                paths, shape_type='path',
-                name='Arbor',
-                edge_width=0.3,
-                edge_color='blue',
-            )
+            # Add shapes representing the tree
+            pathShapes = self.treeToShapes(self.uiState._tree, zyxScale)
+            shapeLayer = None
+            for data, width, color in pathShapes:
+                print (color)
+                if shapeLayer is None:
+                    shapeLayer = viewer.add_shapes(
+                        data, shape_type='path',
+                        name='Arbor',
+                        edge_width=width,
+                        edge_color=color,
+                    )
+                else:
+                    shapeLayer.add(
+                        data, shape_type='path',
+                        edge_width=width,
+                        edge_color=color,
+                    )
