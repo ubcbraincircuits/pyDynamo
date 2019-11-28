@@ -81,8 +81,8 @@ class TopMenu():
         menuBar.addMenu(editMenu)
 
         manualRadiiSubmenu = editMenu.addMenu("Radii Mode")
-        radii(manualRadiiSubmenu.addAction("Estimate all point radii ", self.radiiEstimator, QtCore.Qt.SHIFT + QtCore.Qt.Key_G))
-        radii(manualRadiiSubmenu.addAction("Estimate all point radii ", self.singleRadiusEstimator, QtCore.Qt.Key_G))
+        radii(manualRadiiSubmenu.addAction("Recursive Radii Estimation", self.radiiEstimator, QtCore.Qt.SHIFT + QtCore.Qt.Key_G))
+        radii(manualRadiiSubmenu.addAction("Single Radius Estimation", self.singleRadiusEstimator, QtCore.Qt.Key_G))
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
         viewMenu.addAction('Zoom In', self.zoomIn, QtCore.Qt.Key_X)

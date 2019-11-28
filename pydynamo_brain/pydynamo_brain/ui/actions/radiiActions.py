@@ -43,27 +43,26 @@ class RadiiActions():
 
 
 def _radiiThreshold(xs, ys):
-    PADDING = 10
     for i, x in enumerate(xs):
         if ys[i] <= 0.05:
             return xs[i]
 
 def _somaThreshold(xs, ys):
-    PADDING = 10
     index = ys.index(np.max(ys))
     return xs[index]
 
 def intensityForPointRadius(volume, point):
     zIdx = int(point.location[2])
-    plane = volume[0, (zIdx-1):(zIdx+1), :, :]
-    if point.isRoot:
+    if point.isRoot():
         plane = volume[0, zIdx, :, :]
         planeMod = roberts(plane)
         planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
         edges = feature.canny(plane, sigma=2)
         edges[edges == 0]= np.nan
         planeMod = edges * planeMod
+
     else:
+        plane = volume[0, (zIdx-1):(zIdx+1), :, :]
         plane = np.amax(plane, axis=0)
         planeMod = roberts(plane)
         planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
@@ -87,21 +86,22 @@ def intensityForPointRadius(volume, point):
         selected = (planeDist < x)
         ys.append(np.mean(planeMod[selected]))
 
-    radius = point.radius
-    if point.isRoot:
+    if point.isRoot():
         radius = _somaThreshold(xs, ys)
     else:
         radius = _radiiThreshold(xs, ys)
-    if radius == None:
-        radius = 1
 
-    #prevent terminal points from having a radius lareger than their parents
+
+    #prevent terminal points from having a radius larger than their parent
     if point.isLastInBranch() and (point.isRoot()==False):
         parentPoint = point.pathFromRoot()[-2]
-        if parentPoint.radius!=None:
-            parentRadius = parentPoint.radius
-            if radius >= parentRadius:
-                radius = parentRadius
+        parentRadius = parentPoint.radius
+        if parentRadius == None:
+            parentRadius = 1
+        if radius == None:
+                radius = 1
+        if radius >= parentRadius:
+            radius = parentRadius
     return radius
 
 def singleRadiusEstimation(fullState, id, point):

@@ -191,7 +191,8 @@ class DendriteCanvasActions():
         self.canvas.stackWindow.statusBar().clearMessage()
 
     def radiiEstimator(self, windowIndex):
-
+        stackWindow = self._stackWindow()
+        infoBox = createAndShowInfo("Estimating Radii", stackWindow)
         stackWindow = self._stackWindow()
         self.fullActions.history.pushState()
 
@@ -208,7 +209,7 @@ class DendriteCanvasActions():
         recursiveRadiiEstimator(self.uiState.parent(), windowIndex, branch, point)
         self.uiState.showMarked = True
         self.canvas.redraw()
-
+        infoBox.hide()
         return
 
 
