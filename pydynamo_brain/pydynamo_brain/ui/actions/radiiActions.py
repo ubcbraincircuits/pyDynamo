@@ -45,7 +45,7 @@ class RadiiActions():
 def _radiiThreshold(xs, ys):
     PADDING = 10
     for i, x in enumerate(xs):
-        if ys[i] <= 0.0:
+        if ys[i] <= 0.05:
             return xs[i]
 
 def _somaThreshold(xs, ys):
