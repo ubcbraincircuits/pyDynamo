@@ -48,14 +48,27 @@ def _radiiThreshold(xs, ys):
         if ys[i] <= 0.0:
             return xs[i]
 
+def _somaThreshold(xs, ys):
+    PADDING = 10
+    index = ys.index(np.max(ys))
+    return xs[index]
+
 def intensityForPointRadius(volume, point):
     zIdx = int(point.location[2])
     plane = volume[0, (zIdx-1):(zIdx+1), :, :]
-    plane = np.amax(plane, axis=0)
-    planeMod = roberts(plane)
-    planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
-    edges = feature.canny(plane, sigma=2)
-    planeMod = planeMod - edges
+    if point.isRoot:
+        plane = volume[0, zIdx, :, :]
+        planeMod = roberts(plane)
+        planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
+        edges = feature.canny(plane, sigma=2)
+        edges[edges == 0]= np.nan
+        planeMod = edges * planeMod
+    else:
+        plane = np.amax(plane, axis=0)
+        planeMod = roberts(plane)
+        planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
+        edges = feature.canny(plane, sigma=2)
+        planeMod = planeMod - edges
 
     plane01 = np.ones(plane.shape)
     plane01[int(point.location[1]), int(point.location[0])] = 0
@@ -67,15 +80,18 @@ def intensityForPointRadius(volume, point):
     X_POINTS = 100
     SQUISH = 1
     MAX_DIST_PX = 30
-    if point.isRoot():
-        MAX_DIST_PX = 300
+
     xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
     ys = []
     for x in xs:
         selected = (planeDist < x)
         ys.append(np.mean(planeMod[selected]))
 
-    radius = _radiiThreshold(xs, ys)
+    radius = point.radius
+    if point.isRoot:
+        radius = _somaThreshold(xs, ys)
+    else:
+        radius = _radiiThreshold(xs, ys)
     if radius == None:
         radius = 1
 
