@@ -123,12 +123,23 @@ class DendriteVolumeCanvas(QWidget):
                     if shiftPressed:
                         self.fullActions.beginMove(self.windowIndex, pointClicked)
                     else:
-                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                       self.fullActions.selectPoint(self.windowIndex, pointClicked)
                 else:
                     # NOTE: laterStacks is ctrl here, and shift for deletion.
                     # Not ideal, but downstream was already bound to shift here.
                     self.fullActions.endMove(self.windowIndex, location,
                         downstream=shiftPressed, laterStacks=ctrlPressed)
+
+
+            # Radii Mode Click Events
+            elif fullState.inRadiiMode():
+                if pointClicked:
+                    if pointClicked != self.uiState.currentPoint():
+                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                else:
+                    self.editRadiiOnClick(location)
+                    print("RadiiMode Click Event")
+
             # Next, Right-click/ctrl first; either delete the point, or start a new branch.
             elif rightClick or ctrlPressed:
                 if pointClicked:
@@ -145,13 +156,10 @@ class DendriteVolumeCanvas(QWidget):
                 else:
                     assert not (ctrlPressed and not rightClick) # Ctrl-shift-left handled above
                     self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location)
-            # Otherwise - handle no modifier; either select point, or add to end of current branch.
+            # Otherwise - handle no modifier; either select point, or add to end of selectPoin branch.
             else:
                 if pointClicked:
                     self.fullActions.selectPoint(self.windowIndex, pointClicked)
-                elif fullState.inRadiiMode():
-                    self.editRadiiOnClick(location)
-                    print("RadiiMode click event")
                 else:
                     self.fullActions.addPointToCurrentBranchAndSelect(self.windowIndex, location)
             self.dynamoWindow.redrawAllStacks(self.stackWindow)
@@ -248,7 +256,7 @@ class DendriteVolumeCanvas(QWidget):
         mouseX, mouseY, mouseZ = location
         point = self.uiState.currentPoint()
         pointX, pointY, pointZ = point.location
-        if mouseZ == pointZ:
+        if (pointZ-1) <= mouseZ <= (pointZ+1):
             newRadius =  math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
             point.radius = newRadius
             point.manuallyMarked = False
