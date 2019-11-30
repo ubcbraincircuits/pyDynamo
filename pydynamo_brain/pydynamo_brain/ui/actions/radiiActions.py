@@ -44,27 +44,37 @@ class RadiiActions():
     def radiusFromIntensity(self, volume, point):
         zIdx = round(point.location[2])
         if point.isRoot():
-            plane = volume[0, zIdx, :, :]
+            plane = volume[self.state.channel, zIdx, :, :]
+            # Detect edges and apply a gaussian_filter blur
             modifiedPlane = roberts(plane)
             modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
+            # Use Canny edge dectection edges
             edges = feature.canny(plane, sigma=2)
             edges[edges == 0]= np.nan
+            # Enhance edge instensity; find soma edge by searching for maxima
             modifiedPlane = edges * modifiedPlane
 
         else:
-            plane = volume[0, (zIdx-1):(zIdx+1), :, :]
+            # Create a small Z-projection used for radius estimations
+            if zIdx== 0:
+                plane = volume[self.state.channel, (zIdx):(zIdx+1), :, :]
+            elif  zIdx== volume.shape[1]:
+                plane = volume[self.state.channel, (zIdx-1):(zIdx), :, :]
+            else:
+                plane = volume[self.state.channel, (zIdx-1):(zIdx+1), :, :]
             plane = np.amax(plane, axis=0)
+            # Detect edges and apply a gaussian_filter blur
             modifiedPlane = roberts(plane)
             modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
+            # Use Canny edge dectection edges
             edges = feature.canny(plane, sigma=2)
+            # Subtract Canny edges from gaussion blur
+            # Find branch edges near the crossover point in array instensity
             modifiedPlane = modifiedPlane - edges
 
         plane01 = np.ones(plane.shape)
         plane01[int(point.location[1]), int(point.location[0])] = 0
         planeDist = ndimage.distance_transform_edt(plane01)
-
-        _mx = np.max(planeDist)
-        planeDistNorm = np.power(((_mx - planeDist) / _mx), 13)
 
         #Number of points 'X' sampled
         #Power of the skewed of the distrubtion
