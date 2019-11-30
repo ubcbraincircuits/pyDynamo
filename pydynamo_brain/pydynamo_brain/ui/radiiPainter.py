@@ -85,76 +85,41 @@ class RadiiPainter():
             self.maybeDrawText(x, y, point)
 
     def returnRadiusCoord(self, point, radius, realRadius):
-        #point radius will be drawn from
+        # Point radius will be drawn from
         delta = 1
-        #Drawing the radius calipers for root points
-        if  point.isRoot():
-            nextPoint  = point.nextPointInBranch(delta)
-            p2Loc = point.location
-
-            x2, y2, z2 = self.zoomedLocation(p2Loc)
-            p1Loc = nextPoint.location
-            x1, y1, z1 = self.zoomedLocation(p1Loc)
-
-            #length between two points
-            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-            if L == 0:
-                L = 1
-            #all solutions for the plotting radius
-            #assuming a right triangle
-            negX = x2 -((radius*(y1-y2)/L))
-            posX = x2 +((radius*(y1-y2)/L))
-            posY = y2 +((radius*(x1-x2)/L))
-            negY = y2 -((radius*(x1-x2)/L))
-
-            return negX, posY, posX, negY
-        #drawing the raidus calipers for terminal points
-        elif point.isLastInBranch():
-            p2Loc = point.location
-            x2, y2, z2 = self.zoomedLocation(p2Loc)
-            point1 =  point.pathFromRoot()[-2:][0]
-            p1Loc = point1.location
-            x1, y1, z1 = self.zoomedLocation(p1Loc)
-
-            #length between two points
-            L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-            if L == 0:
-                L = 1
-            #all solutions for the plotting radius
-            #assuming a right triangle
-            negX = x2 -((radius*(y1-y2)/L))
-            posX = x2 +((radius*(y1-y2)/L))
-            posY = y2 +((radius*(x1-x2)/L))
-            negY = y2 -((radius*(x1-x2)/L))
-            return negX, posY, posX, negY
-        #drawing calipers for mid branch points, angles based off an average of
-        #previous and last point
-        else:
-            #previous point
-            pointCoord = point.location
-            xPix, yPix, zPix = self.zoomedLocation(pointCoord)
-            xyPix = np.array([xPix, yPix])
-
+        previousPoint = None
+        if not point.isRoot():
             previousPoint =  point.pathFromRoot()[-2]
-            nextPoint  = point.nextPointInBranch(delta)
+        nextPoint  = point.nextPointInBranch(delta)
 
+        pointCoord = point.location
+        xPix, yPix, zPix = self.zoomedLocation(pointCoord)
+        xyPix = np.array([xPix, yPix])
 
-            PA = self.caliperPoints(point, nextPoint, ifNext= True)
+        # Drawing the radius calipers for root points
+        if  previousPoint is  None:
+            pC = self.caliperPoints(point, nextPoint, ifNext= True)
 
-            PB = self.caliperPoints(point, previousPoint, ifNext= False)
+        # Drawing the raidus calipers for terminal points
+        elif nextPoint is None:
+            pC = self.caliperPoints(point, previousPoint, ifNext= False)
 
-            PC = PA + PB
+        # Drawing calipers for mid branch points, angles based off an average of
+        #Previous and last point
+        else:
+            pA = self.caliperPoints(point, nextPoint, ifNext= True)
+            pB = self.caliperPoints(point, previousPoint, ifNext= False)
+            pC = pA + pB
 
-            PCprime = (radius/np.linalg.norm(PC))*PC
+        pCprime = (radius/np.linalg.norm(pC))*pC
+        radiiPoint = pCprime + xyPix
+        negRadiiPoint = -pCprime + xyPix
 
-            radiiPoint = PCprime + xyPix
-            negradiiPoint = -PCprime + xyPix
-
-            negX = negradiiPoint[0]
-            posX = radiiPoint[0]
-            posY = negradiiPoint[1]
-            negY = radiiPoint[1]
-            return negX, posY, posX, negY
+        negX = negRadiiPoint[0]
+        posX = radiiPoint[0]
+        posY = negRadiiPoint[1]
+        negY = radiiPoint[1]
+        return negX, posY, posX, negY
 
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
         if realRadius is not None:
@@ -199,16 +164,13 @@ class RadiiPainter():
         else:
             radiusX, radiusY = radius, radius
 
-
         self.p.drawEllipse(QPointF(x, y), radiusX, radiusY)
-        #self.p.end()
         #draw lines to represent the size of the radius
         radiColor = QColor(*rgbRadius)
 
         #Pen for drawing radi
         self.p.setPen(QPen(QBrush(radiColor), self.uiState.parent().lineWidth, Qt.DotLine))
         self.p.drawLine(x1, y1, x2, y2)
-
 
     def maybeDrawText(self, x, y, point):
         if not self.uiState.showAnnotations and not self.uiState.showIDs:
@@ -257,9 +219,7 @@ class RadiiPainter():
     #Given a selected point and an additional neightboring point
     #returns a point perpendicular to the line joining these points
     def caliperPoints(self, origin, point, ifNext):
-        origin = origin.location
-        point = point.location
-        x, y, _ = util.normDelta(point, origin)
+        x, y, _ = util.normDelta(point.location, origin.location)
         if ifNext:
             vector = np.array([y, -x])
         else:

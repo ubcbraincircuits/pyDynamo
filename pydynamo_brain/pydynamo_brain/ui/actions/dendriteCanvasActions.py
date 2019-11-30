@@ -16,7 +16,6 @@ from pydynamo_brain.files import importFromSWC
 from pydynamo_brain.model import IdAligner, PointMode, recursiveAdjust
 from pydynamo_brain.model.tree.util import findTightAngles
 
-from pydynamo_brain.ui.actions.radiiActions import recursiveRadiiEstimator, singleRadiusEstimation
 class DendriteCanvasActions():
     COLOR_SENSITIVITY = 10.0 / 256.0
 
@@ -27,6 +26,7 @@ class DendriteCanvasActions():
         self.canvas = dendriteCanvas
         self.imagePath = imagePath
         self.branchToColorMap = BranchToColorMap()
+
 
     def _stackWindow(self):
         return self.canvas.stackWindow
@@ -193,35 +193,28 @@ class DendriteCanvasActions():
     def radiiEstimator(self, windowIndex):
         stackWindow = self._stackWindow()
         infoBox = createAndShowInfo("Estimating Radii", stackWindow)
-        stackWindow = self._stackWindow()
         self.fullActions.history.pushState()
 
         point = self.uiState.currentPoint()
-        pointNew = self.uiState.currentPoint()
-        branch = None if point is None else pointNew.parentBranch
+        branch = None if point is None else point.parentBranch
 
         # Default to root if anything is wrong...
         if point is None or branch is None:
             branch = None
             point = self.uiState.parent().trees[windowIndex].rootPoint
-            pointNew = self.uiState.parent().trees[windowIndex].rootPoint
 
-        recursiveRadiiEstimator(self.uiState.parent(), windowIndex, branch, point)
+        self.fullActions.radiiActions.RadiiEstimator(self.uiState.parent(), windowIndex, point, recursive=True)
         self.uiState.showMarked = True
         self.canvas.redraw()
         infoBox.hide()
         return
 
-
     def singleRadiusEstimator(self, windowIndex):
-
         stackWindow = self._stackWindow()
         self.fullActions.history.pushState()
-
         point = self.uiState.currentPoint()
-        pointNew = self.uiState.currentPoint()
 
-        singleRadiusEstimation(self.uiState.parent(), windowIndex, point)
+        self.fullActions.radiiActions.RadiiEstimator(self.uiState.parent(), windowIndex, point)
         self.uiState.showMarked = True
         self.canvas.redraw()
 
@@ -234,7 +227,6 @@ class DendriteCanvasActions():
             return
 
         self.fullActions.history.pushState()
-
         fullState = self.uiState.parent()
         oldTree = fullState.trees[windowIndex - 1]
         newTree = fullState.trees[windowIndex]

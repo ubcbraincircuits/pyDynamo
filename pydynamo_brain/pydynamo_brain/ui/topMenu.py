@@ -208,13 +208,12 @@ class TopMenu():
     def radiiEstimator(self):
         if self._global().fullState.inRadiiMode:
             self._local().radiiEstimator(self.stackWindow.windowIndex)
-        self.redraw()
+            self.redraw()
 
     def singleRadiusEstimator(self):
         if self._global().fullState.inRadiiMode:
             self._local().singleRadiusEstimator(self.stackWindow.windowIndex)
-        self.redraw()
-
+            self.redraw()
 
     def registerIDs(self):
         if self._global().fullState.inManualRegistrationMode():

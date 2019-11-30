@@ -51,7 +51,6 @@ def rotation_matrix(axis, theta):
                      [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
 
-
 def emptyArrayArray(c):
     d = []
     for i in range(c):

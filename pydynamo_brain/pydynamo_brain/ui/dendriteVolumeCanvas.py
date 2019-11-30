@@ -14,6 +14,7 @@ from .dendriteOverlay import DendriteOverlay
 from pydynamo_brain.model import Point
 from pydynamo_brain.util import ImageCache, deltaSz, snapToRange, zStackForUiState
 
+
 _IMGCACHE = ImageCache()
 
 class DendriteVolumeCanvas(QWidget):
@@ -124,12 +125,12 @@ class DendriteVolumeCanvas(QWidget):
                         self.fullActions.beginMove(self.windowIndex, pointClicked)
                     else:
                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+
                 else:
                     # NOTE: laterStacks is ctrl here, and shift for deletion.
                     # Not ideal, but downstream was already bound to shift here.
                     self.fullActions.endMove(self.windowIndex, location,
                         downstream=shiftPressed, laterStacks=ctrlPressed)
-
 
             # Radii Mode Click Events
             elif fullState.inRadiiMode():
@@ -137,8 +138,7 @@ class DendriteVolumeCanvas(QWidget):
                     if pointClicked != self.uiState.currentPoint():
                         self.fullActions.selectPoint(self.windowIndex, pointClicked)
                 else:
-                    self.editRadiiOnClick(location)
-                    print("RadiiMode Click Event")
+                    self.fullActions.radiiActions.editRadiiOnClick(location, self.uiState)
 
             # Next, Right-click/ctrl first; either delete the point, or start a new branch.
             elif rightClick or ctrlPressed:
@@ -149,6 +149,7 @@ class DendriteVolumeCanvas(QWidget):
                         self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location, backwards=True)
                     else:
                         self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
+
             # Next. Middle-click / shift; either start move, or add mid-branch point
             elif middleClick or shiftPressed:
                 if pointClicked:
@@ -156,7 +157,7 @@ class DendriteVolumeCanvas(QWidget):
                 else:
                     assert not (ctrlPressed and not rightClick) # Ctrl-shift-left handled above
                     self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location)
-            # Otherwise - handle no modifier; either select point, or add to end of selectPoin branch.
+            # Otherwise - handle no modifier; either select point, or add to end of current branch.
             else:
                 if pointClicked:
                     self.fullActions.selectPoint(self.windowIndex, pointClicked)
@@ -248,16 +249,3 @@ class DendriteVolumeCanvas(QWidget):
         x, y, z = xyz
         zoomedXY = self.imgView.mapFromScene(x, y)
         return (zoomedXY.x(), zoomedXY.y(), z)
-
-    #Function to edit radius of selected point by clicking
-    def editRadiiOnClick(self, location, zFilter=True):
-        self.fullActions.history.pushState()
-        #self.FullStateActions.history.pushState()
-        mouseX, mouseY, mouseZ = location
-        point = self.uiState.currentPoint()
-        pointX, pointY, pointZ = point.location
-        if (pointZ-1) <= mouseZ <= (pointZ+1):
-            newRadius =  math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
-            point.radius = newRadius
-            point.manuallyMarked = False
-        return

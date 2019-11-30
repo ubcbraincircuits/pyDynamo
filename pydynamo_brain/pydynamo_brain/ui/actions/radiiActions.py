@@ -41,86 +41,88 @@ class RadiiActions():
                     else:
                         current.radius *= dR
 
+    def radiusFromIntensity(self, volume, point):
+        zIdx = round(point.location[2])
+        if point.isRoot():
+            plane = volume[0, zIdx, :, :]
+            modifiedPlane = roberts(plane)
+            modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
+            edges = feature.canny(plane, sigma=2)
+            edges[edges == 0]= np.nan
+            modifiedPlane = edges * modifiedPlane
 
-def _radiiThreshold(xs, ys):
-    for i, x in enumerate(xs):
-        if ys[i] <= 0.05:
-            return xs[i]
+        else:
+            plane = volume[0, (zIdx-1):(zIdx+1), :, :]
+            plane = np.amax(plane, axis=0)
+            modifiedPlane = roberts(plane)
+            modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
+            edges = feature.canny(plane, sigma=2)
+            modifiedPlane = modifiedPlane - edges
 
-def _somaThreshold(xs, ys):
-    index = ys.index(np.max(ys))
-    return xs[index]
+        plane01 = np.ones(plane.shape)
+        plane01[int(point.location[1]), int(point.location[0])] = 0
+        planeDist = ndimage.distance_transform_edt(plane01)
 
-def intensityForPointRadius(volume, point):
-    zIdx = int(point.location[2])
-    if point.isRoot():
-        plane = volume[0, zIdx, :, :]
-        planeMod = roberts(plane)
-        planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
-        edges = feature.canny(plane, sigma=2)
-        edges[edges == 0]= np.nan
-        planeMod = edges * planeMod
+        _mx = np.max(planeDist)
+        planeDistNorm = np.power(((_mx - planeDist) / _mx), 13)
 
-    else:
-        plane = volume[0, (zIdx-1):(zIdx+1), :, :]
-        plane = np.amax(plane, axis=0)
-        planeMod = roberts(plane)
-        planeMod = ndimage.gaussian_filter(planeMod, sigma=3)
-        edges = feature.canny(plane, sigma=2)
-        planeMod = planeMod - edges
+        #Number of points 'X' sampled
+        #Power of the skewed of the distrubtion
+        #Max distance sampled away from the the point in pixels
+        X_POINTS = 100
+        SQUISH = 1
+        MAX_DIST_PX = 30
 
-    plane01 = np.ones(plane.shape)
-    plane01[int(point.location[1]), int(point.location[0])] = 0
-    planeDist = ndimage.distance_transform_edt(plane01)
+        xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
+        ys = []
+        for x in xs:
+            selected = (planeDist < x)
+            ys.append(np.mean(modifiedPlane[selected]))
 
-    _mx = np.max(planeDist)
-    planeDistNorm = np.power(((_mx - planeDist) / _mx), 13)
+        if point.isRoot():
+            index = ys.index(np.max(ys))
+            radius = xs[index]
+        else:
+            for i, x in enumerate(xs):
+                if ys[i] <= 0.0:
+                    radius = xs[i]
+                    break
 
-    X_POINTS = 100
-    SQUISH = 1
-    MAX_DIST_PX = 30
+        #prevent terminal points from having a radius larger than their parent
+        if point.isLastInBranch() and (not point.isRoot()):
+            prevPoint = point.nextPointInBranch(delta=-1)
+            if prevPoint is not None:
+                parentRadius = prevPoint.radius
+                if parentRadius is None:
+                    parentRadius = 1
+                if radius is None:
+                        radius = 1
+                if radius >= parentRadius * 2:
+                    radius = parentRadius
+        return radius
 
-    xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
-    ys = []
-    for x in xs:
-        selected = (planeDist < x)
-        ys.append(np.mean(planeMod[selected]))
+    def singleRadiusEstimation(self, fullState, id, point):
+        volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
+        radius = self.radiusFromIntensity(volume, point)
+        point.radius = radius
+        point.manuallyMarked = True
 
-    if point.isRoot():
-        radius = _somaThreshold(xs, ys)
-    else:
-        radius = _radiiThreshold(xs, ys)
+    def RadiiEstimator(self, fullState, id, point, recursive=False):
+        volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
+        points = point.flattenSubtreePoints() if recursive else [point]
+        for p in points:
+            radius = self.radiusFromIntensity(volume, p)
+            p.radius = radius
+            p.manuallyMarked = True
 
-
-    #prevent terminal points from having a radius larger than their parent
-    if point.isLastInBranch() and (point.isRoot()==False):
-        parentPoint = point.pathFromRoot()[-2]
-        parentRadius = parentPoint.radius
-        if parentRadius == None:
-            parentRadius = 1
-        if radius == None:
-                radius = 1
-        if radius >= parentRadius:
-            radius = parentRadius
-    return radius
-
-def singleRadiusEstimation(fullState, id, point):
-    newTree = fullState.uiStates[id]._tree
-    volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
-    radius = intensityForPointRadius(volume, point)
-    point.radius = radius
-    point.manuallyMarked = True
-
-    return
-
-def recursiveRadiiEstimator(fullState, id, branch, point):
-    newTree = fullState.uiStates[id]._tree
-    volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
-
-    childrenPoints = point.flattenSubtreePoints()
-    for p in childrenPoints:
-        radius = intensityForPointRadius(volume, p)
-        p.radius = radius
-        p.manuallyMarked = True
-
-    return
+    #Function to edit radius of selected point by clicking
+    def editRadiiOnClick(self, location, uiState, zFilter=True):
+        self.history.pushState()
+        mouseX, mouseY, mouseZ = location
+        point = uiState.currentPoint()
+        pointX, pointY, pointZ = point.location
+        if round(mouseZ) == round(pointZ):
+            newRadius =  math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
+            point.radius = newRadius
+            point.manuallyMarked = False
+        return
