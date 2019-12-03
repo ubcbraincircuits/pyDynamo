@@ -44,9 +44,12 @@ class RadiiActions():
     def radiusFromIntensity(self, fullState, volume, point):
         zIdx = round(point.location[2])
         if point.isRoot():
+
             plane = volume[fullState.channel, zIdx, :, :]
+            # Detect edges and apply a gaussian_filter blur
             modifiedPlane = roberts(plane)
             modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
+            # Use Canny edge dectection edges
             edges = feature.canny(plane, sigma=2)
             edges[edges == 0] = np.nan
             modifiedPlane = edges * modifiedPlane
@@ -55,9 +58,13 @@ class RadiiActions():
             loIdx, hiIdx = max(0, zIdx - 1), min(volume.shape[1], zIdx + 2)
             plane = volume[fullState.channel, loIdx:hiIdx, :, :]
             plane = np.amax(plane, axis=0)
+            # Detect edges and apply a gaussian_filter blur
             modifiedPlane = roberts(plane)
             modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
+            # Use Canny edge dectection edges
             edges = feature.canny(plane, sigma=2)
+            # Subtract Canny edges from gaussion blur
+            # Find branch edges near the crossover point in array instensity
             modifiedPlane = modifiedPlane - edges
 
         plane01 = np.ones(plane.shape)
@@ -70,6 +77,7 @@ class RadiiActions():
         X_POINTS = 100 #Number of points 'X' sampled
         SQUISH = 1 #Power of the skewed of the distrubtion
         MAX_DIST_PX = 30 #Max distance sampled away from the the point in pixels
+
 
         xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
         ys = []
