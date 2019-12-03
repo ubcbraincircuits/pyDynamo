@@ -111,7 +111,8 @@ class RadiiPainter():
             pB = self.caliperPoints(point, previousPoint, ifNext= False)
             pC = pA + pB
 
-        pCprime = (radius/np.linalg.norm(pC))*pC
+        pC *= (1/np.linalg.norm(pC))
+        pCprime = radius * pC
         radiiPoint = pCprime + xyPix
         negRadiiPoint = -pCprime + xyPix
 
@@ -216,10 +217,11 @@ class RadiiPainter():
     def isNearZ(self, z):
         return abs(z - self.zAt) < 3
 
-    #Given a selected point and an additional neightboring point
-    #returns a point perpendicular to the line joining these points
+    # Given a selected point and an additional neightboring point
+    # returns a point perpendicular to the line joining these points
     def caliperPoints(self, origin, point, ifNext):
-        x, y, _ = util.normDelta(point.location, origin.location)
+        origin_ignoreZ = (origin.location[0], origin.location[1], point.location[2])
+        x, y, _ = util.normDelta(point.location, origin_ignoreZ)
         if ifNext:
             vector = np.array([y, -x])
         else:

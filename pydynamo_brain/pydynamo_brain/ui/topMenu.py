@@ -62,7 +62,6 @@ class TopMenu():
         dmo(editMenu.addAction('Remove empty branches from all stacks',
             self.cleanEmptyBranches, QtCore.Qt.SHIFT + QtCore.Qt.Key_E))
         editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
-        editMenu.addAction('Draw Radii', self.radiiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
         doramo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
 
         manualRegisterSubmenu = editMenu.addMenu("Registration")
@@ -81,7 +80,8 @@ class TopMenu():
         menuBar.addMenu(editMenu)
 
         manualRadiiSubmenu = editMenu.addMenu("Radii Mode")
-        radii(manualRadiiSubmenu.addAction("Recursive Radii Estimation", self.radiiEstimator, QtCore.Qt.SHIFT + QtCore.Qt.Key_G))
+        manualRadiiSubmenu.addAction('Draw Radii', self.radiiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
+        radii(manualRadiiSubmenu.addAction("Recursive Radii Estimation", self.multipleRadiiEstimator, QtCore.Qt.SHIFT + QtCore.Qt.Key_G))
         radii(manualRadiiSubmenu.addAction("Single Radius Estimation", self.singleRadiusEstimator, QtCore.Qt.Key_G))
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
@@ -205,7 +205,7 @@ class TopMenu():
         self._local().smartRegisterImages(self.stackWindow.windowIndex)
         self.redraw()
 
-    def radiiEstimator(self):
+    def multipleRadiiEstimator(self):
         if self._global().fullState.inRadiiMode:
             self._local().radiiEstimator(self.stackWindow.windowIndex)
             self.redraw()

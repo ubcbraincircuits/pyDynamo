@@ -41,18 +41,19 @@ class RadiiActions():
                     else:
                         current.radius *= dR
 
-    def radiusFromIntensity(self, volume, point):
+    def radiusFromIntensity(self, fullState, volume, point):
         zIdx = round(point.location[2])
         if point.isRoot():
-            plane = volume[0, zIdx, :, :]
+            plane = volume[fullState.channel, zIdx, :, :]
             modifiedPlane = roberts(plane)
             modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
             edges = feature.canny(plane, sigma=2)
-            edges[edges == 0]= np.nan
+            edges[edges == 0] = np.nan
             modifiedPlane = edges * modifiedPlane
 
         else:
-            plane = volume[0, (zIdx-1):(zIdx+1), :, :]
+            loIdx, hiIdx = max(0, zIdx - 1), min(volume.shape[1], zIdx + 2)
+            plane = volume[fullState.channel, loIdx:hiIdx, :, :]
             plane = np.amax(plane, axis=0)
             modifiedPlane = roberts(plane)
             modifiedPlane = ndimage.gaussian_filter(modifiedPlane, sigma=3)
@@ -66,12 +67,9 @@ class RadiiActions():
         _mx = np.max(planeDist)
         planeDistNorm = np.power(((_mx - planeDist) / _mx), 13)
 
-        #Number of points 'X' sampled
-        #Power of the skewed of the distrubtion
-        #Max distance sampled away from the the point in pixels
-        X_POINTS = 100
-        SQUISH = 1
-        MAX_DIST_PX = 30
+        X_POINTS = 100 #Number of points 'X' sampled
+        SQUISH = 1 #Power of the skewed of the distrubtion
+        MAX_DIST_PX = 30 #Max distance sampled away from the the point in pixels
 
         xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
         ys = []
@@ -103,7 +101,7 @@ class RadiiActions():
 
     def singleRadiusEstimation(self, fullState, id, point):
         volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
-        radius = self.radiusFromIntensity(volume, point)
+        radius = self.radiusFromIntensity(fullState, volume, point)
         point.radius = radius
         point.manuallyMarked = True
 
@@ -111,7 +109,7 @@ class RadiiActions():
         volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
         points = point.flattenSubtreePoints() if recursive else [point]
         for p in points:
-            radius = self.radiusFromIntensity(volume, p)
+            radius = self.radiusFromIntensity(fullState, volume, p)
             p.radius = radius
             p.manuallyMarked = True
 

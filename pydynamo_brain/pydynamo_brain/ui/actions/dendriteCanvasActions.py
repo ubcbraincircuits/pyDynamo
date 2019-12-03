@@ -27,7 +27,6 @@ class DendriteCanvasActions():
         self.imagePath = imagePath
         self.branchToColorMap = BranchToColorMap()
 
-
     def _stackWindow(self):
         return self.canvas.stackWindow
 
@@ -207,7 +206,7 @@ class DendriteCanvasActions():
         self.uiState.showMarked = True
         self.canvas.redraw()
         infoBox.hide()
-        return
+
 
     def singleRadiusEstimator(self, windowIndex):
         stackWindow = self._stackWindow()
@@ -217,9 +216,6 @@ class DendriteCanvasActions():
         self.fullActions.radiiActions.RadiiEstimator(self.uiState.parent(), windowIndex, point)
         self.uiState.showMarked = True
         self.canvas.redraw()
-
-        return
-
 
     def simpleRegisterImages(self, windowIndex, somaScale=1.01):
         if windowIndex == 0:
