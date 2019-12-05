@@ -71,13 +71,9 @@ class RadiiActions():
         plane01[int(point.location[1]), int(point.location[0])] = 0
         planeDist = ndimage.distance_transform_edt(plane01)
 
-        _mx = np.max(planeDist)
-        planeDistNorm = np.power(((_mx - planeDist) / _mx), 13)
-
         X_POINTS = 100 #Number of points 'X' sampled
         SQUISH = 1 #Power of the skewed of the distrubtion
         MAX_DIST_PX = 30 #Max distance sampled away from the the point in pixels
-
 
         xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
         ys = []
@@ -86,9 +82,11 @@ class RadiiActions():
             ys.append(np.mean(modifiedPlane[selected]))
 
         if point.isRoot():
+            # Max instensity
             index = ys.index(np.max(ys))
             radius = xs[index]
         else:
+            # Select for radius where instensity == threshold 0.0
             for i, x in enumerate(xs):
                 if ys[i] <= 0.0:
                     radius = xs[i]
@@ -107,13 +105,7 @@ class RadiiActions():
                     radius = parentRadius
         return radius
 
-    def singleRadiusEstimation(self, fullState, id, point):
-        volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
-        radius = self.radiusFromIntensity(fullState, volume, point)
-        point.radius = radius
-        point.manuallyMarked = True
-
-    def RadiiEstimator(self, fullState, id, point, recursive=False):
+    def radiiEstimator(self, fullState, id, point, recursive=False):
         volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
         points = point.flattenSubtreePoints() if recursive else [point]
         for p in points:
@@ -127,8 +119,10 @@ class RadiiActions():
         mouseX, mouseY, mouseZ = location
         point = uiState.currentPoint()
         pointX, pointY, pointZ = point.location
+
         if round(mouseZ) == round(pointZ):
-            newRadius =  math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
+            newRadius = math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
             point.radius = newRadius
             point.manuallyMarked = False
+
         return

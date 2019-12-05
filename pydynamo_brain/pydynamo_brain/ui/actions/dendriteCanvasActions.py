@@ -202,18 +202,17 @@ class DendriteCanvasActions():
             branch = None
             point = self.uiState.parent().trees[windowIndex].rootPoint
 
-        self.fullActions.radiiActions.RadiiEstimator(self.uiState.parent(), windowIndex, point, recursive=True)
+        self.fullActions.radiiActions.radiiEstimator(self.uiState.parent(), windowIndex, point, recursive=True)
         self.uiState.showMarked = True
         self.canvas.redraw()
         infoBox.hide()
-
 
     def singleRadiusEstimator(self, windowIndex):
         stackWindow = self._stackWindow()
         self.fullActions.history.pushState()
         point = self.uiState.currentPoint()
 
-        self.fullActions.radiiActions.RadiiEstimator(self.uiState.parent(), windowIndex, point)
+        self.fullActions.radiiActions.radiiEstimator(self.uiState.parent(), windowIndex, point)
         self.uiState.showMarked = True
         self.canvas.redraw()
 

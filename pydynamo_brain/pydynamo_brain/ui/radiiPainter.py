@@ -30,10 +30,10 @@ class RadiiPainter():
     ANNOTATION_HEIGHT = 40
     ANNOTATION_MAX_WIDTH = 512
 
-    #Colors for Radius Calipers
-    RAIDUS_COLOR_NONE = (255, 0, 0)
-    RAIDUS_COLOR_REAL = (255,0,255)
-    RAIDUS_COLOR_SELECTED = (11, 219, 209)
+    # Colors for Radius Calipers
+    RADIUS_COLOR_NONE = (255, 0, 0)
+    RADIUS_COLOR_REAL = (255, 0, 255)
+    RADIUS_COLOR_SELECTED = (11, 219, 209)
     RADIUS_COLOR_IS_MARKED = (255, 108, 180)
 
     def __init__(self, painter, uiState, zoomMapFunc, zoomDistFunc):
@@ -89,7 +89,7 @@ class RadiiPainter():
         delta = 1
         previousPoint = None
         if not point.isRoot():
-            previousPoint =  point.pathFromRoot()[-2]
+            previousPoint = point.pathFromRoot()[-2]
         nextPoint  = point.nextPointInBranch(delta)
 
         pointCoord = point.location
@@ -97,15 +97,15 @@ class RadiiPainter():
         xyPix = np.array([xPix, yPix])
 
         # Drawing the radius calipers for root points
-        if  previousPoint is  None:
+        if previousPoint is None:
             pC = self.caliperPoints(point, nextPoint, ifNext= True)
 
-        # Drawing the raidus calipers for terminal points
+        # Drawing the radius calipers for terminal points
         elif nextPoint is None:
             pC = self.caliperPoints(point, previousPoint, ifNext= False)
 
         # Drawing calipers for mid branch points, angles based off an average of
-        #Previous and last point
+        # Previous and last point
         else:
             pA = self.caliperPoints(point, nextPoint, ifNext= True)
             pB = self.caliperPoints(point, previousPoint, ifNext= False)
@@ -125,10 +125,10 @@ class RadiiPainter():
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
         if realRadius is not None:
             radius2Draw = realRadius
-            rgbRadius = self.RAIDUS_COLOR_REAL
+            rgbRadius = self.RADIUS_COLOR_REAL
         else:
             radius2Draw = 10
-            rgbRadius = self.RAIDUS_COLOR_NONE
+            rgbRadius = self.RADIUS_COLOR_NONE
         radius = fakeRadius
         resizeRadius = False
         if radius is None:
@@ -138,14 +138,14 @@ class RadiiPainter():
             radius = self.NODE_CIRCLE_DEFAULT_RADIUS
         radiusX, radiusY = radius, radius
 
-        #scale radius for image view
+        # Scale radius for image view
         radius2Draw, junk = self.zoomDistFunc(radius2Draw, radius2Draw)
-        #calculate the line to represent neurite radius
+        # Calculate the line to represent neurite radius
         x1, y1, x2, y2 = self.returnRadiusCoord(point, radius2Draw, realRadius)
 
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
-            rgbRadius = self.RAIDUS_COLOR_SELECTED
+            rgbRadius = self.RADIUS_COLOR_SELECTED
             brushColor = self.NODE_CIRCLE_SELECTED_BRUSH
             if self.uiState.isMoving():
                 brushColor = self.NODE_CIRCLE_MOVING_BRUSH
@@ -166,10 +166,10 @@ class RadiiPainter():
             radiusX, radiusY = radius, radius
 
         self.p.drawEllipse(QPointF(x, y), radiusX, radiusY)
-        #draw lines to represent the size of the radius
+        # Draw lines to represent the size of the radius
         radiColor = QColor(*rgbRadius)
 
-        #Pen for drawing radi
+        # Pen for drawing radi
         self.p.setPen(QPen(QBrush(radiColor), self.uiState.parent().lineWidth, Qt.DotLine))
         self.p.drawLine(x1, y1, x2, y2)
 

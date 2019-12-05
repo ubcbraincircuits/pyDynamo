@@ -72,7 +72,7 @@ class StackListWindow(QtWidgets.QMainWindow):
 
         # Build the widget itself.
         container = QtWidgets.QWidget()
-        wText =  QtWidgets.QLabel(title)
+        wText = QtWidgets.QLabel(title)
         bViz = cursorPointer(QtWidgets.QPushButton("Show" if stackHidden else "Hide"))
         bDel = cursorPointer(QtWidgets.QPushButton("Delete"))
         bUp  = cursorPointer(QtWidgets.QPushButton("▲"))
