@@ -86,11 +86,10 @@ class RadiiPainter():
 
     def returnRadiusCoord(self, point, radius, realRadius):
         # Point radius will be drawn from
-        delta = 1
         previousPoint = None
         if not point.isRoot():
             previousPoint = point.pathFromRoot()[-2]
-        nextPoint  = point.nextPointInBranch(delta)
+        nextPoint = point.nextPointInBranch(delta= 1)
 
         pointCoord = point.location
         xPix, yPix, zPix = self.zoomedLocation(pointCoord)

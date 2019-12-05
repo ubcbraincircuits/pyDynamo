@@ -207,7 +207,7 @@ class TopMenu():
 
     def multipleRadiiEstimator(self):
         if self._global().fullState.inRadiiMode:
-            self._local().radiiEstimator(self.stackWindow.windowIndex)
+            self._local().multipleRadiiEstimator(self.stackWindow.windowIndex)
             self.redraw()
 
     def singleRadiusEstimator(self):

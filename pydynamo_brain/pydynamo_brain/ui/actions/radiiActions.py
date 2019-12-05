@@ -68,7 +68,7 @@ class RadiiActions():
             modifiedPlane = modifiedPlane - edges
 
         plane01 = np.ones(plane.shape)
-        plane01[int(point.location[1]), int(point.location[0])] = 0
+        plane01[round(point.location[1]), round(point.location[0])] = 0
         planeDist = ndimage.distance_transform_edt(plane01)
 
         X_POINTS = 100 # Number of points 'X' sampled
@@ -92,17 +92,16 @@ class RadiiActions():
                     radius = x
                     break
 
-        #prevent terminal points from having a radius larger than their parent
+        # Prevent terminal points from having a radius larger than their parent
         if point.isLastInBranch() and (not point.isRoot()):
             prevPoint = point.nextPointInBranch(delta=-1)
 
             if prevPoint is not None:
                 parentRadius = prevPoint.radius
-
                 if parentRadius is None:
                     parentRadius = 1
                 if radius is None:
-                        radius = 1
+                    radius = 1
                 if radius >= parentRadius * 2:
                     radius = parentRadius
 
@@ -116,7 +115,7 @@ class RadiiActions():
             p.radius = radius
             p.manuallyMarked = True
 
-    #Function to edit radius of selected point by clicking
+    # Edit radius of selected point by clicking
     def editRadiiOnClick(self, location, uiState, zFilter=True):
         self.history.pushState()
         mouseX, mouseY, mouseZ = location
@@ -127,5 +126,3 @@ class RadiiActions():
             newRadius = math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
             point.radius = newRadius
             point.manuallyMarked = False
-
-        return
