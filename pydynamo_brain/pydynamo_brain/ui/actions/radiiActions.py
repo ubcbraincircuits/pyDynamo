@@ -87,7 +87,7 @@ class RadiiActions():
             radius = xs[index]
         else:
             # Select for radius where instensity == threshold 0.0
-            for x, y if zip(xs, ys):
+            for x, y in zip(xs, ys):
                 if y <= 0.0:
                     radius = x
                     break
