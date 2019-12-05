@@ -22,6 +22,7 @@ class TopMenu():
         self.modeRestrictedActions = {}
         dmo    = lambda x: self.modeRestrictedActions.update({x: [DrawMode.DEFAULT]})
         rmo    = lambda x: self.modeRestrictedActions.update({x: [DrawMode.REGISTRATION]})
+        radii  = lambda x: self.modeRestrictedActions.update({x: [DrawMode.RADII]})
         doramo = lambda x: self.modeRestrictedActions.update({x: [DrawMode.DEFAULT, DrawMode.RADII]})
 
         fileMenu = QtWidgets.QMenu('&File', stackWindow)
@@ -61,7 +62,6 @@ class TopMenu():
         dmo(editMenu.addAction('Remove empty branches from all stacks',
             self.cleanEmptyBranches, QtCore.Qt.SHIFT + QtCore.Qt.Key_E))
         editMenu.addAction('Draw &Puncta', self.punctaMode, QtCore.Qt.Key_P)
-        editMenu.addAction('Draw Radii', self.radiiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
         doramo(editMenu.addAction('Cycle select->move->reparent modes', self.cyclePointModes, QtCore.Qt.Key_Tab))
 
         manualRegisterSubmenu = editMenu.addMenu("Registration")
@@ -78,6 +78,11 @@ class TopMenu():
         rmo(manualRegisterSubmenu.addAction(' -> Manual: Assign a new ID to all selected points',
             self.alignIDsToNew, QtCore.Qt.SHIFT + QtCore.Qt.Key_Apostrophe))
         menuBar.addMenu(editMenu)
+
+        manualRadiiSubmenu = editMenu.addMenu("Radii Mode")
+        manualRadiiSubmenu.addAction('Start/End Radius Editing', self.radiiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
+        radii(manualRadiiSubmenu.addAction("Recursive Radii Estimation", self.multipleRadiiEstimator, QtCore.Qt.SHIFT + QtCore.Qt.Key_G))
+        radii(manualRadiiSubmenu.addAction("Single Radius Estimation", self.singleRadiusEstimator, QtCore.Qt.Key_G))
 
         viewMenu = QtWidgets.QMenu('&View', stackWindow)
         viewMenu.addAction('Zoom In', self.zoomIn, QtCore.Qt.Key_X)
@@ -199,6 +204,16 @@ class TopMenu():
             return
         self._local().smartRegisterImages(self.stackWindow.windowIndex)
         self.redraw()
+
+    def multipleRadiiEstimator(self):
+        if self._global().fullState.inRadiiMode:
+            self._local().multipleRadiiEstimator(self.stackWindow.windowIndex)
+            self.redraw()
+
+    def singleRadiusEstimator(self):
+        if self._global().fullState.inRadiiMode:
+            self._local().singleRadiusEstimator(self.stackWindow.windowIndex)
+            self.redraw()
 
     def registerIDs(self):
         if self._global().fullState.inManualRegistrationMode():

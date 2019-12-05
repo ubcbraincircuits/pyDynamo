@@ -189,13 +189,39 @@ class DendriteCanvasActions():
         infoBox.hide()
         self.canvas.stackWindow.statusBar().clearMessage()
 
+    def multipleRadiiEstimator(self, windowIndex):
+        stackWindow = self._stackWindow()
+        infoBox = createAndShowInfo("Estimating Radii", stackWindow)
+        self.fullActions.history.pushState()
+
+        point = self.uiState.currentPoint()
+        branch = None if point is None else point.parentBranch
+
+        # Default to root if anything is wrong...
+        if point is None or branch is None:
+            branch = None
+            point = self.uiState.parent().trees[windowIndex].rootPoint
+
+        self.fullActions.radiiActions.radiiEstimator(self.uiState.parent(), windowIndex, point, recursive=True)
+        self.uiState.showMarked = True
+        self.canvas.redraw()
+        infoBox.hide()
+
+    def singleRadiusEstimator(self, windowIndex):
+        stackWindow = self._stackWindow()
+        self.fullActions.history.pushState()
+        point = self.uiState.currentPoint()
+
+        self.fullActions.radiiActions.radiiEstimator(self.uiState.parent(), windowIndex, point)
+        self.uiState.showMarked = True
+        self.canvas.redraw()
+
     def simpleRegisterImages(self, windowIndex, somaScale=1.01):
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
 
         self.fullActions.history.pushState()
-
         fullState = self.uiState.parent()
         oldTree = fullState.trees[windowIndex - 1]
         newTree = fullState.trees[windowIndex]

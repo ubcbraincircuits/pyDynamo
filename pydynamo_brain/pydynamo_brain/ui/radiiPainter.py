@@ -22,7 +22,7 @@ class RadiiPainter():
     NODE_CIRCLE_MOVING_BRUSH = QBrush(QColor.fromRgbF(1.0, 0, 0, 0.5))
     NODE_CIRCLE_REPARENTING_BRUSH = QBrush(QColor.fromRgbF(0, 0, 1.0, 0.5))
     NODE_CIRCLE_DEFAULT_RADIUS = 5
-    MARKED_CIRCLE_BRUSH = QBrush(QColor(255, 108, 180))
+    MARKED_CIRCLE_BRUSH = QBrush(QColor.fromRgbF(1.0, 0.48, 0.8, 0.5))
 
     ANNOTATION_PEN = QPen(QBrush(Qt.yellow), 1, Qt.SolidLine)
     ANNOTATION_FONT = QFont("Arial", 12, QFont.Bold)
@@ -30,10 +30,11 @@ class RadiiPainter():
     ANNOTATION_HEIGHT = 40
     ANNOTATION_MAX_WIDTH = 512
 
-    #Colors for Radius Calipers
-    RAIDUS_COLOR_NONE = (219, 164, 11)
-    RAIDUS_COLOR_REAL = (255,0,255)
-    RAIDUS_COLOR_SELECTED = (11, 219, 209)
+    # Colors for Radius Calipers
+    RADIUS_COLOR_NONE = (255, 0, 0)
+    RADIUS_COLOR_REAL = (255, 0, 255)
+    RADIUS_COLOR_SELECTED = (11, 219, 209)
+    RADIUS_COLOR_IS_MARKED = (255, 108, 180)
 
     def __init__(self, painter, uiState, zoomMapFunc, zoomDistFunc):
         self.p = painter
@@ -83,51 +84,50 @@ class RadiiPainter():
             )
             self.maybeDrawText(x, y, point)
 
-    def returnRadiusCoord(self, point, radius):
-        #point radius will be drawn from
-        delta = 1
+    def returnRadiusCoord(self, point, radius, realRadius):
+        # Point radius will be drawn from
+        previousPoint = None
+        if not point.isRoot():
+            previousPoint = point.pathFromRoot()[-2]
+        nextPoint = point.nextPointInBranch(delta=1)
 
-        """        #previous point
-        posX, posY, negX, negY = x2, y2, x2, y2,"""
-        if  point.isRoot():
-            #print(point.isRoot)
-            nextPoint  = point.nextPointInBranch(delta)
-            #print(nextPoint)
-            p2Loc = point.location
-            #print(p2Loc)
-            x2, y2, z2 = self.zoomedLocation(p2Loc)
+        pointCoord = point.location
+        xPix, yPix, zPix = self.zoomedLocation(pointCoord)
+        xyPix = np.array([xPix, yPix])
 
-            p1Loc = nextPoint.location
-            x1, y1, z1 = self.zoomedLocation(p1Loc)
+        # Drawing the radius calipers for root points
+        if previousPoint is None:
+            pC = self.caliperPoints(point, nextPoint, ifNext=True)
 
+        # Drawing the radius calipers for terminal points
+        elif nextPoint is None:
+            pC = self.caliperPoints(point, previousPoint, ifNext=False)
 
+        # Drawing calipers for mid branch points, angles based off an average of
+        # Previous and last point
         else:
-            p2Loc = point.location
-            x2, y2, z2 = self.zoomedLocation(p2Loc)
-            point1 =  point.pathFromRoot()[-2:][0]
-            p1Loc = point1.location
-            x1, y1, z1 = self.zoomedLocation(p1Loc)
+            pA = self.caliperPoints(point, nextPoint, ifNext=True)
+            pB = self.caliperPoints(point, previousPoint, ifNext=False)
+            pC = pA + pB
 
-        #length between two points
-        L = math.sqrt(math.pow((x2-x1),2)+math.pow((y2-y1),2))
-        if L == 0:
-            L = 1
-        #all solutions for the plotting radius
-        #assuming a right triangle
-        negX = x2 -((radius*(y1-y2)/L))
-        posX = x2 +((radius*(y1-y2)/L))
-        posY = y2 +((radius*(x1-x2)/L))
-        negY = y2 -((radius*(x1-x2)/L))
+        pC *= (1/np.linalg.norm(pC))
+        pCprime = radius * pC
+        radiiPoint = pCprime + xyPix
+        negRadiiPoint = -pCprime + xyPix
 
+        negX = negRadiiPoint[0]
+        posX = radiiPoint[0]
+        posY = negRadiiPoint[1]
+        negY = radiiPoint[1]
         return negX, posY, posX, negY
 
     def drawCircleThisZ(self, x, y, isSelected, isMarked, fakeRadius, realRadius, point):
         if realRadius is not None:
             radius2Draw = realRadius
-            rgbRadius = self.RAIDUS_COLOR_NONE
+            rgbRadius = self.RADIUS_COLOR_REAL
         else:
             radius2Draw = 10
-            rgbRadius = self.RAIDUS_COLOR_REAL
+            rgbRadius = self.RADIUS_COLOR_NONE
         radius = fakeRadius
         resizeRadius = False
         if radius is None:
@@ -135,15 +135,16 @@ class RadiiPainter():
             resizeRadius = (realRadius is not None)
         if radius is None:
             radius = self.NODE_CIRCLE_DEFAULT_RADIUS
+        radiusX, radiusY = radius, radius
 
-        #scale radius for image view
+        # Scale radius for image view
         radius2Draw, junk = self.zoomDistFunc(radius2Draw, radius2Draw)
-        #calculate the line to represent neurite radius
-        x1, y1, x2, y2 = self.returnRadiusCoord(point, radius2Draw)
+        # Calculate the line to represent neurite radius
+        x1, y1, x2, y2 = self.returnRadiusCoord(point, radius2Draw, realRadius)
 
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
-            rgbRadius = self.RAIDUS_COLOR_SELECTED
+            rgbRadius = self.RADIUS_COLOR_SELECTED
             brushColor = self.NODE_CIRCLE_SELECTED_BRUSH
             if self.uiState.isMoving():
                 brushColor = self.NODE_CIRCLE_MOVING_BRUSH
@@ -151,21 +152,25 @@ class RadiiPainter():
                 brushColor = self.NODE_CIRCLE_REPARENTING_BRUSH
         elif isMarked and self.uiState.showMarked:
             brushColor = self.MARKED_CIRCLE_BRUSH
+            rgbRadius = self.RADIUS_COLOR_IS_MARKED
         self.p.setPen(self.NODE_CIRCLE_PEN)
         self.p.setBrush(brushColor)
-        if resizeRadius:
+
+        if point == self.uiState.currentPoint():
+            if point.radius is not None:
+                radiusX, radiusY = self.zoomDistFunc(point.radius, point.radius)
+        elif resizeRadius:
             radiusX, radiusY = self.zoomDistFunc(radius, radius)
         else:
             radiusX, radiusY = radius, radius
+
         self.p.drawEllipse(QPointF(x, y), radiusX, radiusY)
-        #self.p.end()
-        #draw lines to represent the size of the radius
+        # Draw lines to represent the size of the radius
         radiColor = QColor(*rgbRadius)
 
-        #Pen for drawing radi
+        # Pen for drawing radi
         self.p.setPen(QPen(QBrush(radiColor), self.uiState.parent().lineWidth, Qt.DotLine))
         self.p.drawLine(x1, y1, x2, y2)
-
 
     def maybeDrawText(self, x, y, point):
         if not self.uiState.showAnnotations and not self.uiState.showIDs:
@@ -210,3 +215,14 @@ class RadiiPainter():
     # HACK - utilities
     def isNearZ(self, z):
         return abs(z - self.zAt) < 3
+
+    # Given a selected point and an additional neightboring point
+    # returns a point perpendicular to the line joining these points
+    def caliperPoints(self, origin, point, ifNext):
+        origin_ignoreZ = (origin.location[0], origin.location[1], point.location[2])
+        x, y, _ = util.normDelta(point.location, origin_ignoreZ)
+        if ifNext:
+            vector = np.array([y, -x])
+        else:
+            vector = np.array([-y, x])
+        return vector

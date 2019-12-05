@@ -14,6 +14,7 @@ from .dendriteOverlay import DendriteOverlay
 from pydynamo_brain.model import Point
 from pydynamo_brain.util import ImageCache, deltaSz, snapToRange, zStackForUiState
 
+
 _IMGCACHE = ImageCache()
 
 class DendriteVolumeCanvas(QWidget):
@@ -123,12 +124,21 @@ class DendriteVolumeCanvas(QWidget):
                     if shiftPressed:
                         self.fullActions.beginMove(self.windowIndex, pointClicked)
                     else:
-                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                       self.fullActions.selectPoint(self.windowIndex, pointClicked)
                 else:
                     # NOTE: laterStacks is ctrl here, and shift for deletion.
                     # Not ideal, but downstream was already bound to shift here.
                     self.fullActions.endMove(self.windowIndex, location,
                         downstream=shiftPressed, laterStacks=ctrlPressed)
+
+            # Radii Mode Click Events
+            elif fullState.inRadiiMode():
+                if pointClicked:
+                    if pointClicked != self.uiState.currentPoint():
+                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
+                else:
+                    self.fullActions.radiiActions.editRadiiOnClick(location, self.uiState)
+
             # Next, Right-click/ctrl first; either delete the point, or start a new branch.
             elif rightClick or ctrlPressed:
                 if pointClicked:
@@ -138,6 +148,7 @@ class DendriteVolumeCanvas(QWidget):
                         self.fullActions.addPointMidBranchAndSelect(self.windowIndex, location, backwards=True)
                     else:
                         self.fullActions.addPointToNewBranchAndSelect(self.windowIndex, location)
+
             # Next. Middle-click / shift; either start move, or add mid-branch point
             elif middleClick or shiftPressed:
                 if pointClicked:
@@ -149,9 +160,6 @@ class DendriteVolumeCanvas(QWidget):
             else:
                 if pointClicked:
                     self.fullActions.selectPoint(self.windowIndex, pointClicked)
-                elif fullState.inRadiiMode():
-                    self.editRadiiOnClick(location)
-                    print("RadiiMode click event")
                 else:
                     self.fullActions.addPointToCurrentBranchAndSelect(self.windowIndex, location)
             self.dynamoWindow.redrawAllStacks(self.stackWindow)
@@ -240,15 +248,3 @@ class DendriteVolumeCanvas(QWidget):
         x, y, z = xyz
         zoomedXY = self.imgView.mapFromScene(x, y)
         return (zoomedXY.x(), zoomedXY.y(), z)
-
-    #Function to edit radius of selected point by clicking
-    def editRadiiOnClick(self, location, zFilter=True):
-        self.fullActions.history.pushState()
-        #self.FullStateActions.history.pushState()
-        mouseX, mouseY, mouseZ = location
-        point = self.uiState.currentPoint()
-        pointX, pointY, pointZ = point.location
-        if mouseZ == pointZ:
-            newRadius =  math.sqrt(math.pow((mouseX-pointX),2)+math.pow((mouseY-pointY),2))
-            point.radius = newRadius
-        return
