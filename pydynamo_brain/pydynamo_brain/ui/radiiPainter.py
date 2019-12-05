@@ -89,7 +89,7 @@ class RadiiPainter():
         previousPoint = None
         if not point.isRoot():
             previousPoint = point.pathFromRoot()[-2]
-        nextPoint = point.nextPointInBranch(delta= 1)
+        nextPoint = point.nextPointInBranch(delta=1)
 
         pointCoord = point.location
         xPix, yPix, zPix = self.zoomedLocation(pointCoord)
@@ -97,17 +97,17 @@ class RadiiPainter():
 
         # Drawing the radius calipers for root points
         if previousPoint is None:
-            pC = self.caliperPoints(point, nextPoint, ifNext= True)
+            pC = self.caliperPoints(point, nextPoint, ifNext=True)
 
         # Drawing the radius calipers for terminal points
         elif nextPoint is None:
-            pC = self.caliperPoints(point, previousPoint, ifNext= False)
+            pC = self.caliperPoints(point, previousPoint, ifNext=False)
 
         # Drawing calipers for mid branch points, angles based off an average of
         # Previous and last point
         else:
-            pA = self.caliperPoints(point, nextPoint, ifNext= True)
-            pB = self.caliperPoints(point, previousPoint, ifNext= False)
+            pA = self.caliperPoints(point, nextPoint, ifNext=True)
+            pB = self.caliperPoints(point, previousPoint, ifNext=False)
             pC = pA + pB
 
         pC *= (1/np.linalg.norm(pC))
