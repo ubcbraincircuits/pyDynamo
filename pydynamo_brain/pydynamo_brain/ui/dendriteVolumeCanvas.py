@@ -125,7 +125,6 @@ class DendriteVolumeCanvas(QWidget):
                         self.fullActions.beginMove(self.windowIndex, pointClicked)
                     else:
                        self.fullActions.selectPoint(self.windowIndex, pointClicked)
-
                 else:
                     # NOTE: laterStacks is ctrl here, and shift for deletion.
                     # Not ideal, but downstream was already bound to shift here.

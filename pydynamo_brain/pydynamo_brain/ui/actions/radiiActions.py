@@ -43,8 +43,8 @@ class RadiiActions():
 
     def radiusFromIntensity(self, fullState, volume, point):
         zIdx = round(point.location[2])
-        if point.isRoot():
 
+        if point.isRoot():
             plane = volume[fullState.channel, zIdx, :, :]
             # Detect edges and apply a gaussian_filter blur
             modifiedPlane = roberts(plane)
@@ -71,9 +71,9 @@ class RadiiActions():
         plane01[int(point.location[1]), int(point.location[0])] = 0
         planeDist = ndimage.distance_transform_edt(plane01)
 
-        X_POINTS = 100 #Number of points 'X' sampled
-        SQUISH = 1 #Power of the skewed of the distrubtion
-        MAX_DIST_PX = 30 #Max distance sampled away from the the point in pixels
+        X_POINTS = 100 # Number of points 'X' sampled
+        SQUISH = 1 # Power of the skewed of the distrubtion
+        MAX_DIST_PX = 30 # Max distance sampled away from the the point in pixels
 
         xs = 1 + np.power(np.arange(0, 1, 1 / X_POINTS), SQUISH) * (MAX_DIST_PX - 1)
         ys = []
@@ -87,22 +87,25 @@ class RadiiActions():
             radius = xs[index]
         else:
             # Select for radius where instensity == threshold 0.0
-            for i, x in enumerate(xs):
-                if ys[i] <= 0.0:
-                    radius = xs[i]
+            for x, y if zip(xs, ys):
+                if y <= 0.0:
+                    radius = x
                     break
 
         #prevent terminal points from having a radius larger than their parent
         if point.isLastInBranch() and (not point.isRoot()):
             prevPoint = point.nextPointInBranch(delta=-1)
+
             if prevPoint is not None:
                 parentRadius = prevPoint.radius
+
                 if parentRadius is None:
                     parentRadius = 1
                 if radius is None:
                         radius = 1
                 if radius >= parentRadius * 2:
                     radius = parentRadius
+
         return radius
 
     def radiiEstimator(self, fullState, id, point, recursive=False):

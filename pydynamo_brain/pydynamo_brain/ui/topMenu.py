@@ -80,7 +80,7 @@ class TopMenu():
         menuBar.addMenu(editMenu)
 
         manualRadiiSubmenu = editMenu.addMenu("Radii Mode")
-        manualRadiiSubmenu.addAction('Draw Radii', self.radiiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
+        manualRadiiSubmenu.addAction('Start/End Radius Editing', self.radiiMode, QtCore.Qt.ALT + QtCore.Qt.Key_R)
         radii(manualRadiiSubmenu.addAction("Recursive Radii Estimation", self.multipleRadiiEstimator, QtCore.Qt.SHIFT + QtCore.Qt.Key_G))
         radii(manualRadiiSubmenu.addAction("Single Radius Estimation", self.singleRadiusEstimator, QtCore.Qt.Key_G))
 
