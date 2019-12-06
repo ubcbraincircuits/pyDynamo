@@ -76,6 +76,9 @@ class Volume3DWindow():
                 layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
                 layer.visible = (c == self.uiState._parent.channel)
 
+            # Note: Addition of near-tree volume is removed for now as it is slow.
+            # Uncomment to add back in, there may eventually be an option in the UI
+            """
             if self.uiState._tree is not None and len(self.uiState._tree.flattenPoints()) > 1:
                 maskedVolume = maskedNearTree(self.volume, self.uiState._tree, xyzScale)
                 for c in reversed(range(maskedVolume.shape[0])):
@@ -86,6 +89,7 @@ class Volume3DWindow():
                     layer.scale = zyxScale
                     layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
                     layer.visible = False
+            """
 
             viewer.dims.ndim = 3
             viewer.dims.ndisplay = 3
@@ -94,7 +98,6 @@ class Volume3DWindow():
             pathShapes = self.treeToShapes(self.uiState._tree, zyxScale)
             shapeLayer = None
             for data, width, color in pathShapes:
-                print (color)
                 if shapeLayer is None:
                     shapeLayer = viewer.add_shapes(
                         data, shape_type='path',
