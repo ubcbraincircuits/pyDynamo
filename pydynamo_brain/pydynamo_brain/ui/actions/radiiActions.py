@@ -43,7 +43,7 @@ class RadiiActions():
 
     def radiusFromIntensity(self, fullState, volume, point):
         zIdx = round(point.location[2])
-
+        radius = 1
         if point.isRoot():
             plane = volume[fullState.channel, zIdx, :, :]
             # Detect edges and apply a gaussian_filter blur
