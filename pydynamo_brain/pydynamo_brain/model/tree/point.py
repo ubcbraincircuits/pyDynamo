@@ -113,6 +113,18 @@ class Point():
             pointAt = pointAt.nextPointInBranch(delta=-1)
         return list(reversed(points))
 
+    def radiusFromAncestors(self):
+        """Walks backwards from currtent point until a radius is found.
+            Returns default value (5) if no Radius is found """
+        ancestorRadius = None
+        upTreePoint = self
+        while ancestorRadius == None:
+            upTreePoint = upTreePoint.nextPointInBranch(delta=-1)
+            ancestorRadius = upTreePoint.radius
+            if upTreePoint == None:
+                ancestorRadius == 5
+        return ancestorRadius
+
     def longestDistanceToLeaf(self):
         tree = self.parentBranch._parentTree
 

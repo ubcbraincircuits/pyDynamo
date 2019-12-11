@@ -32,7 +32,7 @@ class RadiiPainter():
 
     # Colors for Radius Calipers
     RADIUS_COLOR_NONE = (255, 0, 0)
-    RADIUS_COLOR_REAL = (255, 0, 255)
+    RADIUS_COLOR_REAL = (0, 255, 0)
     RADIUS_COLOR_SELECTED = (11, 219, 209)
     RADIUS_COLOR_IS_MARKED = (255, 108, 180)
 
@@ -84,7 +84,7 @@ class RadiiPainter():
             )
             self.maybeDrawText(x, y, point)
 
-    def returnRadiusCoord(self, point, radius, realRadius):
+    def returnRadiusCoord(self, point, radius):
         # Point radius will be drawn from
         previousPoint = None
         if not point.isRoot():
@@ -126,8 +126,9 @@ class RadiiPainter():
             radius2Draw = realRadius
             rgbRadius = self.RADIUS_COLOR_REAL
         else:
-            radius2Draw = 10
+            radius2Draw = point.radiusFromAncestors()
             rgbRadius = self.RADIUS_COLOR_NONE
+
         radius = fakeRadius
         resizeRadius = False
         if radius is None:
@@ -140,7 +141,7 @@ class RadiiPainter():
         # Scale radius for image view
         radius2Draw, junk = self.zoomDistFunc(radius2Draw, radius2Draw)
         # Calculate the line to represent neurite radius
-        x1, y1, x2, y2 = self.returnRadiusCoord(point, radius2Draw, realRadius)
+        x1, y1, x2, y2 = self.returnRadiusCoord(point, radius2Draw)
 
         brushColor = self.NODE_CIRCLE_BRUSH
         if isSelected:
@@ -166,10 +167,10 @@ class RadiiPainter():
 
         self.p.drawEllipse(QPointF(x, y), radiusX, radiusY)
         # Draw lines to represent the size of the radius
-        radiColor = QColor(*rgbRadius)
+        radiiColor = QColor(*rgbRadius)
 
         # Pen for drawing radi
-        self.p.setPen(QPen(QBrush(radiColor), self.uiState.parent().lineWidth, Qt.DotLine))
+        self.p.setPen(QPen(QBrush(radiiColor), self.uiState.parent().lineWidth, Qt.DotLine))
         self.p.drawLine(x1, y1, x2, y2)
 
     def maybeDrawText(self, x, y, point):
