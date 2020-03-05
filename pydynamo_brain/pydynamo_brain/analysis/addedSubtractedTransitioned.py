@@ -54,9 +54,14 @@ def addedSubtractedTransitioned(
     filoExists = (filoTypes > FiloType.ABSENT)
     filos = filoExists & (filoTypes < FiloType.BRANCH_ONLY) # NOTE: brackets needed for numpy precendence
     branches = (filoTypes > FiloType.TERMINAL)
+    branchWithFilo = (branches & filos)
+    justBranches = (filoTypes == FiloType.BRANCH_ONLY)
+    justBranchBefore, justBranchAfter = justBranches[:-1, :], justBranches[1:, :]
+    branchWithFiloBefore, branchWithFiloAfter = branchWithFilo[:-1, :], branchWithFilo[1:, :]
     filoBefore, filoAfter = filos[:-1, :], filos[1:, :]
-    added = (~filoBefore & filoAfter)
-    subtracted = (filoBefore & ~filoExists[1:, :])
+    existBefore, existAfter = filoExists[:-1, :], filoExists[1:, :]
+    added = (~existBefore & filoAfter) | (justBranchBefore & branchWithFiloAfter)
+    subtracted = (filoBefore & ~existAfter) | (branchWithFiloBefore & justBranchAfter)
     transitioned = filoBefore & ~branches[:-1, :] & branches[1:, :]
 
     fillMasterChanged(masterChanged, masterNodes)
