@@ -104,10 +104,8 @@ def _calcFiloLengths(branchIDList, filoLengths, treeIdx, branch, excludeAxon, ex
         for childBranch in point.children:
             _calcFiloLengths(branchIDList, filoLengths, treeIdx, childBranch, excludeAxon, excludeBasal, filoDist)
 
-    # 6) Add the final filo for this branch if it's short enough.
+    # 6) Add the final filo for this branch if it is there, otherwise use entire length
     filoLengths[branchIdx] = 0
     totalLength, totalLengthToLastBranch = branch.worldLengths()
-    if totalLengthToLastBranch > 0:
-        lengthPastLastBranch = totalLength - totalLengthToLastBranch
-        if lengthPastLastBranch < filoDist:
-            filoLengths[branchIdx] = lengthPastLastBranch
+    lengthPastLastBranch = totalLength - totalLengthToLastBranch
+    filoLengths[branchIdx] = lengthPastLastBranch
