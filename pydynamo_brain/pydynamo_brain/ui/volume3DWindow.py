@@ -25,13 +25,14 @@ class Volume3DWindow():
 
     # @return (data, width, color) for a line segment between two points
     def segmentToShape(self, prevPoint, nextPoint, zyxScale, color):
-        width = 0.3
+        width = 1.0
         if prevPoint.radius is None:
             width = nextPoint.radius
         elif nextPoint.radius is None:
             width = prevPoint.radius
         elif prevPoint.radius is not None and nextPoint.radius is not None:
             width = (prevPoint.radius + nextPoint.radius) / 2.0
+        width = width * ((zyxScale[1] * zyxScale[2]) ** 0.5)
 
         path = [
             self.locationToZYXList(prevPoint.location, zyxScale),
