@@ -93,7 +93,16 @@ def importFromMatlab(matlabPath, removeOrphanBranches=True):
     filePaths, treeData = [], []
 
     mat = sio.loadmat(matlabPath)
-    saveStates = mat['savedata'][0]['state'][0]
+    saveStates = None
+    if 'saved' in mat.keys():
+        # Original microscope code
+        saveStates = mat['saved'][0]['Dynamo'][0]['state'][0][0]
+    elif 'savedata' in mat.keys():
+        # Just matlab dynamo code
+        saveStates = mat['savedata'][0]['state'][0]
+    else:
+        raise Exception("Unrecognized matlab content")
+
     for i in range(saveStates.shape[1]):
         saveState = saveStates[0, i][0]
         filePath = saveState['info'][0]['filename'][0][0][0]
