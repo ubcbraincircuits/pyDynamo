@@ -277,9 +277,10 @@ class Tree():
             pAt = p
             if hasattr(p, 'location'):
                 pAt = p.location
-            pAt = np.matmul(np.array(self.transform.rotation), np.array(pAt).T).T
-            pAt = (pAt + np.array(self.transform.translation)) * np.array(self.transform.scale)
-            pAt = pAt * globalScale
+            # Note: For now, tree-specific transforms are unsupported!
+            #pAt = np.matmul(np.array(self.transform.rotation), np.array(pAt).T).T
+            #pAt = (pAt + np.array(self.transform.translation)) * np.array(self.transform.scale)
+            pAt = np.array(pAt) * globalScale
             x.append(pAt[0]), y.append(pAt[1]), z.append(pAt[2])
         return x, y, z
 
