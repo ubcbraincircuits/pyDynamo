@@ -32,7 +32,10 @@ class Volume3DWindow():
             width = prevPoint.radius
         elif prevPoint.radius is not None and nextPoint.radius is not None:
             width = (prevPoint.radius + nextPoint.radius) / 2.0
-        width = width * ((zyxScale[1] * zyxScale[2]) ** 0.5)
+        
+        # Either use default (None) or convert pixel -> real world radius.
+        if width is not None:
+            width = width * ((zyxScale[1] * zyxScale[2]) ** 0.5)
 
         path = [
             self.locationToZYXList(prevPoint.location, zyxScale),
