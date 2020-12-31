@@ -68,7 +68,7 @@ class TraceCanvas(BaseMatplotlibCanvas):
             y = samples
             off = len(self.tracesToShow) - 1 - i
             yV = y + off * perLineOffset
-            ax.plot(x, yV, label="%s @ %s" % (pID, wID))
+            ax.plot(x, yV, label="%s @ Volume %s" % (pID, wID + 1))
 
             if minX is None:
                 minX, maxX = np.min(x), np.max(x)
