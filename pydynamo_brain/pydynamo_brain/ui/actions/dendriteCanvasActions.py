@@ -10,6 +10,7 @@ from pydynamo_brain.ui.common import createAndShowInfo
 from pydynamo_brain.ui.dendrite3DViewWindow import Dendrite3DViewWindow
 from pydynamo_brain.ui.helpDialog import showHelpDialog
 from pydynamo_brain.ui.registration.idRegisterWindow import IdRegisterWindow
+from pydynamo_brain.ui.traces.traceViewWindow import TraceViewWindow
 from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 
 from pydynamo_brain.files import importFromSWC
@@ -145,6 +146,14 @@ class DendriteCanvasActions():
             thisTree.clearAndCopyFrom(newTree, self.uiState.parent())
             self.branchToColorMap.addNewTree(thisTree)
 
+    def importTracesFromNWB(self, windowIndex, filePath):
+        # Adds to file list, doesn't actually load until traces are needed.
+        fullState = self.uiState.parent()
+        while len(fullState.traces) <= windowIndex:
+            fullState.traces.append([])
+        if filePath not in fullState.traces[windowIndex]:
+            fullState.traces[windowIndex].append(filePath)
+
     def smartRegisterImages(self, windowIndex):
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
@@ -216,6 +225,17 @@ class DendriteCanvasActions():
         self.uiState.showMarked = True
         self.canvas.redraw()
 
+    def toggleTraceForPoint(self, windowIndex):
+        # TODO: Allow toggling point views. Logic should be:
+        # 1) Find existing TraceViewWindow; if not open, create & show.
+        # 2) Toggle point within TVW
+        # 3) Close TVW if no points remain, otherwise redraw and bring to front.
+        point = self.uiState.currentPoint()
+        if point is not None:
+            TraceViewWindow(self.canvas.parent(),
+                self.uiState.parent(), windowIndex, point.id
+            ).show()
+
     def simpleRegisterImages(self, windowIndex, somaScale=1.01):
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
@@ -242,7 +262,6 @@ class DendriteCanvasActions():
 
     # Cycle selection -> Moving -> Reparenting -> back
     def cyclePointModes(self):
-        # POIUY
         currentPoint = self.uiState.currentPoint()
         if currentPoint is not None:
             if self.uiState.isMoving():

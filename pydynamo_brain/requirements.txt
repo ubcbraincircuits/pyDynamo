@@ -4,6 +4,7 @@ napari
 neurom
 numpy
 pandas
+pynwb
 PyQt5
 scikit-image
 scipy >= 1.2.0

@@ -23,8 +23,11 @@ class FullState:
     # Image-specific tree data, one for each of the files above
     trees = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
-    # Puncta points (mapping id -> Point) for each stack.
+    # Puncta points (mapping id -> Point), for each stack.
     puncta = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+
+    # Paths to *.nwb files of per-POI recorded traces, for each stack.
+    traces = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Image-specific options, one for each of the files above
     uiStates = attr.ib(default=attr.Factory(list), metadata=SAVE_META)

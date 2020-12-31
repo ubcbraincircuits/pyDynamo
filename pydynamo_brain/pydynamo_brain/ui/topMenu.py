@@ -33,6 +33,7 @@ class TopMenu():
         dmo(fileMenu.addAction('Import from previous stack', self.importFromPreviousStack, QtCore.Qt.Key_I))
         dmo(fileMenu.addAction('Import from SWC...', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I))
         dmo(fileMenu.addAction('Export to SWC...', self.exportToSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_E))
+        dmo(fileMenu.addAction('Import traces from NWB...', self.importFromNWB))
         fileMenu.addSeparator()
         fileMenu.addAction('&Project Settings...',
             self.openSettings, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_P)
@@ -90,6 +91,7 @@ class TopMenu():
         viewMenu.addAction('View 3D Arbor', self.view3DArbor, QtCore.Qt.CTRL + QtCore.Qt.Key_3)
         viewMenu.addAction('View 3D Arbor (old)', self.view3DArborOld, QtCore.Qt.Key_3)
         viewMenu.addAction('View 3D Image Volume', self.view3DVolume, QtCore.Qt.SHIFT + QtCore.Qt.Key_3)
+        viewMenu.addAction('View trace for selected point', self.viewTrace, QtCore.Qt.SHIFT + QtCore.Qt.Key_T)
 
         viewMenu.addSeparator()
         doramo(viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J))
@@ -165,6 +167,14 @@ class TopMenu():
     def exportToSWC(self):
         self._global().exportToSWC(parentWindow=self.stackWindow)
 
+    def importFromNWB(self):
+        filePath = getOpenFileName(self.stackWindow,
+            "Import NWB file", "", "NWB file (*.nwb)"
+        )
+        if filePath is not None and filePath is not '':
+            self._local().importTracesFromNWB(self.stackWindow.windowIndex, filePath)
+            self.redraw()
+
     def openSettings(self):
         self._global().openSettings()
 
@@ -214,6 +224,10 @@ class TopMenu():
         if self._global().fullState.inRadiiMode:
             self._local().singleRadiusEstimator(self.stackWindow.windowIndex)
             self.redraw()
+
+    def showTraces(self):
+        # TODO: Have only in some mode?
+        self._local().toggleTraceForPoint(self.stackWindow.windowIndex)
 
     def registerIDs(self):
         if self._global().fullState.inManualRegistrationMode():
@@ -290,6 +304,9 @@ class TopMenu():
 
     def view3DVolume(self):
         self._local().launch3DVolume()
+
+    def viewTrace(self):
+        self._local().toggleTraceForPoint(self.stackWindow.windowIndex)
 
     def toggleLineSize(self):
         self._global().fullState.toggleLineWidth()
