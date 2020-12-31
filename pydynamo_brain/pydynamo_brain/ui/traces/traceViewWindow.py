@@ -2,14 +2,23 @@ from PyQt5 import QtCore, QtWidgets
 
 from .traceCanvas import TraceCanvas
 
+# HACK: Global editable
+_INSTANCE = [None]
+
+def getWindowAndMaybeOpen(rootParent, fullState):
+    if _INSTANCE[0] is None:
+        _INSTANCE[0] = TraceViewWindow(rootParent, fullState)
+        _INSTANCE[0].show()
+    return _INSTANCE[0]
+
 # Plot view showing traces associated to all selected points.
 class TraceViewWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent, fullState, windowIndex, pointID):
+    def __init__(self, parent, fullState):
         super(TraceViewWindow, self).__init__(parent)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle('Traces')
 
-        self.view = TraceCanvas(self, fullState, windowIndex, pointID)
+        self.view = TraceCanvas(self, fullState)
 
         root = QtWidgets.QWidget(self)
         l = QtWidgets.QHBoxLayout(root)
@@ -25,3 +34,15 @@ class TraceViewWindow(QtWidgets.QMainWindow):
         #viewMenu.addSeparator()
         #self._addScrollActions(viewMenu)
         #self.menuBar().addMenu(viewMenu)
+
+    def closeEvent(self, event):
+        event.accept()
+        _INSTANCE[0] = None
+
+    def togglePointInWindow(self, windowIndex, pointID):
+        isEmpty = self.view.togglePointInWindow(windowIndex, pointID)
+        if isEmpty:
+            self.close()
+        else:
+            # TODO: Bring to front? Maybe not, if more convenient.
+            pass

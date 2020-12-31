@@ -10,8 +10,8 @@ from pydynamo_brain.ui.common import createAndShowInfo
 from pydynamo_brain.ui.dendrite3DViewWindow import Dendrite3DViewWindow
 from pydynamo_brain.ui.helpDialog import showHelpDialog
 from pydynamo_brain.ui.registration.idRegisterWindow import IdRegisterWindow
-from pydynamo_brain.ui.traces.traceViewWindow import TraceViewWindow
 from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
+import pydynamo_brain.ui.traces as traceUI
 
 from pydynamo_brain.files import importFromSWC
 from pydynamo_brain.model import IdAligner, PointMode, recursiveAdjust
@@ -147,6 +147,8 @@ class DendriteCanvasActions():
             self.branchToColorMap.addNewTree(thisTree)
 
     def importTracesFromNWB(self, windowIndex, filePath):
+        self.fullActions.history.pushState()
+
         # Adds to file list, doesn't actually load until traces are needed.
         fullState = self.uiState.parent()
         while len(fullState.traces) <= windowIndex:
@@ -226,15 +228,15 @@ class DendriteCanvasActions():
         self.canvas.redraw()
 
     def toggleTraceForPoint(self, windowIndex):
-        # TODO: Allow toggling point views. Logic should be:
-        # 1) Find existing TraceViewWindow; if not open, create & show.
-        # 2) Toggle point within TVW
-        # 3) Close TVW if no points remain, otherwise redraw and bring to front.
+        # If a point is selected, bring up the trace view window
+        # and either add or remove the points trace to it.
+        # If no traces remain, window is closed, otherwise bring to front.
         point = self.uiState.currentPoint()
         if point is not None:
-            TraceViewWindow(self.canvas.parent(),
-                self.uiState.parent(), windowIndex, point.id
-            ).show()
+            tvw = traceUI.getWindowAndMaybeOpen(self.canvas.dynamoWindow, self.uiState.parent())
+            tvw.togglePointInWindow(windowIndex, point.id)
+            # Close / bring to front handled by TVW.
+
 
     def simpleRegisterImages(self, windowIndex, somaScale=1.01):
         if windowIndex == 0:
