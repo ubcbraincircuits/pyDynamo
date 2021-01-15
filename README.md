@@ -1,5 +1,5 @@
 # pyDynamo
-![pyDynamo logo](https://padster.github.io/pyDynamo/tmpLogo.png)
+![pyDynamo logo](https://ubcbraincircuits.github.io/pyDynamo/tmpLogo.png)
 
 Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics.
 ...todo, write stuff
@@ -11,7 +11,7 @@ Providing you have a version of python 3+, this library can be installed directl
 conda create --name dynamoEnv
 source activate dynamoEnv
 conda install pip git
-pip install --upgrade "git+https://github.com/padster/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
+pip install --upgrade "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
 ```
 Once installed, it can be run by the following command, and optionally given a file to open:
 ```
@@ -23,7 +23,7 @@ pydynamo_brain path/to/my/file.dyn.gz
 ```
 
 ## Usage
-Documentation is available at https://padster.github.io/pyDynamo/ . For an overview:
+Documentation is available at https://ubcbraincircuits.github.io/pyDynamo/ . For an overview:
 
 After opening Dynamo, two windows will show.
 1)  One will contain the dynamo logo (see above), and a close button. This window should always stay open until you want to stop - then pressing the button will close dynamo completely.
