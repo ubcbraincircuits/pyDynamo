@@ -10,6 +10,7 @@ from pydynamo_brain.ui.common import createAndShowInfo
 from pydynamo_brain.ui.dendrite3DViewWindow import Dendrite3DViewWindow
 from pydynamo_brain.ui.helpDialog import showHelpDialog
 from pydynamo_brain.ui.registration.idRegisterWindow import IdRegisterWindow
+from pydynamo_brain.ui.traces import AllTracesWindow
 from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 import pydynamo_brain.ui.traces as traceUI
 
@@ -234,9 +235,15 @@ class DendriteCanvasActions():
         point = self.uiState.currentPoint()
         if point is not None:
             tvw = traceUI.getWindowAndMaybeOpen(self.canvas.dynamoWindow, self.uiState.parent())
-            tvw.togglePointInWindow(windowIndex, point.id)
             # Close / bring to front handled by TVW.
+            tvw.togglePointInWindow(windowIndex, point.id)
 
+    def viewAllTraces(self, windowIndex):
+        stackWindow = self._stackWindow()
+        infoBox = createAndShowInfo("Rendering all intensities", stackWindow)
+        viewWindow = AllTracesWindow(stackWindow, self.uiState.parent(), self.windowIndex)
+        infoBox.hide()
+        viewWindow.show()
 
     def simpleRegisterImages(self, windowIndex, somaScale=1.01):
         if windowIndex == 0:

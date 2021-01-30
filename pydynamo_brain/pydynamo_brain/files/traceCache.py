@@ -63,3 +63,19 @@ class TraceCache:
 
         # Not found :(
         return None
+
+    # Returns a list of list of TimeSeries for all POI in the given paths
+    def getAllTraces(self, tracePaths):
+        mergedTraces = {}
+
+        for path in tracePaths:
+            if path not in self._loadedTraces:
+                traceMap = loadTraces(path, verbose=False)
+                if traceMap is not None:
+                    self._loadedTraces[path] = traceMap
+
+            if path in self._loadedTraces and self._loadedTraces[path] is not None:
+                for k, v in self._loadedTraces[path].items():
+                    mergedTraces[k] = v
+
+        return mergedTraces

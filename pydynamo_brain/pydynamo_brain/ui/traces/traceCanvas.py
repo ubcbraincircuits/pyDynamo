@@ -15,8 +15,7 @@ def _addPad(lo, hi, pad):
     haf = hi - mid
     return mid - (1 + pad) * haf, mid + (1 + pad) * haf
 
-
-# Draws a dendritic tree in 3D space that can be rotated by the user.
+# Draws a collection of functional traces for selected POI
 class TraceCanvas(BaseMatplotlibCanvas):
     def __init__(self, parent, fullState, *args, **kwargs):
         self.fullState = fullState

@@ -92,6 +92,7 @@ class TopMenu():
         viewMenu.addAction('View 3D Arbor (old)', self.view3DArborOld, QtCore.Qt.Key_3)
         viewMenu.addAction('View 3D Image Volume', self.view3DVolume, QtCore.Qt.SHIFT + QtCore.Qt.Key_3)
         viewMenu.addAction('View trace for selected point', self.viewTrace, QtCore.Qt.SHIFT + QtCore.Qt.Key_T)
+        viewMenu.addAction('View all traces as intensity plot', self.viewAllTraces, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_T)
 
         viewMenu.addSeparator()
         doramo(viewMenu.addAction('Toggle line size', self.toggleLineSize, QtCore.Qt.Key_J))
@@ -307,6 +308,9 @@ class TopMenu():
 
     def viewTrace(self):
         self._local().toggleTraceForPoint(self.stackWindow.windowIndex)
+
+    def viewAllTraces(self):
+        self._local().viewAllTraces(self.stackWindow.windowIndex)
 
     def toggleLineSize(self):
         self._global().fullState.toggleLineWidth()
