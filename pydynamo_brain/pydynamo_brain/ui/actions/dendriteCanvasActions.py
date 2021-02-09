@@ -12,7 +12,7 @@ from pydynamo_brain.ui.helpDialog import showHelpDialog
 from pydynamo_brain.ui.registration.idRegisterWindow import IdRegisterWindow
 from pydynamo_brain.ui.traces import AllTracesWindow
 from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
-import pydynamo_brain.ui.traces as traceUI
+from pydynamo_brain.ui import traces as traceUI
 
 from pydynamo_brain.files import importFromSWC
 from pydynamo_brain.model import IdAligner, PointMode, recursiveAdjust
