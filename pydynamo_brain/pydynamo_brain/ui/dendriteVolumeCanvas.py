@@ -34,7 +34,7 @@ class DendriteVolumeCanvas(QWidget):
         self.history = dynamoWindow.history
 
         self.imgView = QtImageViewer(self,
-            np2qt(self.currentImg(), normalize=True, channel=self.uiState.parent().colorChannel())
+            np2qt(self.currentImg(),cmapID=self.uiState.colorMap, normalize=True, channel=self.uiState.parent().colorChannel())
         )
         self.imgOverlay = DendriteOverlay(self, windowIndex)
 
@@ -67,7 +67,7 @@ class DendriteVolumeCanvas(QWidget):
         imageData = (imageData - c1) / (c2 - c1)
         imageData = snapToRange(imageData, 0.0, 1.0)
         self.imgView.setImage(
-            np2qt(imageData, normalize=True, channel=self.uiState.parent().colorChannel()),
+            np2qt(imageData, normalize=True, cmapID=self.uiState.colorMap, channel=self.uiState.parent().colorChannel()),
             maintainZoom=True)
 
     def mouseClickEvent(self, event, pos):

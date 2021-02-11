@@ -1,7 +1,7 @@
 # https://github.com/hmeine/qimage2ndarray
 
 from PyQt5.QtGui import QImage, qRgb
-
+import matplotlib.pyplot as plt
 import numpy as np
 
 def PyQt_data(image):
@@ -48,7 +48,7 @@ def _normalize255(array, normalize, clip = (0, 255)):
 
     return array
 
-def np2qt(gray, normalize=False, channel=None):
+def np2qt(gray, cmapID=None, normalize=False, channel=None):
     """Convert the 2D numpy array `gray` into a 8-bit, indexed QImage_
     with a gray colormap.  The first dimension represents the vertical
     image axis.
@@ -72,7 +72,15 @@ def np2qt(gray, normalize=False, channel=None):
 
     h, w = gray.shape
     result = QImage(w, h, QImage.Format_Indexed8)
+    if cmapID is not None:
+        cmap = plt.get_cmap(cmapID)
+        gray = cmap(gray)[:,:, :3]*255
+        """gray = gray[:,:, :3]
+        gray = gray* 255"""
+        gray = gray.astype('uint8')
+        result = QImage(gray, w, h,  QImage.Format_RGB888)
 
+        return result
     if not np.ma.is_masked(gray):
         for i in range(256):
             if channel == 'r':
@@ -83,5 +91,6 @@ def np2qt(gray, normalize=False, channel=None):
                 result.setColor(i, qRgb(0,0,i))
             else:
                 result.setColor(i, qRgb(i,i,i))
-        qimageview(result)[:] = _normalize255(gray, normalize)
+        else:
+            qimageview(result)[:] = _normalize255(gray, normalize)
     return result

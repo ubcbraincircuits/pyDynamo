@@ -64,6 +64,9 @@ class UIState():
     # (lower-, upper-) bounds for intensities to show
     colorLimits = attr.ib(default=(0, 1), metadata=SAVE_META)
 
+    # (lower-, upper-) bounds for intensities to show
+    colorMap = attr.ib(default=None)
+
     def parent(self):
         return self._parent
 
@@ -273,6 +276,14 @@ class UIState():
     def cycleBranchDisplayMode(self):
         N_BRANCH_DISPLAY_MODES = 3 # Local, All Z, Only this Z
         self.branchDisplayMode = (self.branchDisplayMode + 1) % N_BRANCH_DISPLAY_MODES
+
+    def cycleCMAP(self):
+        cmapList = [None, 'magma', 'viridis', 'cividis']
+        if cmapList.index(self.colorMap) == (len(cmapList)-1):
+            self.colorMap = cmapList[0]
+        else:
+            self.colorMap= cmapList[cmapList.index(self.colorMap)+1]
+
 
     def cyclePointInfo(self):
         # show annotations -> showIDs -> show neither -> ...

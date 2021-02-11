@@ -99,6 +99,7 @@ class TopMenu():
         doramo(viewMenu.addAction('Toggle dot size', self.toggleDotSize, QtCore.Qt.SHIFT + QtCore.Qt.Key_J))
         viewMenu.addAction('Change channel', self.changeChannel, QtCore.Qt.Key_C)
         viewMenu.addAction('Turn on/off colours', self.toggleColor, QtCore.Qt.SHIFT + QtCore.Qt.Key_C)
+        viewMenu.addAction('Cycle Through Color Maps', self.cycleCMAP, QtCore.Qt.ALT + QtCore.Qt.Key_C)
         viewMenu.addAction('Cycle showing branches on this Z -> nearby Z -> all Z',
             self.cycleBranchDisplayMode, QtCore.Qt.Key_V)
         viewMenu.addAction('Cycle showing annotations -> IDs -> nothing per point', self.cyclePointInfo, QtCore.Qt.Key_F)
@@ -327,6 +328,10 @@ class TopMenu():
     def toggleColor(self):
         self._global().fullState.useColor = not self._global().fullState.useColor
         self._global().redrawAllStacks(self.stackWindow)
+
+    def cycleCMAP(self):
+        self.stackWindow.uiState.cycleCMAP()
+        self.redraw()
 
     def cycleBranchDisplayMode(self):
         self.stackWindow.uiState.cycleBranchDisplayMode()
