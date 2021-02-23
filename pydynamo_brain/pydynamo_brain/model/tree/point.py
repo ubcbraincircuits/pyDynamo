@@ -120,9 +120,13 @@ class Point():
         upTreePoint = self
         while ancestorRadius == None:
             upTreePoint = upTreePoint.nextPointInBranch(delta=-1)
-            ancestorRadius = upTreePoint.radius
             if upTreePoint == None:
                 ancestorRadius == 5
+            if upTreePoint is not None:
+                if upTreePoint.radius is not None:
+                    ancestorRadius = upTreePoint.radius
+            else:
+                ancestorRadius = 5
         return ancestorRadius
 
     def longestDistanceToLeaf(self):
