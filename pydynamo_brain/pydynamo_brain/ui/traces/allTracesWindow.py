@@ -49,10 +49,7 @@ class AllTracesWindow(QtWidgets.QMainWindow):
 
         return trace[0] # Extract back single row.
 
-    def showPercent(self):
-        return self.dfof0Toggle.isChecked()
-
     def getTitle(self):
         prefix = "Smoothed " if self.nndSmoothToggle.isChecked() else ""
-        suffix = "DF/F0 (%)" if self.dfof0Toggle.isChecked() else "Raw"
+        suffix = "DF/F0" if self.dfof0Toggle.isChecked() else "Raw"
         return prefix + suffix
