@@ -19,7 +19,7 @@ class FullStateActions():
         self.state = fullState
         self.history = history
         self.punctaActions = PunctaActions(fullState, history)
-        self.radiiActions = RadiiActions(fullState, history)
+        self.radiiActions = RadiiActions(self, fullState, history)
         self.branchToColorMap = BranchToColorMap()
 
     def selectPoint(self, localIdx, point, avoidPush=False, deselectHidden=False):

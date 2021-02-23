@@ -17,13 +17,27 @@ _IMG_CACHE = util.ImageCache()
 class RadiiActions():
     DEFAULT_RADIUS_PX = 3 # default size in zoomed out pixels
 
-    def __init__(self, fullState, history):
+    def __init__(self, parentActions, fullState, history):
+        self.parentActions = parentActions
         self.state = fullState
         self.history = history
 
     # Get local UI state for this stack
     def _localState(self, localIdx):
         return self.state.uiStates[localIdx]
+
+    # Find the next point without radius, select it, and return it.
+    def selectNextUnradii(self, localIdx, delta):
+        sourcePoint = self.state.uiStates[localIdx].currentPoint()
+        if sourcePoint is None:
+            return None
+
+        tree = self.state.trees[localIdx]
+        noRadiusFunc = lambda p: p.radius is None
+        nextPoint, passCount = tree.nextPointFilteredWithCount(sourcePoint, noRadiusFunc, delta)
+        if nextPoint is not None:
+            self.parentActions.selectPoint(localIdx, nextPoint, avoidPush=False)
+        return nextPoint, passCount
 
     # Grow/shrink the radius of a point, by a set ratio
     def changeRadius(self, localIdx, dR, laterStacks=False):

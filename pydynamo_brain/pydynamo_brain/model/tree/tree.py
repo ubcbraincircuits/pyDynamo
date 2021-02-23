@@ -144,6 +144,27 @@ class Tree():
             points.extend(b.points)
         return points
 
+    def nextPointFilteredWithCount(self, sourcePoint, filterFunc, delta):
+        """Starting at a point, walk the tree to find all points that match a
+        filter, and step a certain amount to the next one.
+        Also return the count, for convenience."""
+        points = self.flattenPoints()
+        filteredPoints = [p for p in points if p == sourcePoint or filterFunc(p)]
+        countPass = len(filteredPoints)
+        if not filterFunc(sourcePoint):
+            countPass -= 1
+
+        if len(filteredPoints) == 0 or sourcePoint not in filteredPoints:
+            return None, countPass
+
+        idx = filteredPoints.index(sourcePoint) + delta
+        nextIdx = idx % len(filteredPoints) # wrap
+
+        result = filteredPoints[nextIdx]
+        if not filterFunc(result):
+            result = None
+        return result, countPass
+
     def continueParentBranchIfFirst(self, point):
         """If point is first in its branch, change it to extend its parent."""
         if point is None or point.indexInParent() > 0 or point.isRoot():

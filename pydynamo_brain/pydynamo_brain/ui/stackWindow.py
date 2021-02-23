@@ -8,6 +8,7 @@ import pydynamo_brain.files as files
 import pydynamo_brain.util as util
 
 from .actions.dendriteCanvasActions import DendriteCanvasActions
+from .common import createAndShowInfo
 from .dendriteVolumeCanvas import DendriteVolumeCanvas
 from .np2qt import np2qt
 from .QtImageViewer import QtImageViewer
@@ -210,7 +211,14 @@ class StackWindow(QtWidgets.QMainWindow):
                     self.fullActions.punctaActions.selectNextPoint(self.windowIndex, delta)
                 else:
                     locationSnapshot = self.parent().snapshotSelectionLocation()
-                    self.fullActions.selectNextPoints(delta)
+                    if fullState.inRadiiMode() and ctrlPressed:
+                        nextPoint, remain = self.fullActions.radiiActions.selectNextUnradii(self.windowIndex, delta)
+                        if nextPoint is None:
+                            createAndShowInfo("All points have radius set!", self)
+                            return
+                        self.statusBar().showMessage("%d points without radius." % remain)
+                    else:
+                        self.fullActions.selectNextPoints(delta)
                     self.parent().updateSelectionLocation(locationSnapshot)
 
                 self.parent().redrawAllStacks(self)
