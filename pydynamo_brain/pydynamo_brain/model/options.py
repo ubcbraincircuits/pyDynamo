@@ -26,7 +26,7 @@ class MotilityOptions():
 
 @attr.s
 class ProjectOptions():
-    pixelSizes: List[float] = attr.ib(default=attr.Factory(lambda: [0.3070, 0.3070, 1.5]), cmp=False, metadata=SAVE_META)
+    pixelSizes: List[float] = attr.ib(default=attr.Factory(lambda: [0.3070, 0.3070, 1.5]), eq=False, order=False, metadata=SAVE_META)
     """ x/y/z size of each pixel in microns. """
 
     motilityOptions: MotilityOptions = attr.ib(default=attr.Factory(MotilityOptions), metadata=SAVE_META)

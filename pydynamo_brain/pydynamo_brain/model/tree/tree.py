@@ -33,7 +33,7 @@ class Tree():
     transform: Transform = attr.ib(default=attr.Factory(Transform), metadata=SAVE_META)
     """Conversion for this tree from pixel to world coordinates."""
 
-    _parentState: Optional[UIState] = attr.ib(default=None, repr=False, cmp=False)
+    _parentState: Optional[UIState] = attr.ib(default=None, repr=False, eq=False, order=False)
     """UI State this belongs to."""
 
     # HACK - make faster, index points by ID

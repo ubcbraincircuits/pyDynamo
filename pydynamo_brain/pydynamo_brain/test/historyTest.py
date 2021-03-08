@@ -2,21 +2,24 @@ import attr
 import copy
 
 import pydynamo_brain.files as files
-from pydynamo_brain.model import *
+from pydynamo_brain.model import FullState, Tree, Branch, Point, History
 
 def deepClone(obj):
     return copy.deepcopy(obj)
 
 # Tests that a bunch of basic operations can be undone properly
 def testTree():
-    data = Tree()
+    data: FullState = FullState()
+    t = Tree()
+    data.trees.append(t)
+
     h = History(data)
 
     t0 = deepClone(data)
     assert data == t0
 
     pR = Point(id='root', location=(0,0,0))
-    data.rootPoint = pR
+    t.rootPoint = pR
     assert data != t0
 
     s0 = h.pushState()
@@ -26,7 +29,7 @@ def testTree():
     b0 = Branch(id='b0')
     p1 = Point(id='p1', location=(0,0,1))
     b0.addPoint(p1)
-    data.addBranch(b0)
+    t.addBranch(b0)
     assert data != t0
     assert data != s0
 
@@ -46,11 +49,11 @@ def testTree():
     assert data == s1
 
     # Verify parent references are restored:
-    for branch in data.branches:
-        assert id(branch._parentTree) == id(data)
+    for branch in t.branches:
+        assert id(branch._parentTree) == id(t)
         for point in branch.points:
             assert id(point.parentBranch) == id(branch)
-    for point in data.flattenPoints():
+    for point in t.flattenPoints():
         for child in point.children:
             assert id(child.parentPoint) == id(point)
 
@@ -61,11 +64,11 @@ def testTree():
     assert data == s0
 
     # Verify parent references are restored:
-    for branch in data.branches:
-        assert id(branch._parentTree) == id(data)
+    for branch in t.branches:
+        assert id(branch._parentTree) == id(t)
         for point in branch.points:
             assert id(point.parentBranch) == id(branch)
-    for point in data.flattenPoints():
+    for point in t.flattenPoints():
         for child in point.children:
             assert id(child.parentPoint) == id(point)
 
@@ -94,14 +97,17 @@ def testParents():
 
 # Tests that if you keep pushing state, you start dropping old ones.
 def testMaxDepth():
-    data = Tree()
+    data: FullState = FullState()
+    t = Tree()
+    data.trees.append(t)
+
     h = History(data)
     assert len(h.undoStack) == 0
 
     h.pushState()
 
     pR = Point(id='root', location=(0,0,0))
-    data.rootPoint = pR
+    t.rootPoint = pR
     assert len(h.undoStack) == 1
 
     for i in range(2 * History.MAX_HISTORY_LENGTH):
@@ -112,7 +118,7 @@ def testMaxDepth():
         # Returns False once undo stack is empty
         numUndoes += 1
     assert numUndoes == History.MAX_HISTORY_LENGTH
-    assert h.liveState.rootPoint is not None
+    assert h.liveState.trees[0].rootPoint is not None
     print ("History length test passed! 🙌")
 
 

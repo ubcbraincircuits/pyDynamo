@@ -23,19 +23,19 @@ class Branch():
     id: str = attr.ib(metadata=SAVE_META)
     """Identifier of a branch, can be shared across stacks."""
 
-    _parentTree: Tree = attr.ib(default=None, repr=False, cmp=False)
+    _parentTree: Tree = attr.ib(default=None, repr=False, eq=False, order=False)
     """Tree the branch belongs to"""
 
-    parentPoint: Optional[Point] = attr.ib(default=None, repr=False, cmp=False, metadata=SAVE_META)
+    parentPoint: Optional[Point] = attr.ib(default=None, repr=False, eq=False, order=False, metadata=SAVE_META)
     """Node this branched off, or None for root branch"""
 
     points: List[Point] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
     """Points along this dendrite branch, in order."""
 
-    isEnded: bool = attr.ib(default=False, cmp=False)
+    isEnded: bool = attr.ib(default=False, eq=False, order=False)
     """Not sure...? Isn't used... """
 
-    colorData: Any = attr.ib(default=None, cmp=False) # Not used yet
+    colorData: Any = attr.ib(default=None, eq=False, order=False) # Not used yet
     """Not sure...? Isn't used... """
 
     reparentTo: Optional[Point] = attr.ib(default=None, metadata=SAVE_META)

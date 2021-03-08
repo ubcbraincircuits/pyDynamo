@@ -27,19 +27,19 @@ class Point():
     radius: Optional[float] = attr.ib(default=None, metadata=SAVE_META)
     """(optional) radius of the point, in pixels."""
 
-    parentBranch: Optional[Branch] = attr.ib(default=None, repr=False, cmp=False)
+    parentBranch: Optional[Branch] = attr.ib(default=None, repr=False, eq=False, order=False)
     """Branch this point belongs to."""
 
-    annotation: str = attr.ib(default="", cmp=False, metadata=SAVE_META)
+    annotation: str = attr.ib(default="", eq=False, order=False, metadata=SAVE_META)
     """Text annotation for node."""
 
     children: List[Branch] = attr.ib(default=attr.Factory(list))
     """Branches coming off the node."""
 
-    manuallyMarked: Optional[bool] = attr.ib(default=None, cmp=False, metadata=SAVE_META)
+    manuallyMarked: Optional[bool] = attr.ib(default=None, eq=False, order=False, metadata=SAVE_META)
     """Indicates which points have been marked to be revisited."""
 
-    hilighted: Optional[bool] = attr.ib(default=None, cmp=False, metadata=SAVE_META)
+    hilighted: Optional[bool] = attr.ib(default=None, eq=False, order=False, metadata=SAVE_META)
     """ NOTE: Hilighting has been removed, keep here for backwards compatibility."""
 
     def isRoot(self) -> bool:
