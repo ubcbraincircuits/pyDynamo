@@ -23,8 +23,6 @@ class FullStateActions():
         self.branchToColorMap = BranchToColorMap()
 
     def selectPoint(self, localIdx, point, avoidPush=False, deselectHidden=False):
-        print (point.id if point is not None else 'None')
-        print (localIdx)
         if not avoidPush:
             self.history.pushState()
         for state in self.state.uiStates:
