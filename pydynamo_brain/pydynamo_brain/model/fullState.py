@@ -1,5 +1,7 @@
 import attr
 
+from typing import List
+
 from .options import ProjectOptions
 from .tree.branch import Branch
 from .tree.point import Point
@@ -30,7 +32,7 @@ class FullState:
     traces = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Image-specific options, one for each of the files above
-    uiStates = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    uiStates: List[UIState] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Project options
     projectOptions = attr.ib(default=attr.Factory(ProjectOptions), metadata=SAVE_META)
