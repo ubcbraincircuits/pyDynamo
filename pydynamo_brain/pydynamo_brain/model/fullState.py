@@ -23,7 +23,7 @@ class FullState:
     filePaths = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Image-specific tree data, one for each of the files above
-    trees = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    trees: List[Tree] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Puncta points (mapping id -> Point), for each stack.
     puncta = attr.ib(default=attr.Factory(list), metadata=SAVE_META)

@@ -4,7 +4,7 @@ import copy
 from typing import List
 
 from .fullState import FullState
-from .model.tree import Tree
+from .tree.tree import Tree
 
 class History:
     """Respresents the current live active state of the app, as well as a history of changes.
@@ -71,14 +71,16 @@ class History:
 
     def _fixParents(self, liveState: FullState) -> None:
         """Cloning ruins parent references, this will put them back."""
-        if hasattr(liveState, 'uiStates'): # State is a fullState object
-            for idx, uiState in enumerate(liveState.uiStates):
-                uiState._parent = liveState
-                uiState._tree = liveState.trees[idx]
-            for tree in liveState.trees:
-                self._fixTreeParents(tree)
-        elif hasattr(liveState, 'branches'): # State is a tree
-            self._fixTreeParents(liveState)
+        #if hasattr(liveState, 'uiStates'): # State is a fullState object
+        for idx, uiState in enumerate(liveState.uiStates):
+            uiState._parent = liveState
+            uiState._tree = liveState.trees[idx]
+        for tree in liveState.trees:
+            self._fixTreeParents(tree)
+
+        # TODO: Remove?
+        #elif hasattr(liveState, 'branches'): # State is a tree
+        #    self._fixTreeParents(liveState)
 
     def _fixTreeParents(self, tree: Tree) -> None:
         """Walk an entire tree and fix up branch and point parents."""
