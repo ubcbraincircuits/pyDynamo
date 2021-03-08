@@ -1,6 +1,6 @@
 import attr
 
-from typing import List
+from typing import List, Optional, Tuple
 
 from .options import ProjectOptions
 from .tree.branch import Branch
@@ -10,81 +10,81 @@ from .tree.tree import Tree
 from .drawMode import DrawMode
 from .uiState import UIState
 
-from pydynamo_brain.util import SAVE_META, ImageCache, locationMinus, locationPlus
+from pydynamo_brain.util import SAVE_META, ImageCache, locationMinus, locationPlus, Point3D
 
 _IMG_CACHE = ImageCache()
 
 @attr.s
 class FullState:
     # Root path this data is saved to:
-    _rootPath = attr.ib(default=None)
+    _rootPath: Optional[str] = attr.ib(default=None)
 
     # Paths to *.tif image files.
-    filePaths = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    filePaths: List[str] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Image-specific tree data, one for each of the files above
     trees: List[Tree] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Puncta points (mapping id -> Point), for each stack.
-    puncta = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    puncta: List[List[Point]] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Paths to *.nwb files of per-POI recorded traces, for each stack.
-    traces = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    traces: List[str] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Image-specific options, one for each of the files above
     uiStates: List[UIState] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
 
     # Project options
-    projectOptions = attr.ib(default=attr.Factory(ProjectOptions), metadata=SAVE_META)
+    projectOptions: ProjectOptions = attr.ib(default=attr.Factory(ProjectOptions), metadata=SAVE_META)
 
     # Size of volume (# channels, x, y, z), needs to be the same between stacks
-    volumeSize = attr.ib(default=None)
+    volumeSize: Optional[List[int]] = attr.ib(default=None)
 
     # Shared color channel information
-    channel = attr.ib(default=0)
+    channel: int = attr.ib(default=0)
 
     # What drawing mode the user is currently in (normal, puncta, radii, registration)
-    drawMode = attr.ib(default=DrawMode.DEFAULT)
+    drawMode: DrawMode = attr.ib(default=DrawMode.DEFAULT)
 
     # Whether to draw channels in color (True for r/g/b) or white (False)
-    useColor = attr.ib(default=False)
+    useColor: bool = attr.ib(default=False)
 
     # Shared UI Option for dendrite line width
-    lineWidth = attr.ib(default=3)
+    lineWidth: int = attr.ib(default=3)
 
     # Shared UI Option for diameter of point circles
-    dotSize = attr.ib(default=5)
+    dotSize: Optional[int] = attr.ib(default=5)
 
     # Keep track of the ID for the next point created, used for making more unique identifiers.
-    _nextPointID = 0
+    _nextPointID: int = 0
 
     # Keep track of the ID for the next branch created, used for making more unique identifiers.
-    _nextBranchID = 0
+    _nextBranchID: int = 0
 
     # Get the index of a state, or -1 if it's not contained.
-    def indexForState(self, uiState):
+    def indexForState(self, uiState: UIState) -> int:
         try:
             return self.uiStates.index(uiState)
         except:
             return -1
 
     # Draw status
-    def inDrawMode(self):
+    def inDrawMode(self) -> bool:
         return self.drawMode == DrawMode.DEFAULT
 
-    def inPunctaMode(self):
+    def inPunctaMode(self) -> bool:
         return self.drawMode == DrawMode.PUNCTA
 
-    def inManualRegistrationMode(self):
+    def inManualRegistrationMode(self) -> bool:
         return self.drawMode == DrawMode.REGISTRATION
 
-    def inRadiiMode(self):
+    def inRadiiMode(self) -> bool:
         return self.drawMode == DrawMode.RADII
 
     # TODO: active window
     # TODO: add new window off active
 
-    def addFiles(self, filePaths, treeData=None):
+    def addFiles(self, filePaths: List[str], treeData: Optional[List[Tree]]=None) -> None:
         for i, path in enumerate(filePaths):
             self.filePaths.append(path)
 
@@ -97,13 +97,13 @@ class FullState:
             self.uiStates.append(uiState)
             nextTree._parentState = uiState
 
-    def toggleLineWidth(self):
+    def toggleLineWidth(self) -> None:
         if self.lineWidth == 4:
             self.lineWidth = 1
         else:
             self.lineWidth += 1
 
-    def toggleDotSize(self):
+    def toggleDotSize(self) -> None:
         if self.dotSize is None:
             self.dotSize = 3
         elif self.dotSize == 9:
@@ -111,8 +111,8 @@ class FullState:
         else:
             self.dotSize += 2
 
-    def changeAllZAxis(self, delta):
-        delta = int(round(delta))
+    def changeAllZAxis(self, floatDelta: float) -> None:
+        delta: int = int(round(delta))
         if delta == 0:
             return
 
@@ -135,38 +135,35 @@ class FullState:
                 highestLeft = max(highestLeft, zDim - 1 - uiState.zAxisAt)
 
         # Make sure that we're in at least one volume by the end of the scroll:
-        if delta < 0:
+        if delta < 0 and highestZ is not None:
             delta = -min(-delta, highestZ)
-        else:
+        elif highestLeft is not None:
             delta = min(delta, highestLeft)
 
         for uiState in self.uiStates:
             uiState.zAxisAt += delta
 
-    def changeChannel(self, delta):
-        self.channel = (self.channel + delta) % self.volumeSize[0]
+    def changeChannel(self, delta: int) -> None:
+        if self.volumeSize is not None and len(self.volumeSize) > 0:
+            self.channel = (self.channel + delta) % self.volumeSize[0]
 
-    def togglePunctaMode(self):
+    def togglePunctaMode(self) -> None:
         self.drawMode = DrawMode.DEFAULT if self.inPunctaMode() else DrawMode.PUNCTA
 
-    def toggleRadiiMode(self):
+    def toggleRadiiMode(self) -> None:
         self.drawMode = DrawMode.DEFAULT if self.inRadiiMode() else DrawMode.RADII
 
-    def toggleManualRegistrationMode(self):
+    def toggleManualRegistrationMode(self) -> None:
         self.drawMode = DrawMode.DEFAULT if self.inManualRegistrationMode() else DrawMode.REGISTRATION
 
-    def appendIDRemap(self, idRemaps):
-        for stepID, idRemapList in idRemaps.items():
-            while len(self.manualRegistrationIDRemap) <= stepID:
-                self.manualRegistrationIDRemap.append([])
-            self.manualRegistrationIDRemap[stepID].extend(idRemapList)
-
-    def updateVolumeSize(self, volumeSize):
+    def updateVolumeSize(self, volumeSize: List[int]) -> None:
         # TODO: Something better when volume sizes don't match? ...
         if self.volumeSize is None:
             self.volumeSize = volumeSize
 
-    def convertLocation(self, sourceID, targetID, sourceLocation, sourcePointBefore=None):
+    def convertLocation(self,
+        sourceID: int, targetID: int, sourceLocation: Point3D, sourcePointBefore: Optional[Point]=None
+    ) -> Point3D:
         # TODO: Use stack transform once registration is useful?
         # TODO: Also perhaps use pointAfter to guide even better when it exists.
         if sourcePointBefore is None:
@@ -184,55 +181,62 @@ class FullState:
 
         # Keep same delta. Loc_source - PB_source = Delta = Loc_target - PB_target
         # So Loc_target = PB_target + (Loc_source - PB_source)
+        if sourcePointBefore is None:
+            return targetPointBefore.location
+
         sourceDelta = locationMinus(sourceLocation, sourcePointBefore.location)
         return locationPlus(targetPointBefore.location, sourceDelta)
 
-    def analogousPoint(self, sourcePoint, sourceID, targetID):
+    def analogousPoint(self,
+        sourcePoint: Optional[Point], sourceID: int, targetID: int
+    ) -> Optional[Point]:
         if sourcePoint is None or sourceID == targetID:
             return sourcePoint
-        return self.uiStates[targetID]._tree.getPointByID(sourcePoint.id)
+        tree = self.uiStates[targetID]._tree
+        if tree is not None:
+            return tree.getPointByID(sourcePoint.id)
+        return None
 
-    def removeStack(self, index):
+    def removeStack(self, index: int) -> None:
         self.filePaths.pop(index)
         self.trees.pop(index)
         self.uiStates.pop(index)
         # TODO - remove undo state for that stack too
 
-    def colorChannel(self):
+    def colorChannel(self) -> Optional[str]:
         if not self.useColor:
             return None
         return ['r', 'g', 'b'][self.channel % 3]
 
-    def setPointIDWithoutCollision(self, tree, point, newID):
+    def setPointIDWithoutCollision(self, tree: Tree, point: Point, newID: str) -> None:
         """Change the ID of a point in a tree, making sure it doesn't collide with an existing point."""
         if point.id == newID:
             return
+
         existingWithID = tree.getPointByID(newID)
         if existingWithID == point:
             return
-        remaps = []
+
         if existingWithID is not None:
             # There's already a point with this ID - change it to a new ID.
-            fixedID = self.nextPointID()
-            remaps.append((existingWithID.id, fixedID))
-            existingWithID.id = fixedID
-        remaps.append((point.id, newID))
-        point.id = newID
-        # Return a list of ID remaps: (oldID, newID). Will either be one, or two if collision.
-        return remaps
+            existingWithID.id = self.nextPointID()
 
-    def setBranchIDWithoutCollision(self, tree, branch, newID):
+        point.id = newID
+
+    def setBranchIDWithoutCollision(self, tree: Tree, branch: Branch, newID: str) -> None:
         """Same as setPointIDWithoutCollision, but with branches instead of points."""
         if branch.id == newID:
             return
+
         existingWithID = tree.getBranchByID(newID)
         if existingWithID == branch:
             return
+
         if existingWithID is not None:
             # There's already a branch with this ID - change it to a new ID.
             existingWithID.id = self.nextBranchID()
+
         branch.id = newID
-        # No return for this one, can be added if needed.
 
     def nextPointID(self) -> str:
         newID = '%08x' % self._nextPointID
