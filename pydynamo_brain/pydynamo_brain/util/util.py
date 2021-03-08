@@ -5,14 +5,14 @@ import os.path
 
 from typing import Dict, Tuple
 
+# Type aliases for points
+Point3D = Tuple[float, float, float]
+
 SAVE_KEY = 'persist'
 SAVE_META: Dict[str, bool] = {SAVE_KEY: True}
 
 # Function that does nothing:
 NOOP_FUNC = lambda: None
-
-# Type alias for points
-Point3D = Tuple[float, float, float]
 
 def currentTimeMillis():
     return int(round(time.time() * 1000))

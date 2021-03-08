@@ -1,17 +1,20 @@
+from __future__ import annotations
 """
 .. module:: tree
 """
+
 import attr
 import numpy as np
 
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, TYPE_CHECKING
 
 import pydynamo_brain.util as util
 from pydynamo_brain.util import SAVE_META
 
 from .point import Point
-from .tree import Tree
 
+if TYPE_CHECKING:
+    from .tree import Tree
 
 @attr.s
 class Branch():
@@ -113,7 +116,7 @@ class Branch():
         if centrifugal:
             # Centrifugal order: When walking along a branch,
             # increment order each time subbranches come off it.
-            pointAt = self.parentPoint.parentBranch.points[0]
+            pointAt: Optional[Point] = self.parentPoint.parentBranch.points[0]
             while pointAt is not None and pointAt.id != self.parentPoint.id:
                 if len(pointAt.children) > 0:
                     parentOrder += 1
