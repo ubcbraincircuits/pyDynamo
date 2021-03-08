@@ -232,12 +232,12 @@ class FullState:
         branch.id = newID
         # No return for this one, can be added if needed.
 
-    def nextPointID(self):
+    def nextPointID(self) -> str:
         newID = '%08x' % self._nextPointID
         self._nextPointID += 1
         return newID
 
-    def nextBranchID(self):
+    def nextBranchID(self) -> str:
         newID = '%04x' % self._nextBranchID
         self._nextBranchID += 1
         return newID

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 .. module:: tree
 """
@@ -7,45 +9,49 @@ import numpy as np
 from typing import List
 
 import pydynamo_brain.util as util
-from pydynamo_brain.util import SAVE_META
+from pydynamo_brain.util import SAVE_META, Point3D
+
+from typing import Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from .branch import Branch
 from .point import Point
 from .transform import Transform
 
+if TYPE_CHECKING:
+    from pydynamo_brain.model import FullState, UIState
 
 @attr.s
 class Tree():
     """3D Tree structure."""
 
-    rootPoint = attr.ib(default=None, metadata=SAVE_META)
+    rootPoint: Optional[Point] = attr.ib(default=None, metadata=SAVE_META)
     """Soma, initial start of the main branch."""
 
     branches: List[Branch] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
     """All branches making up this dendrite tree."""
 
-    transform = attr.ib(default=attr.Factory(Transform), metadata=SAVE_META)
+    transform: Transform = attr.ib(default=attr.Factory(Transform), metadata=SAVE_META)
     """Conversion for this tree from pixel to world coordinates."""
 
-    _parentState = attr.ib(default=None, repr=False, cmp=False)
+    _parentState: Optional[UIState] = attr.ib(default=None, repr=False, cmp=False)
     """UI State this belongs to."""
 
     # HACK - make faster, index points by ID
-    def getPointByID(self, pointID, includeDisconnected=False):
+    def getPointByID(self, pointID: str, includeDisconnected: bool=False) -> Optional[Point]:
         """Given the ID of a point, find the point object that matches."""
         for point in self.flattenPoints(includeDisconnected):
             if point.id == pointID:
                 return point
         return None
 
-    def getBranchByID(self, branchID):
+    def getBranchByID(self, branchID: str) -> Optional[Branch]:
         """Given the ID of a branch, find the branch object that matches."""
         for branch in self.branches:
             if branch.id == branchID:
                 return branch
         return None
 
-    def addBranch(self, branch):
+    def addBranch(self, branch: Branch) -> int:
         """Adds a branch to the tree.
 
         :returns: Index of branch within the tree."""
@@ -53,7 +59,7 @@ class Tree():
         branch._parentTree = self
         return len(self.branches) - 1
 
-    def removeBranch(self, branch):
+    def removeBranch(self, branch: Branch) -> None:
         """Removes a branch from the tree - assumes all points already removed."""
         if branch not in self.branches:
             print ("Deleting branch not in the tree? Whoops")
@@ -65,12 +71,12 @@ class Tree():
             branch.parentPoint.removeChildrenByID(branch.id)
         self.branches.remove(branch)
 
-    def removePointByID(self, pointID):
+    def removePointByID(self, pointID: str) -> Optional[Point]:
         """Removes a single point from the tree, identified by ID."""
         pointToRemove = self.getPointByID(pointID)
         if pointToRemove is not None:
             if pointToRemove.parentBranch is None:
-                assert pointToRemove.id == self.rootPoint.id
+                assert self.rootPoint is not None and pointToRemove.id == self.rootPoint.id
                 if len(self.branches) == 0:
                     self.rootPoint = None
                 else:
@@ -85,15 +91,18 @@ class Tree():
         else:
             return None
 
-    def reparentPoint(self, childPoint, newParent, newBranchID=None):
+    def reparentPoint(self, childPoint: Point, newParent: Point, newBranchID: Optional[str]=None) -> Optional[str]:
         """Changes a point (and its later siblings) to a new branch off the given parent."""
         if childPoint.parentBranch is None:
             # should not be allowed, skip
             print ("Can't reparent the root! Ignoring...")
             return None
+
         oldBranch, newBranch = childPoint.parentBranch, newParent.parentBranch
 
         if newParent.isLastInBranch() and not newParent.isRoot():
+            assert newBranch is not None
+
             # Append the child point to the new parent's branch
             atIdx = childPoint.indexInParent()
             while len(oldBranch.points) > atIdx:
@@ -104,11 +113,11 @@ class Tree():
         else:
             # Otherwise, move a whole branch - creating a new one if needed
             newBranch = childPoint.parentBranch
-            newID = None
+            newID: Optional[str] = None
             atIdx = childPoint.indexInParent()
 
             if atIdx > 0: # need to split the old branch
-                newID = newBranchID if newBranchID is not None else self._parentState._parent.nextBranchID()
+                newID = newBranchID if newBranchID is not None else self._fullState().nextBranchID()
                 newBranch = Branch(id=newID)
                 while len(oldBranch.points) > atIdx:
                     toMove = oldBranch.points[atIdx]
@@ -118,7 +127,7 @@ class Tree():
             newBranch.setParentPoint(newParent)
             return newID
 
-    def movePoint(self, pointID, newLocation, downstream=False):
+    def movePoint(self, pointID: str, newLocation: Point3D, downstream: bool=False) -> None:
         """Moves a point to a new loction, optionally also moving all downstream points by the same.
 
         :param pointID: ID of point to move.
@@ -134,7 +143,7 @@ class Tree():
             # Non-recursive, so just move this one point:
             pointToMove.location = newLocation
 
-    def flattenPoints(self, includeDisconnected=False):
+    def flattenPoints(self, includeDisconnected: bool=False) -> List[Point]:
         """Returns all points in the tree, as a single list."""
         if self.rootPoint is None:
             return []
@@ -146,7 +155,9 @@ class Tree():
             points.extend(b.points)
         return points
 
-    def nextPointFilteredWithCount(self, sourcePoint, filterFunc, delta):
+    def nextPointFilteredWithCount(self,
+            sourcePoint: Point, filterFunc: Callable[[Point], bool], delta:int
+    ) -> Tuple[Optional[Point], int]:
         """Starting at a point, walk the tree to find all points that match a
         filter, and step a certain amount to the next one.
         Also return the count, for convenience."""
@@ -162,21 +173,22 @@ class Tree():
         idx = filteredPoints.index(sourcePoint) + delta
         nextIdx = idx % len(filteredPoints) # wrap
 
-        result = filteredPoints[nextIdx]
-        if not filterFunc(result):
-            result = None
+        found = filteredPoints[nextIdx]
+        result = found if filterFunc(found) else None
         return result, countPass
 
-    def continueParentBranchIfFirst(self, point):
+    def continueParentBranchIfFirst(self, point: Optional[Point]) -> None:
         """If point is first in its branch, change it to extend its parent."""
         if point is None or point.indexInParent() > 0 or point.isRoot():
             return # Moving right along, nothing to see here...
+        assert point.parentBranch is not None # Root
 
         branch = point.parentBranch
         parent = branch.parentPoint
         assert parent is not None
         if parent.isRoot():
             return # All branches are children of the root...
+        assert parent.parentBranch is not None
 
         parentIdx = parent.indexInParent()
         parentsBranch = parent.parentBranch
@@ -194,10 +206,12 @@ class Tree():
             # Otherwise, remove from tree completely
             self.removeBranch(branch) # Also removes branch from parent point
 
-    def updateAllPrimaryBranches(self, point=None):
+    def updateAllPrimaryBranches(self, point: Optional[Point]=None) -> None:
         """For all branching points, make the longest branch continue the parent branch."""
         if point is None:
             point = self.rootPoint
+        if point is None:
+            return
 
         # Step 1: find the longest child, see if it's longer than the continuation
         nextPoint = point.nextPointInBranch(noWrap=True)
@@ -213,10 +227,10 @@ class Tree():
             self.continueParentBranchIfFirst(nextPoint)
 
         # Step 2: Normalize by sorting branches by remaining length:
-        def _branchDistRemaining(branch):
+        def _branchDistRemaining(branch: Branch) -> float:
             if len(branch.points) > 0:
                 return -branch.points[0].longestDistanceToLeaf()
-            return 0
+            return 0.0
         point.children.sort(key=_branchDistRemaining)
 
         # Step 3: Recurse down tree:
@@ -227,7 +241,7 @@ class Tree():
             if len(childBranch.points) > 0:
                 self.updateAllPrimaryBranches(childBranch.points[0])
 
-    def cleanBranchIDs(self):
+    def cleanBranchIDs(self) -> None:
         """For all branches, set the ID of the branch to its first point's ID.
 
         Note: Branch IDs should be removed overall and this be the default behaviour.
@@ -236,9 +250,10 @@ class Tree():
             if len(branch.points) > 0:
                 branch.id = branch.points[0].id
             else:
-                branch.id = self._parentState._parent.nextBranchID()
 
-    def cleanEmptyBranches(self):
+                branch.id = self._fullState().nextBranchID()
+
+    def cleanEmptyBranches(self) -> int:
         """For all branches, if it has no points just remove it completely.
 
         :returns: Number of branches removed.
@@ -248,22 +263,20 @@ class Tree():
             self.removeBranch(emptyBranch)
         return len(emptyBranches)
 
-    def spatialRadius(self):
+    def spatialRadius(self) -> float:
         """External longest distance to points from soma."""
-        maxS = 0
-        for point in self.flattenPoints():
-            maxS = max(maxS, self.spatialDist(self.rootPoint, point))
-        return maxS
+        return self.spatialAndTreeRadius()[0]
 
-    def spatialAndTreeRadius(self):
+    def spatialAndTreeRadius(self) -> Tuple[float, float]:
         """External and internal longest distance to points from soma."""
-        maxS, maxT = 0, 0
-        for point in self.flattenPoints():
-            pS, pT = self.spatialAndTreeDist(self.rootPoint, point)
-            maxS, maxT = max(maxS, pS), max(maxT, pT)
+        maxS, maxT = 0.0, 0.0
+        if self.rootPoint is not None:
+            for point in self.flattenPoints():
+                pS, pT = self.spatialAndTreeDist(self.rootPoint, point)
+                maxS, maxT = max(maxS, pS), max(maxT, pT)
         return maxS, maxT
 
-    def closestPointTo(self, targetLocation, zFilter=False):
+    def closestPointTo(self, targetLocation: Point3D, zFilter: bool=False) -> Optional[Point]:
         """Given a position in the volume, find the point closest to it in image space.
 
         :param targetLocation: (x, y, z) location tuple.
@@ -278,7 +291,7 @@ class Tree():
                 closestDist, closestPoint = dist, point
         return closestPoint
 
-    def closestPointToWorldLocation(self, targetWorldLocation):
+    def closestPointToWorldLocation(self, targetWorldLocation: Point3D) -> Optional[Point]:
         """Given a position in world space, find the point closest to it in world space.
 
         :param targetWorldLocation: (x, y, z) location tuple.
@@ -292,29 +305,36 @@ class Tree():
                 closestDist, closestPoint = dist, point
         return closestPoint
 
-    def worldCoordPoints(self, points):
+    def worldCoordPoints(self, points: List[Point]) -> Tuple[List[float], List[float], List[float]]:
         """Convert image pixel (x, y, z) to a real-world (x, y, z) position."""
-        x, y, z = [], [], []
-        globalScale = self._parentState._parent.projectOptions.pixelSizes
+        x: List[float] = []
+        y: List[float] = []
+        z: List[float] = []
+
+        globalScale = self._fullState().projectOptions.pixelSizes
         for p in points:
-            pAt = p
-            if hasattr(p, 'location'):
-                pAt = p.location
+            # POIUY: support calling with list of locations?
+            #pAt = p
+            #if hasattr(p, 'location'):
+            pAt = p.location
+
             # Note: For now, tree-specific transforms are unsupported!
             #pAt = np.matmul(np.array(self.transform.rotation), np.array(pAt).T).T
             #pAt = (pAt + np.array(self.transform.translation)) * np.array(self.transform.scale)
             pAt = np.array(pAt) * globalScale
-            x.append(pAt[0]), y.append(pAt[1]), z.append(pAt[2])
+            x.append(pAt[0])
+            y.append(pAt[1])
+            z.append(pAt[2])
         return x, y, z
 
-    def spatialDist(self, p1, p2):
+    def spatialDist(self, p1: Point, p2: Point) -> float:
         """Given two points in the tree, return the 3D spatial distance"""
         x, y, z = self.worldCoordPoints([p1, p2])
         p1Location = (x[0], y[0], z[0])
         p2Location = (x[1], y[1], z[1])
         return util.deltaSz(p1Location, p2Location)
 
-    def spatialAndTreeDist(self, p1, p2):
+    def spatialAndTreeDist(self, p1: Point, p2: Point) -> Tuple[float, float]:
         """Given two points in the tree, return both the 3D spatial distance,
         as well as how far to travel along the tree."""
         path1, path2 = p1.pathFromRoot(), p2.pathFromRoot()
@@ -335,7 +355,7 @@ class Tree():
             treeDist += util.deltaSz(pA, pB)
         return self.spatialDist(p1, p2), treeDist
 
-    def _recursiveMovePointDelta(self, point, delta):
+    def _recursiveMovePointDelta(self, point: Point, delta: Point3D) -> None:
         """Recursively move a point, plus all its children and later neighbours."""
         point.location = util.locationPlus(point.location, delta)
         # First, move any branches coming off this point, by moving their first point
@@ -349,8 +369,10 @@ class Tree():
             if nextIdx < len(point.parentBranch.points):
                 self._recursiveMovePointDelta(point.parentBranch.points[nextIdx], delta)
 
-    def clearAndCopyFrom(self, otherTree, idMaker):
-        pointMap = {}
+    def clearAndCopyFrom(self, otherTree: Tree, idMaker: FullState) -> None:
+        pointMap: Dict[str, Point] = {}
+        assert otherTree.rootPoint is not None, "Can't clone empty tree."
+
         self.rootPoint = _clonePoint(otherTree.rootPoint, idMaker, pointMap)
 
         nonEmptyBranches = [branch for branch in otherTree.branches if len(branch.points) > 0]
@@ -369,10 +391,17 @@ class Tree():
                 else:
                     newBranch.reparentTo = pointMap[oldBranch.reparentTo.id]
 
+    def _fullState(self) -> FullState:
+        """
+        Utility to return the non-none fullstate object.
+        """
+        assert self._parentState is not None, "Accessing uninitialized tree"
+        assert self._parentState._parent is not None, "Accessing uninitialized tree"
+        return self._parentState._parent
 
 ### Cloning utilities
 
-def _clonePoint(point, idMaker, pointMap):
+def _clonePoint(point: Point, idMaker: FullState, pointMap: Dict[str, Point]) -> Point:
     assert point.id not in pointMap
     newID = point.id if idMaker is None else idMaker.nextPointID()
     # NOTE: SWC point ID can be stored here too if needed.
@@ -380,7 +409,7 @@ def _clonePoint(point, idMaker, pointMap):
     pointMap[point.id] = newPoint
     return newPoint
 
-def _cloneBranch(branch, idMaker, pointMap):
+def _cloneBranch(branch: Branch, idMaker: FullState, pointMap: Dict[str, Point]) -> Branch:
     newID = branch.id if idMaker is None else idMaker.nextBranchID()
     b = Branch(id=newID)
     for point in branch.points:
@@ -392,14 +421,18 @@ def _cloneBranch(branch, idMaker, pointMap):
 #
 # Debug formatting for converting trees to string representation
 #
-def printPoint(tree, point, pad="", isFirst=False):
+def printPoint(tree: Tree, point: Optional[Point], pad: str="", isFirst: bool=False) -> None:
+    if point is None:
+        return
     print (pad + ("-> " if isFirst else "   ") + str(point))
     pad = pad + "   "
     for branch in point.children:
         if branch.parentPoint == point:
             printBranch(tree, branch, pad)
 
-def printBranch(tree, branch, pad=""):
+def printBranch(tree: Tree, branch: Optional[Branch], pad:str="") -> None:
+    if branch is None:
+        return
     if len(branch.points) > 0 and branch.points[0] == branch.parentPoint:
         print ("BRANCH IS OWN PARENT? :(")
         return
@@ -407,5 +440,5 @@ def printBranch(tree, branch, pad=""):
     for point in branch.points:
         printPoint(tree, point, pad)
 
-def printTree(tree):
+def printTree(tree: Tree) -> None:
     printPoint(tree, tree.rootPoint)

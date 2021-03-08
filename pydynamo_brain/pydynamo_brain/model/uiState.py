@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import attr
 import math
 import numpy as np
+
+from typing import Optional, TYPE_CHECKING
 
 from .tree.branch import Branch
 from .tree.point import Point
@@ -10,10 +14,13 @@ from .pointMode import PointMode
 
 from pydynamo_brain.util import snapToRange, normDelta, dotDelta, deltaSz, SAVE_META
 
+if TYPE_CHECKING:
+    from .fullState import FullState
+
 @attr.s
 class UIState():
     # Full state this belongs within
-    _parent = attr.ib(default=None)
+    _parent: Optional[FullState] = attr.ib(default=None)
 
     # Tree being shown in the UI.
     _tree = attr.ib(default=None)
