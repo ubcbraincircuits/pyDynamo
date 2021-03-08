@@ -4,6 +4,8 @@
 import attr
 import numpy as np
 
+from typing import List
+
 import pydynamo_brain.util as util
 from pydynamo_brain.util import SAVE_META
 
@@ -27,7 +29,7 @@ class Point():
     annotation = attr.ib(default="", cmp=False, metadata=SAVE_META)
     """Text annotation for node."""
 
-    children = attr.ib(default=attr.Factory(list))
+    children: List[Branch] = attr.ib(default=attr.Factory(list))
     """Branches coming off the node."""
 
     manuallyMarked = attr.ib(default=None, cmp=False, metadata=SAVE_META)

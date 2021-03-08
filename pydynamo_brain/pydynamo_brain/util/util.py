@@ -3,11 +3,16 @@ import numpy as np
 import time
 import os.path
 
+from typing import Dict, Tuple
+
 SAVE_KEY = 'persist'
-SAVE_META = {SAVE_KEY: True}
+SAVE_META: Dict[str, bool] = {SAVE_KEY: True}
 
 # Function that does nothing:
 NOOP_FUNC = lambda: None
+
+# Type alias for points
+Point3D = Tuple[float, float, float]
 
 def currentTimeMillis():
     return int(round(time.time() * 1000))
@@ -16,11 +21,11 @@ def snapToRange(x, lo, hi):
     return np.maximum(lo, np.minimum(hi, x))
 
 # Given two tuples A = (Ax, Ay, Az), B = (Bx, By, Bz), return A + B
-def locationPlus(A, B):
+def locationPlus(A: Point3D, B: Point3D) -> Point3D:
     return (A[0] + B[0], A[1] + B[1], A[2] + B[2])
 
 # Given two tuples A = (Ax, Ay, Az), B = (Bx, By, Bz), return A - B
-def locationMinus(A, B):
+def locationMinus(A: Point3D, B: Point3D) -> Point3D:
     return (A[0] - B[0], A[1] - B[1], A[2] - B[2])
 
 def normDelta(p1, p2):
@@ -31,7 +36,7 @@ def normDelta(p1, p2):
 def dotDelta(p1, p2):
     return p1[0] * p2[0] + p1[1] * p2[1] + p1[2] * p2[2]
 
-def deltaSz(p1, p2):
+def deltaSz(p1: Point3D, p2: Point3D) -> float:
     x, y, z = locationMinus(p1, p2)
     return math.sqrt(x*x + y*y + z*z)
 

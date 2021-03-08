@@ -4,6 +4,8 @@
 import attr
 import numpy as np
 
+from typing import List
+
 import pydynamo_brain.util as util
 from pydynamo_brain.util import SAVE_META
 
@@ -19,7 +21,7 @@ class Tree():
     rootPoint = attr.ib(default=None, metadata=SAVE_META)
     """Soma, initial start of the main branch."""
 
-    branches = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
+    branches: List[Branch] = attr.ib(default=attr.Factory(list), metadata=SAVE_META)
     """All branches making up this dendrite tree."""
 
     transform = attr.ib(default=attr.Factory(Transform), metadata=SAVE_META)
