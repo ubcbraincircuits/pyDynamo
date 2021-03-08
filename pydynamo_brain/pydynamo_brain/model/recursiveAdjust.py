@@ -45,7 +45,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     oldLocMin = util.locationMinus(xyz, dLoc)
     oldLocMax = util.locationPlus(xyz, dLoc)
     volume = _IMG_CACHE.getVolume(fullState.uiStates[id - 1].imagePath)
-    oldBox = _imageBoxIfInside(volume, fullState.channel, oldLocMin, oldLocMax)
+    oldBox = _imageBoxIfInsideXY(volume, fullState.channel, oldLocMin, oldLocMax)
     if oldBox is None:
         callback(_recursiveMark(newTree, branch, fromPointIdx=point.indexInParent()))
         return
@@ -55,7 +55,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     newLocMin = util.locationMinus(xyz, dLoc)
     newLocMax = util.locationPlus(xyz, dLoc)
     volume = _IMG_CACHE.getVolume(fullState.uiStates[id].imagePath)
-    newBox = _imageBoxIfInside(volume, fullState.channel, newLocMin, newLocMax)
+    newBox = _imageBoxIfInsideXY(volume, fullState.channel, newLocMin, newLocMax)
     if newBox is None:
         callback(_recursiveMark(newTree, branch, fromPointIdx=point.indexInParent()))
         return
@@ -95,7 +95,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
         xyNewZ = (xyz[0], xyz[1], xyz[2] + dZ)
         newLocMinZ = util.locationMinus(xyNewZ, dLoc)
         newLocMaxZ = util.locationPlus(xyNewZ, dLoc)
-        newBoxZ = _imageBoxIfInside(volume, fullState.channel, newLocMinZ, newLocMaxZ)
+        newBoxZ = _imageBoxIfInsideXY(volume, fullState.channel, newLocMinZ, newLocMaxZ)
         if newBoxZ is None:
             continue
         delta = _imageDifference(oldBoxShifted, newBoxZ)
@@ -171,16 +171,38 @@ def _recursiveMark(tree, branch, fromPointIdx=0):
                 nMarked += _recursiveMark(tree, childBranch)
     return nMarked
 
-def _imageBoxIfInside(volume, channel, fr, to):
+# Get a subvolume if inside the bigger volume.
+# Note that only Z is padded with zeros, XY must fit entirely within.
+def _imageBoxIfInsideXY(volume, channel, fr, to):
     to = util.locationPlus(to, (1, 1, 1)) # inclusive to exclusive upper bounds
     s = volume.shape # (channels, stacks, x, y)
     volumeXYZ = (s[2], s[3], s[1])
-    for d in range(3): # Verify the box fits inside the volume:
+
+    for d in range(2): # Verify the XY box fits inside the volume:
         if fr[d] < 0 or volumeXYZ[d] < to[d]:
             return None
+
+    # Figure out how much Z padding is needed...
+    addStart, addEnd = 0, 0
+    if fr[2] < 0:
+        addStart = 0 - fr[2]
+        fr = (fr[0], fr[1], 0)
+    if volumeXYZ[2] < to[2]:
+        addEnd = to[2] - volumeXYZ[2]
+        to = (to[0], to[1], volumeXYZ[2])
+
     subVolume = volume[channel, fr[2]:to[2], fr[1]:to[1], fr[0]:to[0]] # ZYX
+
+    # ...and apply the padding:
+    dx, dy = subVolume.shape[1], subVolume.shape[2]
+    if addStart > 0:
+        subVolume = np.vstack( (np.zeros((addStart, dy, dx)), subVolume) )
+    if addEnd > 0:
+        subVolume = np.vstack( (subVolume, np.zeros((addEnd, dy, dx))) )
+
     subVolume = np.moveaxis(subVolume, 0, -1) # YXZ
     return subVolume
+
 
 def _dualRangeExp(n, v, exp=2.0):
     # Given a number of items, return samples in [-v, v]
