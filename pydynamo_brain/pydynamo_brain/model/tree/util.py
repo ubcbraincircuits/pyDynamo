@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 def findNextPoints(pointAt: Point) -> List[Point]:
     nextAlongBranch = pointAt.nextPointInBranch(1, noWrap=True)
     branchPoint = [] if nextAlongBranch is None else [nextAlongBranch]
-    firstChildPoints = [b.points[0] for b in pointAt.children]
+    firstChildPoints = [b.points[0] for b in pointAt.children if len(b.points) > 0]
     return branchPoint + firstChildPoints
 
 # Return all (A, B, C) adjacent triples
