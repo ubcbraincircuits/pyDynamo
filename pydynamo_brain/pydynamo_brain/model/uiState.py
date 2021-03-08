@@ -129,7 +129,7 @@ class UIState():
 
         self._currentPointCache = None
         if selectedID is not None:
-            self._tree.getPointByID(selectedID)
+            self._currentPointCache = self._tree.getPointByID(selectedID)
 
         if self._currentPointCache is not None:
             self.currentPointID = self._currentPointCache.id

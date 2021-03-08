@@ -4,13 +4,17 @@ import scipy.optimize
 from scipy.ndimage.filters import gaussian_filter
 from skimage import transform as tf
 
+from typing import Any, Callable, List, Optional, Tuple
+
 import pydynamo_brain.util as util
+from pydynamo_brain.model import FullState, Tree, Branch, Point
+from pydynamo_brain.util import Point3D
 
 WARP_MODE = 'edge'
 
 _IMG_CACHE = util.ImageCache()
 
-def centreRotation(shape, T, R):
+def centreRotation(shape: Tuple[int, ...], T: Tuple[float, float], R: float) -> tf.SimilarityTransform:
     (x, y) = shape
     dx, dy = (x - 1) // 2, (y - 1) // 2
     tf_rotate = tf.SimilarityTransform(rotation=R)
@@ -18,13 +22,16 @@ def centreRotation(shape, T, R):
     tf_shift_inv = tf.SimilarityTransform(translation=[dx + T[0], dy + T[1]])
     return tf_shift + tf_rotate + tf_shift_inv
 
-def UINT8_WARP(image, transform):
+def UINT8_WARP(image: np.ndarray, transform: tf.SimilarityTransform) -> np.ndarray:
     assert image.dtype == np.uint8
     warpDouble = tf.warp(image, transform, mode=WARP_MODE)
     assert warpDouble.dtype == np.float64
     return np.round(warpDouble * 255).astype(np.uint8)
 
-def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz=4):
+def recursiveAdjust(
+    fullState: FullState, id: int, branch: Branch, point: Point, pointref: Point,
+    callback: Callable[[int], None], Rxy: int=10, Rz: int=4
+) -> None:
     """
     recursively adjusts points, i.e. the 'R' function
     id       -image on which to adjust (reference is id-1)
@@ -37,6 +44,10 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     Rz       -radius, in z axis, of field to be compared
     """
     newTree = fullState.uiStates[id]._tree
+    if newTree is None:
+        print ("Can't adjust to None tree")
+        return
+
     dLoc = (Rxy, Rxy, Rz)
 
     # extract the 'boxes'; subimages for alignment
@@ -90,7 +101,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
     mX, mY, mZ = np.dstack([Bx] * (2*Rz + 1)), np.dstack([By] * (2*Rz + 1)), np.zeros(oldBox.shape)
     oldBoxShifted = _movePixels(oldBox, mX, mY, mZ)
 
-    bestZ, bestZScore = None, 0
+    bestZ, bestZScore = None, 0.0
     for dZ in range(-Rz, Rz + 1):
         xyNewZ = (xyz[0], xyz[1], xyz[2] + dZ)
         newLocMinZ = util.locationMinus(xyNewZ, dLoc)
@@ -100,11 +111,13 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
             continue
         delta = _imageDifference(oldBoxShifted, newBoxZ)
         score = delta * (6 + abs(dZ) ** 1.1)
-        if bestZ is None or bestZScore > score:
+        if bestZ is None or score < bestZScore:
             bestZ, bestZScore = dZ, score
+    if bestZ is None:
+        bestZ = 0
 
-    shiftX = Bx[Rxy, Rxy]
-    shiftY = By[Rxy, Rxy]
+    shiftX = float(Bx[Rxy, Rxy])
+    shiftY = float(By[Rxy, Rxy])
     shiftZ = bestZ # minIdx - Rz - 1
     shift = (shiftX, shiftY, shiftZ)
     print ("moving by (%.3f, %.3f, %.3f)" % (shiftX, shiftY, shiftZ))
@@ -141,7 +154,7 @@ def recursiveAdjust(fullState, id, branch, point, pointref, callback, Rxy=10, Rz
             recursiveAdjust(fullState, id, branch, branch.points[0], branchRef.points[0], callback)
 
 
-def _recursiveMoveBranch(tree, branch, shift, fromPointIdx=0):
+def _recursiveMoveBranch(tree: Tree, branch: Branch, shift: Point3D, fromPointIdx: int=0) -> None:
     # TODO: make recursiveMovePoint?
     if branch is None: # Root branch
         pointToMove = tree.rootPoint
@@ -156,7 +169,7 @@ def _recursiveMoveBranch(tree, branch, shift, fromPointIdx=0):
                 _recursiveMoveBranch(tree, childBranch, shift)
 
 # Mark all down-tree points (mark as un-registered), and return the number marked
-def _recursiveMark(tree, branch, fromPointIdx=0):
+def _recursiveMark(tree: Tree, branch: Branch, fromPointIdx: int=0) -> int:
     nMarked = 0
     if branch is None:
         points = tree.flattenPoints()
@@ -173,45 +186,46 @@ def _recursiveMark(tree, branch, fromPointIdx=0):
 
 # Get a subvolume if inside the bigger volume.
 # Note that only Z is padded with zeros, XY must fit entirely within.
-def _imageBoxIfInsideXY(volume, channel, fr, to):
+def _imageBoxIfInsideXY(volume: np.ndarray, channel: int, fr: Point3D, to: Point3D) -> Optional[np.ndarray]:
     to = util.locationPlus(to, (1, 1, 1)) # inclusive to exclusive upper bounds
     s = volume.shape # (channels, stacks, x, y)
     volumeXYZ = (s[2], s[3], s[1])
 
     for d in range(2): # Verify the XY box fits inside the volume:
-        if fr[d] < 0 or volumeXYZ[d] < to[d]:
+        if fr[d] < 0.0 or volumeXYZ[d] < to[d]:
             return None
 
     # Figure out how much Z padding is needed...
-    addStart, addEnd = 0, 0
-    if fr[2] < 0:
-        addStart = 0 - fr[2]
-        fr = (fr[0], fr[1], 0)
+    addStart, addEnd = 0.0, 0.0
+    if fr[2] < 0.0:
+        addStart = 0.0 - fr[2]
+        fr = (fr[0], fr[1], 0.0)
     if volumeXYZ[2] < to[2]:
         addEnd = to[2] - volumeXYZ[2]
         to = (to[0], to[1], volumeXYZ[2])
 
-    subVolume = volume[channel, fr[2]:to[2], fr[1]:to[1], fr[0]:to[0]] # ZYX
+    subVolume = volume[channel, int(fr[2]):int(to[2]), int(fr[1]):int(to[1]), int(fr[0]):int(to[0])] # ZYX
 
     # ...and apply the padding:
     dx, dy = subVolume.shape[1], subVolume.shape[2]
     if addStart > 0:
-        subVolume = np.vstack( (np.zeros((addStart, dy, dx)), subVolume) )
+        subVolume = np.vstack( (np.zeros((int(addStart), dy, dx)), subVolume) )
     if addEnd > 0:
-        subVolume = np.vstack( (subVolume, np.zeros((addEnd, dy, dx))) )
+        subVolume = np.vstack( (subVolume, np.zeros((int(addEnd), dy, dx))) )
 
     subVolume = np.moveaxis(subVolume, 0, -1) # YXZ
     return subVolume
 
-
-def _dualRangeExp(n, v, exp=2.0):
+def _dualRangeExp(n: int, v: float, exp:float=2.0) -> List[float]:
     # Given a number of items, return samples in [-v, v]
     # exponentially biassed towards the centre
     secondHalf = list(v * (np.arange(0, 1, 2 / n) ** exp))
     firstHalf = [-v for v in secondHalf[::-1]]
     return firstHalf + secondHalf[1:]
 
-def _registerImages(staticImg, movingImg, Rxy, drawTitle=None):
+def _registerImages(
+    staticImg: np.ndarray, movingImg: np.ndarray, Rxy: float, drawTitle: str=None
+) -> Tuple[np.ndarray, np.ndarray, float, float]:
     assert staticImg.shape == movingImg.shape
     # Make smooth images for histogram and fast affine registration
     staticImgSmooth, movingImgSmooth = staticImg, movingImg
@@ -220,9 +234,9 @@ def _registerImages(staticImg, movingImg, Rxy, drawTitle=None):
         movingImgSmooth = _imgGaussian(movingImg, 0.5)
 
     # Set initial affine parameters
-    params = [0, 0, 0] # tx, ty, r
+    params = [0.0, 0.0, 0.0] # tx, ty, r
 
-    def _affineRegistrationError(params):
+    def _affineRegistrationError(params: List[float]) -> float:
         err = _affineError(params, staticImgSmooth, movingImgSmooth)
         return err
 
@@ -256,11 +270,12 @@ def _registerImages(staticImg, movingImg, Rxy, drawTitle=None):
     for dx in dxys:
         for dy in dxys:
             for r in drs:
-                params = [dx, dy, r]
-                err = _affineRegistrationError(params)
+                checkParams = [dx, dy, r]
+                err = _affineRegistrationError(checkParams)
                 if bestErr is None or err < bestErr:
-                    bestParams, bestErr = params, err
+                    bestParams, bestErr = checkParams, err
 
+    assert bestParams is not None
     params = bestParams # res.x
 
     trans = centreRotation(staticImgSmooth.shape, T=(params[0], params[1]), R=params[2])
@@ -282,8 +297,8 @@ def _registerImages(staticImg, movingImg, Rxy, drawTitle=None):
         title = "Best: %s (score %f)" % (str(params), fval)
         f, (ax1, ax2, ax3) = plt.subplots(1, 3)
         f.suptitle(title)
-        img1 = np.copy(staticImgSmooth.astype(np.float))
-        img2 = np.copy(movingImgSmooth.astype(np.float))
+        img1 = np.copy(staticImgSmooth.astype(float))
+        img2 = np.copy(movingImgSmooth.astype(float))
         img3 = np.copy(UINT8_WARP(movingImgSmooth, trans))
         img1[img1.shape[0] // 2, img1.shape[1] // 2] = 1.0
         img2[img2.shape[0] // 2, img2.shape[1] // 2] = 1.0
@@ -298,10 +313,12 @@ def _registerImages(staticImg, movingImg, Rxy, drawTitle=None):
 
     return Bx, By, angle, fval
 
-def _imgGaussian(img, sigma):
-    return np.round(gaussian_filter(img.astype(np.float), sigma)).astype(np.uint8)
+def _imgGaussian(img: np.ndarray, sigma: float) -> np.ndarray:
+    return np.round(gaussian_filter(img.astype(float), sigma)).astype(np.uint8)
 
-def _affineError(params, staticImg, movingImg, drawTitle=None):
+def _affineError(
+    params: List[float], staticImg: np.ndarray, movingImg: np.ndarray, drawTitle:Optional[str]=None
+) -> float:
     trans = centreRotation(movingImg.shape, T=(params[0], params[1]), R=params[2])
     warpedImg = UINT8_WARP(movingImg, trans)
 
@@ -312,9 +329,9 @@ def _affineError(params, staticImg, movingImg, drawTitle=None):
     if drawTitle is not None:
         f, (ax1, ax2, ax3) = plt.subplots(1, 3)
         f.suptitle(drawTitle + " (error: %.4f)" % fval)
-        img1 = np.copy(staticImg.astype(np.float))
-        img2 = np.copy(movingImg.astype(np.float))
-        img3 = np.copy(warpedImg.astype(np.float))
+        img1 = np.copy(staticImg.astype(float))
+        img2 = np.copy(movingImg.astype(float))
+        img3 = np.copy(warpedImg.astype(float))
         img1[img1.shape[0] // 2, img1.shape[1] // 2] = 1.0
         img2[img2.shape[0] // 2, img2.shape[1] // 2] = 1.0
         img3[img3.shape[0] // 2, img3.shape[1] // 2] = 1.0
@@ -324,24 +341,12 @@ def _affineError(params, staticImg, movingImg, drawTitle=None):
         plt.show()
     return fval
 
-
-def _getTransformationMatrix(params):
-    assert len(params) == 3
-    return _makeTransformationMatrix(params[0:2], params[3])
-
-def _makeTransformationMatrix(t, r):
-    assert len(t) == 2
-    # No scaling, no shear.
-    rotatMatrix = np.array([ [np.cos(r), np.sin(r), 0], [-np.sin(r), np.cos(r), 0], [0, 0, 1]])
-    transMatrix = np.array([ [1, 0, t[0]], [0, 1, t[1]], [0, 0, 1]])
-    return np.matmul(transMatrix, rotatMatrix)
-
-def _imageDifference(fr, to):
+def _imageDifference(fr: np.ndarray, to: np.ndarray) -> float:
     # Squared difference
     delta = (fr.astype(np.int32) - to.astype(np.int32))
-    return np.mean(delta ** 2)
+    return float(np.mean(delta ** 2))
 
-def _movePixels(oldVolume, dX, dY, dZ):
+def _movePixels(oldVolume: np.ndarray, dX: np.ndarray, dY: np.ndarray, dZ: np.ndarray) -> np.ndarray:
     assert oldVolume.shape == dX.shape and oldVolume.shape == dY.shape and oldVolume.shape == dZ.shape
     (nx, ny, nz) = oldVolume.shape
     newVolume = np.zeros(oldVolume.shape)

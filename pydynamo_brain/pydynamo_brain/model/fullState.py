@@ -112,7 +112,7 @@ class FullState:
             self.dotSize += 2
 
     def changeAllZAxis(self, floatDelta: float) -> None:
-        delta: int = int(round(delta))
+        delta: int = int(round(floatDelta))
         if delta == 0:
             return
 
