@@ -2,23 +2,27 @@ import math
 import numpy as np
 import pandas as pd
 
+from typing import Any, Dict, List
 from tqdm import tqdm
 
-# hack
-import matplotlib.pyplot as plt
 
 import pydynamo_brain.util as util
+from pydynamo_brain.model import FullState, Point
 
 _IMG_CACHE = util.ImageCache()
 
 # Given r, return pi.r^2, the area of a circle
-def _radiusToArea(r):
+def _radiusToArea(r: float) -> float:
     return math.pi * r * r
 
-def _averageIntensity(point, image, channel):
+def _averageIntensity(point: Point, image: np.ndarray, channel: int) -> float:
     x, y, z = point.location
     zAt = int(round(z))
     plane = image[channel][zAt]
+
+    r = point.radius
+    if r is None:
+        r = point.radiusFromAncestors()
 
     # HACK - find a better way to do this?
     intensitySum = 0.0
@@ -26,45 +30,15 @@ def _averageIntensity(point, image, channel):
     for r in range(plane.shape[0]):
         for c in range(plane.shape[1]):
             d = util.deltaSz((c + 0.5, r + 0.5, 0), (x, y, 0))
-            if d <= point.radius:
+            if d <= r:
                 intensitySum += 1.0 * plane[r, c]
                 intensityCount += 1
     if intensityCount == 0:
         return np.nan
     return intensitySum / intensityCount / 255.0
 
-"""
-TODO - add back if wanted? Or migrate to tree functions?
-# Provide the number of puncta drawn in each tree.
-def punctaCount(fullState, **kwargs):
-    counts = []
-    for i in range(len(fullState.trees)):
-        if i < len(fullState.puncta):
-            counts.append(len(fullState.puncta[i]))
-        else:
-            counts.append(0)
-    return pd.DataFrame({'punctaCount': counts})
-
-# Provide the size of the puncta in each tree.
-def totalPunctaSize(fullState, **kwargs):
-    totalSizes = []
-    for i in range(len(fullState.trees)):
-        if i < len(fullState.puncta):
-            totalSize = 0
-            for p in fullState.puncta[i]:
-                totalSize += _radiusToArea(p.radius)
-            totalSizes.append(totalSize)
-        else:
-            totalSizes.append(0)
-    return pd.DataFrame({'totalPunctaSize': totalSizes})
-
-# Provide the average intensity of the puncta in each tree.
-def totalPunctaIntensity(fullState, **kwargs):
-    raise Exception("Coming soon: Puncta intensity analysis")
-"""
-
 # Provide the size of each individual puncta across time.
-def perPunctaSize(fullState, punctaIDs, **kwargs):
+def perPunctaSize(fullState: FullState, punctaIDs: List[str], **kwargs: Any) -> pd.DataFrame:
     idToIndex = {}
     for idx, id in enumerate(punctaIDs):
         idToIndex[id] = idx
@@ -72,14 +46,20 @@ def perPunctaSize(fullState, punctaIDs, **kwargs):
     sizes = np.zeros((len(punctaIDs), len(fullState.puncta)))
     for idx, punctaList in enumerate(fullState.puncta):
         for puncta in punctaList:
+            radius = puncta.radius
+            if radius is None:
+                radius = puncta.radiusFromAncestors()
+
             pID = puncta.id
             if pID in idToIndex:
-                sizes[idToIndex[pID], idx] = _radiusToArea(puncta.radius)
+                sizes[idToIndex[pID], idx] = _radiusToArea(radius)
     colNames = [('area_%02d' % (i + 1)) for i in range(len(fullState.puncta))]
     return pd.DataFrame(data=sizes, index=punctaIDs, columns=colNames)
 
 # Provide the average intensity of puncta across time
-def perPunctaIntensity(fullState, punctaIDs, **kwargs):
+def perPunctaIntensity(
+    fullState: FullState, punctaIDs: List[str], **kwargs: Any
+) -> pd.DataFrame:
     print ("Pre-loading images...")
     for imgPath in tqdm(fullState.filePaths):
         _IMG_CACHE.getVolume(imgPath, verbose=False)

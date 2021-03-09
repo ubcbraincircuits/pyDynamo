@@ -123,7 +123,7 @@ class Point():
         return list(reversed(points))
 
     def radiusFromAncestors(self) -> float:
-        """Walks backwards from currtent point until a radius is found.
+        """Walks backwards from current point until a radius is found.
             Returns default value (5) if no Radius is found """
         ancestorRadius: Optional[float] = None
         upTreePoint: Optional[Point] = self

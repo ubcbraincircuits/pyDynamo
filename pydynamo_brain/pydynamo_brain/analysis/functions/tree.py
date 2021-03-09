@@ -1,34 +1,33 @@
 import numpy as np
 import pandas as pd
 
+from typing import Any, List
+
+import pydynamo_brain.analysis as pdAnalysis
 import pydynamo_brain.util as util
 
-from pydynamo_brain.analysis import addedSubtractedTransitioned, TDBL
-from pydynamo_brain.analysis import motility as motilityFunc
-from pydynamo_brain.analysis import sholl
-
-from pydynamo_brain.model import FiloType
+from pydynamo_brain.model import FiloType, FullState
 
 
-MIN_MOTILITY  = 0.1
+MIN_MOTILITY = 0.1
 
 # Provide the number of points in each tree.
-def pointCount(fullState, **kwargs):
+def pointCount(fullState: FullState, **kwargs: Any) -> pd.DataFrame:
     counts = []
     for tree in fullState.trees:
         counts.append(len(tree.flattenPoints()))
     return pd.DataFrame({'pointCount': counts})
 
 # Provide the number of branches in each tree.
-def branchCount(fullState, **kwargs):
+def branchCount(fullState: FullState, **kwargs: Any) -> pd.DataFrame:
     counts = []
     for tree in fullState.trees:
         counts.append(len(tree.branches))
     return pd.DataFrame({'branchCount': counts})
 
 # Provide the number of filo in each tree:
-def filoCount(fullState, **kwargs):
-    filoTypes = addedSubtractedTransitioned(fullState.trees, **kwargs)[0]
+def filoCount(fullState: FullState, **kwargs: Any) -> pd.DataFrame:
+    filoTypes = pdAnalysis.addedSubtractedTransitioned(fullState.trees, **kwargs)[0]
     countInterstitial = np.sum(
         (filoTypes == FiloType.INTERSTITIAL) |
         (filoTypes == FiloType.BRANCH_WITH_INTERSTITIAL)
@@ -44,7 +43,7 @@ def filoCount(fullState, **kwargs):
     })
 
 # Calculate filopodia density (#/mm):
-def filoDensity(fullState, **kwargs):
+def filoDensity(fullState: FullState, **kwargs: Any) -> pd.DataFrame:
     counts = filoCount(fullState, **kwargs)
     # Scale up to per-mm, rather than per-micron
     lengths = tdbl(fullState, **kwargs)['tdbl'] / 1000.0
@@ -55,26 +54,26 @@ def filoDensity(fullState, **kwargs):
     })
 
 # Provide the total dendritic branch length in each tree.
-def tdbl(fullState, **kwargs):
+def tdbl(fullState: FullState, **kwargs: Any) -> pd.DataFrame:
     tdbls = []
     for tree in fullState.trees:
-        tdbls.append(TDBL(tree, **kwargs))
+        tdbls.append(pdAnalysis.TDBL(tree, **kwargs))
     return pd.DataFrame({'tdbl': tdbls})
 
 # X and Y point for the maximal Sholl crossings, fitted using a polynomial
-def shollStats(fullState, **kwargs):
+def shollStats(fullState: FullState, **kwargs: Any) -> pd.DataFrame:
     if 'shollBinSize' not in kwargs:
         raise Exception("Sholl requires shollBinSize to be set")
     binSizeUm = kwargs['shollBinSize']
 
-    maxRadius = 0
+    maxRadius = 0.0
     for tree in fullState.trees:
         maxRadius = max(maxRadius, tree.spatialRadius())
 
     criticalValues, dendriteMaxes = [], []
     for tree in fullState.trees:
-        crossCounts, radii = sholl.shollCrossings(tree, binSizeUm, maxRadius)
-        pCoeff, maxX, maxY = sholl.shollMetrics(crossCounts, radii)
+        crossCounts, radii = pdAnalysis.sholl.shollCrossings(tree, binSizeUm, maxRadius)
+        pCoeff, maxX, maxY = pdAnalysis.sholl.shollMetrics(crossCounts, radii)
         criticalValues.append(maxX)
         dendriteMaxes.append(maxY)
 
@@ -84,14 +83,18 @@ def shollStats(fullState, **kwargs):
     })
 
 # Provide motility added/subtracted/transitioned/extended/retracted counts
-def motility(fullState, **kwargs):
+def motility(fullState: FullState, **kwargs: Any) -> pd.DataFrame:
     trees = fullState.trees
-    nA, nS, nT, nE, nR = [], [], [], [], []
+    nA: List[int] = []
+    nS: List[int] = []
+    nT: List[int] = []
+    nE: List[int] = []
+    nR: List[int] = []
 
     branchIDList = util.sortedBranchIDList(trees)
     _, added, subtracted, transitioned, _, _ = \
-        addedSubtractedTransitioned(trees, **kwargs)
-    motilityValues, _ = motilityFunc(trees, **kwargs)
+        pdAnalysis.addedSubtractedTransitioned(trees, **kwargs)
+    motilityValues, _ = pdAnalysis.motility(trees, **kwargs)
     rawMotility = motilityValues['raw'] # Use raw motility
 
     for treeIdx, treeModel in enumerate(trees):
