@@ -3,17 +3,20 @@ from .baseOptions import BaseOptions
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import Qt
 
-from pydynamo_brain.ui.common import floatOrDefault
+from typing import Any, Callable, Dict
+
 from pydynamo_brain.analysis.functions import tree
+from pydynamo_brain.model import FullState
+from pydynamo_brain.ui.common import floatOrDefault
 
 # Methods without custom options
 
 class PointCountOptions(BaseOptions):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(name, tree.pointCount)
 
 class BranchCountOptions(BaseOptions):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(name, tree.branchCount)
 
 # Methods with custom options
@@ -21,10 +24,12 @@ class BranchCountOptions(BaseOptions):
 
 # Parameters supported are passed to TDBL
 class TDBLOptions(BaseOptions):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(name, tree.tdbl)
 
-    def fillOptionsInner(self, currentState, fullState, formParent):
+    def fillOptionsInner(self,
+        currentState: Dict[str, Any], fullState: FullState, formParent: QtWidgets.QWidget
+    ) -> None:
         self.filoDist = QtWidgets.QLineEdit(formParent)
         self.filoDist.setValidator(QtGui.QDoubleValidator())
         k = 'filoDist'
@@ -46,7 +51,7 @@ class TDBLOptions(BaseOptions):
         self.excludeBasal.setChecked(currentState[k] if k in currentState else True)
         self._addFormRow("Exclude Basal?", self.excludeBasal)
 
-    def readOptions(self):
+    def readOptions(self) -> Dict[str, Any]:
         localOptions = {
             'filoDist': floatOrDefault(self.filoDist, 10.0),
             'includeFilo': self.includeFilo.isChecked(),
@@ -56,7 +61,7 @@ class TDBLOptions(BaseOptions):
         localOptions.update(super().readOptions())
         return localOptions
 
-    def defaultValues(self):
+    def defaultValues(self) -> Dict[str, Any]:
         return {
             'filoDist': 10.0,
             'includeFilo': True,
@@ -66,34 +71,38 @@ class TDBLOptions(BaseOptions):
 
 # These parameters are passed to sholl analysis
 class ShollOptions(BaseOptions):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(name, tree.shollStats)
 
-    def fillOptionsInner(self, currentState, fullState, formParent):
+    def fillOptionsInner(self,
+        currentState: Dict[str, Any], fullState: FullState, formParent: QtWidgets.QWidget
+    ) -> None:
         self.binSize = QtWidgets.QLineEdit(formParent)
         self.binSize.setValidator(QtGui.QDoubleValidator())
         k = 'shollBinSize'
         self.binSize.setText(str(currentState[k]) if k in currentState else '5.0')
         self._addFormRow("Sholl Bin Size (uM)", self.binSize)
 
-    def readOptions(self):
+    def readOptions(self) -> Dict[str, Any]:
         localOptions = {
             'shollBinSize': floatOrDefault(self.binSize, 5.0),
         }
         localOptions.update(super().readOptions())
         return localOptions
 
-    def defaultValues(self):
+    def defaultValues(self) -> Dict[str, Any]:
         return {
             'shollBinSize': 5.0,
         }
 
 # Parameters supported are passed to motility
 class MotilityOptions(BaseOptions):
-    def __init__(self, name, methodToCall=tree.motility):
+    def __init__(self, name: str, methodToCall: Callable=tree.motility) -> None:
         super().__init__(name, methodToCall)
 
-    def fillOptionsInner(self, currentState, fullState, formParent):
+    def fillOptionsInner(self,
+        currentState: Dict[str, Any], fullState: FullState, formParent: QtWidgets.QWidget
+    ) -> None:
         self.filoDist = QtWidgets.QLineEdit(formParent)
         self.filoDist.setValidator(QtGui.QDoubleValidator())
         k = 'filoDist'
@@ -116,7 +125,7 @@ class MotilityOptions(BaseOptions):
         self.excludeBasal.setChecked(currentState[k] if k in currentState else True)
         self._addFormRow("Exclude Basal?", self.excludeBasal)
 
-    def readOptions(self):
+    def readOptions(self) -> Dict[str, Any]:
         localOptions = {
             'filoDist': floatOrDefault(self.filoDist, 10.0),
             'terminalDist': floatOrDefault(self.terminalDist, 10.0),
@@ -126,7 +135,7 @@ class MotilityOptions(BaseOptions):
         localOptions.update(super().readOptions())
         return localOptions
 
-    def defaultValues(self):
+    def defaultValues(self) -> Dict[str, Any]:
         return {
             'filoDist': 10.0,
             'terminalDist': 10.0,
@@ -136,10 +145,10 @@ class MotilityOptions(BaseOptions):
 
 # Filo count & density, same as motility, just different method:
 class FiloCountOptions(MotilityOptions):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__(name, tree.filoCount)
 
 class FiloDensityOptions(MotilityOptions):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         # NOTE: TDBL also called, should get default includeFilo=True
         super().__init__(name, tree.filoDensity)
