@@ -4,10 +4,13 @@ import os
 import pandas as pd
 import tempfile
 
+from typing import Any
+
 import pydynamo_brain.files as files
+from pydynamo_brain.model import FullState, Tree
 
 # Convert a fullState tree model object into a NeuroM neuron, via SWC
-def treeToNeuroM(fullState, tree):
+def treeToNeuroM(fullState: FullState, tree: Tree) -> Any:
     result = None
 
     tmpFileDir = os.path.basename(__file__)
@@ -23,7 +26,7 @@ def treeToNeuroM(fullState, tree):
     return result
 
 # Perform per-tree NeuroM analysis of a collection of trees
-def neuroMAnalysisForNeurons(fullState):
+def neuroMAnalysisForNeurons(fullState: FullState) -> pd.DataFrame:
     result = pd.DataFrame()
     neurons = [treeToNeuroM(fullState, tree) for tree in fullState.trees]
 

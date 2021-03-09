@@ -1,16 +1,18 @@
 import numpy as np
 
+from typing import Any, List, Tuple
+
 import pydynamo_brain.util as util
-from pydynamo_brain.model import FiloType
+from pydynamo_brain.model import Tree, FiloType
 
 def addedSubtractedTransitioned(
-    trees,
-    excludeAxon=True,
-    excludeBasal=True,
-    terminalDist=10,
-    filoDist=10,
-    **kwargs
-):
+    trees: List[Tree],
+    excludeAxon: bool=True,
+    excludeBasal: bool=True,
+    terminalDist: float=10.0,
+    filoDist: float=10.0,
+    **kwargs: Any
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Calculate added/subtracted/transitioned status of all branches across time.
 
     Args:
@@ -44,12 +46,14 @@ def addedSubtractedTransitioned(
 
     for treeIdx, tree in enumerate(trees):
         if trees[treeIdx] is not None and len(trees[treeIdx].branches) > 0: # Skip empty trees
-            for branch in trees[treeIdx].rootPoint.children:
-                branchIdx = branchIDList.index(branch.id)
-                _recursiveFiloTypes(
-                    branchIDList, filoTypes, masterNodes, trees, treeIdx, branchIdx,
-                    excludeAxon, excludeBasal, terminalDist, filoDist
-                )
+            treeRoot = trees[treeIdx].rootPoint
+            if treeRoot is not None:
+                for branch in treeRoot.children:
+                    branchIdx = branchIDList.index(branch.id)
+                    _recursiveFiloTypes(
+                        branchIDList, filoTypes, masterNodes, trees, treeIdx, branchIdx,
+                        excludeAxon, excludeBasal, terminalDist, filoDist
+                    )
 
     filoExists = (filoTypes > FiloType.ABSENT)
     filos = filoExists & (filoTypes < FiloType.BRANCH_ONLY) # NOTE: brackets needed for numpy precendence
@@ -70,14 +74,19 @@ def addedSubtractedTransitioned(
 
     return filoTypes, added, subtracted, transitioned, masterChanged, masterNodes
 
-
-def _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, branchIdx, excludeAxon, excludeBasal, terminalDist, filoDist):
+def _recursiveFiloTypes(
+    branchIDList: List[str], filoTypes: np.ndarray, masterNodes: np.ndarray,
+    trees: List[Tree], treeIdx: int, branchIdx: int,
+    excludeAxon: bool, excludeBasal: bool, terminalDist: float, filoDist: float
+) -> None:
     branch = trees[treeIdx].getBranchByID(branchIDList[branchIdx])
     if branch is None:
         filoTypes[treeIdx][branchIdx] = FiloType.ABSENT
         return
 
-    pointsWithRoot = [branch.parentPoint] + branch.points
+    pointsWithRoot = branch.points
+    if branch.parentPoint is not None:
+        pointsWithRoot = [branch.parentPoint] + pointsWithRoot
 
     # Exclude: 1) empty branches, plus 2) axons and 3) basal dendrites if not needed.
     if branch.isEmpty() or (excludeAxon and branch.isAxon()) or (excludeBasal and branch.isBasal()):
@@ -165,7 +174,7 @@ def _recursiveFiloTypes(branchIDList, filoTypes, masterNodes, trees, treeIdx, br
         masterNodes[treeIdx][branchIdx] = [branchIdx]
 
 
-def fillMasterChanged(masterChanged, masterNodes):
+def fillMasterChanged(masterChanged: np.ndarray, masterNodes: np.ndarray) -> None:
     (nTrees, nBranches) = masterChanged.shape
     for t in range(nTrees):
         for b in range(nBranches):

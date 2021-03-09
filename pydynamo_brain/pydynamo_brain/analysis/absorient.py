@@ -3,8 +3,14 @@ import numpy as np
 
 # http://nghiaho.com/?page_id=671
 
+from typing import Any, List, Tuple
+
+from pydynamo_brain.util import Point3D
+
 # TODO: scaling?
-def absOrient(pointsFrom, pointsTo):
+def absOrient(
+    pointsFrom: List[Point3D], pointsTo: List[Point3D]
+) -> Tuple[List[Tuple[Any, ...]], np.ndarray, np.ndarray]:
     """Minimize ||R*pointsFrom + T - pointsTo||
 
     pointsFrom: list( tuple(x, y, z) )
@@ -44,7 +50,7 @@ def absOrient(pointsFrom, pointsTo):
     fitAsTuples = [tuple(row) for row in fitTo]
     return fitAsTuples, R, T
 
-def quatern2orth(quat):
+def quatern2orth(quat: np.ndarray) -> np.ndarray:
     """
     Map a quaternion to an orthonormal 3D matrix
      R=quatern2orth(quat)

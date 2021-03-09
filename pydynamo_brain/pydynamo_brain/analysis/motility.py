@@ -1,19 +1,21 @@
 import numpy as np
 
+from typing import Any, Dict, List, Tuple
+
 from .addedSubtractedTransitioned import addedSubtractedTransitioned
 from .TDBL import TDBL
 
-from pydynamo_brain.model import FiloType
+from pydynamo_brain.model import Tree, Branch, FiloType
 import pydynamo_brain.util as util
 
-def motility(trees,
-    excludeAxon=True,
-    excludeBasal=True,
-    includeAS=False,
-    terminalDist=10,
-    filoDist=10,
-    **kwargs
-):
+def motility(trees: List[Tree],
+    excludeAxon: bool=True,
+    excludeBasal: bool=True,
+    includeAS: bool=False,
+    terminalDist: float=10.0,
+    filoDist: float=10.0,
+    **kwargs: Any,
+) -> Tuple[Dict[str, np.ndarray], np.ndarray]:
     """Calculate motility of all branches across time.
 
     Args:
@@ -77,17 +79,22 @@ def motility(trees,
     return motilities, filoLengths
 
 
-def _calcFiloLengths(branchIDList, filoLengths, treeIdx, branch, excludeAxon, excludeBasal, filoDist):
+def _calcFiloLengths(
+    branchIDList: List[str], filoLengths: np.ndarray,
+    treeIdx: int, branch: Branch,
+    excludeAxon: bool, excludeBasal: bool, filoDist: float
+) -> None:
     if branch.id not in branchIDList:
-        filoLengths[branchIdx] = 0 # Hmm...shouldn't happen.
-        return 0
+        return
 
     branchIdx = branchIDList.index(branch.id)
-    pointsWithRoot = [branch.parentPoint] + branch.points
+    pointsWithRoot = branch.points
+    if branch.parentPoint is not None:
+        pointsWithRoot = [branch.parentPoint] + pointsWithRoot
 
     # 1) If the branch has not been created yet, or is empty, abort
     if branch.isEmpty():
-        filoLengths[branchIdx] = 0
+        filoLengths[branchIdx] = 0.0
         return
     # 2) If the branch contains an 'axon' label, abort. 3) Same with basal dendrite.
     if (excludeAxon and branch.isAxon()) or (excludeBasal and branch.isBasal()):
