@@ -31,6 +31,11 @@ def tiffRead(path, verbose=True):
         #   but this is no longer supported. Do in ImageJ or similar first!
         stack = np.expand_dims(stack, axis=0)
 
+    if len(shape) == 2:
+        temp_stack = np.zeros((1, shape[0], shape[1]))
+        temp_stack[0, :, :]= stack
+        stack = temp_stack
+        stack = np.expand_dims(stack, axis=0)
     # Should be color, Z, (XY), and # color < # Z
     if stack.shape[0] > stack.shape[1]:
         stack = np.swapaxes(stack, 0, 1)
