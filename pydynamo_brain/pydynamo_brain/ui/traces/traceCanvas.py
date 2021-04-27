@@ -81,6 +81,13 @@ class TraceCanvas(BaseMatplotlibCanvas):
                 yZeros.append(off * perLineOffset)
         yZeros = np.array(yZeros)
 
+        # Plot the stimuli as dashed lined
+        print(tracePaths)
+        stimuli = _TRACE_CACHE.getStim(tracePaths, verbose=False)
+        if stimuli is not None:
+            #print(stimuli)
+            for stim in stimuli:
+                ax.axvline(x=(stim), ls='--', color='white')
 
         # X axis is time
         ax.get_xaxis().set_major_formatter(FuncFormatter(lambda x, pos: "%.2fs" % x))

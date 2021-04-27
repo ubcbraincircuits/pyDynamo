@@ -27,6 +27,28 @@ def loadTraces(path, verbose=False):
         return traces
 
 
+
+    except Exception as e:
+        print ("Error reading file!")
+        print (e)
+        return None
+
+def loadStim(path, verbose=False):
+    try:
+        # Note: NWB HD5 traces are lazily ready, so this IO must remain
+        # open until we actively read all trace data out of file.
+        io = pynwb.NWBHDF5IO(path, 'r+')
+        nwbFile = io.read()
+        if nwbFile.stimulus is not None:
+            for _, value in nwbFile.stimulus.items():
+                if value.timestamps is not None:
+                    stim = list(value.timestamps)
+        else:
+            stim = None
+        return stim
+
+
+
     except Exception as e:
         print ("Error reading file!")
         print (e)
@@ -49,6 +71,27 @@ class TraceCache:
 
     # Maps path string -> map: poi id -> NWB TimeSeries
     _loadedTraces = dict()
+
+    _loadedStim = dict()
+
+    # Returns TimeSeries for POI, possibly loading it first if not yet cached.
+    def getStim(self, tracePaths, loadIfMissing=True, verbose=False):
+        for path in tracePaths:
+            if path not in self._loadedStim and loadIfMissing:
+                stimMap = loadStim(path, verbose)
+                if stimMap is not None:
+                    print('3')
+
+                    self._loadedStim[path] = stimMap
+                    print('StimMap: ', stimMap)
+                else:
+                    self._loadedStim[path] = None
+
+            if path in self._loadedStim:
+                return self._loadedStim[path]
+
+        # Not found :(
+        return None
 
     # Returns TimeSeries for POI, possibly loading it first if not yet cached.
     def getTraceForPOI(self, tracePaths, pointID, loadIfMissing=True, verbose=False):
