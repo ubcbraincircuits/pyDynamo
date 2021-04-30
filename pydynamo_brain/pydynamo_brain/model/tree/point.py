@@ -3,6 +3,7 @@ from __future__ import annotations
 .. module:: tree
 """
 import attr
+import math
 import numpy as np
 
 from typing import List, Optional, TYPE_CHECKING
@@ -162,3 +163,16 @@ class Point():
                 childDist = tree.spatialDist(self, cPoint) + cPoint.longestDistanceToLeaf()
                 longestDist = max(longestDist, childDist)
         return longestDist
+
+    def returnWorldRadius(self, fullState) -> float:
+        """Returns world radius value of point or Zero if there is no radius.
+        :returns: (worldRadius)
+        """
+        if self.radius is not None:
+            xScale, yScale, _ = fullState.projectOptions.pixelSizes
+            scaleFactor = math.sqrt(xScale*yScale)
+            worldRadius = self.radius * scaleFactor
+        else:
+            worldRadius = 0
+
+        return worldRadius

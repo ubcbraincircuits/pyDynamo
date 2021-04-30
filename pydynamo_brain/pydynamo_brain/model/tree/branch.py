@@ -181,7 +181,9 @@ class Branch():
         :returns: (totalLength, totalLength to last branch)
         """
         pointsWithRoot = self.pointsWithParentIfExists()[fromIdx:]
-
+        parentRadius = 0
+        if pointsWithRoot[0].isRoot() == False:
+            parentRadius = pointsWithRoot[0].returnWorldRadius(self._parentTree._fullState())
         x, y, z = self._parentTree.worldCoordPoints(pointsWithRoot)
         lastBranchPoint = _lastPointWithChildren(pointsWithRoot)
         totalLength, totalLengthToLastBranch = 0.0, 0.0
@@ -190,6 +192,7 @@ class Branch():
             totalLength += edgeDistance
             if i < lastBranchPoint:
                 totalLengthToLastBranch += edgeDistance
+        totalLength = totalLength-parentRadius
         return totalLength, totalLengthToLastBranch
 
     def cumulativeWorldLengths(self) -> List[float]:
