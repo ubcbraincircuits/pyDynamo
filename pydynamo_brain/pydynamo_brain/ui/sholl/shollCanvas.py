@@ -1,3 +1,6 @@
+import matplotlib
+import matplotlib.pyplot as plt
+
 import numpy as np
 import numpy.polynomial.polynomial as npPoly
 
@@ -10,80 +13,57 @@ GREY_COLOUR   = (0.75, 0.75, 0.75, 0.75)
 
 # Draws a dendritic tree in 3D space that can be rotated by the user.
 class ShollCanvas(BaseMatplotlibCanvas):
-    TREE_COUNT = 3
-    FIT_DEGREE = 7
 
-    def __init__(self, parent, fullState, firstTreeIdx, treeModels, filePaths, *args, **kwargs):
+    def __init__(self, parent, fullState, treeModels, *args, **kwargs):
+
         self.treeModels = treeModels
-        self.filePaths = filePaths
-        self.vizTreeCount = min(len(treeModels), self.TREE_COUNT)
-        self.firstTree = max(0, min(len(treeModels) - self.vizTreeCount, firstTreeIdx))
-
-        maxRadius = 0
-        for tree in treeModels:
-            maxRadius = max(maxRadius, tree.spatialRadius())
-        maxRadius += 1e-9 # exclusive -> inclusive(ish)
-
+        self.fullState = fullState
+        self.shollViewWindow = parent
         analysisOpt = fullState.projectOptions.analysisOptions
         self.binSizeUm = analysisOpt['shollBinSize'] if 'shollBinSize' in analysisOpt else 5.0
 
-        self.maxCount = 0
-        self.shollResults = []
-        for tree in treeModels:
-            crossCounts, radii = shollCrossings(tree, self.binSizeUm, maxRadius)
-            pCoeff, maxX, maxY = shollMetrics(crossCounts, radii)
-            self.shollResults.append((crossCounts, radii, pCoeff, maxX, maxY))
-            self.maxCount = max(self.maxCount, np.max(crossCounts))
+        super(ShollCanvas, self).__init__(parent, *args, in3D=False, **kwargs)
 
-        super(ShollCanvas, self).__init__(*args, subplots=self.vizTreeCount, **kwargs)
-        self.fig.subplots_adjust(top=0.95, bottom=0.05, right=0.95, left=0.05, wspace=0.05, hspace=0.05)
+        self.fig.subplots_adjust(top=0.95, bottom=0.2, right=0.95, left=0.2, wspace=0.05, hspace=0.05)
 
 
     def compute_initial_figure(self):
-        for offset, ax in enumerate(self.axes):
-            treeIdx = self.firstTree + offset
-            ax.set_title(util.createTitle(treeIdx, self.filePaths[treeIdx]))
-            ax.set_facecolor("white")
-            ax.set_ylim(0, 1.1 * self.maxCount)
-            ax.set_xlabel("Radius (uM)")
-            if offset == 0:
-                ax.set_ylabel("Intersection count")
-            else:
-                ax.get_yaxis().set_visible(False)
-            self.drawSingleTreeSholl(ax, treeIdx)
+        ax  = self.axes[0]
+        cmap = matplotlib.cm.get_cmap('viridis')
 
-    # Given one tree, draw sholl data for that tree
-    def drawSingleTreeSholl(self, ax, treeIdx):
-        counts, xs, pCoeff, maxX, maxY = self.shollResults[treeIdx]
-        bounds = [np.min(xs), np.max(xs)]
-        hdPolyX = np.arange(bounds[0], bounds[1], (bounds[1]-bounds[0]) / 1000)
+        BIN_SZ_UM =  self.binSizeUm
 
-        ax.bar(xs, counts, width=(self.binSizeUm * 0.8), color='b', alpha=0.5, zorder=1)
-        ax.plot(hdPolyX, npPoly.polyval(hdPolyX, pCoeff).clip(min=0), color='b', zorder=2)
-        ax.scatter(maxX, maxY, c='r', zorder=3)
+        MAX_RAD_UM = 0
+        for tree in self.treeModels:
+            if tree.spatialRadius() > MAX_RAD_UM:
+                MAX_RAD_UM = tree.spatialRadius()
+        MAX_RAD_UM += BIN_SZ_UM
+
+        n = len(self.treeModels)
+
+        stacked = []
+
+        for i, tree in enumerate(self.treeModels):
+            count, rad = shollCrossings(tree, BIN_SZ_UM, MAX_RAD_UM)
+            stacked.append(count)
+            ax.plot(rad, count, ':x', c=cmap(i/n), alpha=0.5, lw=1, zorder=1)
+
+        combined = np.array(stacked)
+        mean = np.mean(combined, axis=0)
+        err = np.std(combined, axis=0)
+        ax.errorbar(rad, mean, yerr=err, c='k', lw=2, elinewidth=2, capsize=2, zorder=2)
+
+        ax.set_xlabel("Distance from Soma (μm)", fontsize=18)
+        ax.set_ylabel("Crossing count (#)", fontsize=18)
+        ax.tick_params(axis='both', labelsize=16)
+        legend_labels = []
+        for tree in self.treeModels:
+            legend_labels.append("Tree {}".format(self.treeModels.index(tree)))
+        ax.legend(legend_labels)
 
     def needToUpdate(self):
         for ax in self.axes:
             ax.cla()
+
         self.compute_initial_figure()
         self.draw()
-
-    def canPrev(self):
-        return self.firstTree > 0
-
-    def canNext(self):
-        return self.firstTree < len(self.treeModels) - self.TREE_COUNT
-
-    def previous(self, toEnd):
-        endIdx = 0
-        nextIdx = endIdx if toEnd else max(self.firstTree - 1, endIdx)
-        if nextIdx != self.firstTree:
-            self.firstTree = nextIdx
-            self.needToUpdate()
-
-    def next(self, toEnd):
-        endIdx = len(self.treeModels) - self.TREE_COUNT
-        nextIdx = endIdx if toEnd else min(self.firstTree + 1, endIdx)
-        if nextIdx != self.firstTree:
-            self.firstTree = nextIdx
-            self.needToUpdate()

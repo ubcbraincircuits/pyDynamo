@@ -398,8 +398,7 @@ class TopMenu():
             return
 
         infoBox = createAndShowInfo("Calculating Sholl...", self.stackWindow)
-        ShollViewWindow(parent, parent.fullState, self.stackWindow.windowIndex,
-            parent.fullState.trees, parent.fullState.filePaths).show()
+        ShollViewWindow(parent, parent.fullState, parent.fullState.trees).show()
         infoBox.hide()
 
     # Help menu callbacks:
