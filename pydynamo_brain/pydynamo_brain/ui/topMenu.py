@@ -7,6 +7,7 @@ from pydynamo_brain.util.testableFilePicker import getOpenFileName
 
 from .common import createAndShowInfo
 from .motility.motility3DViewWindow import Motility3DViewWindow
+from .motility.overlayViewWindow import OverlayViewWindow
 from .registration.registration3DViewWindow import Registration3DViewWindow
 from .sholl.shollViewWindow import ShollViewWindow
 from .tree3D.tree3DViewWindow import Tree3DViewWindow
@@ -119,6 +120,7 @@ class TopMenu():
         inAppAnalysisSubmenu = analysisMenu.addMenu("Visualization")
         inAppAnalysisSubmenu.addAction('3D Morphometrics', lambda: self.viewMorphometrics(False), QtCore.Qt.Key_M)
         inAppAnalysisSubmenu.addAction('2D Morphometrics dendrograms', lambda: self.viewMorphometrics(True))
+        inAppAnalysisSubmenu.addAction('Timepoint Overlay', self.viewOverlay, QtCore.Qt.Key_O)
         inAppAnalysisSubmenu.addAction('Sholl graphs', self.viewSholl)
 
         menuBar.addMenu(analysisMenu)
@@ -399,6 +401,19 @@ class TopMenu():
 
         infoBox = createAndShowInfo("Calculating Sholl...", self.stackWindow)
         ShollViewWindow(parent, parent.fullState, parent.fullState.trees).show()
+        infoBox.hide()
+
+    def viewOverlay(self):
+        parent = self._global()
+        if len(parent.fullState.trees) == 1:
+            print ("Need at least two images for to overlay")
+            return
+        if self.stackWindow.windowIndex == 0:
+            print ("No previous timepoint for this window")
+            return
+
+        infoBox = createAndShowInfo("Creating Overlay...", self.stackWindow)
+        OverlayViewWindow(parent, parent.fullState, self.stackWindow.windowIndex).show()
         infoBox.hide()
 
     # Help menu callbacks:
