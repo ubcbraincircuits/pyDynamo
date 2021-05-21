@@ -36,15 +36,18 @@ def _nCrossings(tree: Tree, rad: float) -> int:
         return 0
 
     crosses = 0
-    for point in tree.flattenPoints():
-        if point.isRoot():
-            continue
-        pointBefore = point.nextPointInBranch(delta=-1, noWrap=False)
-        if pointBefore is None:
-            continue
-        if _lineSegmentCrossRadius(tree, point, pointBefore, tree.rootPoint, rad):
-            crosses += 1
-    return crosses
+    if rad == 0:
+        return crosses
+    else:
+        for point in tree.flattenPoints():
+            if point.isRoot():
+                continue
+            pointBefore = point.nextPointInBranch(delta=-1, noWrap=False)
+            if pointBefore is None:
+                continue
+            if _lineSegmentCrossRadius(tree, point, pointBefore, tree.rootPoint, rad):
+                crosses += 1
+        return crosses
 
 # Calculate sholl properties for a tree
 def shollCrossings(tree: Tree, binSizeUm: float, maxRadius: float) -> Tuple[np.ndarray, np.ndarray]:

@@ -54,7 +54,7 @@ class ShollCanvas(BaseMatplotlibCanvas):
         ax.errorbar(rad, mean, yerr=err, c='k', lw=2, elinewidth=2, capsize=2, zorder=2)
 
         ax.set_xlabel("Distance from Soma (μm)", fontsize=18)
-        ax.set_ylabel("Crossing count (#)", fontsize=18)
+        ax.set_ylabel("Intersections", fontsize=18)
         ax.tick_params(axis='both', labelsize=16)
         legend_labels = []
         for tree in self.treeModels:
