@@ -6,6 +6,7 @@ from pydynamo_brain.ui.dendrogram import calculateAllPositions
 import pydynamo_brain.util as util
 
 GREY_COLOUR   = (0.75, 0.75, 0.75, 1.00)
+TREE_COLOUR   = (0.60, 0.60, 0.60, 1.00)
 ADDED_COLOR   = (0.00, 1.00, 0.00, 0.75)
 TRANS_COLOR   = (0.00, 0.00, 0.00, 0.00) # Not shown ?! TODO: verify
 GROW_COLOR    = (0.00, 1.00, 1.00, 0.75)
@@ -87,10 +88,10 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                 if self.dendrogram:
                     x = [denX[p.id] for p in points]
                     y = [denY[p.id] for p in points]
-                    ax.plot(x, y, c=GREY_COLOUR)
+                    ax.plot(x, y, c=TREE_COLOUR)
                 else:
                     x, y, z = treeModel.worldCoordPoints(points)
-                    ax.plot(x, y, z, c=GREY_COLOUR) # TODO - draw axon differently?
+                    ax.plot(x, y, z, c=TREE_COLOUR) # TODO - draw axon differently?
 
             # Draw filo for each branch:
             if treeIdx > 0:
@@ -197,7 +198,7 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
             if treeModel.rootPoint is not None:
                 if not self.dendrogram:
                     x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
-                    ax.scatter(x, y, z, c=[GREY_COLOUR], s=350)
+                    ax.scatter(x, y, z, c=[TREE_COLOUR], s=350)
 
             # Make equal aspect ratio:
             if not self.dendrogram:
