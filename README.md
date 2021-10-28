@@ -8,7 +8,7 @@ Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics
 Providing you have a version of python 3+, this library can be installed directly from github using pip:
 ```
 conda create --name dynamoEnv
-source activate dynamoEnv
+conda activate dynamoEnv
 conda install pip git
 pip install --upgrade "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
 ```
