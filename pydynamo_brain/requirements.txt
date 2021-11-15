@@ -1,6 +1,7 @@
 attrs
 matplotlib
 napari
+neurom
 numpy
 pandas
 pynwb
