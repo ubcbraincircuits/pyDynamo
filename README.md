@@ -11,6 +11,7 @@ conda create --name dynamoEnv
 conda activate dynamoEnv
 conda install pip git
 pip install --upgrade "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
+pip install --upgrade "git+https://github.com/padster/pyNeuroTrace#egg=pyneurotrace&subdirectory=pyneurotrace"
 ```
 Once installed, it can be run by the following command, and optionally given a file to open:
 ```
