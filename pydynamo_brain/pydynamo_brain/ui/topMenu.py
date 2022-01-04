@@ -57,8 +57,10 @@ class TopMenu():
 
         dmo(editMenu.addAction('&Replace parent', self.reparent, QtCore.Qt.CTRL + QtCore.Qt.Key_R))
         dmo(editMenu.addAction('Set as primary &branch', self.primaryBranch, QtCore.Qt.CTRL + QtCore.Qt.Key_B))
-        dmo(editMenu.addAction('Clean up all primary &branches in all stacks',
+        dmo(editMenu.addAction('Clean up all primary &branches by length in all stacks',
             self.allPrimaryBranches, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_B))
+        dmo(editMenu.addAction('Clean up all primary &branches by angle in all stacks',
+            self.allPrimaryBranchesMinAng, QtCore.Qt.CTRL + QtCore.Qt.ALT + QtCore.Qt.Key_B))
         dmo(editMenu.addAction('Clean branch &IDs from first point in all stacks',
             self.cleanBranchIDs, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_I))
         dmo(editMenu.addAction('Remove empty branches from all stacks',
@@ -248,6 +250,10 @@ class TopMenu():
 
     def allPrimaryBranches(self):
         self._global().updateAllPrimaryBranches(self.stackWindow)
+        self._global().redrawAllStacks(self.stackWindow)
+
+    def allPrimaryBranchesMinAng(self):
+        self._global().updateAllBranchesMinimalAngle(self.stackWindow)
         self._global().redrawAllStacks(self.stackWindow)
 
     def cleanBranchIDs(self):

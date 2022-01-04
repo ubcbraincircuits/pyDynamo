@@ -241,6 +241,44 @@ class Tree():
             if len(childBranch.points) > 0:
                 self.updateAllPrimaryBranches(childBranch.points[0])
 
+    def updateAllBranchesMinimalAngle(self, point: Optional[Point]=None) -> None:
+        """For all branching points, continue the parent branch with small angle at bifurications"""
+
+        def _lreturnTriple(point, nextPoint=None):
+            if nextPoint==None:
+                nextPoint = point.nextPointInBranch(noWrap=True)
+            pointBefore = point.nextPointInBranch(delta=-1, noWrap=True)
+            if pointBefore is not None:
+                triple=(pointBefore, point, nextPoint)
+            return triple
+
+        def _lreturnBranchAngle(tree, point,  nextPoint=None):
+            triple = _lreturnTriple(point,  nextPoint)
+            if not all(triple):
+                return 0
+            else:
+                xs, ys, zs = tree.worldCoordPoints(list(triple))
+                worldAt = [np.array([x, y, z]) for x, y, z in zip(xs, ys, zs)]
+                AB, BC = worldAt[1] - worldAt[0], worldAt[2] - worldAt[1]
+
+                cosAngle = np.dot(AB, BC) / (np.linalg.norm(AB) * np.linalg.norm(BC))
+                angle = np.abs(np.arccos(cosAngle))
+                return angle
+
+        # List of all points which are branch parents
+        parent_points = []
+        for branch in self.branches:
+            if branch.parentPoint.isRoot() == False:
+                if len(branch.parentPoint.children) > 0:
+                    parent_points.append(branch.parentPoint.id)
+
+        # Check the branch angles at bifurications and reparent
+        for point_id in parent_points:
+            point = self.getPointByID(point_id)
+            if _lreturnBranchAngle(self, point) > _lreturnBranchAngle(self, point, point.children[0].points[0]):
+                self.continueParentBranchIfFirst(point.children[0].points[0])
+
+
     def cleanBranchIDs(self) -> None:
         """For all branches, set the ID of the branch to its first point's ID.
 

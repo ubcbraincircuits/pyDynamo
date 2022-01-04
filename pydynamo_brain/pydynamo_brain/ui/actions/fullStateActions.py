@@ -222,6 +222,13 @@ class FullStateActions():
             tree.updateAllPrimaryBranches()
         self.branchToColorMap.initFromFullState(self.state)
 
+    def updateAllBranchesMinimalAngle(self):
+        """For each branch point, make the 'primary' branch with minimal branch deviation."""
+        self.history.pushState()
+        for i, tree in enumerate(self.state.trees):
+            tree.updateAllBranchesMinimalAngle()
+        self.branchToColorMap.initFromFullState(self.state)
+
     def cleanBranchIDs(self):
         """For each branch, set the branch ID to the ID of the first point along it."""
         self.history.pushState()
