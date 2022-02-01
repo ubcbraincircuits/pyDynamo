@@ -51,3 +51,10 @@ Currently analysis is done purely visually (i.e. 'M' or '3'), but as requirement
 ## Errors
 As pyDynamo is currently pre-release and under active development, it may also still crash occasionally.
 If this happens, let me know and I should be able to fix it - more error details should also be visible from the commandline in which the original `python dynamo.py` was run.
+
+## Acknowledgement & Referencing
+Development of pyDynamo is supported by funding from a Canadian Institutes of Health Research (CIHR)
+Foundation Award (FDN-148468) and the [Canadian Open Neuroscience Platform](https://conp.ca/).
+pyDynamo has the research resource identifier [RRID: SCR_017541](https://scicrunch.org/resources/Any/search?q=SCR_017541&l=SCR_017541)
+
+
