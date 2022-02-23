@@ -1,7 +1,6 @@
 attrs
 matplotlib
 napari
-morphio==3.3.2
 numpy
 pandas
 pynwb
