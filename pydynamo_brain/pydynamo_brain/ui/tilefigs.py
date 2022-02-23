@@ -36,6 +36,6 @@ def tileFigs(stackWindows):
             if idx < nfigs:
                 figlft = (col + 1) * hspc + col * figwid
                	figtop = row * medspc + topspc + row * fighgt
-                stackWindows[idx].resize(figwid, fighgt)
-                stackWindows[idx].move(figlft, figtop)
+                stackWindows[idx].resize(int(figwid), int(fighgt))
+                stackWindows[idx].move(int(figlft), int(figtop))
                 stackWindows[idx].redraw()
