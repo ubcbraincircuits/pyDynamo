@@ -2,7 +2,6 @@ attrs
 matplotlib
 napari
 morphio==3.3.2
-neurom
 numpy
 pandas
 pynwb
