@@ -48,9 +48,11 @@ def parseMatlabTree(fullState, saveState, removeOrphanBranches=True):
             )
 
             # ... and remove first point as it is duplicated data from parent:
+
             rootPoint = branch.points[0]
             branch.removePointLocally(rootPoint)
             branch.setParentPoint(rootPoint)
+            branch.points[0].annotation = str(i)
             if i == 0: # First branch is special, as first node is tree root
                 tree.rootPoint = rootPoint
                 tree.rootPoint.parentBranch = None
