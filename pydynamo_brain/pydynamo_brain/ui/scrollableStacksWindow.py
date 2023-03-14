@@ -37,7 +37,7 @@ class ScrollableStacksWindow(QtWidgets.QMainWindow):
         screenWidth = QtWidgets.QDesktopWidget().availableGeometry().width()
         scaleFactor = 1.0 # Compensate for title/padding to plots
         treesShown = min(self.nTrees, treesShown)
-        self.resize(screenWidth, screenWidth / treesShown * scaleFactor)
+        self.resize(int(screenWidth), int(screenWidth / treesShown * scaleFactor))
         self.updateButtons()
 
         # Set up menu

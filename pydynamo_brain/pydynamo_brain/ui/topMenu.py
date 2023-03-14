@@ -49,6 +49,11 @@ class TopMenu():
         editMenu.addAction('Find', self.find, QtCore.Qt.CTRL + QtCore.Qt.Key_F)
         editMenu.addSeparator()
 
+        autotracingSubmenu = editMenu.addMenu("Tracing")
+        dmo(autotracingSubmenu.addAction('Trace Tectal Neuron',
+             self.traceTectalNeuron))
+
+
         annotationSubmenu = editMenu.addMenu("Annotate")
         dmo(annotationSubmenu.addAction('Selected point on current stack',
             self.annotateThis, QtCore.Qt.Key_Q))
@@ -203,6 +208,9 @@ class TopMenu():
         if okPressed:
             self._global().findByID(pointOrBranchID, self.stackWindow)
 
+    def traceTectalNeuron(self):
+        self._local().traceTectalNeuron(self.stackWindow.windowIndex)
+    
     def annotateThis(self):
         self._global().fullActions.getAnnotation(
             self.stackWindow.windowIndex, self.stackWindow, False
