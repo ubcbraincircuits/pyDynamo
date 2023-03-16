@@ -4,7 +4,7 @@ from skimage.measure import label
 from skimage.filters import sobel
 from skimage.morphology import skeletonize_3d, dilation, erosion, remove_small_objects
 from skimage.segmentation import watershed, random_walker
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import NearestNeighbors, KDTree
 
 from scipy.ndimage import center_of_mass
 
@@ -25,6 +25,7 @@ class TectalTracing():
         self.state = fullState
         self.history = history
         self.branchToColorMap = BranchToColorMap()
+        self.epislon_val = 1.2
 
 
     def segmentedSkeleton(self, img2skel):
@@ -70,16 +71,18 @@ class TectalTracing():
 
             return end_points, y_points
     
-    def _returnBranchPoints (self, skelFragment, skellID=1, factor=1.2):
-        skellID = np.where(skelFragment==skellID)
-        points  = list(zip(skellID[0], skellID[1]))
+    def _returnBranchPoints (self, skelFragment, skellID=1, ):
+        factor = self.epislon_val
+        points = np.where(skelFragment==skellID)
+        points = np.array(points)
+        points = [[_i[0], _i[1]] for _i in zip(points [0, :], points[1, :])]
         allPointTree = KDTree(points)
         sortedAllPoints = np.zeros_like(points)
         
         for i, c in enumerate(allPointTree.query(np.array(points[0]).reshape(1, -1), k=len(points))[1][0]):
             sortedAllPoints[i, : ] = points[c]
 
-        reducedpoints = DouglasPeucker(sortedAllPoints, factor)
+        reducedpoints = douglasPeucker(sortedAllPoints, factor)
 
 
         pointArray = np.array(reducedpoints)
@@ -95,17 +98,11 @@ class TectalTracing():
     def generateTree(self, somaCenter, branchData):
         newTree = Tree()
         newTree._parentState = self.state.uiStates[0]
-        #print(self.state.trees)
-
-        #self.state.uiStates[0].addPointToNewBranchAndSelect(somaCenter)
         
-        # Create first branch in the tree
-        
+        # Root the tree
         somaCenter = list(somaCenter)
-
         somaCenter[0] = somaCenter[0]*5
         somaCenter = np.round(somaCenter)
-        # Root the tree
         somaPoint =  Point(
                             id ='root',
                             location = tuple((somaCenter[2]*1.0, somaCenter[1]*1.0, somaCenter[0]/5.0))
@@ -114,12 +111,10 @@ class TectalTracing():
 
         newTree.rootPoint = somaPoint
         newTree.rootPoint.parentBranch = None                        
-        
-        
-
-
+   
         _pointNum = 1
         _branchNum = 1
+
         # Loop over other basal branches
         _endPoints = branchData.copy()
         _matchedPath = [] 
@@ -190,7 +185,7 @@ class TectalTracing():
                 nbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(_endPoints)
                 if firstPoint:
                     distances, indices = nbrs.kneighbors(np.array(somaCenter).reshape(1, -1))
-
+                    
                    
                     path.append(_endPoints[indices[0][0]])
                     _currentPoint = _endPoints[indices[0][0]]
@@ -199,8 +194,9 @@ class TectalTracing():
                     distances, _parentNode = _parentNbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
                     _parentPoints.append(_treeSearchSpace[_parentNode[0][0]])
                     _endPoints.pop(indices[0][0])
-                    
+                        
                     firstPoint = False
+
 
                 else:
                     if len(_endPoints)>3:
@@ -258,8 +254,8 @@ class TectalTracing():
         soma = pixelClasses[0,:,:,:].copy()
         soma[pixelClasses[0,:,:,:]!=1]=0
         soma = np.array(soma, bool)
-        # Filter out small false positive pixels
 
+        # Filter out small false positive pixels
         soma = remove_small_objects(soma,250, connectivity=2)
 
         dendrites = np.zeros_like(pixelClasses[0,:,:,:])
@@ -306,13 +302,12 @@ class TectalTracing():
                             plane[plane>0]=1
                             points = np.where(plane==1)
                             
-                            points, junctions = self.findEndsAndJunctions(points, plane)
                             if len(points)>1:
                                 for point in points:
                                     _endPoints.append((z, point[1], point[0]))
                                 
                                 branches[branch_key] = _endPoints
-                                allPoints[branch_key] = _returnBranchPoints(self, plane)
+                                allPoints[branch_key] = self._returnBranchPoints(plane)
                                 branch_key += 1
                                 
                                 
@@ -324,12 +319,13 @@ class TectalTracing():
                                 branch_key += 1
 
                         
-                    else:   
+                    else:
+     
                         if len(points)>1:
                             for point in points:
                                 _endPoints.append((z, point[1], point[0]))
                             branches[branch_key] = _endPoints
-                            allPoints[branch_key] = _returnBranchPoints(self, plane)
+                            allPoints[branch_key] = self._returnBranchPoints(plane)
                             branch_key += 1
                         else:
                             for point in points:
@@ -339,17 +335,6 @@ class TectalTracing():
                             branch_key += 1
         
 
-        """branchConstructor = {}
-        for key in allPoints.keys():
-
-            if len(allPoints[key])>2:
-                print("Multipoint Branch")
-                branchConstructor[key] = []
-                for _pointcoord in allPoints[key]:
-                    _tempTuple = (branches[key][0][0], _pointcoord[0], _pointcoord[1])
-                    branchConstructor[key].append(_tempTuple)
-            else:
-                branchConstructor[key] = branches[key]"""
 
         for key in allPoints.keys():
             allPoints[key]
@@ -365,15 +350,7 @@ class TectalTracing():
                 # TODO pull in project XYZ scale
                 allPoints3D.append((allPoints[key][i,0], allPoints[key][i,1], allPoints[key][i,2]))
         
-        """        # Find parent points
-        branchParents = {}
-        for key in allPoints.keys():
-            _tempBranch = [(_array[0],  _array[1], _array[2]) for _array in allPoints[key]]
-            temp = list(set(allPoints3D).difference(_tempBranch))
-            _nbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(temp)
-            _, _index = _nbrs.kneighbors(allPoints[key][0].reshape(1, -1))
-            branchParents[key] = temp[_index[0][0]]
-        """
+
         
         
         SOMA_POINT = center_of_mass(soma)

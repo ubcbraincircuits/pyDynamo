@@ -117,6 +117,7 @@ def douglasPeucker(PointList, epsilon):
         PointList: list of (x,y) tuples
         epsilon
     """
+    
     pointArray = np.array(PointList)
     dmax =0
     index = 0
@@ -133,10 +134,9 @@ def douglasPeucker(PointList, epsilon):
             dmax = d
 
     results = []
-
     if dmax > epsilon:
-        recResults1 = DouglasPeucker(pointArray[:index], epsilon)
-        recResults2 = DouglasPeucker(pointArray[index:end], epsilon)
+        recResults1 = douglasPeucker(pointArray[:index], epsilon)
+        recResults2 = douglasPeucker(pointArray[index:end], epsilon)
         results.extend(recResults1)
         results.extend(recResults2)
     else:
