@@ -9,3 +9,10 @@ scikit-image
 scipy >= 1.2.0
 tifffile
 tqdm
+torchio
+patchify
+tensorflow
+scikit-learn
+monai
+torchvision
+torch
