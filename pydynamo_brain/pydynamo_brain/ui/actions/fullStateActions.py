@@ -4,9 +4,7 @@ from PyQt5 import QtWidgets
 
 from .punctaActions import PunctaActions
 from .radiiActions import RadiiActions
-
-
-from pydynamo_brain.ui.actions.unet.tectalTracing import TectalTracing
+from .unet.tectalTracing import TectalTracing
 
 from pydynamo_brain.analysis import absOrient
 from pydynamo_brain.model import PointMode
