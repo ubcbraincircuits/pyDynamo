@@ -266,7 +266,7 @@ class QtImageViewer(QGraphicsView):
 
     def toSceneDist(self, pixelDistX, pixelDistY):
         mappedA = self.mapToScene(0, 0)
-        mappedB = self.mapToScene(pixelDistX, pixelDistY)
+        mappedB = self.mapToScene(int(pixelDistX), int(pixelDistY))
         dX, dY = mappedB.x() - mappedA.x(), mappedB.y() - mappedA.y()
         return dX, dY
 
