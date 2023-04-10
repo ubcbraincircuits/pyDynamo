@@ -2,6 +2,7 @@ attrs
 matplotlib
 napari
 numpy
+onnxruntime
 pandas
 pynwb
 PyQt5
