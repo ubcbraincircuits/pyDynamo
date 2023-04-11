@@ -17,4 +17,5 @@ tensorflow
 scikit-learn
 monai
 torchvision
+threadpoolctl >= 3.0.0
 torch
