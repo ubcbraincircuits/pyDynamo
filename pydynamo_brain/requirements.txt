@@ -1,7 +1,7 @@
 attrs
 matplotlib
 napari
-numpy
+numpy == 1.23.0
 onnxruntime
 pandas
 pynwb
