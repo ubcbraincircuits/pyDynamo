@@ -169,7 +169,7 @@ class DynamoWindow(QtWidgets.QMainWindow):
         dirPath = QtWidgets.QFileDialog.getExistingDirectory(self,
             "Folder for SWC files", ""
         )
-        if dirPath is not None and dirPath is not '':
+        if dirPath != None and dirPath != '':
             for path, tree in zip(self.fullState.filePaths, self.fullState.trees):
                 childPath = os.path.basename(path)
                 childPath = childPath.replace(".tif", "").replace(".tiff", "").replace(".mat", "")
