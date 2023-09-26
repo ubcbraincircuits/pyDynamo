@@ -1,0 +1,2 @@
+include pydynamo_brain/pydynamo_brain/ui/actions/unet/*
+recursive-include src *.py *.path *.onnx 

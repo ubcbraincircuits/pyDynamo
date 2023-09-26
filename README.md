@@ -7,11 +7,11 @@ Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics
 
 Providing you have a version of python 3+, this library can be installed directly from github using pip:
 ```
-conda create --name dynamoEnv
+conda create -n dynamoEnv python=3.10 anaconda
 conda activate dynamoEnv
 conda install pip git
-pip install --upgrade "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
-pip install --upgrade "git+https://github.com/padster/pyNeuroTrace#egg=pyneurotrace&subdirectory=pyneurotrace"
+pip install --upgrade -e "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
+pip install "git+https://github.com/padster/pyNeuroTrace#egg=pyneurotrace&subdirectory=pyneurotrace"
 ```
 Once installed, it can be run by the following command, and optionally given a file to open:
 ```
