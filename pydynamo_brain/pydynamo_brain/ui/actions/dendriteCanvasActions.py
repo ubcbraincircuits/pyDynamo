@@ -137,7 +137,18 @@ class DendriteCanvasActions():
         assert thisTree is not None and lastTree is not None
         thisTree.clearAndCopyFrom(lastTree, None) # No id maker, so clone IDs
         self.branchToColorMap.addNewTree(thisTree)
-
+    
+    def importPunctaFromLastStack(self, windowIndex):
+        if windowIndex == 0:
+            print ("Can't import puncta into the first image, nothing to import from...")
+            return
+        print(len(self.uiState.parent().puncta))
+        #thisPuncta = self.uiState.parent().puncta[windowIndex]
+        lastPuncta = self.uiState.parent().puncta[windowIndex - 1]
+        thisPuncta = lastPuncta.copy()
+        assert thisPuncta is not None and lastPuncta is not None
+        self.uiState.parent().puncta.append(thisPuncta)
+    
     def importPointsFromSWC(self, windowIndex, filePath):
         thisTree = self.uiState.parent().trees[windowIndex]
         if thisTree is None or thisTree.rootPoint is not None:
@@ -289,7 +300,7 @@ class DendriteCanvasActions():
     
     def traceTectalNeuron(self, windowIndex):
         stackWindow = self._stackWindow()
-        if windowIndex is not 0:
+        if windowIndex != 0:
             print('Currently only initial reconstruction supported')
             return
         thisTree = self.uiState.parent().trees[windowIndex]
