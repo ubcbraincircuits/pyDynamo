@@ -31,7 +31,8 @@ class TopMenu():
         fileMenu.addAction('&Save', self.save, QtCore.Qt.CTRL + QtCore.Qt.Key_S)
         fileMenu.addAction('Save As...', self.saveAs, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_S)
         fileMenu.addSeparator()
-        dmo(fileMenu.addAction('Import from previous stack', self.importFromPreviousStack, QtCore.Qt.Key_I))
+        dmo(fileMenu.addAction('Import Tree from previous stack', self.importFromPreviousStack, QtCore.Qt.Key_I))
+        dmo(fileMenu.addAction('Import Puncta from previous stack', self.importFromPreviousPuncta, QtCore.Qt.SHIFT + QtCore.Qt.Key_I))
         dmo(fileMenu.addAction('Import from SWC...', self.importFromSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_I))
         dmo(fileMenu.addAction('Export to SWC...', self.exportToSWC, QtCore.Qt.CTRL + QtCore.Qt.Key_E))
         dmo(fileMenu.addAction('Import traces from NWB...', self.importFromNWB))
@@ -165,6 +166,10 @@ class TopMenu():
 
     def importFromPreviousStack(self):
         self._local().importPointsFromLastStack(self.stackWindow.windowIndex)
+        self.redraw()
+
+    def importFromPreviousPuncta(self):
+        self._local().importPunctaFromLastStack(self.stackWindow.windowIndex)
         self.redraw()
 
     def importFromSWC(self):
