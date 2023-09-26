@@ -54,12 +54,12 @@ class BaseMatplotlibCanvas(FigureCanvas):
         )
         if filePath is None or filePath == "":
             return
-        if not filePath.endswith(".png"):
-            filePath += ".png"
+        if not filePath.endswith(".svg"):
+            filePath += ".svg"
         for i, ax in enumerate(self.axes):
             axPath = filePath
             if len(self.axes) > 1:
-                axPath = filePath.replace('.png', '_%d.png' % (i))
+                axPath = filePath.replace('.svg', '_%d.svg' % (i))
             self.fig.savefig(axPath, bbox_inches=self._axesExtent(ax))
 
     def _axesExtent(self, ax, pad=0.0):

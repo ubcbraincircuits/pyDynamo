@@ -171,7 +171,7 @@ class RadiiPainter():
 
         # Pen for drawing radi
         self.p.setPen(QPen(QBrush(radiiColor), self.uiState.parent().lineWidth, Qt.DotLine))
-        self.p.drawLine(x1, y1, x2, y2)
+        self.p.drawLine(int(x1), int(y1), int(x2), int(y2))
 
     def maybeDrawText(self, x, y, point):
         if not self.uiState.showAnnotations and not self.uiState.showIDs:

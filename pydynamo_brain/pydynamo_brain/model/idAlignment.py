@@ -105,16 +105,16 @@ class IdAligner():
         pointBeforeB = pointB.nextPointInBranch(-skipB, noWrap=False)
 
         if pointBeforeA is not None:
-            assert pointBeforeB is not None
-            xA, yA, zA = self.treeA.worldCoordPoints([pointA, pointBeforeA])
-            xB, yB, zB = self.treeB.worldCoordPoints([pointB, pointBeforeB])
-            # Distance offset = | (pA-pbA) - (pB-pbB) |
-            delta = [
-                xA[0] - xA[1] - xB[0] + xB[1],
-                yA[0] - yA[1] - yB[0] + yB[1],
-                zA[0] - zA[1] - zB[0] + zB[1],
-            ]
-            return np.linalg.norm(np.array(delta))
+            if pointBeforeB is not None:
+                xA, yA, zA = self.treeA.worldCoordPoints([pointA, pointBeforeA])
+                xB, yB, zB = self.treeB.worldCoordPoints([pointB, pointBeforeB])
+                # Distance offset = | (pA-pbA) - (pB-pbB) |
+                delta = [
+                    xA[0] - xA[1] - xB[0] + xB[1],
+                    yA[0] - yA[1] - yB[0] + yB[1],
+                    zA[0] - zA[1] - zB[0] + zB[1],
+                        ]
+                return np.linalg.norm(np.array(delta))
         # Should be soma, so no cost for matching:
         return 0.0
 

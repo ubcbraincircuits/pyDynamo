@@ -1,6 +1,8 @@
 import numpy as np
 import scipy.io as sio
 
+from scipy.spatial.distance import euclidean
+
 from pydynamo_brain.model import *
 from pydynamo_brain.util import deltaSz
 
@@ -89,6 +91,63 @@ def parseMatlabTree(fullState, saveState, removeOrphanBranches=True):
     tree.transform = parseTransform(saveState['info'][0])
     return tree
 
+def alignPointID(fullState):
+    treeList = fullState.trees
+    if len(treeList) <= 1:
+        return fullState
+    for i in range(len(treeList)-1):
+        fullState.setPointIDWithoutCollision(treeList[i+1], treeList[i+1].rootPoint, treeList[i].rootPoint.id)
+
+    for i in range(len(treeList)-1):
+        treeShift = np.array(treeList[i+1].rootPoint.location) - np.array(treeList[i].rootPoint.location)
+        
+        
+        _branchesT0 = [branch.id for branch in treeList[i].branches]
+        _branchesT1 = [branch.id for branch in treeList[i+1].branches]
+        for _branch in _branchesT0:
+            if treeList[i+1].getBranchByID(_branch) is not None:
+                if len(treeList[i+1].getBranchByID(_branch).points) == len(treeList[i].getBranchByID(_branch).points):
+                    for pairPoints in zip(treeList[i+1].getBranchByID(_branch).points, treeList[i].getBranchByID(_branch).points): 
+                        fullState.setPointIDWithoutCollision(treeList[i+1], pairPoints[0], pairPoints[1].id)    
+                else:
+                    _matchedPoint = None
+                    for _pointT0 in treeList[i].getBranchByID(_branch).points:
+                        for _pointT1 in treeList[i+1].getBranchByID(_branch).points:
+                            #if treeList[i].getPointByID(_pointT1) is None:
+                                #print(np.allclose(np.array(_pointT1.location), (np.array(_pointT0.location) + treeShift), atol=15))
+                                #print(_pointT0.location, _pointT1.location)
+                            if np.allclose(np.array(_pointT1.location), (np.array(_pointT0.location) + treeShift), atol=25):
+                                if _matchedPoint is None:
+                                    fullState.setPointIDWithoutCollision(treeList[i+1], _pointT1, _pointT0.id)
+                                    _matchedPoint = _pointT0
+                                else:
+                                    if euclidean(np.array(_pointT1.location), (np.array(_pointT0.location) + treeShift)) <=  euclidean(np.array(_pointT1.location), (np.array(_matchedPoint.location) + treeShift)):
+                                        fullState.setPointIDWithoutCollision(treeList[i+1], _pointT1, _pointT0.id)
+                                        _matchedPoint = _pointT0    
+        
+        
+        for _pointT1 in treeList[i+1].flattenPoints():
+            if treeList[i].getPointByID(_pointT1.id) is None:
+                _tempPoint = treeList[i].closestPointTo(np.array(_pointT1.location)-treeShift)
+                if treeList[i+1].getPointByID(_tempPoint.id) is None:
+                    print(np.array(_pointT1.location), (np.array(_tempPoint.location) + treeShift))
+                    if _pointT1.parentBranch.id == _tempPoint.parentBranch.id:
+                        fullState.setPointIDWithoutCollision(treeList[i+1], _pointT1, _tempPoint.id)
+
+        for _pointT0 in treeList[i].flattenPoints():
+            if treeList[i+1].getPointByID(_pointT0.id) is None:
+                _tempPoint = treeList[i+1].closestPointTo(np.array(_pointT0.location)+treeShift)
+                if treeList[i].getPointByID(_tempPoint.id) is None:
+                    if _pointT0.parentBranch.id == _tempPoint.parentBranch.id:
+                        print(np.array(_pointT1.location), (np.array(_tempPoint.location) + treeShift))
+                        fullState.setPointIDWithoutCollision(treeList[i+1], _pointT1, _tempPoint.id)
+                        
+                            
+                                    
+    return fullState
+
+
+
 # Load an existing dynamo matlab file, and convert it into the python dynamo format.
 def importFromMatlab(matlabPath, removeOrphanBranches=True):
     fullState = FullState()
@@ -114,5 +173,7 @@ def importFromMatlab(matlabPath, removeOrphanBranches=True):
         fullState.projectOptions.pixelSizes = tree.transform.scale
         tree.transform.scale = (1, 1, 1)
         treeData.append(tree)
+       
     fullState.addFiles(filePaths, treeData)
+    fullState = alignPointID(fullState)
     return fullState

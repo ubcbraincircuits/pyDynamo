@@ -71,6 +71,17 @@ class TectalTracing():
 
             return end_points, y_points
     
+    def filterPoints(p1, p2, listofpoints):
+        filteredPoints = []
+        imageSpace = []
+        for point in listofpoints:
+            imageSpace.append((int(point[0]/5), int(point[1]*1.0), int(_path[2]/1.0)))
+        # TODO Get image dim 
+        np.zeros(120, 512, 512)
+        
+        
+        return filteredPoints
+
     def _returnBranchPoints (self, skelFragment, skellID=1, ):
         factor = self.epislon_val
         points = np.where(skelFragment==skellID)
@@ -176,32 +187,52 @@ class TectalTracing():
 
         #return newTree
         # Find non-basal branches
-
+        _end = False
         while len(_endPoints)>3:
             firstPoint = True
             Complete = False
             path = []
+            if _end == True:
+                break
             while Complete == False:
-                nbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(_endPoints)
-                if firstPoint:
+                nbrs = NearestNeighbors(n_neighbors=15, algorithm='brute').fit(_endPoints)
+                _firstPointIndex = 0
+                while firstPoint == True:
+                    if len(_endPoints)<3:
+                        firstPoint = False
+                        Complete = True
+                        break
+                    if _firstPointIndex>10:
+                        print("pass")
+                        firstPoint = False
+                        Complete = True
+                        break
                     distances, indices = nbrs.kneighbors(np.array(somaCenter).reshape(1, -1))
                     
                    
-                    path.append(_endPoints[indices[0][0]])
-                    _currentPoint = _endPoints[indices[0][0]]
+                    _currentPoint = _endPoints[indices[0][_firstPointIndex]]
 
                     _parentNbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(_treeSearchSpace)
-                    distances, _parentNode = _parentNbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
-                    _parentPoints.append(_treeSearchSpace[_parentNode[0][0]])
-                    _endPoints.pop(indices[0][0])
-                        
-                    firstPoint = False
+                    parentDists, _parentNode = _parentNbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
+                    if parentDists[0][0] < 50:
+                    
+                        _parentPoints.append(_treeSearchSpace[_parentNode[0][0]])
+                        path.append(_endPoints[indices[0][_firstPointIndex]])
+                        _endPoints.pop(indices[0][_firstPointIndex])
+                            
+                        firstPoint = False
+                    else:
+                        _firstPointIndex +=1
 
-
+                if Complete == True:
+                    _end = True
+                    break
                 else:
                     if len(_endPoints)>3:
+                        nbrs = NearestNeighbors(n_neighbors=15, algorithm='brute').fit(_endPoints)
+
                         distances, indices = nbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
-                        if distances[0][0] < GAP:
+                        if distances[0][0] < 25:
                             path.append(_endPoints[indices[0][0]])
                             _currentPoint = _endPoints[indices[0][0]]
                             _treeSearchSpace.append(_endPoints[indices[0][0]])
@@ -301,7 +332,7 @@ class TectalTracing():
                             plane[plane !=line]=0
                             plane[plane>0]=1
                             points = np.where(plane==1)
-                            
+                            points, junctions = self.findEndsAndJunctions(points, plane)
                             if len(points)>1:
                                 for point in points:
                                     _endPoints.append((z, point[1], point[0]))
