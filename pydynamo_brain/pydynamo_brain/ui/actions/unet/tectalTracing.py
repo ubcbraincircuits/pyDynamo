@@ -1,9 +1,10 @@
 import numpy as np
-
+import random
+import math
 from skimage.measure import label
 from skimage.filters import sobel
 from skimage.morphology import skeletonize_3d, dilation, erosion, remove_small_objects
-from skimage.segmentation import watershed, random_walker
+from skimage.segmentation import watershed, random_walker, expand_labels
 from sklearn.neighbors import NearestNeighbors, KDTree
 
 from scipy.ndimage import center_of_mass
@@ -26,6 +27,7 @@ class TectalTracing():
         self.history = history
         self.branchToColorMap = BranchToColorMap()
         self.epislon_val = 1.2
+
 
 
     def segmentedSkeleton(self, img2skel):
@@ -106,160 +108,196 @@ class TectalTracing():
         return sortedPoints
     
 
-    def generateTree(self, somaCenter, branchData):
+    def generateTree(self, somaCenter, somaCloud, branchData):
         newTree = Tree()
         newTree._parentState = self.state.uiStates[0]
         
         # Root the tree
         somaCenter = list(somaCenter)
-        somaCenter[0] = somaCenter[0]*5
+        somaCenter[0] = somaCenter[0]*6.25
         somaCenter = np.round(somaCenter)
         somaPoint =  Point(
                             id ='root',
-                            location = tuple((somaCenter[2]*1.0, somaCenter[1]*1.0, somaCenter[0]/5.0))
+                            location = tuple((somaCenter[2]*1.0, somaCenter[1]*1.0, somaCenter[0]/6.25))
                             
                                 )
 
         newTree.rootPoint = somaPoint
         newTree.rootPoint.parentBranch = None                        
-   
-        _pointNum = 1
-        _branchNum = 1
+        secondaryBranchPool = []
 
-        # Loop over other basal branches
-        _endPoints = branchData.copy()
-        _matchedPath = [] 
+
+        _pointPool = branchData.copy()
+        unique_tuples = set()
+        _pointPool = [tup for tup in _pointPool if not (tup in unique_tuples or unique_tuples.add(tup))]
+        _parentPoints = {}
+
+        # Create Tree Search Space and Add Soma
         _treeSearchSpace = []
-        SOMA_RADIUS = 60
-        GAP = 15
-        _branchList = []
+        _treeSearchSpace.append(np.round(tuple(np.round(somaCenter))))
 
 
         _branchPaths = []
-        for i in range(5):
-            firstPoint = True
-            Complete = False
-            path = []
-            # Find path with nearest neighbor search
-            while Complete == False:
-                nbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(_endPoints)
-                if firstPoint:
-                    distances, indices = nbrs.kneighbors(np.array(somaCenter).reshape(1, -1))
+        _inspectedPoints = []
+        PrimaryBranch = True
 
-                    if distances[0][0] < SOMA_RADIUS:
-                        path.append(_endPoints[indices[0][0]])
-                        _currentPoint = _endPoints[indices[0][0]]
-                        
-                        _endPoints.pop(indices[0][0])
-                        firstPoint = False
-                    else:
-                        break
-                else:
-                    distances, indices = nbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
-                    if distances[0][0] < GAP:
-                        path.append(_endPoints[indices[0][0]])
-                        _currentPoint = _endPoints[indices[0][0]]
-                        _treeSearchSpace.append(_endPoints[indices[0][0]])
-                        _endPoints.pop(indices[0][0])
-                    else:
-                        Complete = True
-
-            _branchPaths.append(path)
-            if len(path)>0:
-                newBranch = Branch(id = 'b'+str(_branchNum))
-                _branchNum += 1
-                for xyz in path:                    
-                    nextPoint = Point(
-                            id = 'p'+str(_pointNum),
-                            location = tuple((xyz[2]*1.0, xyz[1]*1.0, int(xyz[0]/5.0)))
-                            )
-                    _pointNum += 1 
-                    newBranch.addPoint(nextPoint)
-                    
-                newBranch.setParentPoint(somaPoint)
-                newTree.addBranch(newBranch)
-                _branchList.append(newBranch)
-
-         
-        _parentPoints = []
-        _childBranches = []
-        GAP = 15
-
-        #return newTree
-        # Find non-basal branches
-        _end = False
-        while len(_endPoints)>3:
-            firstPoint = True
-            Complete = False
-            path = []
-            if _end == True:
+        _somaNbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(somaCloud)
+        print('Primary Branch Search... this may take a minute')
+        while PrimaryBranch == True:
+            if PrimaryBranch == False:
                 break
+            firstPoint = True
+            Complete = False
+            path = []
+            _lastSearch = len(_pointPool)
             while Complete == False:
-                nbrs = NearestNeighbors(n_neighbors=15, algorithm='brute').fit(_endPoints)
-                _firstPointIndex = 0
-                while firstPoint == True:
-                    if len(_endPoints)<3:
-                        firstPoint = False
-                        Complete = True
-                        break
-                    if _firstPointIndex>10:
-                        print("pass")
-                        firstPoint = False
-                        Complete = True
-                        break
-                    distances, indices = nbrs.kneighbors(np.array(somaCenter).reshape(1, -1))
+        
+                if firstPoint:
                     
-                   
-                    _currentPoint = _endPoints[indices[0][_firstPointIndex]]
+                    path.append(_treeSearchSpace[0])
+                    random.shuffle(_pointPool)
+                    for _point in _pointPool:
+                        distances, indices = _somaNbrs.kneighbors(np.array(_point).reshape(1, -1))
+                        if distances[0][0] < 15:
 
-                    _parentNbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(_treeSearchSpace)
-                    parentDists, _parentNode = _parentNbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
-                    if parentDists[0][0] < 50:
-                    
-                        _parentPoints.append(_treeSearchSpace[_parentNode[0][0]])
-                        path.append(_endPoints[indices[0][_firstPointIndex]])
-                        _endPoints.pop(indices[0][_firstPointIndex])
+                            _rootNode = _treeSearchSpace[0]
+                            _currentPoint = _point
+                            path.append(_currentPoint)
+                            _parentPoints[_currentPoint] = _rootNode
+                            _treeSearchSpace.append(_currentPoint)
+                            _pointPool.pop(_pointPool.index(_point))
+                            firstPoint = False
+                            break
+                    if firstPoint == False:
+                        break
+                    if _lastSearch ==  len(_pointPool):
+                        Complete == True
+                        break
+
                             
-                        firstPoint = False
-                    else:
-                        _firstPointIndex +=1
-
-                if Complete == True:
-                    _end = True
-                    break
+                
                 else:
-                    if len(_endPoints)>3:
-                        nbrs = NearestNeighbors(n_neighbors=15, algorithm='brute').fit(_endPoints)
-
-                        distances, indices = nbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
-                        if distances[0][0] < 25:
-                            path.append(_endPoints[indices[0][0]])
-                            _currentPoint = _endPoints[indices[0][0]]
-                            _treeSearchSpace.append(_endPoints[indices[0][0]])
-                            _endPoints.pop(indices[0][0])
+                    if len(_pointPool) > 10:
+                        _nbrs = NearestNeighbors(n_neighbors=10, algorithm='brute').fit(_pointPool)
+                        distances, indices = _nbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
+                        for _idx in range(10):
+                        
+                            if distances[0][_idx] < 20:
+                            
+                                if angle_between_vectors(_rootNode, _currentPoint, _pointPool[indices[0][_idx]]) < 90:
+                                    _pointIndex = indices[0][_idx]
+                                    _parentPoints[_currentPoint] = _rootNode
+                                    _rootNode = _currentPoint
+                                    _currentPoint = _pointPool[_pointIndex]
+                                    _parentPoints[_currentPoint] = _rootNode
+                                    path.append( _pointPool[_pointIndex])
+                                    _treeSearchSpace.append(_currentPoint)
+                                    _pointPool.pop(_pointIndex)
+                                    break
                         else:
                             Complete = True
+                            _lastSearch = len(_pointPool)
+
+                    
                     else:
                         Complete = True
-            _childBranches.append(path)
-        
-        for _path in zip(_childBranches, _parentPoints):
-                path = _path[0]
-                _parentNode = newTree.closestPointTo((_path[1][2]*1.0, _path[1][1]*1.0, int(_path[1][0]/5.0)))
+                        _lastSearch = len(_pointPool)
+                        
+            if len(_pointPool) == _lastSearch:
+                PrimaryBranch = False
+                Complete == True
+            if len(path)>2:
+                _branchPaths.append(path)
+            else:
+                for _removed in _branchPaths[1:]:
+                    _popi = _treeSearchSpace.index(_removed)
+                    secondaryBranchPool.append( _treeSearchSpace.pop(_popi))
+                    
+            
+        PrimaryBranch == False
+
+        print('Secondary branch search... this may take a minute')
+        _pointPool += secondaryBranchPool
+        _catche =  len(_pointPool)+1
+
+
+        secondaryBranch = True
+        while secondaryBranch:
+            firstPoint = True
+            Complete = False
+            path = []
+
+            while Complete == False:
+                if _catche == len(_pointPool):
+                    secondaryBranch = False
+                    Complete = True
+                    break
+
+                if firstPoint:
+                    _catche = len(_pointPool)
+                    random.shuffle(_pointPool)
+                    if len(_treeSearchSpace)>3:
+                        _treeNbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(_treeSearchSpace)
+                        for _nbIndex, _newBranch in enumerate(_pointPool):
+                            if firstPoint:
+                                distances, indices = _treeNbrs.kneighbors(np.array(_newBranch).reshape(1, -1))
+                                if distances[0][0] < 20:
+                                    _rootNode = _treeSearchSpace[indices[0][0]] # _newBranch
+                                    _currentPoint = _newBranch
+                                    _treeSearchSpace.append(_currentPoint)
+                                    path.append(_rootNode)
+                                    path.append(_currentPoint)
+                                    _parentPoints[_currentPoint] = _rootNode
+                                    _null = _pointPool.pop(_nbIndex)
+                                    firstPoint = False
+
+
+                else:
+                    if len(_pointPool) > 10:
+                        _nbrs = NearestNeighbors(n_neighbors=10, algorithm='brute', n_jobs=3).fit(_pointPool)
+                        distances, indices = _nbrs.kneighbors(np.array(_currentPoint).reshape(1, -1))
+                        for _idx in range(10):
+                            if distances[0][_idx] < 20:
+                                if angle_between_vectors(_rootNode, _currentPoint, _pointPool[indices[0][_idx]]) < 30:
+                                    _pointIndex = indices[0][_idx]
+                                    _parentPoints[_currentPoint] = _rootNode
+                                    _rootNode = _currentPoint
+                                    _currentPoint = _pointPool[_pointIndex]
+                                    path.append( _pointPool[_pointIndex])
+                                    _treeSearchSpace.append(_currentPoint)
+                                    _pointPool.pop(_pointIndex)
+                                    break
+                        if _idx == 9:
+                            Complete = True
+                            _branchPaths.append(path)
+                            path = []
+                    else:
+                            Complete = True
+                            _branchPaths.append(path)
+                            path = []
+
+
+
+
+        _pointNum = 1
+        _branchNum = 1
+        for _path in _branchPaths:
                 
+                _parentNode = newTree.closestPointTo((_path[0][2]*1.0, _path[0][1]*1.0, int(_path[0][0]/6.25)))
+                _ = _path.pop(0)
                 newBranch = Branch(id = 'b'+str(_branchNum))
                 _branchNum += 1
-                for xyz in path:                    
+                for xyz in _path:                    
                     nextPoint = Point(
                             id = 'p'+str(_pointNum),
-                            location = tuple((xyz[2]*1.0, xyz[1]*1.0, int(xyz[0]/5.0)))
+                            location = tuple((xyz[2]*1.0, xyz[1]*1.0, int(xyz[0]/6.25)))
                             )
                     _pointNum += 1 
                     newBranch.addPoint(nextPoint)
                     
                 newBranch.setParentPoint(_parentNode)
                 newTree.addBranch(newBranch)
-                _branchList.append(newBranch)
+                #_branchList.append(newBranch)
         return newTree
         
     
@@ -287,7 +325,7 @@ class TectalTracing():
         soma = np.array(soma, bool)
 
         # Filter out small false positive pixels
-        soma = remove_small_objects(soma,250, connectivity=2)
+        soma = remove_small_objects(soma,300, connectivity=2)
 
         dendrites = np.zeros_like(pixelClasses[0,:,:,:])
         dendrites[pixelClasses[0,:,:,:]==2]=1
@@ -367,13 +405,16 @@ class TectalTracing():
         
 
 
-        for key in allPoints.keys():
-            allPoints[key]
-            z_value = np.zeros((allPoints[key].shape[0], 1+allPoints[key].shape[1]))
-            # TODO use project XYZ scaling
-            z_value[:, 0] = branches[key][0][0]*5
-            z_value[:, 1:] = allPoints[key]
-            allPoints[key] = z_value
+        for key in list(allPoints.keys()):
+            if len(allPoints) < 2:
+                del allPoints
+            else:
+                   
+                z_value = np.zeros((allPoints[key].shape[0], 1+allPoints[key].shape[1]))
+                # TODO use project XYZ scaling
+                z_value[:, 0] = branches[key][0][0]*6.25
+                z_value[:, 1:] = allPoints[key]
+                allPoints[key] = z_value
         
         allPoints3D = []
         for key in allPoints.keys():
@@ -385,10 +426,76 @@ class TectalTracing():
         
         
         SOMA_POINT = center_of_mass(soma)
+        soma_filter = expand_labels(soma, distance=3)
+        _z, _x, _y = np.where(soma_filter==1)
+        _somaCoords = list( zip(_z*6.25, _x, _y))
+        _somaCloudindex = np.random.choice(len(_somaCoords), int(.05*len(_somaCoords)), replace=False)
+        _somaCloud = [_somaCoords[i] for i in _somaCloudindex]
 
 
 
+        _autoTree = self.generateTree(SOMA_POINT, _somaCloud, allPoints3D)
 
-        _autoTree = self.generateTree(SOMA_POINT, allPoints3D)
-        return _autoTree
+        _cleanTree = cleanUpTree(_autoTree)
+        return _cleanTree
 
+def angle_between_vectors(A, B, C):
+    # Calculate vectors AB and AC
+    vector_AB = np.array(B) - np.array(A)
+    vector_AC = np.array(C) - np.array(A)
+    
+    # Calculate the dot product of vectors AB and AC
+    dot_product = np.dot(vector_AB, vector_AC)
+    
+    # Calculate the magnitude (norm) of vectors AB and AC
+    magnitude_AB = np.linalg.norm(vector_AB)
+    magnitude_AC = np.linalg.norm(vector_AC)
+    
+    # Calculate the cosine of the angle between vectors AB and AC
+    cosine_theta = dot_product / (magnitude_AB * magnitude_AC)
+    
+    # Calculate the angle in radians using arccosine
+    angle_rad = np.arccos(cosine_theta)
+    
+    # Convert the angle to degrees
+    angle_deg = np.degrees(angle_rad)
+
+    return angle_deg
+
+def cleanUpTree(localTree):
+    print('Clean-up')
+    for _point in localTree.flattenPoints():
+        if _point is not None:
+            if len(_point.children)==2:
+                childA = localTree.getBranchByID(_point.children[0])
+                childB = localTree.getBranchByID(_point.children[1])
+                # Remove small acute angle branches
+                if (childA is not None) and (childB is not None):
+                    print(angle_between_vectors(_point.location, childA.points[0].location, childA.points[0].location))
+                    if angle_between_vectors(_point.location, childA.points[0].location, childA.points[0].location) < 15:
+                       
+                        if childA.hasChildren() == False:
+                            for _childPoints in childA.points[::-1]:
+                                localTree.remoPointById(_childPoints.id)
+                        if childB.hasChildren == False:
+                            for _childPoints in childB.points[::-1]:
+                                localTree.remoPointById(_childPoints.id)
+                    # Remove large angle branches
+                    elif angle_between_vectors(_point.location, childA.points[0].location, childA.points[0].location) > 150:
+                        if childA.hasChildren() == False:
+                            for _childPoints in childA.points[::-1]:
+                                localTree.remoPointById(_childPoints.id)
+                        if childB.hasChildren == False:
+                            for _childPoints in childB.points[::-1]:
+                                localTree.remoPointById(_childPoints.id)
+                    
+
+        
+        return localTree
+
+def distance(p1, p2): 
+    print(p1, p2, '\n')
+    d = math.sqrt(math.pow(p1[0]- p2[0], 2) +
+                math.pow(p1[1] - p2[1], 2) +
+                math.pow(p1[2] - p2[2], 2))
+    return d
