@@ -437,6 +437,53 @@ class Tree():
         assert self._parentState._parent is not None, "Accessing uninitialized tree"
         return self._parentState._parent
 
+    #Cleaning Methods for autotraced trees
+    def cleanUpTree(self):
+        print('Clean-up')
+        self.updateAllPrimaryBranches()
+        def removeOverBranch(localTree, branch):
+            if branch.hasChildren() == False:
+                print("Let's prune it!")
+                print(len(branch.points))
+                branch.points = []
+                
+                localTree.removeBranch(branch.id)
+            else:
+                for _point in branch.points[::-1]:
+                    if len(_point.children) > 0:
+                        for child in _point.children:
+                            removeOverBranch(localTree, child)
+
+
+        ids = set()
+        ids = set([b.id for b in self.branches])
+        branchIDs =  sorted(list(ids))
+
+        for branch in branchIDs:
+            if self.getBranchByID(branch) is not None:
+                print(branch)
+                _tempBranch = self.getBranchByID(branch)
+                if _tempBranch.hasChildren():
+                    for _point in _tempBranch.points:
+                        if len(_point.children) > 0:
+                            try:
+                                A = _point.location
+                                B = _point.children[0].points[0].location
+                                C = _tempBranch.points[_point.indexInParent()+1].location
+                                if  75 > angle_between_vectors(A,B,C):
+                                    removeOverBranch(self, _point.children[0])
+                                    _point.children.pop()
+                                if  130 < angle_between_vectors(A,B,C):
+                                    removeOverBranch(self, _point.children[0])
+                                    _point.children.pop()
+                            except:
+                                pass
+        # Remove empties 
+        self.cleanEmptyBranches()
+        self.updateAllPrimaryBranches()
+
+
+
 ### Cloning utilities
 
 def _clonePoint(point: Point, idMaker: FullState, pointMap: Dict[str, Point]) -> Point:
@@ -480,3 +527,47 @@ def printBranch(tree: Tree, branch: Optional[Branch], pad:str="") -> None:
 
 def printTree(tree: Tree) -> None:
     printPoint(tree, tree.rootPoint)
+
+
+# Functions for cleaning autotrace tree; Move else where?
+def angle_between_vectors(A, B, C):
+    # Calculate vectors AB and AC
+    vector_AB = np.array(B) - np.array(A)
+    vector_AC = np.array(C) - np.array(A)
+    
+    # Calculate the dot product of vectors AB and AC
+    dot_product = np.dot(vector_AB, vector_AC)
+    
+    # Calculate the magnitude (norm) of vectors AB and AC
+    magnitude_AB = np.linalg.norm(vector_AB)
+    magnitude_AC = np.linalg.norm(vector_AC)
+    
+    # Calculate the cosine of the angle between vectors AB and AC
+    cosine_theta = dot_product / (magnitude_AB * magnitude_AC)
+    
+    # Calculate the angle in radians using arccosine
+    angle_rad = np.arccos(cosine_theta)
+    
+    # Convert the angle to degrees
+    angle_deg = np.degrees(angle_rad)
+
+    return angle_deg 
+
+def scanBranchFlow(branchPoints):
+    newPoints = []
+    if len(branchPoints)<4:
+        return branchPoints
+    else:
+        if 40 < angle_between_vectors(branchPoints[0].location,
+                                    branchPoints[1].location,
+                                    branchPoints[2].location):
+                if angle_between_vectors(branchPoints[0].location,
+                                    branchPoints[1].location,
+                                    branchPoints[2].location) < angle_between_vectors(branchPoints[0].location,
+                    branchPoints[2].location,
+                    branchPoints[3].location):
+                    if len(branchPoints[1].children) == 0:
+                        branchPoints.pop(1)
+        
+        return branchPoints[:3] + scanBranchFlow(branchPoints[2:][3:])
+                                            
