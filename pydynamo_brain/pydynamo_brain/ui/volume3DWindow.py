@@ -69,49 +69,48 @@ class Volume3DWindow():
         xyzScale = self.uiState._parent.projectOptions.pixelSizes
         zyxScale = [1, xyzScale[1] / xyzScale[2], xyzScale[0] / xyzScale[2]]
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            for c in reversed(range(self.volume.shape[0])):
-                name = 'Volume'
-                if self.volume.shape[0] > 1:
+        viewer = napari.Viewer()
+        for c in reversed(range(self.volume.shape[0])):
+            name = 'Volume'
+            if self.volume.shape[0] > 1:
+                name = '%s (%d)' % (name, c + 1)
+            layer = viewer.add_image(self.volume[c], name=name, rgb=False)
+            layer.scale = zyxScale
+            layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
+            layer.visible = (c == self.uiState._parent.channel)
+        # Note: Addition of near-tree volume is removed for now as it is slow.
+        # Uncomment to add back in, there may eventually be an option in the UI
+        """
+        if self.uiState._tree is not None and len(self.uiState._tree.flattenPoints()) > 1:
+            maskedVolume = maskedNearTree(self.volume, self.uiState._tree, xyzScale)
+            for c in reversed(range(maskedVolume.shape[0])):
+                name = 'Masked Volume'
+                if maskedVolume.shape[0] > 1:
                     name = '%s (%d)' % (name, c + 1)
-                layer = viewer.add_image(self.volume[c], name=name, rgb=False)
+                layer = viewer.add_image(maskedVolume[c], name=name, rgb=False)
                 layer.scale = zyxScale
                 layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
-                layer.visible = (c == self.uiState._parent.channel)
+                layer.visible = False
+        """
 
-            # Note: Addition of near-tree volume is removed for now as it is slow.
-            # Uncomment to add back in, there may eventually be an option in the UI
-            """
-            if self.uiState._tree is not None and len(self.uiState._tree.flattenPoints()) > 1:
-                maskedVolume = maskedNearTree(self.volume, self.uiState._tree, xyzScale)
-                for c in reversed(range(maskedVolume.shape[0])):
-                    name = 'Masked Volume'
-                    if maskedVolume.shape[0] > 1:
-                        name = '%s (%d)' % (name, c + 1)
-                    layer = viewer.add_image(maskedVolume[c], name=name, rgb=False)
-                    layer.scale = zyxScale
-                    layer.contrast_limits = [cl * 255 for cl in self.uiState.colorLimits]
-                    layer.visible = False
-            """
+        viewer.dims.ndim = 3
+        viewer.dims.ndisplay = 3
 
-            viewer.dims.ndim = 3
-            viewer.dims.ndisplay = 3
-
-            # Add shapes representing the tree
-            pathShapes = self.treeToShapes(self.uiState._tree, zyxScale)
-            shapeLayer = None
-            for data, width, color in pathShapes:
-                if shapeLayer is None:
-                    shapeLayer = viewer.add_shapes(
-                        data, shape_type='path',
-                        name='Arbor',
-                        edge_width=width,
-                        edge_color=color,
-                    )
-                else:
-                    shapeLayer.add(
-                        data, shape_type='path',
-                        edge_width=width,
-                        edge_color=color,
-                    )
+        # Add shapes representing the tree
+        pathShapes = self.treeToShapes(self.uiState._tree, zyxScale)
+        shapeLayer = None
+        for data, width, color in pathShapes:
+            if shapeLayer is None:
+                shapeLayer = viewer.add_shapes(
+                    data, shape_type='path',
+                    name='Arbor',
+                    edge_width=width,
+                    edge_color=color,
+                )
+            else:
+                shapeLayer.add(
+                    data, shape_type='path',
+                    edge_width=width,
+                    edge_color=color,
+                )
+        napari.run()

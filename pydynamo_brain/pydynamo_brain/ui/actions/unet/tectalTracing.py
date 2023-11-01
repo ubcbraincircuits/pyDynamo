@@ -15,6 +15,7 @@ from pydynamo_brain.model import *
 from pydynamo_brain.ui.branchToColorMap import BranchToColorMap
 from pydynamo_brain.util.util import douglasPeucker
 from pydynamo_brain.util import imageCache
+from pydynamo_brain.util import sortedBranchIDList
 from .inference import modelPredict
 
 _IMG_CACHE = util.ImageCache()
@@ -298,6 +299,7 @@ class TectalTracing():
                 newBranch.setParentPoint(_parentNode)
                 newTree.addBranch(newBranch)
                 #_branchList.append(newBranch)
+
         return newTree
         
     
@@ -436,8 +438,7 @@ class TectalTracing():
 
         _autoTree = self.generateTree(SOMA_POINT, _somaCloud, allPoints3D)
 
-        _cleanTree = cleanUpTree(_autoTree)
-        return _cleanTree
+        return _autoTree
 
 def angle_between_vectors(A, B, C):
     # Calculate vectors AB and AC
@@ -462,40 +463,10 @@ def angle_between_vectors(A, B, C):
 
     return angle_deg
 
-def cleanUpTree(localTree):
-    print('Clean-up')
-    for _point in localTree.flattenPoints():
-        if _point is not None:
-            if len(_point.children)==2:
-                childA = localTree.getBranchByID(_point.children[0])
-                childB = localTree.getBranchByID(_point.children[1])
-                # Remove small acute angle branches
-                if (childA is not None) and (childB is not None):
-                    print(angle_between_vectors(_point.location, childA.points[0].location, childA.points[0].location))
-                    if angle_between_vectors(_point.location, childA.points[0].location, childA.points[0].location) < 15:
-                       
-                        if childA.hasChildren() == False:
-                            for _childPoints in childA.points[::-1]:
-                                localTree.remoPointById(_childPoints.id)
-                        if childB.hasChildren == False:
-                            for _childPoints in childB.points[::-1]:
-                                localTree.remoPointById(_childPoints.id)
-                    # Remove large angle branches
-                    elif angle_between_vectors(_point.location, childA.points[0].location, childA.points[0].location) > 150:
-                        if childA.hasChildren() == False:
-                            for _childPoints in childA.points[::-1]:
-                                localTree.remoPointById(_childPoints.id)
-                        if childB.hasChildren == False:
-                            for _childPoints in childB.points[::-1]:
-                                localTree.remoPointById(_childPoints.id)
-                    
-
-        
-        return localTree
-
 def distance(p1, p2): 
     print(p1, p2, '\n')
     d = math.sqrt(math.pow(p1[0]- p2[0], 2) +
                 math.pow(p1[1] - p2[1], 2) +
                 math.pow(p1[2] - p2[2], 2))
     return d
+

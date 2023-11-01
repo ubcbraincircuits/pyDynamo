@@ -16,6 +16,7 @@ from pydynamo_brain.ui import traces as traceUI
 
 from pydynamo_brain.files import importFromSWC
 import pydynamo_brain.ui.actions.unet.tectalTracing as tracing
+
 from pydynamo_brain.model import IdAligner, PointMode, recursiveAdjust
 from pydynamo_brain.model.tree.util import findTightAngles
 
@@ -303,12 +304,17 @@ class DendriteCanvasActions():
         if windowIndex != 0:
             print('Currently only initial reconstruction supported')
             return
-        thisTree = self.uiState.parent().trees[windowIndex]
         infoBox = createAndShowInfo("Tracing Dendritic Arbor", stackWindow)
         self.fullActions.history.pushState()
-        
+
+        thisTree = self.uiState.parent().trees[windowIndex]
         newTree = self.fullActions.tectalTracing.dendriteTracing()
         if newTree is not None:
+
+            newTree.cleanUpTree()
             thisTree.clearAndCopyFrom(newTree,  self.uiState.parent())
-            thisTree.updateAllPrimaryBranches()
+            thisTree.cleanEmptyBranches()
             self.branchToColorMap.addNewTree(thisTree)
+      
+      
+           
