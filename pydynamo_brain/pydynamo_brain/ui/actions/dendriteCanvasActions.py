@@ -1,4 +1,5 @@
 import napari
+import copy
 
 from PyQt5.QtCore import QRectF
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QMessageBox
@@ -146,7 +147,7 @@ class DendriteCanvasActions():
         print(len(self.uiState.parent().puncta))
         #thisPuncta = self.uiState.parent().puncta[windowIndex]
         lastPuncta = self.uiState.parent().puncta[windowIndex - 1]
-        thisPuncta = lastPuncta.copy()
+        thisPuncta = copy.deepcopy(lastPuncta)
         assert thisPuncta is not None and lastPuncta is not None
         self.uiState.parent().puncta.append(thisPuncta)
     
