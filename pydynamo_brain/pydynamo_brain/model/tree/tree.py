@@ -437,51 +437,6 @@ class Tree():
         assert self._parentState._parent is not None, "Accessing uninitialized tree"
         return self._parentState._parent
 
-    #Cleaning Methods for autotraced trees
-    def cleanUpTree(self):
-        print('Clean-up')
-        self.updateAllPrimaryBranches()
-        def removeOverBranch(localTree, branch):
-            if branch.hasChildren() == False:
-                print("Let's prune it!")
-                print(len(branch.points))
-                branch.points = []
-                
-                localTree.removeBranch(branch.id)
-            else:
-                for _point in branch.points[::-1]:
-                    if len(_point.children) > 0:
-                        for child in _point.children:
-                            removeOverBranch(localTree, child)
-
-
-        ids = set()
-        ids = set([b.id for b in self.branches])
-        branchIDs =  sorted(list(ids))
-
-        for branch in branchIDs:
-            if self.getBranchByID(branch) is not None:
-                print(branch)
-                _tempBranch = self.getBranchByID(branch)
-                if _tempBranch.hasChildren():
-                    for _point in _tempBranch.points:
-                        if len(_point.children) > 0:
-                            try:
-                                A = _point.location
-                                B = _point.children[0].points[0].location
-                                C = _tempBranch.points[_point.indexInParent()+1].location
-                                if  75 > angle_between_vectors(A,B,C):
-                                    removeOverBranch(self, _point.children[0])
-                                    _point.children.pop()
-                                if  130 < angle_between_vectors(A,B,C):
-                                    removeOverBranch(self, _point.children[0])
-                                    _point.children.pop()
-                            except:
-                                pass
-        # Remove empties 
-        self.cleanEmptyBranches()
-        self.updateAllPrimaryBranches()
-
 
 
 ### Cloning utilities
