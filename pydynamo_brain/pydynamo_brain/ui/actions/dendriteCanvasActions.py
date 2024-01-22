@@ -312,7 +312,7 @@ class DendriteCanvasActions():
         newTree = self.fullActions.tectalTracing.dendriteTracing()
         if newTree is not None:
 
-            newTree.cleanUpTree()
+            #newTree.cleanUpTree()
             thisTree.clearAndCopyFrom(newTree,  self.uiState.parent())
             thisTree.cleanEmptyBranches()
             self.branchToColorMap.addNewTree(thisTree)
