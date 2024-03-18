@@ -306,9 +306,10 @@ class UIState():
             return None
 
         if pointID != self._tree.rootPoint.id:
-            if len(self._tree.getPointByID(pointID).children) > 0:
-                for child in self._tree.getPointByID(pointID).children:
-                    self.deleteBranch(child)
+            if self._tree.getPointByID(pointID) is not None:
+                if len(self._tree.getPointByID(pointID).children) > 0:
+                    for child in self._tree.getPointByID(pointID).children:
+                        self.deleteBranch(child)
             
         return self._tree.removePointByID(pointID)
 
