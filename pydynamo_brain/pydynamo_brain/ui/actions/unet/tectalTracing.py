@@ -10,6 +10,7 @@ from skimage.measure import label, regionprops
 
 from skimage.morphology import skeletonize_3d, dilation, erosion, remove_small_objects
 from skimage.segmentation import expand_labels
+from skimage.filters import gaussian
 
 from scipy.ndimage import center_of_mass
 
@@ -164,7 +165,7 @@ class TectalTracing():
         return results
 
 
-    def generateTree(self, somaCenter, somaCloud, skel):
+    def generateTree(self, somaCenter, skel):
 
         # Support Functions
         def distance_3d(point1, point2):
@@ -241,7 +242,7 @@ class TectalTracing():
         
             return cloesestPoint
 
-
+        skel[somaCenter[0], somaCenter[1], somaCenter[2]]=0
         # Find all of the branch nodes and ends in the dendrites
         end_points, y_points = self.find_skeleton_3Dpoints(skel)
 
@@ -271,16 +272,14 @@ class TectalTracing():
         
 
         # Use soma point cloud to find end points of primary and basal dendrites
-        _somaCloud = np.array(somaCloud)
         end_pointArray = np.array(end_points)
 
-        _somaNbrs = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(end_pointArray)
-        somaDists, somaIndex = _somaNbrs.kneighbors(_somaCloud)
+        _somaNbrs = NearestNeighbors(n_neighbors=2, algorithm='brute').fit(end_pointArray)
+        somaDists, somaIndex = _somaNbrs.kneighbors(somaCenter.reshape(1, -1))
 
         _closeBranchEnds = np.unique(end_pointArray[somaIndex[:, :]], axis=0)
-
         somaEndPoints = np.unique(_closeBranchEnds, axis=0)
-        somaEnds = [tuple(_somaEnd[0]) for _somaEnd in somaEndPoints]
+        somaEnds = [tuple(_somaEnd) for _somaEnd in somaEndPoints[0]]
 
         endNodeSet = set(end_points)
         somaEndSet = set(somaEnds)
@@ -342,7 +341,7 @@ class TectalTracing():
                     _points.reverse()
                 
                 if (_endNode == _points[0]):
-                    _points.insert(0, somaCenter)
+                    _points.insert(0, (somaCenter[0], somaCenter[1], somaCenter[2]))
                     junction = returnBranchingNode(_points, _cleanBranchNodes)
                     junctionsInTree.append(junction)
                     _points.append(junction)
@@ -351,7 +350,7 @@ class TectalTracing():
   
                 else:                                  
                     _points =  orderPointList(_endNode, _points)
-                    _points.insert(0, somaCenter)
+                    _points.insert(0, (somaCenter[0], somaCenter[1], somaCenter[2]))
                     junction = returnBranchingNode(_points, _cleanBranchNodes)
                     junctionsInTree.append(junction)
                     TreeBranches.append(_points) 
@@ -512,13 +511,6 @@ class TectalTracing():
         # Center of soma pixels
         SOMA_POINT = center_of_mass(soma)
 
-        # Points used to root dendrites
-        soma_filter = expand_labels(soma, distance=3)
-        _z, _x, _y = np.where(soma_filter==1)
-        _somaCoords = list( zip(_z, _x, _y))
-        _somaCloudindex = np.random.choice(len(_somaCoords), int(.05*len(_somaCoords)), replace=False)
-        _somaCloud = [_somaCoords[i] for i in _somaCloudindex]
-
         dendrites = np.zeros_like(pixelClasses[0,:,:,:])
         dendrites[pixelClasses[0,:,:,:]==2]=1
         dendrites = np.array(dendrites, bool)
@@ -526,15 +518,27 @@ class TectalTracing():
         # Filter out small false positive pixels
         dendrites = remove_small_objects(dendrites, 500, connectivity=10)
 
+        neuron = np.zeros_like(dendrites)
+        neuron[dendrites==1]=1
+        neuron[soma == 1]=1
+
+
         # Create a skeleton of the dendrites #spooky
-        skel = skeletonize_3d(dendrites)
-        skel[soma_filter==True]=0
+        skel = skeletonize_3d(neuron)
 
+        cube = np.zeros((3, 3, 3))
+        cube[1, :, :] = 1 
+        biggerSkelly = dilation(skel, cube)
+        biggerSkelly = gaussian(biggerSkelly, .85)
+        skel = skeletonize_3d(biggerSkelly)
 
+        skeletonPoints = np.array(np.where(skel==np.max(skel)))
+        _allPoints = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(skeletonPoints.T)
+        somaDists, somaIndex = _allPoints.kneighbors(np.array(SOMA_POINT).reshape(1, -1))
 
+        RootNode = skeletonPoints.T[somaIndex, :][0][0]
 
-
-        _autoTree = self.generateTree(SOMA_POINT, _somaCloud, skel)
+        _autoTree = self.generateTree(RootNode, skel.copy())
 
         return _autoTree
 
