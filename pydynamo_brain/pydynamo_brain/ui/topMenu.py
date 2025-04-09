@@ -51,9 +51,12 @@ class TopMenu():
         editMenu.addSeparator()
 
         autotracingSubmenu = editMenu.addMenu("Tracing")
-        dmo(autotracingSubmenu.addAction('Trace Tectal Neuron',
+        dmo(autotracingSubmenu.addAction('Trace tectal neuron',
              self.traceTectalNeuron))
-
+        dmo(autotracingSubmenu.addAction('Trace tectal neuron from soma',
+             self.traceTectalNeuronFromSoma))   
+        dmo(autotracingSubmenu.addAction('Trace biocytin neuron from soma',
+             self.traceBiocytinNeuronFromSoma))
 
         annotationSubmenu = editMenu.addMenu("Annotate")
         dmo(annotationSubmenu.addAction('Selected point on current stack',
@@ -215,6 +218,12 @@ class TopMenu():
 
     def traceTectalNeuron(self):
         self._local().traceTectalNeuron(self.stackWindow.windowIndex)
+    
+    def traceTectalNeuronFromSoma(self):
+        self._local().traceTectalNeuronFromSoma(self.stackWindow.windowIndex)
+    
+    def traceBiocytinNeuronFromSoma(self):
+        self._local().traceBiocytinNeuronFromSoma(self.stackWindow.windowIndex)
     
     def annotateThis(self):
         self._global().fullActions.getAnnotation(
