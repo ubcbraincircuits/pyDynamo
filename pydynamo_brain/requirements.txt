@@ -19,3 +19,6 @@ monai
 torchvision
 threadpoolctl >= 3.0.0
 torch
+albumentations == 1.4.14
+segmentation-models-pytorch == 0.3.4
+
