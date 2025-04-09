@@ -2,12 +2,12 @@ attrs
 h5py == 3.6.0
 matplotlib
 napari
+scikit-image == 0.24.0
 numpy == 1.23.0
 onnxruntime
 pandas
 pynwb
 PyQt5
-scikit-image
 scipy == 1.10.0
 tifffile
 tqdm

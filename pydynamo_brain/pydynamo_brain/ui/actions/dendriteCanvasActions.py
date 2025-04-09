@@ -16,7 +16,9 @@ from pydynamo_brain.ui.volume3DWindow import Volume3DWindow
 from pydynamo_brain.ui import traces as traceUI
 
 from pydynamo_brain.files import importFromSWC
-import pydynamo_brain.ui.actions.unet.tectalTracing as tracing
+#import pydynamo_brain.ui.actions.unet.tectalTracing as tracing
+#import pydynamo_brain.ui.actions.unet.TectalTracingSoma as somaTracing
+
 
 from pydynamo_brain.model import IdAligner, PointMode, recursiveAdjust
 from pydynamo_brain.model.tree.util import findTightAngles
@@ -298,8 +300,6 @@ class DendriteCanvasActions():
                 # Selection -> Moving
                 self.fullActions.beginMove(self.windowIndex, currentPoint)
     
-    
-    
     def traceTectalNeuron(self, windowIndex):
         stackWindow = self._stackWindow()
         if windowIndex != 0:
@@ -311,11 +311,37 @@ class DendriteCanvasActions():
         thisTree = self.uiState.parent().trees[windowIndex]
         newTree = self.fullActions.tectalTracing.dendriteTracing()
         if newTree is not None:
+            thisTree.clearAndCopyFrom(newTree,  self.uiState.parent())
+            thisTree.cleanEmptyBranches()
+            self.branchToColorMap.addNewTree(thisTree) 
+    
+    def traceTectalNeuronFromSoma(self, windowIndex):
+        stackWindow = self._stackWindow()
+        if windowIndex != 0:
+            print('Currently only initial reconstruction supported')
+            return
+        infoBox = createAndShowInfo("Tracing Dendritic Arbor From Soma", stackWindow)
+        self.fullActions.history.pushState()
 
-            #newTree.cleanUpTree()
+        thisTree = self.uiState.parent().trees[windowIndex]
+        newTree = self.fullActions.tectalTracingSoma.dendriteTracingFromSoma()
+        if newTree is not None:
             thisTree.clearAndCopyFrom(newTree,  self.uiState.parent())
             thisTree.cleanEmptyBranches()
             self.branchToColorMap.addNewTree(thisTree)
-      
-      
+
+    def traceBiocytinNeuronFromSoma(self, windowIndex):
+        stackWindow = self._stackWindow()
+        if windowIndex != 0:
+            print('Currently only initial reconstruction supported')
+            return
+        infoBox = createAndShowInfo("Tracing Dendritic Arbor From Soma", stackWindow)
+        self.fullActions.history.pushState()
+
+        thisTree = self.uiState.parent().trees[windowIndex]
+        newTree = self.fullActions.biocytinTracingSoma.dendriteTracingFromSoma()
+        if newTree is not None:
+            thisTree.clearAndCopyFrom(newTree,  self.uiState.parent())
+            thisTree.cleanEmptyBranches()
+            self.branchToColorMap.addNewTree(thisTree)       
            

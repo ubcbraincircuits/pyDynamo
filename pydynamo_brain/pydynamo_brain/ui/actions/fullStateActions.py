@@ -5,6 +5,8 @@ from PyQt5 import QtWidgets
 from .punctaActions import PunctaActions
 from .radiiActions import RadiiActions
 from .unet.tectalTracing import TectalTracing
+from .unet.tectalTracingSoma import TectalTracingFromSoma
+from .unet.biocytinTracingSoma import BiocytinTracingFromSoma
 
 from pydynamo_brain.analysis import absOrient
 from pydynamo_brain.model import PointMode
@@ -22,6 +24,9 @@ class FullStateActions():
         self.punctaActions = PunctaActions(fullState, history)
         self.radiiActions = RadiiActions(self, fullState, history)
         self.tectalTracing = TectalTracing(self, fullState, history)
+        self.tectalTracingSoma = TectalTracingFromSoma(self, fullState, history)
+        self.biocytinTracingSoma = BiocytinTracingFromSoma(self, fullState, history)
+
         self.branchToColorMap = BranchToColorMap()
 
     def selectPoint(self, localIdx, point, avoidPush=False, deselectHidden=False):

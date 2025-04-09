@@ -13,7 +13,7 @@ from skimage.segmentation import expand_labels
 from skimage.filters import gaussian
 
 from scipy.ndimage import center_of_mass
-
+from scipy.stats import mode
 import pydynamo_brain.util as util
 
 from pydynamo_brain.model import *
@@ -22,6 +22,8 @@ from pydynamo_brain.util.util import douglasPeucker
 from pydynamo_brain.util import imageCache
 from pydynamo_brain.util import sortedBranchIDList
 from .inference import modelPredict
+from joblib import Parallel, delayed
+from tqdm import tqdm 
 
 _IMG_CACHE = util.ImageCache()
 
@@ -32,35 +34,11 @@ class TectalTracing():
         self.state = fullState
         self.history = history
         self.branchToColorMap = BranchToColorMap()
-        self.epislon_val = 1.25
+        self.epislon_val = 1.5 #1.25
         self.xyzScale =  self.state.projectOptions.pixelSizes
         self.threshold = 10
 
-    def segmentedSkeleton(self, img2skel):
-        # Takes an skeletonized image and segments the skeleton per plane
-        # Returns segments as unique values in 3D array
-        skel = skeletonize_3d(img2skel)
-    
-        segsPerPlane = np.zeros(img2skel.shape)
-        foreground, background = 1, 2
 
-        for i in range(skel.shape[0]):
-
-            edges = sobel(skel[i,:,:])
-            plane = skel[i,:,:]
-            
-            seeds = np.zeros((512,512))
-            
-            seeds[plane <.5] = background
-            seeds[skel[i,:,:] > .5] = foreground
-            ws = watershed(edges, seeds)
-            segments = label(ws == foreground)
-            temp_max = np.max(segsPerPlane)
-            segments = segments+temp_max
-            segments[segments ==temp_max]=0
-            segsPerPlane[i,:,:] = segments
-        
-        return segsPerPlane, skel
 
     def findEndsAndJunctions(self, points, skelly_image):
         skelly_image[skelly_image>0]=1
@@ -251,7 +229,7 @@ class TectalTracing():
         epsilon = 10  
         min_samples = 2 
         points = np.array(y_points)
-
+        
         clustering = DBSCAN(eps=epsilon, min_samples=min_samples).fit(points)
 
         cluster_ids = clustering.labels_
@@ -290,38 +268,93 @@ class TectalTracing():
         # Currently slowest step
         # To-Do down sample point density with Douglas-Pecker here or when added to the tree
         _branchIds = np.unique(line_fragments)
-        orderedBranches = []
-        for _id in _branchIds:
-            if _id > 0:
-                path = []
-                _coords = np.where(line_fragments==_id)
-                branchPoints = []
 
-                for index in range(len(_coords[0])):
-                    branchPoints.append((_coords[0][index], _coords[1][index], _coords[2][index]))
-                
-                # Make sure the branch has enough points
-                if len(branchPoints) > 2:     
-                    _points = [tuple(node) for node in path ]
-                    _pointSet = set(branchPoints)
-                    # Find the intersection
-                    shared_points = endNodeSet.intersection(_pointSet)
-                    # Branch has an endpoint, order points using it
 
-                    if shared_points:
-                        # one of the end points
-                        _endNode = list(shared_points)[0]
-                        branchPoints =  orderPointList(_endNode, branchPoints)
-                        orderedBranches.append(branchPoints)
-                        
-                    else:
-                        # Order points closest to branching nodes
-                        _nbrs = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(branchPoints)
-                        dist, indices = _nbrs.kneighbors(np.array(_cleanBranchNodes))
-                        _firstPoint = branchPoints[indices[np.argmin(dist)][0]]
-                        branchPoints =  orderPointList(_firstPoint, branchPoints)
-                        orderedBranches.append(branchPoints)
+        end_points_array = np.array(end_points)
+        skel_shape = skel.shape
+        end_indices = np.ravel_multi_index((end_points_array[:,0], end_points_array[:,1], end_points_array[:,2]), skel_shape)
+
+        def extract_branch_path(skeleton, start_point):
+            path = []
+            visited = np.zeros_like(skeleton, dtype=bool)
+            stack = [start_point]
+            visited[start_point] = True
+
+            while stack:
+                current_point = stack.pop()
+                path.append(current_point)
+                z, x, y = current_point
+
+                # Define neighbor offsets
+                neighbor_offsets = [offset for offset in np.ndindex(3, 3, 3) if offset != (1, 1, 1)]
+                for dz, dx, dy in neighbor_offsets:
+                    nz, nx, ny = z + dz - 1, x + dx - 1, y + dy - 1
+                    if (0 <= nz < skeleton.shape[0] and
+                        0 <= nx < skeleton.shape[1] and
+                        0 <= ny < skeleton.shape[2] and
+                        skeleton[nz, nx, ny] and
+                        not visited[nz, nx, ny]):
+                        visited[nz, nx, ny] = True
+                        stack.append((nz, nx, ny))
+            return path
+
+        def process_branch(_id):
+            if _id <= 0:
+                return None
+            _coords = np.where(line_fragments == _id)
+            branchPoints_array = np.column_stack(_coords)
+
+
+            branch_indices = np.ravel_multi_index(branchPoints_array.T, skel_shape)
+            shared_indices = np.intersect1d(branch_indices, end_indices)
+
+            current_branch_mask = (line_fragments == _id).astype(np.uint8)
+
+            if shared_indices.size > 0:
+                _endNode = np.unravel_index(shared_indices[0], skel_shape)
+                branch_path = extract_branch_path(current_branch_mask, _endNode)
+            else:
+                nbrs = NearestNeighbors(n_neighbors=1, algorithm='kd_tree').fit(branchPoints_array)
+                distances, indices = nbrs.kneighbors(_cleanBranchNodes)
+                min_idx = np.argmin(distances)
+                _firstPoint = tuple(branchPoints_array[indices[min_idx][0]])
+                branch_path = extract_branch_path(current_branch_mask, _firstPoint)
+
+            if len(branch_path) > 3:
+                branch_path = chunked_douglas_peucker(branch_path, 3, 100)
+            return branch_path
+        def get_skeleton_neighbors(skeleton, point):
+            z, x, y = point
+            neighbors = []
+            for dz in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    for dy in [-1, 0, 1]:
+                        if dz == dx == dy == 0:
+                            continue
+                        nz, nx, ny = z + dz, x + dx, y + dy
+                        if (0 <= nz < skeleton.shape[0] and
+                            0 <= nx < skeleton.shape[1] and
+                            0 <= ny < skeleton.shape[2] and
+                            skeleton[nz, nx, ny]):
+                            neighbors.append((nz, nx, ny))
+            return neighbors
+        def chunked_douglas_peucker(points, epsilon, chunk_size=500):
+            simplified_points = []
+            if len(points) > chunk_size:
+                for i in range(0, len(points), chunk_size):
+                    chunk = points[i:i+chunk_size]
+                    simplified_chunk = self.DouglasPeucker3D(chunk, self.epislon_val)
+                    simplified_points.extend(simplified_chunk)
+            else:
+                simplified_points = self.DouglasPeucker3D(points, self.epislon_val)
+            return simplified_points
         
+        
+        orderedBranches = Parallel(n_jobs=-1)(
+            delayed(process_branch)(_id) for _id in tqdm(_branchIds)
+        )
+        orderedBranches = [branch for branch in orderedBranches if branch is not None]
+
         # Find primary and basal dendrites and connect them
         _orderedBranches = copy.deepcopy(orderedBranches)
         TreeBranches = []
@@ -422,7 +455,7 @@ class TectalTracing():
                             
                             
                             _parentNode = newTree.closestPointTo((int(_closestTreeNode[2]), int(_closestTreeNode[1]), int(_closestTreeNode[0])))
-                            _p_pointsath = self.DouglasPeucker3D(_points, self.epislon_val)
+                            #_p_pointsath = self.DouglasPeucker3D(_points, self.epislon_val)
 
                             newBranch = Branch(id = 'b'+str(_branchNum))
                             _branchNum += 1
@@ -476,7 +509,16 @@ class TectalTracing():
                         _nbrsTree = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(_treePointArr)
             if len(_orderedBranches) == remainingBranches:
                 failures += 1
-
+        newTree.updateAllPrimaryBranches()
+        print("Branches in tree:", len(newTree.branches))
+        for branch in newTree.branches:
+            if branch.worldLengths()[0] < 5:
+                if branch.hasChildren() == False:
+                    reverseIndex = list(reversed(range(len(branch.points))))
+                    for i in reverseIndex:
+                        newTree.removePointByID(branch.points[i].id)
+        newTree.updateAllPrimaryBranches()
+        print("Branches in tree:", len(newTree.branches))
         return newTree
        
   
@@ -489,14 +531,24 @@ class TectalTracing():
         volume = _IMG_CACHE.getVolume(self.state.uiStates[0].imagePath)
 
         # Work with the current channel
-        imgVolume = volume[self.state.channel,:,:,:]
-
-   
+        #imgVolume = volume[self.state.channel,:,:,:]
+        def _postProcess(image):
+            image = image.astype(np.float64) ** 0.75 # Gamma correction
+            for c in range(image.shape[0]):
+                for i in range(image.shape[1]):
+                    d = image[c, i]
+                    mn = np.percentile(d, 10)
+                    mx = np.max(d)
+                    image[c, i] = 255 * (d - mn) / (mx - mn)
+            return np.round(image.clip(min=0)).astype(np.uint8)
+        imgVolume = _postProcess(gaussian(volume[self.state.channel,:,:,:].astype(np.float16), .15))
+        for imgSlice in range(imgVolume.shape[0]):
+            imgVolume[imgSlice, :,:] -= mode(imgVolume[imgSlice, :,:])[0].astype(np.uint8)
+        imgVolume[imgVolume < 0] = 0
         # IMAGE [z, x , y]
-        pixelClasses, other = modelPredict(imgVolume,"Soma+Dendrite", 2)
-
-        soma = pixelClasses[0,:,:,:].copy()
-        soma[pixelClasses[0,:,:,:]!=1]=0
+        pixelClasses, other = modelPredict(imgVolume.astype(np.uint8),"Soma+Dendrite")
+        soma = pixelClasses[:,:,:].copy()
+        soma[pixelClasses[:,:,:]!=1]=0
         soma = np.array(soma, bool)
         
         mask_int = soma.astype(int)  
@@ -511,26 +563,29 @@ class TectalTracing():
         # Center of soma pixels
         SOMA_POINT = center_of_mass(soma)
 
-        dendrites = np.zeros_like(pixelClasses[0,:,:,:])
-        dendrites[pixelClasses[0,:,:,:]==2]=1
+        dendrites = np.zeros_like(pixelClasses[:,:,:])
+        dendrites[pixelClasses[:,:,:]==2]=1
         dendrites = np.array(dendrites, bool)
 
         # Filter out small false positive pixels
         dendrites = remove_small_objects(dendrites, 500, connectivity=10)
-
+       
+       
         neuron = np.zeros_like(dendrites)
-        neuron[dendrites==1]=1
-        neuron[soma == 1]=1
+        neuron[dendrites == 1] = 1
+        neuron = neuron.astype(np.float16)
+
+        neuron = gaussian(neuron, 0.5)
+        neuron = neuron.astype(np.float16)
+        soma_gaussian = gaussian(soma.astype(np.float16))
+        neuron += soma_gaussian
+        neuron = np.clip(neuron, 0, 1)
 
 
         # Create a skeleton of the dendrites #spooky
         skel = skeletonize_3d(neuron)
+        skel = skel.astype(np.int8)
 
-        cube = np.zeros((3, 3, 3))
-        cube[1, :, :] = 1 
-        biggerSkelly = dilation(skel, cube)
-        biggerSkelly = gaussian(biggerSkelly, .85)
-        skel = skeletonize_3d(biggerSkelly)
 
         skeletonPoints = np.array(np.where(skel==np.max(skel)))
         _allPoints = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(skeletonPoints.T)

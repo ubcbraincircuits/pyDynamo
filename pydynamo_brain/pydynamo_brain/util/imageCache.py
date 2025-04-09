@@ -114,8 +114,8 @@ class ImageCache:
     def getVolume(self, path, verbose=True):
         if path not in self._images:
             imgRaw = pathRead(path, verbose)
-            imgClean = self._postProcess(imgRaw)
-            self._images[path] = imgClean
+            #imgClean = self._postProcess(imgRaw)
+            self._images[path] = imgRaw
         return self._images[path]
 
     # Returns volume for a tif path only if cached, otherwise None.
