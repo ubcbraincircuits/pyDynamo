@@ -8,6 +8,8 @@ from pydynamo_brain.util.testableFilePicker import getOpenFileName
 from .common import createAndShowInfo
 from .motility.motility3DViewWindow import Motility3DViewWindow
 from .motility.overlayViewWindow import OverlayViewWindow
+from .motility.puncta3DViewWindow import Puncta3DViewWindow
+
 from .registration.registration3DViewWindow import Registration3DViewWindow
 from .sholl.shollViewWindow import ShollViewWindow
 from .tree3D.tree3DViewWindow import Tree3DViewWindow
@@ -130,9 +132,10 @@ class TopMenu():
 
         inAppAnalysisSubmenu = analysisMenu.addMenu("Visualization")
         inAppAnalysisSubmenu.addAction('3D Morphometrics', lambda: self.viewMorphometrics(False), QtCore.Qt.Key_M)
-        inAppAnalysisSubmenu.addAction('2D Morphometrics dendrograms', lambda: self.viewMorphometrics(True))
         inAppAnalysisSubmenu.addAction('Timepoint Overlay', self.viewOverlay, QtCore.Qt.Key_O)
         inAppAnalysisSubmenu.addAction('Sholl graphs', self.viewSholl)
+        inAppAnalysisSubmenu.addAction('Puncta Dynamics', lambda: self.viewPuncta())
+
 
         menuBar.addMenu(analysisMenu)
 
@@ -409,6 +412,18 @@ class TopMenu():
         opt = parent.fullState.projectOptions.motilityOptions
         Motility3DViewWindow(parent, self.stackWindow.windowIndex,
             parent.fullState.trees, is2D, parent.fullState.filePaths, opt).show()
+        infoBox.hide()
+
+    def viewPuncta(self):
+        parent = self._global()
+        if len(parent.fullState.trees) <= 1:
+            print ("Need >= 2 trees for morphometrics display")
+            return
+
+        infoBox = createAndShowInfo("Calculating Motility...", self.stackWindow)
+        opt = parent.fullState.projectOptions.motilityOptions
+        Puncta3DViewWindow(parent, self.stackWindow.windowIndex,
+            parent.fullState.trees, parent.fullState, parent.fullState.filePaths, opt).show()
         infoBox.hide()
 
     def viewRegistration(self):
