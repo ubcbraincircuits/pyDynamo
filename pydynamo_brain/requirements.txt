@@ -14,7 +14,7 @@ tqdm
 torchio
 patchify
 tensorflow==2.20.*
-protobuf==5.28.3
+protobuf==5.29.5
 scikit-learn
 monai
 torchvision
