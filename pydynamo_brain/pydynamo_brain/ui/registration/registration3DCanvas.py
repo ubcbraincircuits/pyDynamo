@@ -27,12 +27,12 @@ class Registration3DCanvas(BaseMatplotlibCanvas):
         print ("")
         for offset, ax in enumerate(self.axes):
             ax.set_facecolor("black")
-            ax.w_xaxis.set_pane_color((0.0,0.0,0.0,1.0))
-            ax.w_yaxis.set_pane_color((0.0,0.0,0.0,1.0))
-            ax.w_zaxis.set_pane_color((0.0,0.0,0.0,1.0))
-            ax.w_xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
-            ax.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
-            ax.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
+            ax.xaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.yaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.zaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
+            ax.yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
+            ax.zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
 
             if offset == 0 or offset == 1:
                 self.drawSingleTreeChanges(ax, offset == 0)

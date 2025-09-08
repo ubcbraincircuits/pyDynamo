@@ -73,12 +73,12 @@ class Motility3DCanvas(BaseMatplotlibCanvas):
                 ax.set_xticklabels([])
                 ax.set_yticklabels([])
             else:
-                ax.w_xaxis.set_pane_color((1.0,1.0,1.0,1.0))
-                ax.w_yaxis.set_pane_color((1.0,1.0,1.0,1.0))
-                ax.w_zaxis.set_pane_color((1.0,1.0,1.0,1.0))
-                ax.w_xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
-                ax.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
-                ax.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
+                ax.xaxis.set_pane_color((1.0,1.0,1.0,1.0))
+                ax.yaxis.set_pane_color((1.0,1.0,1.0,1.0))
+                ax.zaxis.set_pane_color((1.0,1.0,1.0,1.0))
+                ax.xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
+                ax.yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
+                ax.zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'gray'})
 
             # Draw lines for each branch:
             for branch in treeModel.branches:

@@ -23,12 +23,12 @@ class Tree3DCanvas(BaseMatplotlibCanvas):
 
         for ax in self.axes:
             ax.set_facecolor("black")
-            ax.w_xaxis.set_pane_color((0.0,0.0,0.0,1.0))
-            ax.w_yaxis.set_pane_color((0.0,0.0,0.0,1.0))
-            ax.w_zaxis.set_pane_color((0.0,0.0,0.0,1.0))
-            ax.w_xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
-            ax.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
-            ax.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+            ax.xaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.yaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.zaxis.set_pane_color((0.0,0.0,0.0,1.0))
+            ax.xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+            ax.yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+            ax.zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
 
     def compute_initial_figure(self):
         # Scale results to keep same aspect ratio (matplotlib apsect='equal' is broken in 3d...)

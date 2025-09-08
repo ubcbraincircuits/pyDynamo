@@ -15,12 +15,12 @@ class Dendrite3DCanvas(BaseMatplotlibCanvas):
         ax = self.axes[0]
         # Update colors to be white on black:
         ax.set_facecolor("black")
-        ax.w_xaxis.set_pane_color((0.0,0.0,0.0,1.0))
-        ax.w_yaxis.set_pane_color((0.0,0.0,0.0,1.0))
-        ax.w_zaxis.set_pane_color((0.0,0.0,0.0,1.0))
-        ax.w_xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
-        ax.w_yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
-        ax.w_zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+        ax.xaxis.set_pane_color((0.0,0.0,0.0,1.0))
+        ax.yaxis.set_pane_color((0.0,0.0,0.0,1.0))
+        ax.zaxis.set_pane_color((0.0,0.0,0.0,1.0))
+        ax.xaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+        ax.yaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
+        ax.zaxis._axinfo['grid'].update({'linewidth':0.25,'color':'white'})
 
         # No tree, draw nothing...
         if self.treeModel is None or self.treeModel.rootPoint is None:
