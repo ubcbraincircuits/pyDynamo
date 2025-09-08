@@ -1,5 +1,5 @@
 attrs
-h5py == 3.10.*
+h5py >= 3.10.*
 matplotlib
 napari
 scikit-image == 0.24.0
