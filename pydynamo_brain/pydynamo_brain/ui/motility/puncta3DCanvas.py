@@ -79,9 +79,12 @@ class Puncta3DCanvas(BaseMatplotlibCanvas):
             # Draw filo for each branch:
             if treeIdx > 0:
 
-                
+                added_count = int(0)
+                subtracted_count = int(0)
+                grew_count = int(0)
+                shrunk_count = int(0)
+
                 oldPuncta = self.puncta[treeIdx - 1]
-                print(oldPuncta)
                 oldpunctaID = {puncta.id for puncta in oldPuncta}
 
                 # current time point
@@ -95,12 +98,25 @@ class Puncta3DCanvas(BaseMatplotlibCanvas):
                 newpunctaID = [puncta.id for puncta in newPuncta]
 
                 growCount, shrinkCount = 0, 0
+                for punctaPoint in oldPuncta:
+                    plot = True
+                    if punctaPoint.id in removed:
+                        color, sz = GONE_COLOR, punctaPoint.radius * SZ_FACTOR
+                        plot = True # Don't draw transitions ?!
+
+                        if plot:
+                    
+                            x, y, z = treeModel.worldCoordPoints([punctaPoint])
+                            ax.scatter(x, y, z, c=[color], s=sz)
+                            subtracted_count += 1
 
                 for punctaPoint in newPuncta:
 
                     plot = True
                     if punctaPoint.id in added:
                         color, sz = ADDED_COLOR, punctaPoint.radius * SZ_FACTOR
+                        added_count += 1
+
                     elif punctaPoint.id in removed:
                         color, sz = RETRACT_COLOR, punctaPoint.radius * SZ_FACTOR
                         plot = True # Don't draw transitions ?!
@@ -109,12 +125,13 @@ class Puncta3DCanvas(BaseMatplotlibCanvas):
                         mot = punctaPoint.radius - oldPuncta[_idx].radius
 
                         if abs(mot) >= self.options.minMotilityDist:
-                            print(mot)
                             color = GROW_COLOR if mot > 0 else SHRINK_COLOR
-
+                            if color == GROW_COLOR:
+                                 grew_count += 1
+                            else:
+                                shrunk_count += 1
                             sz = punctaPoint.radius * SZ_FACTOR
                         else:
-                            print(mot)
                             color = GREY_COLOUR
                             sz = punctaPoint.radius * SZ_FACTOR
 
@@ -145,31 +162,15 @@ class Puncta3DCanvas(BaseMatplotlibCanvas):
                                     x, y, z = treeModel.worldCoordPoints([childPointInNew])
                                 ax.scatter(x, y, z, c=[RETRACT_COLOR], s=(retracted * SZ_FACTOR))
 
-                # Subtractions do not appear in tree, so find by looking at last tree
-                for branchIdx, branchId in enumerate(self.branchIDList):
-                    if not self.subtracted[treeIdx - 1][branchIdx]:
-                        continue
-                    branchInLast = self.treeModels[treeIdx - 1].getBranchByID(branchId)
-                    if branchInLast is None:
-                        continue
-                    # Draw at the parent of the subtracted branch, not the end point.
-                    drawAt = branchInLast.parentPoint
-                    if drawAt is not None:
-                        # Walk up the old tree until a point exists in the new
-                        # tree to connect the removal to.
-                        drawAtInNew = treeModel.getPointByID(drawAt.id)
-                        while drawAtInNew is None and drawAt is not None:
-                            drawAt = drawAt.nextPointInBranch(delta=-1)
-                            if drawAt is not None:
-                                drawAtInNew = treeModel.getPointByID(drawAt.id)
-                        if drawAt is None or drawAtInNew is None:
-                            continue
-
-                        sz = self.filoLengths[treeIdx-1][branchIdx] * SZ_FACTOR
-    
-                        x, y, z = treeModel.worldCoordPoints([drawAtInNew])
-                        ax.scatter(x, y, z, c=[GONE_COLOR], s=sz)
-
+            
+            
+            
+                # For debugging puposes, maybe remove?
+                print ("Stack #%d -> #%d" % (treeIdx, treeIdx + 1))
+                print ("  - #Added        = %d" % added_count)
+                print ("  - #Subtracted   = %d" % subtracted_count)
+                print ("  - #Grew   = %d" % grew_count)
+                print ("  - #Shrunk  = %d" % shrunk_count)
 
 
             # And finally draw the soma as a big sphere (if present):
