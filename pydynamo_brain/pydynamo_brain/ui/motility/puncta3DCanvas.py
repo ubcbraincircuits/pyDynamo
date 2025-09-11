@@ -181,6 +181,7 @@ class Puncta3DCanvas(BaseMatplotlibCanvas):
                     sz = punctaPoint.radius * SZ_FACTOR
                     x, y, z = treeModel.worldCoordPoints([punctaPoint])
                     ax.scatter(x, y, z, c=[color], s=sz)
+                    
             # And finally draw the soma as a big sphere (if present):
             if treeModel.rootPoint is not None:
                 x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
