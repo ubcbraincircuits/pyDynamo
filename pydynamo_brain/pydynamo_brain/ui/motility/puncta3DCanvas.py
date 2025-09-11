@@ -171,8 +171,16 @@ class Puncta3DCanvas(BaseMatplotlibCanvas):
                 print ("  - #Subtracted   = %d" % subtracted_count)
                 print ("  - #Grew   = %d" % grew_count)
                 print ("  - #Shrunk  = %d" % shrunk_count)
-
-
+            
+            # Plot T0 Puncta 
+            else:
+                newPuncta = self.puncta[treeIdx]
+                newpunctaID = {puncta.id for puncta in newPuncta}
+                for punctaPoint in newPuncta:
+                    color = GREY_COLOUR
+                    sz = punctaPoint.radius * SZ_FACTOR
+                    x, y, z = treeModel.worldCoordPoints([punctaPoint])
+                    ax.scatter(x, y, z, c=[color], s=sz)
             # And finally draw the soma as a big sphere (if present):
             if treeModel.rootPoint is not None:
                 x, y, z = treeModel.worldCoordPoints([treeModel.rootPoint])
