@@ -7,7 +7,7 @@ Initial options
 When you first start Dynamo, you have the following options:
 
 .. figure:: ../img/initialOptions.png
-  :align: center
+  :align: center 
 
 **New from Stacks** (Ctrl-N)
   Choose this to start a new Dynamo project. Use this to load one or more .tif stacks,
