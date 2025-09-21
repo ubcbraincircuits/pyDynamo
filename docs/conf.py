@@ -42,7 +42,7 @@ autosummary_generate = True
 myst_enable_extensions = ["colon_fence", "deflist", "linkify"]
 nbsphinx_execute = "never"
 # Mock heavy GUI deps so autodoc never breaks CI
-autodoc_mock_imports = ["PyQt6", "vispy", "pyNeuroTrace", "numpy", "scipy"]
+autodoc_mock_imports = ["numpy", "scipy"]
 
 # (Optional) Intersphinx mappings
 intersphinx_mapping = {
