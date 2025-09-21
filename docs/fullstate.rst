@@ -46,4 +46,4 @@ Attributes
      - Active channel index (default: ``0``).
    * - ``drawMode``
      - ``DrawMode``
-     - Current drawing mode (``DEFAULT``, ``PUNCTA``, ``RADII``, ``REGISTRA
+     - Current drawing mode (``DEFAULT``, ``PUNCTA``, ``RADII``, ``REGISTRATION``)
