@@ -1,5 +1,5 @@
 # pyDynamo
-![pyDynamo logo](https://ubcbraincircuits.github.io/pyDynamo/tmpLogo.png)
+![pyDynamo logo](img/tmpLogo.png)
 
 Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics.
 
