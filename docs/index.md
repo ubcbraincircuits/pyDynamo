@@ -27,5 +27,6 @@ puncta
 
 fullstate
 model
+docRst/analysis
 examples
 ```

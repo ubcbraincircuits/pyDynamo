@@ -16,15 +16,13 @@ html_theme = "furo"
 
 extensions = [
     "myst_parser",
+    "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx_copybutton",
     "nbsphinx",
 ]
-
-# You can re-enable autosummary/autodoc later if needed.
-# autosummary_generate = True
 
 # MyST: keep only what you need; 'linkify' requires an extra pip package.
 myst_enable_extensions = ["colon_fence", "deflist"]  # remove "linkify" for now
