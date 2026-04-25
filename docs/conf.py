@@ -1,6 +1,8 @@
 # Entry point (Sphinx 8+)
 root_doc = "index"
 
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
 project = "pyDynamo"
 author = "Peter W. Hogg and Patrick Coleman"
 release = "dev"
