@@ -5,14 +5,24 @@ Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics
 
 ## Installation
 
-Providing you have a version of python 3+, this library can be installed directly from github using pip:
+This library can be installed using [uv](https://docs.astral.sh/uv/). If you don't have uv, install it first:
 ```
-conda create -n dynamoEnv python=3.10 anaconda
-conda activate dynamoEnv
-conda install pip git
-pip install --upgrade -e "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
-pip install pyNeuroTrace
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
+Then create an environment and install:
+```
+uv venv --python 3.10 dynamoEnv
+source dynamoEnv/bin/activate
+uv pip install --upgrade -e "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
+uv pip install pyNeuroTrace
+```
+
+> **Note for GPU users:** uv installs the CPU-only build of PyTorch by default. To use a CUDA-enabled build, install torch manually before the above, e.g. for CUDA 12.1:
+> ```
+> uv pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu121
+> ```
+
 Once installed, it can be run by the following command, and optionally given a file to open:
 ```
 pydynamo_brain
