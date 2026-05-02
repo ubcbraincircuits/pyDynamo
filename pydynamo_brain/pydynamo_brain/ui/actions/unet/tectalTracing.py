@@ -40,46 +40,46 @@ class TectalTracing():
 
 
 
-    def findEndsAndJunctions(self, points, skelly_image):
-        skelly_image[skelly_image>0]=1
-        end_points = []
-        y_points = []
+    # def findEndsAndJunctions(self, points, skelly_image):
+    #     skelly_image[skelly_image>0]=1
+    #     end_points = []
+    #     y_points = []
 
-        for point in range(points[0].shape[0]):
-            i = points[0][point]
-            j = points[1][point]
-            window=skelly_image[i-1:i+2, j-1:j+2]
+    #     for point in range(points[0].shape[0]):
+    #         i = points[0][point]
+    #         j = points[1][point]
+    #         window=skelly_image[i-1:i+2, j-1:j+2]
 
-            if np.sum(window)<=2:
-                end_points.append((j,i))
-            if np.sum(window)==4:
-                y_points.append((j,i))
+    #         if np.sum(window)<=2:
+    #             end_points.append((j,i))
+    #         if np.sum(window)==4:
+    #             y_points.append((j,i))
 
-            return end_points, y_points
+    #         return end_points, y_points
     
 
-    def _returnBranchPoints (self, skelFragment, skellID=1, ):
-        factor = self.epislon_val
-        points = np.where(skelFragment==skellID)
-        points = np.array(points)
-        points = [[_i[0], _i[1]] for _i in zip(points [0, :], points[1, :])]
-        allPointTree = KDTree(points)
-        sortedAllPoints = np.zeros_like(points)
+    # def _returnBranchPoints (self, skelFragment, skellID=1, ):
+    #     factor = self.epislon_val
+    #     points = np.where(skelFragment==skellID)
+    #     points = np.array(points)
+    #     points = [[_i[0], _i[1]] for _i in zip(points [0, :], points[1, :])]
+    #     allPointTree = KDTree(points)
+    #     sortedAllPoints = np.zeros_like(points)
         
-        for i, c in enumerate(allPointTree.query(np.array(points[0]).reshape(1, -1), k=len(points))[1][0]):
-            sortedAllPoints[i, : ] = points[c]
+    #     for i, c in enumerate(allPointTree.query(np.array(points[0]).reshape(1, -1), k=len(points))[1][0]):
+    #         sortedAllPoints[i, : ] = points[c]
 
-        reducedpoints = douglasPeucker(sortedAllPoints, factor)
+    #     reducedpoints = douglasPeucker(sortedAllPoints, factor)
 
 
-        pointArray = np.array(reducedpoints)
-        sortedPoints = np.zeros_like(pointArray)
-        kdTree = KDTree(pointArray)
-        for i, c in enumerate(kdTree.query(np.array([0,0]).reshape(1, -1), k=pointArray.shape[0])[1][0]):
+    #     pointArray = np.array(reducedpoints)
+    #     sortedPoints = np.zeros_like(pointArray)
+    #     kdTree = KDTree(pointArray)
+    #     for i, c in enumerate(kdTree.query(np.array([0,0]).reshape(1, -1), k=pointArray.shape[0])[1][0]):
 
-            sortedPoints[i, : ] = pointArray[c, :]
+    #         sortedPoints[i, : ] = pointArray[c, :]
         
-        return sortedPoints
+    #     return sortedPoints
     
     def find_skeleton_3Dpoints(self, skelly_image):
         # Force binary image

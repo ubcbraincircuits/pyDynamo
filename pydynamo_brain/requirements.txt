@@ -8,7 +8,7 @@ onnxruntime
 pandas
 pynwb
 PyQt5==5.15.*
-scipy == 1.10.0
+scipy == 1.10.0 # locked: scipy.stats.mode API changed in 1.11
 tifffile
 tqdm
 torchio
@@ -21,3 +21,4 @@ threadpoolctl >= 3.0.0
 torch
 albumentations == 1.3.1
 segmentation-models-pytorch == 0.3.4
+czifile

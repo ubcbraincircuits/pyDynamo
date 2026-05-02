@@ -5,7 +5,7 @@
 import numpy as np
 import scipy.io as sio
 from tifffile import TiffFile
-
+from czifile import CziFile
 from .util import zStackForUiState
 
 # libtiff.libtiff_ctypes.suppress_warnings()
@@ -20,6 +20,39 @@ def tiffRead(path, verbose=True):
         print ("Loaded TIFF, shape: %s" % str(shape))
 
     if len(shape) == 5:
+        # Some LSM files have an initial single-size dimension
+        assert shape[0] == 1
+        stack = np.squeeze(stack)
+        shape = stack.shape
+        print ("Resized to: %s" % str(shape))
+
+    if len(shape) == 3:
+        # NOTE: we used to split large stacks into two colours,
+        #   but this is no longer supported. Do in ImageJ or similar first!
+        stack = np.expand_dims(stack, axis=0)
+
+    if len(shape) == 2:
+        temp_stack = np.zeros((1, shape[0], shape[1]))
+        temp_stack[0, :, :]= stack
+        stack = temp_stack
+        stack = np.expand_dims(stack, axis=0)
+    # Should be color, Z, (XY), and # color < # Z
+    if stack.shape[0] > stack.shape[1]:
+        stack = np.swapaxes(stack, 0, 1)
+    return stack
+
+def cziRead(path, verbose=True):
+    # First use tifffile to get channel data (not supported by libtiff?)
+    shape, stack = None, None
+    with CziFile(path) as czi:
+        stack = czi.asarray()      # numpy array
+        shape = stack.shape
+        axes  = czi.axes  
+
+    if verbose:
+        print ("Loaded CZI, shape: %s" % str(shape))
+
+    if len(shape) >= 5:
         # Some LSM files have an initial single-size dimension
         assert shape[0] == 1
         stack = np.squeeze(stack)
@@ -62,6 +95,8 @@ def matlabRead(path, verbose=True, key='image'):
 def pathRead(path, verbose=True):
     if path.endswith(".tif") or path.endswith(".tiff") or path.endswith('.lsm'):
         return tiffRead(path, verbose)
+    elif path.endswith(".czi"):
+        return cziRead(path, verbose=True)
     elif path.endswith(".mat"):
         return matlabRead(path, verbose)
     else:
