@@ -14,6 +14,8 @@ from skimage.filters import gaussian
 
 from scipy.ndimage import center_of_mass
 from scipy.stats import mode
+from scipy.ndimage import zoom
+
 import pydynamo_brain.util as util
 
 from pydynamo_brain.model import *
@@ -37,49 +39,8 @@ class TectalTracing():
         self.epislon_val = 1.5 #1.25
         self.xyzScale =  self.state.projectOptions.pixelSizes
         self.threshold = 10
+        self.training_set_xy = 0.230
 
-
-
-    # def findEndsAndJunctions(self, points, skelly_image):
-    #     skelly_image[skelly_image>0]=1
-    #     end_points = []
-    #     y_points = []
-
-    #     for point in range(points[0].shape[0]):
-    #         i = points[0][point]
-    #         j = points[1][point]
-    #         window=skelly_image[i-1:i+2, j-1:j+2]
-
-    #         if np.sum(window)<=2:
-    #             end_points.append((j,i))
-    #         if np.sum(window)==4:
-    #             y_points.append((j,i))
-
-    #         return end_points, y_points
-    
-
-    # def _returnBranchPoints (self, skelFragment, skellID=1, ):
-    #     factor = self.epislon_val
-    #     points = np.where(skelFragment==skellID)
-    #     points = np.array(points)
-    #     points = [[_i[0], _i[1]] for _i in zip(points [0, :], points[1, :])]
-    #     allPointTree = KDTree(points)
-    #     sortedAllPoints = np.zeros_like(points)
-        
-    #     for i, c in enumerate(allPointTree.query(np.array(points[0]).reshape(1, -1), k=len(points))[1][0]):
-    #         sortedAllPoints[i, : ] = points[c]
-
-    #     reducedpoints = douglasPeucker(sortedAllPoints, factor)
-
-
-    #     pointArray = np.array(reducedpoints)
-    #     sortedPoints = np.zeros_like(pointArray)
-    #     kdTree = KDTree(pointArray)
-    #     for i, c in enumerate(kdTree.query(np.array([0,0]).reshape(1, -1), k=pointArray.shape[0])[1][0]):
-
-    #         sortedPoints[i, : ] = pointArray[c, :]
-        
-    #     return sortedPoints
     
     def find_skeleton_3Dpoints(self, skelly_image):
         # Force binary image
@@ -531,7 +492,7 @@ class TectalTracing():
         volume = _IMG_CACHE.getVolume(self.state.uiStates[0].imagePath)
 
         # Work with the current channel
-        #imgVolume = volume[self.state.channel,:,:,:]
+        imgVolume = volume[self.state.channel,:,:,:]
         def _postProcess(image):
             image = image.astype(np.float64) ** 0.75 # Gamma correction
             for c in range(image.shape[0]):
@@ -545,7 +506,16 @@ class TectalTracing():
         for imgSlice in range(imgVolume.shape[0]):
             imgVolume[imgSlice, :,:] -= mode(imgVolume[imgSlice, :,:])[0].astype(np.uint8)
         imgVolume[imgVolume < 0] = 0
-        # IMAGE [z, x , y]
+
+
+        # Scale Image that differ from the training set
+        scaled = False
+        # scale_ratio = self.xyzScale[1]/self.training_set_xy
+        # if not (0.8 <= scale_ratio <= 1.2):
+        #     print('Scaling input image')
+        #     imgVolume = zoom(imgVolume, (1, scale_ratio, scale_ratio))
+        #     scaled = True
+
         pixelClasses, other = modelPredict(imgVolume.astype(np.uint8),"Soma+Dendrite")
         soma = pixelClasses[:,:,:].copy()
         soma[pixelClasses[:,:,:]!=1]=0
@@ -594,7 +564,15 @@ class TectalTracing():
         RootNode = skeletonPoints.T[somaIndex, :][0][0]
 
         _autoTree = self.generateTree(RootNode, skel.copy())
-
+        if scaled:
+            inverse_scale = 1.0 / scale_ratio
+            for branch in _autoTree.branches:
+                    for point in branch.points:
+                        x, y, z = point.location
+                        point.location = (x * inverse_scale, y * inverse_scale, z * 1)
+                        # Scale radius too if your Point has it
+                        if hasattr(point, 'radius') and point.radius is not None:
+                            point.radius *= inverse_scale 
         return _autoTree
 
 def angle_between_vectors(A, B, C):
