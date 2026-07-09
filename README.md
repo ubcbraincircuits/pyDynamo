@@ -6,14 +6,31 @@ Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics
 ## Installation
 
 This library can be installed using [uv](https://docs.astral.sh/uv/). If you don't have uv, install it first:
+
+**macOS / Linux:**
 ```
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+**Windows (PowerShell):**
+```
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
 
-Then create an environment and install:
+Then create an environment and install. First create and activate the environment:
+
+**macOS / Linux:**
 ```
 uv venv --python 3.10 dynamoEnv
 source dynamoEnv/bin/activate
+```
+**Windows (PowerShell):**
+```
+uv venv --python 3.10 dynamoEnv
+dynamoEnv\Scripts\Activate.ps1
+```
+
+Then install (same on all platforms):
+```
 uv pip install --upgrade -e "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
 uv pip install pyNeuroTrace
 ```

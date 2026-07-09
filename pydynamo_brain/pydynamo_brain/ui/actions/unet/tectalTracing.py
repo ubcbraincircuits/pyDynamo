@@ -15,6 +15,7 @@ from skimage.filters import gaussian
 from scipy.ndimage import center_of_mass
 from scipy.stats import mode
 from scipy.ndimage import zoom
+from scipy.spatial import cKDTree
 
 import pydynamo_brain.util as util
 
@@ -37,7 +38,6 @@ class TectalTracing():
         self.history = history
         self.branchToColorMap = BranchToColorMap()
         self.epislon_val = 1.5 #1.25
-        self.xyzScale =  self.state.projectOptions.pixelSizes
         self.threshold = 10
         self.training_set_xy = 0.230
 
@@ -132,25 +132,28 @@ class TectalTracing():
 
         def returnBranchingNode(list_of_points, list_of_branch_nodes, junction=None):
             _points = copy.deepcopy(list_of_points)
-
             junction_point_array = np.array(list_of_branch_nodes)  
-            branch_array = np.array(_points[-1])  
-            _nbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(junction_point_array)
-
+            branch_array = np.array(_points[-1])
+            
+            # Cap k at number of available samples
+            k = min(3, len(junction_point_array))
+            _nbrs = NearestNeighbors(n_neighbors=k, algorithm='brute').fit(junction_point_array)
             distances, indices = _nbrs.kneighbors(branch_array.reshape(1, -1))
-            if junction == None:
+            
+            if junction is None:
                 closest_branch_point_indices = indices[:, 0]
-      
                 closest_branch_points = tuple(junction_point_array[closest_branch_point_indices][0])
                 return closest_branch_points
             else:
                 closest_branch_point_indices = indices[:, 0]
                 closest_branch_points = tuple(junction_point_array[closest_branch_point_indices][0])
                 if junction == closest_branch_points:
-                    closest_branch_point_indices = indices[:, 1]
-                    closest_branch_points = tuple(junction_point_array[closest_branch_point_indices][0])
+                    # Only try the 2nd nearest if it exists
+                    if indices.shape[1] >= 2:
+                        closest_branch_point_indices = indices[:, 1]
+                        closest_branch_points = tuple(junction_point_array[closest_branch_point_indices][0])
+                    # else: fall through and return the first one anyway
                     return closest_branch_points
-
                 else:
                     return closest_branch_points
 
@@ -172,38 +175,59 @@ class TectalTracing():
             return closest_branch_points
 
         # Current Tree method is too slow
-        def returnClosetTreePoint(treeNbrs, treepoints, point):
+        # def returnClosetTreePoint(treeNbrs, treepoints, point):
 
-            pointArray = np.array(point)
-            distances, indices = treeNbrs.kneighbors(pointArray.reshape(1, -1))
-            closest_point_indices = indices[:, 0]
-            cloesestPoint = tuple(treepoints[closest_point_indices][0])
+        #     pointArray = np.array(point)
+        #     distances, indices = treeNbrs.kneighbors(pointArray.reshape(1, -1))
+        #     closest_point_indices = indices[:, 0]
+        #     cloesestPoint = tuple(treepoints[closest_point_indices][0])
         
-            return cloesestPoint
+        #     return cloesestPoint
+
+        def returnClosetTreePoint(tree_kdtree, treepoints, point):
+            pointArray = np.array(point)
+            distance, index = tree_kdtree.query(pointArray, k=1)
+            closestPoint = tuple(treepoints[index])
+            return closestPoint
 
         skel[somaCenter[0], somaCenter[1], somaCenter[2]]=0
         # Find all of the branch nodes and ends in the dendrites
         end_points, y_points = self.find_skeleton_3Dpoints(skel)
 
 
-        # Use DBSCAN to cluster nearby branch nodes (within 10 pixels)
-        epsilon = 10  
-        min_samples = 2 
-        points = np.array(y_points)
+        # # Use DBSCAN to cluster nearby branch nodes (within 10 pixels)
+        # epsilon = 10  
+        # min_samples = 2 
+        # points = np.array(y_points)
         
-        clustering = DBSCAN(eps=epsilon, min_samples=min_samples).fit(points)
+        # clustering = DBSCAN(eps=epsilon, min_samples=min_samples).fit(points)
 
-        cluster_ids = clustering.labels_
-        _cleanBranchNodes = []
-        for cluster_id in np.unique(cluster_ids):
-            if cluster_id == -1: 
-                noise_points = points[cluster_ids == cluster_id]
-                _cleanBranchNodes.extend(noise_points)
-            else:
-                cluster_members = points[cluster_ids == cluster_id]
-                centroid = np.mean(cluster_members, axis=0)
-                _cleanBranchNodes.append(centroid)
+        # cluster_ids = clustering.labels_
+        # _cleanBranchNodes = []
+        # for cluster_id in np.unique(cluster_ids):
+        #     if cluster_id == -1: 
+        #         noise_points = points[cluster_ids == cluster_id]
+        #         _cleanBranchNodes.extend(noise_points)
+        #     else:
+        #         cluster_members = points[cluster_ids == cluster_id]
+        #         centroid = np.mean(cluster_members, axis=0)
+        #         _cleanBranchNodes.append(centroid)
 
+        def grid_based_clustering(points, grid_size):
+            quantized_points = np.floor(points / grid_size).astype(int)
+            grid_dict = {}
+            for idx, qp in enumerate(quantized_points):
+                key = tuple(qp)
+                grid_dict.setdefault(key, []).append(idx)
+            clusters = []
+            for indices in grid_dict.values():
+                cluster_points = points[indices]
+                centroid = np.mean(cluster_points, axis=0)
+                clusters.append(centroid)
+            return clusters
+
+        points = np.array(y_points)
+        _cleanBranchNodes = grid_based_clustering(points, grid_size=10)
         # Use the branch nodes to break up the skeleton into branches
         for _branchNode in y_points:
             skel[_branchNode[0], _branchNode[1], _branchNode[2]] = 0
@@ -387,97 +411,82 @@ class TectalTracing():
             newBranch.setParentPoint(_parentNode)
             newTree.addBranch(newBranch)
                 
-        # Initialize NearestNeighbors for points in tree
+        # Initialize cKDTree for points in tree (replaces brute-force NN)
         _treePointArr = np.array(_TreePoints)
-        _nbrsTree = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(_treePointArr)
+        _nbrsTree = cKDTree(_treePointArr)
 
-        
-        
-        # CloestPointTo is super slow! Replace with nearestneighbor algo? 
+        # Pre-compute each path's endpoint-intersection ONCE...
+        _shared_endpoints_cache = {
+            id(p): endNum.intersection(p) for p in _orderedBranches
+        }
+
+        # CloestPointTo is super slow — kept for OG-equivalent semantics.
         remainingBranches = -1
         failures = 0
         while failures < 25:
             _treePointArr = np.array(_TreePoints)
-            _nbrsTree = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(_treePointArr)
+            _nbrsTree = cKDTree(_treePointArr)
             for _path in _orderedBranches:
 
-                
-                _pointSet = set(_path)
                 _points = _path
-                shared_points = endNum.intersection(_pointSet)
+                shared_points = _shared_endpoints_cache[id(_path)]
                 if shared_points:
                     _endNode = list(shared_points)[0]
                     if (_endNode == _points[0]):
                         _points.reverse()
                     if (_endNode == _points[-1]):
-                        # Dynamo points are xyz, image points are zxy
                         _closestTreeNode = returnClosetTreePoint(_nbrsTree, _treePointArr, _points[0])
                         if distance_3d(_closestTreeNode, _points[0]) < 10:
-                            
-                            
-                            _parentNode = newTree.closestPointTo((int(_closestTreeNode[2]), int(_closestTreeNode[1]), int(_closestTreeNode[0])))
-                            #_p_pointsath = self.DouglasPeucker3D(_points, self.epislon_val)
 
-                            newBranch = Branch(id = 'b'+str(_branchNum))
+                            _parentNode = newTree.closestPointTo((int(_closestTreeNode[2]), int(_closestTreeNode[1]), int(_closestTreeNode[0])))
+
+                            newBranch = Branch(id='b' + str(_branchNum))
                             _branchNum += 1
                             for xyz in _points:
                                 _TreePoints.append(xyz)
-
                                 nextPoint = Point(
-                                        id = 'p'+str(_pointNum),
-                                        location = tuple([int(xyz[2]), int(xyz[1]), int(xyz[0])])
-                                        )
-
-                                _pointNum += 1 
+                                    id='p' + str(_pointNum),
+                                    location=tuple([int(xyz[2]), int(xyz[1]), int(xyz[0])])
+                                )
+                                _pointNum += 1
                                 newBranch.addPoint(nextPoint)
                             newBranch.setParentPoint(_parentNode)
                             newTree.addBranch(newBranch)
                             _ = _orderedBranches.pop(_orderedBranches.index(_path))
                             remainingBranches = len(_orderedBranches)
 
-
-                            #Only update when new branches are added
                             _treePointArr = np.array(_TreePoints)
-                            _nbrsTree = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(_treePointArr)
+                            _nbrsTree = cKDTree(_treePointArr)
                 else:
                     _closestTreeNode = returnClosetTreePoint(_nbrsTree, _treePointArr, _points[0])
                     if distance_3d(_closestTreeNode, _points[0]) > 10:
-                        _closestTreeNode = returnClosetTreePoint(_nbrsTree, _treePointArr, _points[-1])  
+                        _closestTreeNode = returnClosetTreePoint(_nbrsTree, _treePointArr, _points[-1])
                     if distance_3d(_closestTreeNode, _points[-1]) < 10:
-                            _points.reverse()
+                        _points.reverse()
                     if distance_3d(_closestTreeNode, _points[0]) < 10:
                         _points = self.DouglasPeucker3D(_points, self.epislon_val)
 
                         _parentNode = newTree.closestPointTo((int(_closestTreeNode[2]), int(_closestTreeNode[1]), int(_closestTreeNode[0])))
-                
 
-                        newBranch = Branch(id = 'b'+str(_branchNum))
+                        newBranch = Branch(id='b' + str(_branchNum))
                         _branchNum += 1
                         for xyz in _points:
                             _TreePoints.append(xyz)
                             nextPoint = Point(
-                                    id = 'p'+str(_pointNum),
-                                    location = tuple([int(xyz[2]), int(xyz[1]), int(xyz[0])])
-                                    )
-
-                            _pointNum += 1 
+                                id='p' + str(_pointNum),
+                                location=tuple([int(xyz[2]), int(xyz[1]), int(xyz[0])])
+                            )
+                            _pointNum += 1
                             newBranch.addPoint(nextPoint)
                         newBranch.setParentPoint(_parentNode)
                         newTree.addBranch(newBranch)
                         _ = _orderedBranches.pop(_orderedBranches.index(_path))
                         remainingBranches = len(_orderedBranches)
                         _treePointArr = np.array(_TreePoints)
-                        _nbrsTree = NearestNeighbors(n_neighbors=1, algorithm='brute').fit(_treePointArr)
+                        _nbrsTree = cKDTree(_treePointArr)
             if len(_orderedBranches) == remainingBranches:
                 failures += 1
-        newTree.updateAllPrimaryBranches()
-        print("Branches in tree:", len(newTree.branches))
-        for branch in newTree.branches:
-            if branch.worldLengths()[0] < 5:
-                if branch.hasChildren() == False:
-                    reverseIndex = list(reversed(range(len(branch.points))))
-                    for i in reverseIndex:
-                        newTree.removePointByID(branch.points[i].id)
+
         newTree.updateAllPrimaryBranches()
         print("Branches in tree:", len(newTree.branches))
         return newTree
@@ -510,11 +519,13 @@ class TectalTracing():
 
         # Scale Image that differ from the training set
         scaled = False
-        # scale_ratio = self.xyzScale[1]/self.training_set_xy
-        # if not (0.8 <= scale_ratio <= 1.2):
-        #     print('Scaling input image')
-        #     imgVolume = zoom(imgVolume, (1, scale_ratio, scale_ratio))
-        #     scaled = True
+        xy_pixel_size = self.state.projectOptions.pixelSizes[1]
+        scale_ratio = xy_pixel_size / self.training_set_xy
+        print(xy_pixel_size, self.training_set_xy)
+        if not (0.8 <= scale_ratio <= 1.2):
+            print('Scaling input image')
+            imgVolume = zoom(imgVolume, (1, scale_ratio, scale_ratio), order=1)
+            scaled = True
 
         pixelClasses, other = modelPredict(imgVolume.astype(np.uint8),"Soma+Dendrite")
         soma = pixelClasses[:,:,:].copy()
@@ -569,7 +580,7 @@ class TectalTracing():
             for branch in _autoTree.branches:
                     for point in branch.points:
                         x, y, z = point.location
-                        point.location = (x * inverse_scale, y * inverse_scale, z * 1)
+                        point.location = (x * inverse_scale, y * inverse_scale, z)
                         # Scale radius too if your Point has it
                         if hasattr(point, 'radius') and point.radius is not None:
                             point.radius *= inverse_scale 

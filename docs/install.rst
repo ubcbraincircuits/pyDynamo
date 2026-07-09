@@ -6,17 +6,33 @@ Requirements
 * Python 3.10+
 * `uv <https://docs.astral.sh/uv/>`_
 
-If you don't have uv, install it with::
+If you don't have uv, install it with the command for your platform.
+
+On macOS / Linux::
 
  $> curl -LsSf https://astral.sh/uv/install.sh | sh
+
+On Windows (PowerShell)::
+
+ PS> powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
 
 Installation
 ------------
-Create a virtual environment and install from this repository::
+Create a virtual environment and activate it.
+
+On macOS / Linux::
 
  $> uv venv --python 3.10 dynamoEnv
  $> source dynamoEnv/bin/activate
+
+On Windows (PowerShell)::
+
+ PS> uv venv --python 3.10 dynamoEnv
+ PS> dynamoEnv\Scripts\Activate.ps1
+
+Then install from this repository (same on every platform)::
+
  $> uv pip install --upgrade "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
  $> uv pip install pyNeuroTrace
 
