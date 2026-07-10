@@ -2,6 +2,8 @@
 
 Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics.
 
+See the [interactive dendritic arbor timelapse](timelapse) for a taste of what pyDynamo produces.
+
 ```{toctree}
 :maxdepth: 2
 :caption: Getting Started
@@ -9,6 +11,13 @@ Application for the UI and analysis of neurons via **Dyna**mic **Mo**rphometrics
 installation
 quickstart
 troubleshooting
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Gallery
+
+timelapse
 ```
 
 ```{toctree}

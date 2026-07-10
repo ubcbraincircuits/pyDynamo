@@ -13,6 +13,7 @@ html_short_title = "pyDynamo"
 
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 html_theme = "furo"
+html_static_path = ["_static"]
 
 extensions = [
     "myst_parser",
