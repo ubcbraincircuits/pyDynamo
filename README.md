@@ -67,7 +67,7 @@ The recommended approach is:
 3) Load the next .tif stack in the series
 4) Generate points in this new stack, from either
     * Importing from the previous drawing (I)
-    * Importing from an SWC file (**coming**)
+    * Importing from an SWC file
 5) Move/add/delete points as required to match the stack images.
 6) Register (R) to make sure that old points are mapped to new points correctly.
 7) Repeat from step 3 until all stacks are done.
