@@ -31,7 +31,7 @@ dynamoEnv\Scripts\Activate.ps1
 
 Then install (same on all platforms):
 ```
-uv pip install --upgrade -e "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
+uv pip install --upgrade "git+https://github.com/ubcbraincircuits/pyDynamo#subdirectory=pydynamo_brain"
 uv pip install pyNeuroTrace
 ```
 
