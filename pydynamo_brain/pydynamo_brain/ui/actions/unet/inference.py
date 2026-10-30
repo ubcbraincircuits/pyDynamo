@@ -1,14 +1,14 @@
-import torch
 import numpy as np
 import pathlib
-from torchvision import transforms
-from torch.utils.data import DataLoader
 from monai.networks.nets import UNet
 from monai.inferers import SliceInferer
 from pydynamo_brain.ui.actions.unet import processingFunctions
-from torch.cuda.amp import autocast
 
 def modelPredict(image, mode, slice_batch_size=4):
+    import torch
+    from torch.cuda.amp import autocast
+    from torchvision import transforms
+    from torch.utils.data import DataLoader
     path = pathlib.Path(__file__).parent.resolve()
     model_path = f'{path}/models/2D_{mode}.pth'
 
