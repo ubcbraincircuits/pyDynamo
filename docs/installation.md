@@ -54,5 +54,5 @@ pydynamo_brain path/to/my/file.dyn.gz
 
 To update to the latest version, re-run the install command:
 ```bash
-uv pip install --upgrade -e "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
+uv pip install --upgrade "git+https://github.com/ubcbraincircuits/pyDynamo#egg=pydynamo_brain&subdirectory=pydynamo_brain"
 ```
