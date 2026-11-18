@@ -251,6 +251,53 @@ class FullStateActions():
             totalRemoved += tree.cleanEmptyBranches()
         return totalRemoved
 
+    def registerAllStacksHeuristic(self):
+        """Sequentially align point and branch IDs across all consecutive stack pairs using HeuristicIdAligner."""
+        from pydynamo_brain.ui.registration.heuristicIdAligner import (
+            HeuristicIdAligner,
+            sync_target_branches_to_reference,
+        )
+
+        if len(self.state.trees) < 2:
+            return 0, 0, 0.0
+
+        self.history.pushState()
+        nPairs = 0
+        totalRemaps = 0
+        totalMs = 0.0
+
+        for idx in range(1, len(self.state.trees)):
+            refTree = self.state.trees[idx - 1]
+            targetTree = self.state.trees[idx]
+            if refTree is None or targetTree is None:
+                continue
+            if refTree.rootPoint is None or targetTree.rootPoint is None:
+                continue
+
+            details = HeuristicIdAligner(refTree, targetTree).performAlignmentDetailed()
+            totalMs += details.elapsed_ms
+            nPairs += 1
+
+            cachedPts = {oldId: targetTree.getPointByID(oldId) for oldId in details.remap}
+            unmatchedPts = [targetTree.getPointByID(uid) for uid in details.added_points_B]
+
+            for oldId, newId in details.remap.items():
+                pt = cachedPts.get(oldId)
+                if pt is not None:
+                    self.state.setPointIDWithoutCollision(targetTree, pt, newId)
+                    totalRemaps += 1
+
+            if unmatchedPts:
+                refIds = {p.id for p in refTree.flattenPoints()}
+                for pt in unmatchedPts:
+                    if pt is not None and pt.id in refIds:
+                        pt.id = self.state.nextPointID()
+
+            sync_target_branches_to_reference(self.state, refTree, targetTree)
+
+        self.branchToColorMap.initFromFullState(self.state)
+        return nPairs, totalRemaps, totalMs
+
     def togglePunctaMode(self):
         return self.state.togglePunctaMode()
 

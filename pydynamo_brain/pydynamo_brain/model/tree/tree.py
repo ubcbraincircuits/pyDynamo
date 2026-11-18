@@ -243,38 +243,40 @@ class Tree():
 
     def updateAllBranchesMinimalAngle(self, point: Optional[Point]=None) -> None:
         """For all branching points, continue the parent branch with small angle at bifurications"""
+        self.cleanEmptyBranches()
 
         def _lreturnTriple(point, nextPoint=None):
-            if nextPoint==None:
+            if nextPoint is None:
                 nextPoint = point.nextPointInBranch(noWrap=True)
             pointBefore = point.nextPointInBranch(delta=-1, noWrap=True)
-            if pointBefore is not None:
-                triple=(pointBefore, point, nextPoint)
-            return triple
+            return (pointBefore, point, nextPoint)
 
-        def _lreturnBranchAngle(tree, point,  nextPoint=None):
-            triple = _lreturnTriple(point,  nextPoint)
+        def _lreturnBranchAngle(tree, point, nextPoint=None):
+            triple = _lreturnTriple(point, nextPoint)
             if not all(triple):
                 return 0
-            else:
-                xs, ys, zs = tree.worldCoordPoints(list(triple))
-                worldAt = [np.array([x, y, z]) for x, y, z in zip(xs, ys, zs)]
-                AB, BC = worldAt[1] - worldAt[0], worldAt[2] - worldAt[1]
-
-                cosAngle = np.dot(AB, BC) / (np.linalg.norm(AB) * np.linalg.norm(BC))
-                angle = np.abs(np.arccos(cosAngle))
-                return angle
+            xs, ys, zs = tree.worldCoordPoints(list(triple))
+            worldAt = [np.array([x, y, z]) for x, y, z in zip(xs, ys, zs)]
+            AB, BC = worldAt[1] - worldAt[0], worldAt[2] - worldAt[1]
+            denom = np.linalg.norm(AB) * np.linalg.norm(BC)
+            if denom < 1e-12:
+                return 0
+            cosAngle = np.clip(np.dot(AB, BC) / denom, -1.0, 1.0)
+            angle = np.abs(np.arccos(cosAngle))
+            return angle
 
         # List of all points which are branch parents
         parent_points = []
         for branch in self.branches:
-            if branch.parentPoint.isRoot() == False:
+            if branch.parentPoint is not None and not branch.parentPoint.isRoot():
                 if len(branch.parentPoint.children) > 0:
                     parent_points.append(branch.parentPoint.id)
 
         # Check the branch angles at bifurications and reparent
-        for point_id in parent_points:
+        for point_id in dict.fromkeys(parent_points):
             point = self.getPointByID(point_id)
+            if point is None or len(point.children) == 0 or len(point.children[0].points) == 0:
+                continue
             if _lreturnBranchAngle(self, point) > _lreturnBranchAngle(self, point, point.children[0].points[0]):
                 self.continueParentBranchIfFirst(point.children[0].points[0])
 

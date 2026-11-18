@@ -83,8 +83,12 @@ class TopMenu():
         manualRegisterSubmenu.addAction('View point registration', self.viewRegistration, QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
         dmo(manualRegisterSubmenu.addAction("Register and move from previous stack's volume",
             self.registerSmart, QtCore.Qt.Key_R))
-        dmo(manualRegisterSubmenu.addAction("Register IDs from previous stack's tree (no movement)",
+        dmo(manualRegisterSubmenu.addAction("Register IDs from previous stack's tree (heuristic)",
             self.registerIDs, QtCore.Qt.SHIFT + QtCore.Qt.Key_F))
+        dmo(manualRegisterSubmenu.addAction("Register IDs across all stacks (heuristic)",
+            self.registerIDsAllStacks, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_F))
+        dmo(manualRegisterSubmenu.addAction("Register IDs from previous stack's tree (legacy, no movement)",
+            self.registerIDsLegacy, QtCore.Qt.CTRL + QtCore.Qt.ALT + QtCore.Qt.Key_F))
         manualRegisterSubmenu.addSeparator()
         manualRegisterSubmenu.addAction('Start/end manual registration',
             self.manualRegister, QtCore.Qt.CTRL + QtCore.Qt.SHIFT + QtCore.Qt.Key_R)
@@ -263,7 +267,31 @@ class TopMenu():
     def registerIDs(self):
         if self._global().fullState.inManualRegistrationMode():
             return
-        self._local().simpleRegisterImages(self.stackWindow.windowIndex)
+        self._local().simpleRegisterImages(self.stackWindow.windowIndex, useHeuristic=True)
+        self.redraw()
+
+    def registerIDsAllStacks(self):
+        parent = self._global()
+        if parent.fullState.inManualRegistrationMode():
+            return
+        if len(parent.fullState.trees) < 2:
+            print("Need >= 2 trees for registration")
+            return
+        infoBox = createAndShowInfo("Registering IDs across all stacks...", self.stackWindow)
+        nPairs, totalRemaps, totalMs = parent.fullActions.registerAllStacksHeuristic()
+        parent.redrawAllStacks(self.stackWindow)
+        infoBox.hide()
+        QtWidgets.QMessageBox.information(
+            self.stackWindow,
+            "Registration Complete",
+            "Heuristic ID registration aligned %d stack pair(s) (%d ID remaps) in %.0f ms."
+            % (nPairs, totalRemaps, totalMs),
+        )
+
+    def registerIDsLegacy(self):
+        if self._global().fullState.inManualRegistrationMode():
+            return
+        self._local().simpleRegisterImages(self.stackWindow.windowIndex, useHeuristic=False)
         self.redraw()
 
     def reparent(self):

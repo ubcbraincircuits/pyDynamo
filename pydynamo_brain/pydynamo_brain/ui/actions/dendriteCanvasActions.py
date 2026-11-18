@@ -261,7 +261,7 @@ class DendriteCanvasActions():
         infoBox.hide()
         viewWindow.show()
 
-    def simpleRegisterImages(self, windowIndex, somaScale=1.01):
+    def simpleRegisterImages(self, windowIndex, somaScale=1.01, useHeuristic=True):
         if windowIndex == 0:
             print ("Can't register the first image, nothing to register it against...")
             return
@@ -271,11 +271,18 @@ class DendriteCanvasActions():
         oldTree = fullState.trees[windowIndex - 1]
         newTree = fullState.trees[windowIndex]
 
-        registrationWindow = IdRegisterWindow(self.canvas.parent(), fullState, oldTree, newTree)
+        registrationWindow = IdRegisterWindow(
+            self.canvas.parent(), fullState, oldTree, newTree, useHeuristic=useHeuristic
+        )
         registrationWindow.showMaximized()
 
-        redrawFunc = lambda: self.canvas.redraw()
-        registrationWindow.startRegistration(redrawFunc)
+        def _redrawAll():
+            if self.canvas.dynamoWindow is not None:
+                self.canvas.dynamoWindow.redrawAllStacks(self.canvas.stackWindow)
+            else:
+                self.canvas.redraw()
+
+        registrationWindow.startRegistration(_redrawAll)
 
     def startReplaceParent(self):
         self.uiState.pointMode = PointMode.REPARENT

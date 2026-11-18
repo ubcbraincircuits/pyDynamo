@@ -65,7 +65,9 @@ HELP_MSG = """
 <ul>
 <li><b>Shift-R</b> to see all pairwise point registrations between stacks in 3D</li>
 <li><b>R</b> for 'smart' registration: Adjust point IDs and locations based the previous stack volume.</li>
-<li><b>Shift-F</b> for 'simple' registration: Adjust only point IDs, based of the previous stack tree structure (slow).</li>
+<li><b>Shift-F</b> for heuristic ID registration: Fast alignment of point and branch IDs from the previous stack's tree structure (no coordinate movement).</li>
+<li><b>Ctrl-Shift-F</b> to run heuristic ID registration sequentially across all stacks.</li>
+<li><b>Ctrl-Alt-F</b> for legacy 'simple' ID registration: Original tree-edit DP point ID registration (slow).</li>
 <li><b>Ctrl-Shift-R</b> to enter/leave manual registration mode.
   <ul>
     <li>Click on points, and <b>Shift-Enter</b> to set all to the same ID</li>
